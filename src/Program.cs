@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 
 namespace DUO2C
 {
@@ -20,17 +21,9 @@ namespace DUO2C
             var kMODULE = new PKeyword("MODULE");
             var kIMPORT = new PKeyword("IMPORT");
             var kEND = new PKeyword("END");
+            var kCONST = new PKeyword("CONST");
 
-            var ruleset = new Ruleset();
-
-            // Rule token declarations
-            var rModule = ruleset.CreateRuleToken("Module", true);
-            var rImportList = ruleset.CreateRuleToken("ImportList");
-
-            Debug.WriteLine("==== Defining ruleset ====");
-            ruleset.Add(rModule, +kMODULE +ident +semicolon [+rImportList] +kEND +ident +fullstop);
-            ruleset.Add(rImportList, +kIMPORT [+ident +assignop] +ident *(+comma [+ident +assignop] +ident) +semicolon);
-            Debug.WriteLine("==========================");
+            var ruleset = Ruleset.Parse(File.ReadAllText("oberon2.bnf"));
 
             var src = @"
                 MODULE Testing;

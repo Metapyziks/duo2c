@@ -109,7 +109,7 @@ namespace DUO2C
         public override bool IsMatch(string str, ref int i)
         {
             int init = i;
-            if (Left.IsMatch(str, ref i)) {
+            if (Left == null || Left.IsMatch(str, ref i)) {
                 init = i;
                 if (Right.IsMatch(str, ref i)) return true;
                 i = init; return true;
@@ -119,7 +119,7 @@ namespace DUO2C
 
         public override ParseNode Parse(string str, ref int i)
         {
-            var left = Left.Parse(str, ref i);
+            var left = (Left == null) ? null : Left.Parse(str, ref i);
 
             int j = i;
             if (!Right.IsMatch(str, ref j)) {
@@ -127,6 +127,8 @@ namespace DUO2C
             }
 
             var right = Right.Parse(str, ref i);
+            if (left == null) return right;
+
             if (right is BranchNode && right.Token == null) {
                 return new BranchNode(new ParseNode[] { left }.Concat(((BranchNode) right).Children));
             } else {
@@ -136,7 +138,7 @@ namespace DUO2C
 
         public override string ToString()
         {
-            return Left.ToString() + " [" + Right.ToString() + "]";
+            return (Left != null ? Left.ToString() : "") + " [" + Right.ToString() + "]";
         }
     }
 
@@ -148,7 +150,7 @@ namespace DUO2C
         public override bool IsMatch(string str, ref int i)
         {
             int init = i;
-            if (Left.IsMatch(str, ref i)) {
+            if (Left == null || Left.IsMatch(str, ref i)) {
                 init = i;
                 while (Right.IsMatch(str, ref i)) init = i;
                 i = init; return true;
@@ -158,7 +160,7 @@ namespace DUO2C
 
         public override ParseNode Parse(string str, ref int i)
         {
-            var left = Left.Parse(str, ref i);
+            var left = Left == null ? null : Left.Parse(str, ref i);
 
             var right = new List<ParseNode>();
             
@@ -170,6 +172,8 @@ namespace DUO2C
                 init = i;
             }
 
+            if (left == null) return new BranchNode(right);
+
             if (left is BranchNode && left.Token == null) {
                 return new BranchNode(((BranchNode) left).Children.Concat(right));
             } else {
@@ -179,7 +183,7 @@ namespace DUO2C
 
         public override string ToString()
         {
-            return Left.ToString() + " [" + Right.ToString() + "]";
+            return (Left != null ? Left.ToString() : "") + " {" + Right.ToString() + "}";
         }
     }
 
@@ -190,7 +194,7 @@ namespace DUO2C
 
         public override bool IsMatch(string str, ref int i)
         {
-            int init = 0;
+            int init = i;
             if (Left.IsMatch(str, ref i)) return true;
             i = init;
             if (Right.IsMatch(str, ref i)) return true;
@@ -231,7 +235,7 @@ namespace DUO2C
                     i = init; return false;
                 }
             }
-            if (i < str.Length && char.IsLetterOrDigit(str[i])) {
+            if (i < str.Length && char.IsLetterOrDigit(str[i - 1]) && char.IsLetterOrDigit(str[i])) {
                 i = init; return false;
             }
             return true;
@@ -247,6 +251,41 @@ namespace DUO2C
         public override string ToString()
         {
             return "\"" + Keyword + "\"";
+        }
+    }
+
+    class PString : Parser
+    {
+        public override bool IsMatch(string str, ref int i)
+        {
+            int init = i;
+            SkipWhitespace(str, ref i);
+            if (i < str.Length && str[i] == '"') {
+                while (++i < str.Length) {
+                    if (str[i] == '\\') {
+                        ++ i;
+                    }
+                    if (str[i] == '"') {
+                        ++ i;
+                        return true;
+                    }
+                }
+            }
+            i = init; return false;
+        }
+
+        // TODO: Add proper support for escape characters
+        public override ParseNode Parse(string str, ref int i)
+        {
+            SkipWhitespace(str, ref i);
+            int j = i;
+            IsMatch(str, ref i);
+            return new LeafNode(str.Substring(j + 1, i - j - 2), "string");
+        }
+
+        public override string ToString()
+        {
+            return "string";
         }
     }
 
@@ -312,8 +351,12 @@ namespace DUO2C
         public override ParseNode Parse(string str, ref int i)
         {
             var tree = Parser.Parse(str, ref i);
-            tree.Token = Token;
-            return tree;
+            if (tree.Token == null) {
+                tree.Token = Token;
+                return tree;
+            } else {
+                return new BranchNode(new ParseNode[] { tree }, Token);
+            }
         }
 
         public override string ToString()

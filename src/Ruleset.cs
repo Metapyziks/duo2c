@@ -6,6 +6,36 @@ namespace DUO2C
 {
     class Ruleset : IEnumerable<KeyValuePair<PRule, Parser>>
     {
+        public static Ruleset Parse(String bnf)
+        {
+            var ident = new PIdent();
+            var str = new PString();
+
+            var eq = new PKeyword("=");
+            var fs = new PKeyword(".");
+            var pipe = new PKeyword("|");
+            var sbOpen = new PKeyword("[");
+            var sbClose = new PKeyword("]");
+            var cbOpen = new PKeyword("{");
+            var cbClose = new PKeyword("}");
+
+            var bnfRuleset = new Ruleset();
+            var rSyntax = bnfRuleset.CreateRuleToken("Syntax", true);
+            var rRule = bnfRuleset.CreateRuleToken("Rule");
+            var rTerm = bnfRuleset.CreateRuleToken("Term");
+
+            bnfRuleset.Add(rSyntax, null *(+ident +eq +rRule +fs));
+            bnfRuleset.Add(rRule, +rTerm *(+rTerm) *(+pipe +rTerm *(+rTerm)));
+            bnfRuleset.Add(rTerm, (+sbOpen +rRule +sbClose) | (+cbOpen +rRule +cbClose) | +str | +ident);
+
+            var tree = Parser.Parse(bnf, bnfRuleset);
+            Console.WriteLine(tree.ToString());
+
+            var parsed = new Ruleset();
+
+            return parsed;
+        }
+
         Parser _root;
         Dictionary<PRule, Parser> _dict;
 
