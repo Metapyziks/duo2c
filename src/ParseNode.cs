@@ -23,7 +23,7 @@ namespace DUO2C
         public abstract String ToString(String indent);
     }
 
-    class BranchNode : ParseNode
+    class BranchNode : ParseNode, IEnumerable<ParseNode>
     {
         public IEnumerable<ParseNode> Children { get; private set; }
         public override String String
@@ -46,8 +46,19 @@ namespace DUO2C
 
         public override String ToString(string indent)
         {
+            var nl = Environment.NewLine;
             var nextIndent = indent + "  ";
-            return indent + Token + " : {\n" + String.Join(",\n", Children.Select(x => x.ToString(nextIndent))) + "\n" + indent + "}";
+            return indent + Token + " : {" + nl + String.Join("," + nl, Children.Select(x => x.ToString(nextIndent))) + nl + indent + "}";
+        }
+
+        public IEnumerator<ParseNode> GetEnumerator()
+        {
+            return Children.GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return Children.GetEnumerator();
         }
     }
 
