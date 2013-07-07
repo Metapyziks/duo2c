@@ -41,6 +41,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\Parser.cs" />
+    <Compile Include="src\ParseNode.cs" />
+    <Compile Include="src\Ruleset.cs" />
     <Compile Include="src\Program.cs" />
     <Compile Include="src\Properties\AssemblyInfo.cs" />
   </ItemGroup>
