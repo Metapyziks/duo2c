@@ -44,6 +44,11 @@ namespace DUO2C
             }
         }
 
+        public static Parser operator *(Parser left, Parser right)
+        {
+            return new OptionalRepeatParser(left, right);
+        }
+
         public IEnumerator<Parser> GetEnumerator()
         {
             throw new NotImplementedException();
@@ -126,6 +131,49 @@ namespace DUO2C
                 return new BranchNode(new ParseNode[] { left }.Concat(((BranchNode) right).Children));
             } else {
                 return new BranchNode(new ParseNode[] { left, right });
+            }
+        }
+
+        public override string ToString()
+        {
+            return Left.ToString() + " [" + Right.ToString() + "]";
+        }
+    }
+
+    class OptionalRepeatParser : BinaryParser
+    {
+        public OptionalRepeatParser(Parser left, Parser right)
+            : base(left, right) { }
+
+        public override bool IsMatch(string str, ref int i)
+        {
+            int init = i;
+            if (Left.IsMatch(str, ref i)) {
+                init = i;
+                while (Right.IsMatch(str, ref i)) init = i;
+                i = init; return true;
+            }
+            i = init; return false;
+        }
+
+        public override ParseNode Parse(string str, ref int i)
+        {
+            var left = Left.Parse(str, ref i);
+
+            var right = new List<ParseNode>();
+            
+            int init = i;
+            while (Right.IsMatch(str, ref i))
+            {
+                i = init;
+                right.Add(Right.Parse(str, ref i));
+                init = i;
+            }
+
+            if (left is BranchNode && left.Token == null) {
+                return new BranchNode(((BranchNode) left).Children.Concat(right));
+            } else {
+                return new BranchNode(new ParseNode[] { left }.Concat(right));
             }
         }
 

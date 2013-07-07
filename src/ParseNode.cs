@@ -14,6 +14,13 @@ namespace DUO2C
         {
             Token = token;
         }
+
+        public override String ToString()
+        {
+            return ToString(String.Empty);
+        }
+
+        public abstract String ToString(String indent);
     }
 
     class BranchNode : ParseNode
@@ -37,9 +44,10 @@ namespace DUO2C
             Children = children.SelectMany(x => x is BranchNode && x.Token == null ? ((BranchNode) x).Children : new ParseNode[] { x });
         }
 
-        public override string ToString()
+        public override String ToString(string indent)
         {
-            return Token + ":{" + String.Join(", ", Children) + "}";
+            var nextIndent = indent + "  ";
+            return indent + Token + " : {\n" + String.Join(",\n", Children.Select(x => x.ToString(nextIndent))) + "\n" + indent + "}";
         }
     }
 
@@ -54,9 +62,9 @@ namespace DUO2C
             _string = str;
         }
 
-        public override string ToString()
+        public override String ToString(string indent)
         {
-            return Token + ":\"" + _string + "\"";
+            return indent + Token + " : \"" + _string + "\"";
         }
     }
 }

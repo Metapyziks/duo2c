@@ -7,28 +7,29 @@ namespace DUO2C
     {
         static void Main(string[] args)
         {
+            // Identifier
             var ident = new PIdent();
+
+            // Symbols & Operators
             var fullstop = new PKeyword(".");
             var comma = new PKeyword(",");
             var semicolon = new PKeyword(";");
             var assignop = new PKeyword(":=");
 
-            Func<String, PKeyword> keyword = (x) => new PKeyword(x);
-
-            var kMODULE = keyword("MODULE");
-            var kIMPORT = keyword("IMPORT");
-            var kEND = keyword("END");
+            // Keywords
+            var kMODULE = new PKeyword("MODULE");
+            var kIMPORT = new PKeyword("IMPORT");
+            var kEND = new PKeyword("END");
 
             var ruleset = new Ruleset();
 
+            // Rule token declarations
             var rModule = ruleset.CreateRuleToken("Module", true);
-            var rImport = ruleset.CreateRuleToken("Import");
             var rImportList = ruleset.CreateRuleToken("ImportList");
 
             Debug.WriteLine("==== Defining ruleset ====");
-            ruleset.Add(rModule,        +kMODULE +ident +semicolon [+rImportList] +kEND +ident +fullstop    );
-            ruleset.Add(rImport,        +ident [+assignop +ident] [+comma +rImport]                         );
-            ruleset.Add(rImportList,    +kIMPORT +rImport +semicolon                                        );
+            ruleset.Add(rModule, +kMODULE +ident +semicolon [+rImportList] +kEND +ident +fullstop);
+            ruleset.Add(rImportList, +kIMPORT [+ident +assignop] +ident *(+comma [+ident +assignop] +ident) +semicolon);
             Debug.WriteLine("==========================");
 
             var src = @"
@@ -40,8 +41,6 @@ namespace DUO2C
             var tree = Parser.Parse(src, ruleset);
 
             Console.WriteLine(tree.ToString());
-            Console.WriteLine("========");
-            Console.WriteLine(tree.String);
             Console.ReadKey();
         }
     }
