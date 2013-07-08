@@ -15,7 +15,7 @@
 
         public override ParseNode Parse(string str, ref int i)
         {
-            return new LeafNode(str[i++].ToString(), "digit");
+            return new LeafNode(i, 1, str[i++].ToString(), "digit");
         }
 
         public override string ToString()

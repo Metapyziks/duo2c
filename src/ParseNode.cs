@@ -18,11 +18,26 @@ namespace DUO2C
         public abstract String String { get; }
 
         /// <summary>
+        /// Start index of this node in the original source string.
+        /// </summary>
+        public int SourceIndex { get; private set; }
+
+        /// <summary>
+        /// Length of this node in the original source string.
+        /// </summary>
+        public int Length { get; private set; }
+
+        /// <summary>
         /// Abstract constructor for a new ParseNode.
         /// </summary>
+        /// <param name="index">Start index of this node in the original source string</param>
+        /// <param name="length">Length of this node in the original source string</param>
         /// <param name="token">String identifying the type of this node</param>
-        public ParseNode(String token = null)
+        public ParseNode(int index, int length, String token = null)
         {
+            SourceIndex = index;
+            Length = length;
+
             Token = token;
         }
 

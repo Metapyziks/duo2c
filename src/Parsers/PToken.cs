@@ -85,7 +85,7 @@ namespace DUO2C.Parsers
             SkipWhitespace(str, ref i);
             var tree = Parser.Parse(str, ref i);
             if (Flatten) {
-                return new LeafNode(tree.String, Token);
+                return new LeafNode(tree.SourceIndex, tree.Length, tree.String, Token);
             } else if (tree.Token == null) {
                 // If the produced node has no token, use the
                 // this token name

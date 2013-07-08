@@ -22,7 +22,7 @@
             SkipWhitespace(str, ref i);
             int j = i;
             IsMatch(str, ref i);
-            return new LeafNode(str.Substring(j, i - j), "ident");
+            return new LeafNode(j, i - j, str.Substring(j, i - j), "ident");
         }
 
         public override string ToString()

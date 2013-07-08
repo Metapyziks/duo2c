@@ -13,17 +13,19 @@ namespace DUO2C
         /// <summary>
         /// Constructor for a new LeafNode.
         /// </summary>
+        /// <param name="index">Start index of this node in the original source string</param>
+        /// <param name="length">Length of this node in the original source string</param>
         /// <param name="str">The parsed contents of this node</param>
         /// <param name="token">String identifying the type of this node</param>
-        public LeafNode(String str, String token = null)
-            : base(token)
+        public LeafNode(int index, int length, String str, String token = null)
+            : base(index, length, token)
         {
             _string = str;
         }
 
         public override String ToString(string indent)
         {
-            return indent + Token + " : \"" + _string + "\"";
+            return String.Format("{0}\"{1}\" @({2}, {3}) : \"{4}\"", indent, Token, SourceIndex, Length, _string);
         }
     }
 }

@@ -44,7 +44,12 @@ namespace DUO2C.Parsers
                 init = i;
             }
 
-            if (left == null) return new BranchNode(right);
+            if (left == null) {
+                if (right.Count() > 0) return new BranchNode(right);
+                return new BranchNode(i);
+            }
+
+            if (right.Count() == 0) return left;
 
             if (left is BranchNode && left.Token == null) {
                 // If the parsed left hand side is a branch with no assigned token,

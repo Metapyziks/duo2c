@@ -15,7 +15,7 @@
 
         public override ParseNode Parse(string str, ref int i)
         {
-            return new LeafNode(str[i++].ToString(), "letter");
+            return new LeafNode(i, 1, str[i++].ToString(), "letter");
         }
 
         public override string ToString()

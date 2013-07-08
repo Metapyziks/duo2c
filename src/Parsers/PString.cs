@@ -31,7 +31,7 @@
             SkipWhitespace(str, ref i);
             int j = i;
             IsMatch(str, ref i);
-            return new LeafNode(str.Substring(j + 1, i - j - 2), "string");
+            return new LeafNode(j, i - j, str.Substring(j + 1, i - j - 2), "string");
         }
 
         public override string ToString()

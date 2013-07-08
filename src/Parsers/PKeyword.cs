@@ -42,7 +42,7 @@ namespace DUO2C.Parsers
         {
             SkipWhitespace(str, ref i);
             i += Keyword.Length;
-            return new LeafNode(Keyword, "keyword");
+            return new LeafNode(i - Keyword.Length, Keyword.Length, Keyword, "keyword");
         }
 
         public override string ToString()

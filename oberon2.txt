@@ -1,4 +1,4 @@
-﻿Code         = Module {Module}.
+﻿CodeFile     = Module {Module}.
 Module       = MODULE ident ";" [ImportList] DeclSeq
                [BEGIN StatementSeq] END ident ".".
 ImportList   = IMPORT [ident ":="] ident {"," [ident ":="] ident} ";".
