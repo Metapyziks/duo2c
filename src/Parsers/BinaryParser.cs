@@ -1,5 +1,4 @@
-﻿
-namespace DUO2C.Parsers
+﻿namespace DUO2C.Parsers
 {
     public abstract class BinaryParser : Parser
     {
