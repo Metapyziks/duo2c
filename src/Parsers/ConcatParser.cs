@@ -2,19 +2,23 @@
 
 namespace DUO2C.Parsers
 {
+    /// <summary>
+    /// Parser that concatenates two other parsers.
+    /// </summary>
     public class ConcatParser : BinaryParser
     {
+        /// <summary>
+        /// Constructor to create a new ConcatParser.
+        /// </summary>
+        /// <param name="left">Parser to be matched first</param>
+        /// <param name="right">Parser to be matched second</param>
         public ConcatParser(Parser left, Parser right)
             : base(left, right) { }
 
         public override bool IsMatch(string str, ref int i)
         {
             int init = i;
-            bool left = Left.IsMatch(str, ref i);
-            if (left) {
-                bool right = Right.IsMatch(str, ref i);
-                if (right) return true;
-            }
+            if (Left.IsMatch(str, ref i) && Right.IsMatch(str, ref i)) return true;
             i = init; return false;
         }
 
@@ -22,12 +26,17 @@ namespace DUO2C.Parsers
         {
             var left = Left.Parse(str, ref i);
             var right = Right.Parse(str, ref i);
+
+            // If either side is null, don't bother concatenating
             if (left == null) return right;
             if (right == null) return left;
 
             if (left is BranchNode && left.Token == null) {
+                // If the parsed left hand side is a branch with no assigned token,
+                // append the parsed right hand side
                 return new BranchNode(((BranchNode) left).Children.Concat(new ParseNode[] { right }));
             } else {
+                // Otherwise, create a new branch with only the two parsed results
                 return new BranchNode(new ParseNode[] { left, right });
             }
         }

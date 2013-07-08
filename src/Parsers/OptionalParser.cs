@@ -39,7 +39,7 @@ namespace DUO2C.Parsers
 
         public override string ToString()
         {
-            return (Left != null ? Left.ToString() : "") + " [" + Right.ToString() + "]";
+            return (Left != null ? Left.ToString() + " " : "") + "[" + Right.ToString() + "]";
         }
     }
 }
