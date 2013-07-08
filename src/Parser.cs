@@ -21,7 +21,24 @@ namespace DUO2C
 
         protected static void SkipWhitespace(String str, ref int i)
         {
-            while (i < str.Length && char.IsWhiteSpace(str[i])) ++i;
+            while (i < str.Length) {
+                if (char.IsWhiteSpace(str[i])) {
+                    ++i;
+                } else if (i < str.Length - 3 && str[i] == '(' && str[i + 1] == '*') {
+                    int init = i;
+                    SkipComment(str, ref i);
+                    if (init == i) return;
+                } else {
+                    return;
+                }
+            }
+        }
+
+        static Regex _sCommentPattern = new Regex("\\(\\*.*\\*\\)");
+        static void SkipComment(String str, ref int i)
+        {
+            var match = _sCommentPattern.Match(str, i);
+            if (match.Success && match.Index == i) i += match.Length;
         }
 
         public abstract bool IsMatch(String str, ref int i);
