@@ -100,6 +100,7 @@ namespace DUO2C
             var eq = new PKeyword("=");
             var fs = new PKeyword(".");
             var pipe = new PKeyword("|");
+            var flat = new PKeyword("*");
             var pbOpen = new PKeyword("(");
             var pbClose = new PKeyword(")");
             var sbOpen = new PKeyword("[");
@@ -108,14 +109,14 @@ namespace DUO2C
             var cbClose = new PKeyword("}");
 
             var bnfRuleset = new Ruleset();
-            var rSyntax = bnfRuleset.CreateRuleToken("Syntax", true);
+            var rSyntax = bnfRuleset.CreateRuleToken("Syntax", false, true);
             var rRule = bnfRuleset.CreateRuleToken("Rule");
             var rExpr = bnfRuleset.CreateRuleToken("Expr");
             var rList = bnfRuleset.CreateRuleToken("List");
             var rTerm = bnfRuleset.CreateRuleToken("Term");
 
             bnfRuleset.Add(rSyntax, null *(+rRule));
-            bnfRuleset.Add(rRule, +ident +eq +rExpr +fs);
+            bnfRuleset.Add(rRule, +ident [+flat] +eq +rExpr +fs);
             bnfRuleset.Add(rExpr, +rList *(+pipe +rList));
             bnfRuleset.Add(rList, +rTerm *(+rTerm));
             bnfRuleset.Add(rTerm, (+pbOpen +rExpr +pbClose) | (+sbOpen +rExpr +sbClose) | (+cbOpen +rExpr +cbClose) | +str | +ident);
@@ -127,10 +128,11 @@ namespace DUO2C
 
             bool first = true;
             foreach (var rule in tree) {
-                var branch = (BranchNode) rule;
-                var name = branch.Children.First().String;
-                var token = parsed.CreateRuleToken(name, first);
-                toBuild.Add(token, ((BranchNode) branch.Children.ElementAt(2)).Children);
+                var children = ((BranchNode) rule).Children;
+                var name = children.First().String;
+                bool flatten = children.ElementAt(1).String == "*";
+                var token = parsed.CreateRuleToken(name, flatten, first);
+                toBuild.Add(token, ((BranchNode) children.ElementAt(flatten ? 3 : 2)).Children);
                 first = false;
             }
 
@@ -155,9 +157,9 @@ namespace DUO2C
             _dict = new Dictionary<PRule, Parser>();
         }
 
-        public PRule CreateRuleToken(String token, bool root = false)
+        public PRule CreateRuleToken(String token, bool flatten = false, bool root = false)
         {
-            var rule = new PRule(this, token);
+            var rule = new PRule(this, token, flatten);
             _dict.Add(rule, null);
             if (root) _root = rule;
             return rule;

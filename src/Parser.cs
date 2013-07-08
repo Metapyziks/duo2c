@@ -11,12 +11,12 @@ namespace DUO2C
         {
             int i = 0, j = 0;
             var parser = ruleset.RootParser;
-            //if (parser.IsMatch(str, ref j)) {
+            if (parser.IsMatch(str, ref j)) {
                 var tree = parser.Parse(str, ref i);
                 return tree;
-            //} else {
-            //    return null;
-            //}
+            } else {
+                return null;
+            }
         }
 
         protected static void SkipWhitespace(String str, ref int i)
@@ -376,6 +376,7 @@ namespace DUO2C
     class PRule : Parser
     {
         public String Token { get; private set; }
+        public bool Flatten { get; private set; }
 
         private Ruleset _ruleset;
         private Parser _parser;
@@ -395,11 +396,12 @@ namespace DUO2C
         public event EventHandler MatchTested;
         public event EventHandler Parsed;
 
-        public PRule(Ruleset ruleset, String token)
+        public PRule(Ruleset ruleset, String token, bool flatten)
         {
             _ruleset = ruleset;
             _parser = null;
             Token = token;
+            Flatten = flatten;
         }
 
         public override bool IsMatch(string str, ref int i)
@@ -418,7 +420,9 @@ namespace DUO2C
 
             SkipWhitespace(str, ref i);
             var tree = Parser.Parse(str, ref i);
-            if (tree.Token == null) {
+            if (Flatten) {
+                return new LeafNode(tree.String, Token);
+            } else if (tree.Token == null) {
                 tree.Token = Token;
                 return tree;
             } else {

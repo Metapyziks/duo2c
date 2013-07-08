@@ -1,4 +1,5 @@
-﻿Module       = MODULE ident ";" [ImportList] DeclSeq
+﻿Code         = Module {Module}.
+Module       = MODULE ident ";" [ImportList] DeclSeq
                [BEGIN StatementSeq] END ident ".".
 ImportList   = IMPORT [ident ":="] ident {"," [ident ":="] ident} ";".
 DeclSeq      = { CONST {ConstDecl ";" } | TYPE {TypeDecl ";"}
@@ -53,8 +54,8 @@ IdentList    = IdentDef {"," IdentDef}.
 Qualident    = ident ["." ident].
 IdentDef     = ident ["*" | "-"].
 number       = integer | real.
-integer      = digit {hexDigit} "H" | digit {digit}.
-real         = digit {digit} "." {digit} [ScaleFactor].
+integer*     = digit {hexDigit} "H" | digit {digit}.
+real*        = digit {digit} "." {digit} [ScaleFactor].
 ScaleFactor  = ("E" | "D") ["+" | "-"] digit {digit}.
 hexDigit     = digit | "A" | "B" | "C" | "D" | "E" | "F".
-character    = digit {hexDigit} "X".
+character*   = digit {hexDigit} "X".

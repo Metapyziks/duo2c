@@ -31,7 +31,6 @@ namespace DUO2C
             get {
                 var builder = new StringBuilder();
                 foreach (var node in Children) {
-                    if (node != Children.First()) builder.Append(" ");
                     builder.Append(node.String);
                 }
                 return builder.ToString();
