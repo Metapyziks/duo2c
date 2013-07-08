@@ -1,5 +1,8 @@
 ﻿namespace DUO2C.Parsers
 {
+    /// <summary>
+    /// Atomic parser that parses an identifier.
+    /// </summary>
     public class PIdent : Parser
     {
         public override bool IsMatch(string str, ref int i)

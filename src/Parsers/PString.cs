@@ -1,5 +1,9 @@
 ﻿namespace DUO2C.Parsers
 {
+    /// <summary>
+    /// Atomic parser that parses a string literal surrounded by either
+    /// single or double quotes.
+    /// </summary>
     public class PString : Parser
     {
         public override bool IsMatch(string str, ref int i)

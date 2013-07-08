@@ -2,10 +2,20 @@
 
 namespace DUO2C.Parsers
 {
+    /// <summary>
+    /// Atomic parser that parses a specified keyword.
+    /// </summary>
     public class PKeyword : Parser
     {
+        /// <summary>
+        /// Keyword this parser matches.
+        /// </summary>
         public String Keyword { get; private set; }
 
+        /// <summary>
+        /// Creates a new keyword parser matching a specified keyword.
+        /// </summary>
+        /// <param name="keyword">The keyword to match</param>
         public PKeyword(String keyword)
         {
             Keyword = keyword;
@@ -20,7 +30,9 @@ namespace DUO2C.Parsers
                     i = init; return false;
                 }
             }
+
             if (i < str.Length && char.IsLetterOrDigit(str[i - 1]) && char.IsLetterOrDigit(str[i])) {
+                // If the word being parsed hasn't ended, reject
                 i = init; return false;
             }
             return true;
