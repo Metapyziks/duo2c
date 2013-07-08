@@ -10,11 +10,21 @@ namespace DUO2C
     /// </summary>
     public class BranchNode : ParseNode, IEnumerable<ParseNode>
     {
+        /// <summary>
+        /// Utility function to get the source index of a list of sibling nodes.
+        /// </summary>
+        /// <param name="children">List of siblings</param>
+        /// <returns>Source index of the list</returns>
         static int GetBranchIndex(IEnumerable<ParseNode> children)
         {
             return children.First().SourceIndex;
         }
 
+        /// <summary>
+        /// Utility function to get the source length of a list of sibling nodes.
+        /// </summary>
+        /// <param name="children">List of siblings</param>
+        /// <returns>Source length of the list</returns>
         static int GetBranchLength(IEnumerable<ParseNode> children)
         {
             return children.Last().SourceIndex - children.First().SourceIndex + children.Last().Length;
