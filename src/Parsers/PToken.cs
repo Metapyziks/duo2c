@@ -19,6 +19,15 @@ namespace DUO2C.Parsers
         /// </summary>
         public bool Flatten { get; private set; }
 
+        /// <summary>
+        /// If true, leading whitespace will be ignored when matching
+        /// this token.
+        /// </summary>
+        public bool IgnoreLeadingWhitespace
+        {
+            get { return Token.Length > 0 && char.IsUpper(Token[0]); }
+        }
+
         private Ruleset _ruleset;
         private Parser _parser;
 
