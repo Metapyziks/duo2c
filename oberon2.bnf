@@ -12,16 +12,14 @@ ForwardDecl  = PROCEDURE "^" [Receiver] IdentDef [FormalPars].
 FormalPars   = "(" [FPSection {";" FPSection}] ")" [":" Qualident].
 FPSection    = [VAR] ident {"," ident} ":" Type.
 Receiver     = "(" [VAR] ident ":" ident ")".
-Type         = Qualident
-             | ARRAY [ConstExpr {"," ConstExpr}] OF Type
-             | RECORD ["("Qualident")"] FieldList {";" FieldList} END
+Type         = ARRAY [ConstExpr {"," ConstExpr}] OF Type
+             | RECORD ["("Qualident")"] {FieldList ";"} END
              | POINTER TO Type
-             | PROCEDURE [FormalPars].
-FieldList    = [IdentList ":" Type].
+             | PROCEDURE [FormalPars]
+             | Qualident.
+FieldList    = IdentList ":" Type.
 StatementSeq = Statement {";" Statement}.
-Statement    = [ Designator ":=" Expr 
-             | Designator ["(" [ExprList] ")"] 
-             | IF Expr THEN StatementSeq {ELSIF Expr THEN StatementSeq}
+Statement    = IF Expr THEN StatementSeq {ELSIF Expr THEN StatementSeq}
                [ELSE StatementSeq] END 
              | CASE Expr OF Case {"|" Case} [ELSE StatementSeq] END 
              | WHILE Expr DO StatementSeq END 
@@ -32,7 +30,8 @@ Statement    = [ Designator ":=" Expr
                [ELSE StatementSeq] END
              | EXIT 
              | RETURN [Expr]
-             ].
+             | Designator ":=" Expr 
+             | Designator ["(" [ExprList] ")"].
 Case         = [CaseLabels {"," CaseLabels} ":" StatementSeq].
 CaseLabels   = ConstExpr [".." ConstExpr].
 Guard        = Qualident ":" Qualident.
@@ -41,20 +40,20 @@ Expr         = SimpleExpr [Relation SimpleExpr].
 SimpleExpr   = ["+" | "-"] Term {AddOp Term}.
 Term         = Factor {MulOp Factor}.
 Factor       = Designator ["(" [ExprList] ")"] | number | character | string
-               | NIL | Set | "(" Expr ")" | " ~ " Factor.
+             | NIL | Set | "(" Expr ")" | "~" Factor.
 Set          = "{" [Element {"," Element}] "}".
 Element      = Expr [".." Expr].
 Relation     = "=" | "#" | "<" | "<=" | ">" | ">=" | IN | IS.
 AddOp        = "+" | "-" | OR.
-MulOp        = " * " | "/" | DIV | MOD | "&".
-Designator   = Qualident {"." ident | "[" ExprList "]" | " ^ "
-               | "(" Qualident ")"}.
+MulOp        = "*" | "/" | DIV | MOD | "&".
+Designator   = Qualident {"." ident | "[" ExprList "]" | "^"
+             | "(" Qualident ")"}.
 ExprList     = Expr {"," Expr}.
 IdentList    = IdentDef {"," IdentDef}.
-Qualident    = [ident "."] ident.
-IdentDef     = ident [" * " | "-"].
+Qualident    = ident ["." ident].
+IdentDef     = ident ["*" | "-"].
 number       = integer | real.
-integer      = digit {digit} | digit {hexDigit} "H".
+integer      = digit {hexDigit} "H" | digit {digit}.
 real         = digit {digit} "." {digit} [ScaleFactor].
 ScaleFactor  = ("E" | "D") ["+" | "-"] digit {digit}.
 hexDigit     = digit | "A" | "B" | "C" | "D" | "E" | "F".

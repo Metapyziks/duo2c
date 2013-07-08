@@ -48,7 +48,7 @@ namespace DUO2C
         {
             var nl = Environment.NewLine;
             var nextIndent = indent + "  ";
-            return indent + Token + " : {" + nl + String.Join("," + nl, Children.Select(x => x.ToString(nextIndent))) + nl + indent + "}";
+            return indent + Token + " : {" + nl + String.Join("," + nl, Children.Select(x => (x != null ? x.ToString(nextIndent) : "null" ))) + nl + indent + "}";
         }
 
         public IEnumerator<ParseNode> GetEnumerator()

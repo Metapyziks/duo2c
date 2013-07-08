@@ -9,10 +9,14 @@ namespace DUO2C
     {
         public static ParseNode Parse(String str, Ruleset ruleset)
         {
-            int i = 0;
+            int i = 0, j = 0;
             var parser = ruleset.RootParser;
-            var tree = parser.Parse(str, ref i);
-            return tree;
+            //if (parser.IsMatch(str, ref j)) {
+                var tree = parser.Parse(str, ref i);
+                return tree;
+            //} else {
+            //    return null;
+            //}
         }
 
         protected static void SkipWhitespace(String str, ref int i)
@@ -80,7 +84,11 @@ namespace DUO2C
         public override bool IsMatch(string str, ref int i)
         {
             int init = i;
-            if (Left.IsMatch(str, ref i) && Right.IsMatch(str, ref i)) return true;
+            bool left = Left.IsMatch(str, ref i);
+            if (left) {
+                bool right = Right.IsMatch(str, ref i);
+                if (right) return true;
+            }
             i = init; return false;
         }
 
@@ -88,6 +96,9 @@ namespace DUO2C
         {
             var left = Left.Parse(str, ref i);
             var right = Right.Parse(str, ref i);
+            if (left == null) return right;
+            if (right == null) return left;
+
             if (left is BranchNode && left.Token == null) {
                 return new BranchNode(((BranchNode) left).Children.Concat(new ParseNode[] { right }));
             } else {
@@ -381,6 +392,9 @@ namespace DUO2C
             }
         }
 
+        public event EventHandler MatchTested;
+        public event EventHandler Parsed;
+
         public PRule(Ruleset ruleset, String token)
         {
             _ruleset = ruleset;
@@ -390,6 +404,8 @@ namespace DUO2C
 
         public override bool IsMatch(string str, ref int i)
         {
+            if (MatchTested != null) MatchTested(this, new EventArgs());
+
             int init = i;
             SkipWhitespace(str, ref i);
             if (Parser.IsMatch(str, ref i)) return true;
@@ -398,6 +414,8 @@ namespace DUO2C
 
         public override ParseNode Parse(string str, ref int i)
         {
+            if (Parsed != null) Parsed(this, new EventArgs());
+
             SkipWhitespace(str, ref i);
             var tree = Parser.Parse(str, ref i);
             if (tree.Token == null) {
