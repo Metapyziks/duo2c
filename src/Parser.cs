@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace DUO2C
 {
@@ -16,8 +17,7 @@ namespace DUO2C
 
         protected static void SkipWhitespace(String str, ref int i)
         {
-            while (i < str.Length && char.IsWhiteSpace(str[i]))
-                ++i;
+            while (i < str.Length && char.IsWhiteSpace(str[i])) ++i;
         }
 
         public abstract bool IsMatch(String str, ref int i);
@@ -260,12 +260,13 @@ namespace DUO2C
         {
             int init = i;
             SkipWhitespace(str, ref i);
-            if (i < str.Length && str[i] == '"') {
+            if (i < str.Length && (str[i] == '"' || str[i] == '\'')) {
+                char startChar = str[i];
                 while (++i < str.Length) {
                     if (str[i] == '\\') {
                         ++ i;
                     }
-                    if (str[i] == '"') {
+                    if (str[i] == startChar) {
                         ++ i;
                         return true;
                     }
@@ -286,6 +287,50 @@ namespace DUO2C
         public override string ToString()
         {
             return "string";
+        }
+    }
+
+    class PLetter : Parser
+    {
+        public override bool IsMatch(string str, ref int i)
+        {
+            if (i < str.Length && char.IsLetter(str[i])) {
+                ++i; return true; 
+            }
+            return false;
+        }
+
+        // TODO: Add proper support for escape characters
+        public override ParseNode Parse(string str, ref int i)
+        {
+            return new LeafNode(str[i++].ToString(), "letter");
+        }
+
+        public override string ToString()
+        {
+            return "letter";
+        }
+    }
+
+    class PDigit : Parser
+    {
+        public override bool IsMatch(string str, ref int i)
+        {
+            if (i < str.Length && char.IsDigit(str[i])) {
+                ++i; return true;
+            }
+            return false;
+        }
+
+        // TODO: Add proper support for escape characters
+        public override ParseNode Parse(string str, ref int i)
+        {
+            return new LeafNode(str[i++].ToString(), "digit");
+        }
+
+        public override string ToString()
+        {
+            return "digit";
         }
     }
 
@@ -345,11 +390,15 @@ namespace DUO2C
 
         public override bool IsMatch(string str, ref int i)
         {
-            return Parser.IsMatch(str, ref i);
+            int init = i;
+            SkipWhitespace(str, ref i);
+            if (Parser.IsMatch(str, ref i)) return true;
+            i = init; return false;
         }
 
         public override ParseNode Parse(string str, ref int i)
         {
+            SkipWhitespace(str, ref i);
             var tree = Parser.Parse(str, ref i);
             if (tree.Token == null) {
                 tree.Token = Token;

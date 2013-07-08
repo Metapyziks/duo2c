@@ -22,47 +22,73 @@ namespace DUO2C
             return char.IsUpper(token[0]) && token.All(x => char.IsLetter(x));
         }
 
-        static Parser BuildParser(Ruleset ruleset, IEnumerable<ParseNode> nodes)
+        static Parser BuildExpr(Ruleset ruleset, IEnumerable<ParseNode> nodes)
         {
-            var arr = nodes.ToArray();
-            var first = nodes.First();
-            Parser firstParser = null;
-            if (first is BranchNode) {
-                var branch = (BranchNode) first;
-                if (branch.Children.First().String == "[") {
-                    firstParser = BuildParser(ruleset, branch.Children);
-                } else if (branch.Children.First().String == "{") {
-                    // YOU ARE HERE
-                } else {
-                    firstParser = BuildParser(ruleset, branch.Children);
-                }
-            } else if (first.Token == "string") {
-                firstParser = new PKeyword("\"" + first.String + "\"");
-            } else if (IsKeyword(first.String)) {
-                firstParser = new PKeyword(first.String);
-            } else if (IsPredefined(first.String)) {
-                switch (first.String) {
-                    case "string":
-                        firstParser = new PString();
-                        break;
-                    case "ident":
-                        firstParser = new PIdent();
-                        break;
-                    default:
-                        // TODO: Throw something relevant
-                        throw new NotImplementedException();
-                }
-            } else if (IsToken(first.String)) {
-                firstParser = new PRule(ruleset, first.String);
-            } else {
-                // TODO: Throw something relevant
-                throw new NotImplementedException();
-            }
+            Parser curr = null;
+            foreach (var node in nodes) {
+                if (node.Token == "keyword" && node.String == "|") continue;
 
+                var list = BuildList(ruleset, ((BranchNode) node).Children);
+                if (curr == null) {
+                    curr = list;
+                } else {
+                    curr = new EitherOrParser(curr, list);
+                }
+            }
+            return curr;
+        }
+
+        static Parser BuildList(Ruleset ruleset, IEnumerable<ParseNode> nodes)
+        {
+            Parser curr = null;
+            foreach (var node in nodes) {
+                var term = BuildTerm(ruleset, ((BranchNode) node).Children);
+                if (curr == null) {
+                    curr = term;
+                } else if (term is OptionalParser && ((OptionalParser) term).Left == null) {
+                    curr = new OptionalParser(curr, ((OptionalParser) term).Right);
+                } else if (term is OptionalRepeatParser && ((OptionalRepeatParser) term).Left == null) {
+                    curr = new OptionalRepeatParser(curr, ((OptionalRepeatParser) term).Right);
+                } else {
+                    curr = new ConcatParser(curr, term);
+                }
+            }
+            return curr;
+        }
+
+        static Parser BuildTerm(Ruleset ruleset, IEnumerable<ParseNode> nodes)
+        {
             if (nodes.Count() == 1) {
-                return firstParser;
+                var node = (LeafNode) nodes.First();
+                if (node.Token == "string" || IsKeyword(node.String)) {
+                    return new PKeyword(node.String);
+                } else if (node.Token == "ident") {
+                    switch (node.String) {
+                        case "string":
+                            return new PString();
+                        case "letter":
+                            return new PLetter();
+                        case "digit":
+                            return new PDigit();
+                        case "ident":
+                            return new PIdent();
+                        default:
+                            var rule = ruleset.GetRule(node.String);
+                            if (rule != null) return rule;
+                            return new PKeyword(node.String);
+                    }
+                } else {
+                    throw new NotImplementedException(node.Token + " : " + node.String);
+                }
             } else {
-                return new ConcatParser(firstParser, BuildParser(ruleset, nodes.Skip(1)));
+                var expr = BuildExpr(ruleset, ((BranchNode) nodes.ElementAt(1)).Children);
+                if (nodes.First().String == "[") {
+                    return new OptionalParser(null, expr);
+                } else if (nodes.First().String == "{") {
+                    return new OptionalRepeatParser(null, expr);
+                } else {
+                    return expr;
+                }
             }
         }
 
@@ -74,6 +100,8 @@ namespace DUO2C
             var eq = new PKeyword("=");
             var fs = new PKeyword(".");
             var pipe = new PKeyword("|");
+            var pbOpen = new PKeyword("(");
+            var pbClose = new PKeyword(")");
             var sbOpen = new PKeyword("[");
             var sbClose = new PKeyword("]");
             var cbOpen = new PKeyword("{");
@@ -83,12 +111,14 @@ namespace DUO2C
             var rSyntax = bnfRuleset.CreateRuleToken("Syntax", true);
             var rRule = bnfRuleset.CreateRuleToken("Rule");
             var rExpr = bnfRuleset.CreateRuleToken("Expr");
+            var rList = bnfRuleset.CreateRuleToken("List");
             var rTerm = bnfRuleset.CreateRuleToken("Term");
 
             bnfRuleset.Add(rSyntax, null *(+rRule));
             bnfRuleset.Add(rRule, +ident +eq +rExpr +fs);
-            bnfRuleset.Add(rExpr, +rTerm *(+rTerm) *(+pipe +rTerm *(+rTerm)));
-            bnfRuleset.Add(rTerm, (+sbOpen +rExpr +sbClose) | (+cbOpen +rExpr +cbClose) | +str | +ident);
+            bnfRuleset.Add(rExpr, +rList *(+pipe +rList));
+            bnfRuleset.Add(rList, +rTerm *(+rTerm));
+            bnfRuleset.Add(rTerm, (+pbOpen +rExpr +pbClose) | (+sbOpen +rExpr +sbClose) | (+cbOpen +rExpr +cbClose) | +str | +ident);
 
             var tree = (BranchNode) Parser.Parse(bnf, bnfRuleset);
             var parsed = new Ruleset();
@@ -105,7 +135,7 @@ namespace DUO2C
             }
 
             foreach (var rule in toBuild) {
-                var parser = BuildParser(parsed, rule.Value);
+                var parser = BuildExpr(parsed, rule.Value);
                 parsed.Add(rule.Key, parser);
             }
 
@@ -152,7 +182,7 @@ namespace DUO2C
 
         public PRule GetRule(String name)
         {
-            return _dict.Keys.First(x => x.Token == name);
+            return _dict.Keys.FirstOrDefault(x => x.Token == name);
         }
 
         public Parser GetParser(PRule rule)
