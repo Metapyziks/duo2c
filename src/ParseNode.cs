@@ -5,7 +5,7 @@ namespace DUO2C
     /// <summary>
     /// Abstract class for a node parsed from a string.
     /// </summary>
-    abstract class ParseNode
+    public abstract class ParseNode
     {
         /// <summary>
         /// String identifying the type of this node.

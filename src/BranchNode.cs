@@ -8,7 +8,7 @@ namespace DUO2C
     /// <summary>
     /// Represents nodes that contain other child nodes.
     /// </summary>
-    class BranchNode : ParseNode, IEnumerable<ParseNode>
+    public class BranchNode : ParseNode, IEnumerable<ParseNode>
     {
         /// <summary>
         /// Collection of child nodes within this node.

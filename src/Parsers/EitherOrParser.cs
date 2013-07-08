@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace DUO2C.Parsers
 {
-    class EitherOrParser : BinaryParser
+    public class EitherOrParser : BinaryParser
     {
         public EitherOrParser(Parser left, Parser right)
             : base(left, right) { }

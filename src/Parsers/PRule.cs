@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DUO2C.Parsers
 {
-    class PRule : Parser
+    public class PRule : Parser
     {
         public String Token { get; private set; }
         public bool Flatten { get; private set; }

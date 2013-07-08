@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 
-using DUO2C.Parsers;
 
 namespace DUO2C
 {
@@ -9,7 +8,7 @@ namespace DUO2C
     {
         static void Main(string[] args)
         {
-            var ruleset = Ruleset.FromString(File.ReadAllText("oberon2.bnf"));
+            var ruleset = Ruleset.FromString(Properties.Resources.oberon2);
 
             var src = @"
 MODULE Lists;

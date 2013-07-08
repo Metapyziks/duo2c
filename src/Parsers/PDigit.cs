@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace DUO2C.Parsers
 {
-    class PDigit : Parser
+    public class PDigit : Parser
     {
         public override bool IsMatch(string str, ref int i)
         {

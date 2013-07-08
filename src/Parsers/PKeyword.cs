@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DUO2C.Parsers
 {
-    class PKeyword : Parser
+    public class PKeyword : Parser
     {
         public String Keyword { get; private set; }
 

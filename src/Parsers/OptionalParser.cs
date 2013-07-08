@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 
 namespace DUO2C.Parsers
 {
-    class OptionalParser : BinaryParser
+    public class OptionalParser : BinaryParser
     {
         public OptionalParser(Parser left, Parser right)
             : base(left, right) { }

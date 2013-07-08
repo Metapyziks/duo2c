@@ -7,7 +7,7 @@ using DUO2C.Parsers;
 
 namespace DUO2C
 {
-    class Ruleset : IEnumerable<KeyValuePair<PRule, Parser>>
+    public class Ruleset : IEnumerable<KeyValuePair<PRule, Parser>>
     {
         static Parser BuildExpr(Ruleset ruleset, IEnumerable<ParseNode> nodes)
         {

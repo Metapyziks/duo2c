@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace DUO2C.Parsers
 {
-    abstract class BinaryParser : Parser
+    public abstract class BinaryParser : Parser
     {
         public Parser Left { get; private set; }
         public Parser Right { get; private set; }

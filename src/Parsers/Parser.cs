@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace DUO2C.Parsers
 {
-    abstract class Parser : IEnumerable<Parser>
+    public abstract class Parser : IEnumerable<Parser>
     {
         protected static void SkipWhitespace(String str, ref int i)
         {

@@ -5,7 +5,7 @@ namespace DUO2C
     /// <summary>
     /// Represents nodes that cannot contain children.
     /// </summary>
-    class LeafNode : ParseNode
+    public class LeafNode : ParseNode
     {
         private String _string;
         public override String String { get { return _string; } }
