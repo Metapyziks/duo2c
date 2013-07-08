@@ -10,6 +10,16 @@ namespace DUO2C
     /// </summary>
     public class BranchNode : ParseNode, IEnumerable<ParseNode>
     {
+        static int GetBranchIndex(IEnumerable<ParseNode> children)
+        {
+            return children.First().SourceIndex;
+        }
+
+        static int GetBranchLength(IEnumerable<ParseNode> children)
+        {
+            return children.Last().SourceIndex - children.First().SourceIndex + children.Last().Length;
+        }
+
         /// <summary>
         /// Collection of child nodes within this node.
         /// </summary>
@@ -33,8 +43,7 @@ namespace DUO2C
         /// <param name="children">Collection of child nodes within this node</param>
         /// <param name="token">String identifying the type of this node</param>
         public BranchNode(IEnumerable<ParseNode> children, String token = null)
-            : base(children.First().SourceIndex,
-                children.Last().SourceIndex - children.First().SourceIndex + children.Last().Length, token)
+            : base(GetBranchIndex(children), GetBranchLength(children), token)
         {
             Children = children.SelectMany(x => x is BranchNode && x.Token == null ? ((BranchNode) x).Children : new ParseNode[] { x });
         }
