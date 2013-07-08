@@ -1,13 +1,15 @@
 ﻿using System;
 using System.IO;
 
+using DUO2C.Parsers;
+
 namespace DUO2C
 {
     class Program
     {
         static void Main(string[] args)
         {
-            var ruleset = Ruleset.Parse(File.ReadAllText("oberon2.bnf"));
+            var ruleset = Ruleset.FromString(File.ReadAllText("oberon2.bnf"));
 
             var src = @"
 MODULE Lists;
@@ -49,7 +51,7 @@ MODULE Lists;
 END Lists.
             ";
 
-            var tree = Parser.Parse(src, ruleset);
+            var tree = ruleset.Parse(src);
 
             if (tree == null) {
                 Console.WriteLine("Could not parse!");

@@ -41,8 +41,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\Parser.cs" />
+    <Compile Include="src\BranchNode.cs" />
+    <Compile Include="src\LeafNode.cs" />
     <Compile Include="src\ParseNode.cs" />
+    <Compile Include="src\Parsers\BinaryParser.cs" />
+    <Compile Include="src\Parsers\ConcatParser.cs" />
+    <Compile Include="src\Parsers\EitherOrParser.cs" />
+    <Compile Include="src\Parsers\OptionalParser.cs" />
+    <Compile Include="src\Parsers\OptionalRepeatParser.cs" />
+    <Compile Include="src\Parsers\Parser.cs" />
+    <Compile Include="src\Parsers\PDigit.cs" />
+    <Compile Include="src\Parsers\PIdent.cs" />
+    <Compile Include="src\Parsers\PKeyword.cs" />
+    <Compile Include="src\Parsers\PLetter.cs" />
+    <Compile Include="src\Parsers\PRule.cs" />
+    <Compile Include="src\Parsers\PString.cs" />
     <Compile Include="src\Ruleset.cs" />
     <Compile Include="src\Program.cs" />
     <Compile Include="src\Properties\AssemblyInfo.cs" />

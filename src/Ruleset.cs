@@ -3,25 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
+using DUO2C.Parsers;
+
 namespace DUO2C
 {
     class Ruleset : IEnumerable<KeyValuePair<PRule, Parser>>
     {
-        static bool IsPredefined(String token)
-        {
-            return token.Length > 1 && token.All(x => char.IsLetter(x) && char.IsLower(x));
-        }
-
-        static bool IsKeyword(String token)
-        {
-            return token.Length > 1 && token.All(x => char.IsLetter(x) && char.IsUpper(x));
-        }
-
-        static bool IsToken(String token)
-        {
-            return char.IsUpper(token[0]) && token.All(x => char.IsLetter(x));
-        }
-
         static Parser BuildExpr(Ruleset ruleset, IEnumerable<ParseNode> nodes)
         {
             Parser curr = null;
@@ -60,7 +47,7 @@ namespace DUO2C
         {
             if (nodes.Count() == 1) {
                 var node = (LeafNode) nodes.First();
-                if (node.Token == "string" || IsKeyword(node.String)) {
+                if (node.Token == "string") {
                     return new PKeyword(node.String);
                 } else if (node.Token == "ident") {
                     switch (node.String) {
@@ -92,7 +79,7 @@ namespace DUO2C
             }
         }
 
-        public static Ruleset Parse(String bnf)
+        public static Ruleset FromString(String bnf)
         {
             var ident = new PIdent();
             var str = new PString();
@@ -121,7 +108,7 @@ namespace DUO2C
             bnfRuleset.Add(rList, +rTerm *(+rTerm));
             bnfRuleset.Add(rTerm, (+pbOpen +rExpr +pbClose) | (+sbOpen +rExpr +sbClose) | (+cbOpen +rExpr +cbClose) | +str | +ident);
 
-            var tree = (BranchNode) Parser.Parse(bnf, bnfRuleset);
+            var tree = (BranchNode) bnfRuleset.Parse(bnf);
             var parsed = new Ruleset();
 
             var toBuild = new Dictionary<PRule, IEnumerable<ParseNode>>();
@@ -147,14 +134,20 @@ namespace DUO2C
         Parser _root;
         Dictionary<PRule, Parser> _dict;
 
-        public Parser RootParser
-        {
-            get { return _root; }
-        }
-
         public Ruleset()
         {
             _dict = new Dictionary<PRule, Parser>();
+        }
+
+        public ParseNode Parse(String str)
+        {
+            int i = 0, j = 0;
+            if (_root.IsMatch(str, ref j)) {
+                var tree = _root.Parse(str, ref i);
+                return tree;
+            } else {
+                return null;
+            }
         }
 
         public PRule CreateRuleToken(String token, bool flatten = false, bool root = false)
