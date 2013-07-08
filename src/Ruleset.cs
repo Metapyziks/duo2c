@@ -10,7 +10,7 @@ namespace DUO2C
     /// <summary>
     /// Contains a collection of production rules to be used when parsing a string.
     /// </summary>
-    public class Ruleset : IEnumerable<KeyValuePair<PRule, Parser>>
+    public class Ruleset : IEnumerable<KeyValuePair<PToken, Parser>>
     {
         /// <summary>
         /// Build a eBNF expression parser from a given collection of term lists.
@@ -98,7 +98,7 @@ namespace DUO2C
 
                         default:
                             // Otherwise, look for a matching rule
-                            var rule = ruleset.GetRule(node.String);
+                            var rule = ruleset.GetTokenReference(node.String);
                             if (rule != null) return rule;
 
                             // If no matching rule is found, assume term is a keyword
@@ -174,24 +174,38 @@ namespace DUO2C
             return _sEBNFRuleset;
         }
 
+        /// <summary>
+        /// Parses a Ruleset from a string containing a syntax definition
+        /// in extended Backus-Naur Form.
+        /// </summary>
+        /// <param name="bnf">A string in extended Backus-Naur Form</param>
+        /// <returns>A Ruleset representing the given syntax definition</returns>
         public static Ruleset FromString(String bnf)
         {
+            // Parse the syntax structure
             var tree = (BranchNode) GetEBNFRuleset().Parse(bnf);
             var parsed = new Ruleset();
 
-            var toBuild = new Dictionary<PRule, IEnumerable<ParseNode>>();
+            // Prepare a list of rules to build after all tokens are declared
+            var toBuild = new Dictionary<PToken, IEnumerable<ParseNode>>();
 
             bool first = true;
             foreach (var rule in tree) {
                 var children = ((BranchNode) rule).Children;
                 var name = children.First().String;
+
+                // Tokens marked with a * are flattened into one node
                 bool flatten = children.ElementAt(1).String == "*";
                 var token = parsed.CreateRuleToken(name, flatten, first);
+
+                // If the token is marked to be flattened, the expression will
+                // be one more node along in the array
                 int exprIndex = flatten ? 3 : 2;
                 toBuild.Add(token, ((BranchNode) children.ElementAt(exprIndex)).Children);
                 first = false;
             }
 
+            // Build rules
             foreach (var rule in toBuild) {
                 parsed.Add(rule.Key, BuildExpr(parsed, rule.Value));
             }
@@ -200,60 +214,88 @@ namespace DUO2C
         }
 
         Parser _root;
-        Dictionary<PRule, Parser> _dict;
+        Dictionary<PToken, Parser> _dict;
 
+        /// <summary>
+        /// Constructor to create an empty Ruleset.
+        /// </summary>
         public Ruleset()
         {
-            _dict = new Dictionary<PRule, Parser>();
+            _dict = new Dictionary<PToken, Parser>();
         }
 
+        /// <summary>
+        /// Attempt to parse the structure of a string using this Ruleset.
+        /// </summary>
+        /// <param name="str">String to parse the structure of</param>
+        /// <returns>Node tree representing the string's structure</returns>
         public ParseNode Parse(String str)
         {
             int i = 0, j = 0;
             if (_root.IsMatch(str, ref j)) {
+                // If the string is valid, parse it
                 var tree = _root.Parse(str, ref i);
                 return tree;
             } else {
+                // TODO: Add some kind of error reporting
                 return null;
             }
         }
 
-        public PRule CreateRuleToken(String token, bool flatten = false, bool root = false)
+        /// <summary>
+        /// Declares a token that will have one or more production rules defined for it.
+        /// </summary>
+        /// <param name="token">String used to refer to the associated token</param>
+        /// <param name="flatten">If true, the parsed structures produced for this token
+        /// are flattened to a single leaf node</param>
+        /// <param name="root">If true, this token is used as the initial production rule</param>
+        /// <returns>Parser that refers to this token</returns>
+        public PToken CreateRuleToken(String token, bool flatten = false, bool root = false)
         {
-            var rule = new PRule(this, token, flatten);
+            var rule = new PToken(this, token, flatten);
             _dict.Add(rule, null);
             if (root) _root = rule;
             return rule;
         }
 
-        public void Add(PRule rule, Parser parser)
+        /// <summary>
+        /// Adds a production rule assigned to a given token.
+        /// </summary>
+        /// <param name="token">Token to assign the new production rule to</param>
+        /// <param name="parser">Parser describing the production rule</param>
+        public void Add(PToken token, Parser parser)
         {
-            Debug.WriteLine("{0} ::= {1}.", rule.Token, parser.ToString());
-
-            var prev = _dict[rule];
+            var prev = _dict[token];
             if (prev == null) {
-                _dict[rule] = parser;
+                _dict[token] = parser;
             } else {
-                _dict[rule] = new EitherOrParser(prev, parser);
+                // If a production already exists, combine them in a disjunction
+                _dict[token] = new EitherOrParser(prev, parser);
             }
         }
 
-        public void Add(KeyValuePair<PRule, Parser> item)
-        {
-            Add(item.Key, item.Value);
-        }
-
-        public PRule GetRule(String name)
+        /// <summary>
+        /// Gets the token parser corresponding to the given token name.
+        /// </summary>
+        /// <param name="name">Token name to find a matching token parser for</param>
+        /// <returns>A token parser corresponding to the given token name, or
+        /// null if one isn't found</returns>
+        public PToken GetTokenReference(String name)
         {
             return _dict.Keys.FirstOrDefault(x => x.Token == name);
         }
 
-        public Parser GetParser(PRule rule)
+        /// <summary>
+        /// Gets the parser that corresponds with the given token.
+        /// </summary>
+        /// <param name="token">Token to find a matching parser from</param>
+        /// <returns>Parser that corresponds with the given token</returns>
+        public Parser GetReferencedParser(PToken token)
         {
-            return _dict[rule];
+            return _dict[token];
         }
 
-        public IEnumerator<KeyValuePair<PRule, Parser>> GetEnumerator()
+        public IEnumerator<KeyValuePair<PToken, Parser>> GetEnumerator()
         {
             return _dict.GetEnumerator();
         }

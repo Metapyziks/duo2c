@@ -59,7 +59,7 @@
     <Compile Include="src\Parsers\PIdent.cs" />
     <Compile Include="src\Parsers\PKeyword.cs" />
     <Compile Include="src\Parsers\PLetter.cs" />
-    <Compile Include="src\Parsers\PRule.cs" />
+    <Compile Include="src\Parsers\PToken.cs" />
     <Compile Include="src\Parsers\PString.cs" />
     <Compile Include="src\Ruleset.cs" />
     <Compile Include="src\Program.cs" />

@@ -2,7 +2,7 @@
 
 namespace DUO2C.Parsers
 {
-    public class PRule : Parser
+    public class PToken : Parser
     {
         public String Token { get; private set; }
         public bool Flatten { get; private set; }
@@ -15,7 +15,7 @@ namespace DUO2C.Parsers
             get
             {
                 if (_parser == null) {
-                    _parser = _ruleset.GetParser(this);
+                    _parser = _ruleset.GetReferencedParser(this);
                 }
 
                 return _parser;
@@ -25,7 +25,7 @@ namespace DUO2C.Parsers
         public event EventHandler MatchTested;
         public event EventHandler Parsed;
 
-        public PRule(Ruleset ruleset, String token, bool flatten)
+        public PToken(Ruleset ruleset, String token, bool flatten)
         {
             _ruleset = ruleset;
             _parser = null;
