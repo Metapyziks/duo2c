@@ -51,9 +51,7 @@ namespace DUO2C.Parsers
                 foreach (int k in Right.FindSyntaxError(str, j, out innerError)) {
                     indices.Add(k);
                 }
-                if (innerError != null && (exception == null || innerError.SourceIndex > exception.SourceIndex)) {
-                    exception = innerError;
-                }
+                exception = ChooseParserException(exception, innerError);
             }
             return indices;
         }

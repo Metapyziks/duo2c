@@ -15,6 +15,21 @@ namespace DUO2C.Parsers
         protected static IEnumerable<int> EmptyIndexArray = new int[0];
 
         /// <summary>
+        /// Utility function that compares two exceptions and returns the most useful.
+        /// </summary>
+        /// <param name="a">First exception</param>
+        /// <param name="b">Second exception</param>
+        /// <returns>The most useful exception</returns>
+        protected static ParserException ChooseParserException(ParserException a, ParserException b)
+        {
+            if (a == null || (b != null && b.SourceIndex > a.SourceIndex)) {
+                return b;
+            } else {
+                return a;
+            }
+        }
+
+        /// <summary>
         /// Utility function to ignore whitespace and comments.
         /// </summary>
         /// <param name="str">String being parsed</param>

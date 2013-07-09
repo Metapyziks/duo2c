@@ -42,19 +42,9 @@ namespace DUO2C.Parsers
 
         public override IEnumerable<int> FindSyntaxError(string str, int i, out ParserException exception)
         {
-            ParserException left, right;
-            var indices = Left.FindSyntaxError(str, i, out left).Union(Right.FindSyntaxError(str, i, out right));
-
-            if (left != null && right != null) {
-                exception = left.SourceIndex >= right.SourceIndex ? left : right;
-            } else if (left != null) {
-                exception = left;
-            } else if (right != null) {
-                exception = right;
-            } else {
-                exception = null;
-            }
-
+            ParserException right;
+            var indices = Left.FindSyntaxError(str, i, out exception).Union(Right.FindSyntaxError(str, i, out right));
+            exception = ChooseParserException(exception, right);
             return indices;
         }
 
