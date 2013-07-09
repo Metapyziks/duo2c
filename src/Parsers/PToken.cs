@@ -1,8 +1,34 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace DUO2C.Parsers
 {
+    /// <summary>
+    /// Exception thrown when a specific token is expected but not found.
+    /// </summary>
+    [ExceptionUtility(100)]
+    public class TokenExpectedException : ParserException
+    {
+        /// <summary>
+        /// The token that was expected.
+        /// </summary>
+        public String Token { get; private set; }
+
+        /// <summary>
+        /// Constructor to create a new digit expected exception, containing
+        /// information about the location in the source string that the exception
+        /// occurred.
+        /// </summary>
+        /// <param name="str">The source string being parsed</param>
+        /// <param name="index">Start index in the source string of the exception</param>
+        public TokenExpectedException(String token, String str, int index)
+            : base(String.Format("{0} expected", token), str, index)
+        {
+            Token = token;
+        }
+    }
+
     /// <summary>
     /// Parser that references a token that has one or more
     /// production rules assigned to it.
@@ -109,7 +135,11 @@ namespace DUO2C.Parsers
 
         public override IEnumerable<int> FindSyntaxError(string str, int i, out ParserException exception)
         {
-            return Parser.FindSyntaxError(str, i, out exception);
+            var indices = Parser.FindSyntaxError(str, i, out exception);
+            if (indices.Count() == 0) {
+                exception = ChooseParserException(exception, new TokenExpectedException(Token, str, i));
+            }
+            return indices;
         }
 
         public override string ToString()

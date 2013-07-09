@@ -13,7 +13,7 @@
 
     PROCEDURE (l : List) Add* (v : Integer);
     BEGIN
-        IF l = & THEN
+        IF l = NIL THEN
             NEW(l);             (* create record instance *)
             l.value := v
         ELSE

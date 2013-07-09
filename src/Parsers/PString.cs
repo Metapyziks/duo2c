@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace DUO2C.Parsers
 {
     /// <summary>
-    /// Exception thrown when an string literal is expected but not found.
+    /// Exception thrown when a string literal is expected but not found.
     /// </summary>
     [ExceptionUtility(50)]
     public class StringExpectedException : ParserException

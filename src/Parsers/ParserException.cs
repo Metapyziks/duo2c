@@ -108,8 +108,8 @@ namespace DUO2C.Parsers
         public override String Message
         {
             get {
-                return String.Format("{0}({1}:{2}) {3} : {4}", SourcePath ?? "",
-                    Line, Column, (InnerException ?? this).GetType().Name, MessageNoLocation);
+                return String.Format("{0}({1}:{2}) syntax error : {3}", SourcePath ?? "",
+                    Line, Column, MessageNoLocation);
             }
         }
 
