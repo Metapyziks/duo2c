@@ -262,7 +262,9 @@ namespace DUO2C
                 var tree = _root.Parse(str, ref j);
                 return tree;
             } else {
-                throw _root.FindSyntaxErrors(str, ref j);
+                ParserException error;
+                _root.FindSyntaxError(str, 0, out error);
+                throw error;
             }
         }
 

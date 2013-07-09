@@ -11,6 +11,8 @@ namespace DUO2C.Parsers
     /// </summary>
     public abstract class Parser : IEnumerable<Parser>
     {
+        private static IEnumerable<int> _sEmptyIndexArray = new int[0];
+
         /// <summary>
         /// Utility function to ignore whitespace and comments.
         /// </summary>
@@ -90,8 +92,32 @@ namespace DUO2C.Parsers
         /// <param name="str">String being parsed</param>
         /// <param name="i">Current index</param>
         /// <returns>First syntax error found, if any. Otherwise, null.</returns>
-        public abstract ParserException FindSyntaxErrors(String str, ref int i);
-        
+        protected abstract IEnumerable<int> FindSyntaxError(String str, int i);
+
+        /// <summary>
+        /// Attempts to find the first syntax error encountered using this parser
+        /// from the given index. Also returns an enumerable containing all possible
+        /// valid positions the parser may be at after parsing.
+        /// </summary>
+        /// <param name="str">String being parsed</param>
+        /// <param name="i">Current index</param>
+        /// <param name="exception">Outputted exception</param>
+        /// <returns></returns>
+        public IEnumerable<int> FindSyntaxError(String str, int i, out ParserException exception)
+        {
+            exception = null;
+
+            List<int> list = new List<int>();
+            try {
+                foreach (var index in (FindSyntaxError(str, i) ?? _sEmptyIndexArray)) {
+                    list.Add(index);
+                }
+            } catch (ParserException e) {
+                exception = e;
+            }
+            return list;
+        }
+
         /// <summary>
         /// Literally does nothing, used for aesthetics.
         /// </summary>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DUO2C.Parsers
 {
@@ -106,13 +107,13 @@ namespace DUO2C.Parsers
             }
         }
 
-        public override ParserException FindSyntaxErrors(string str, ref int i)
+        protected override IEnumerable<int> FindSyntaxError(string str, int i)
         {
-            int init = i;
-            SkipWhitespace(str, ref i);
-            var error = Parser.FindSyntaxErrors(str, ref i);
-            if (error == null) i = init;
-            return error;
+            ParserException error;
+            foreach (int index in Parser.FindSyntaxError(str, i, out error)) {
+                yield return index;
+            }
+            if (error != null) throw error;
         }
 
         public override string ToString()

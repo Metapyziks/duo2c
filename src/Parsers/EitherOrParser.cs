@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace DUO2C.Parsers
 {
@@ -38,19 +40,19 @@ namespace DUO2C.Parsers
             }
         }
 
-        public override ParserException FindSyntaxErrors(string str, ref int i)
+        protected override IEnumerable<int> FindSyntaxError(string str, int i)
         {
-            int j = i;
-            var left = Left.FindSyntaxErrors(str, ref j);
-            int k = i;
-            var right = Right.FindSyntaxErrors(str, ref k);
-
-            if (j >= k) {
-                i = j;
-                return left;
-            } else {
-                i = k;
-                return right;
+            ParserException left, right;
+            var indices = Left.FindSyntaxError(str, i, out left).Union(Right.FindSyntaxError(str, i, out right));
+            foreach (int j in indices) {
+                yield return j;
+            }
+            if (left != null && right != null) {
+                throw left.SourceIndex >= right.SourceIndex ? left : right;
+            } else if (left != null) {
+                throw left;
+            } else if (right != null) {
+                throw right;
             }
         }
 

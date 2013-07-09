@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DUO2C.Parsers
 {
@@ -74,12 +75,12 @@ namespace DUO2C.Parsers
             return new LeafNode(i - Keyword.Length, Keyword.Length, Keyword, "keyword");
         }
 
-        public override ParserException FindSyntaxErrors(string str, ref int i)
+        protected override IEnumerable<int> FindSyntaxError(string str, int i)
         {
-            if (!IsMatch(str, ref i)) {
-                return new KeywordExpectedException(Keyword, str, i);
+            if (IsMatch(str, ref i)) {
+                yield return i;
             } else {
-                return null;
+                throw new KeywordExpectedException(Keyword, str, i);
             }
         }
 
