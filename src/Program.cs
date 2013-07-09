@@ -23,15 +23,12 @@ namespace DUO2C
                     var outpath = Path.GetDirectoryName(args[0])
                         + Path.DirectorySeparatorChar + "output.txt";
                     File.WriteAllText(outpath, tree.ToString());
-                    Console.WriteLine("Parsed successfully");
                 } catch (Parsers.ParserException e) {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(e.Message);
+                    Console.ResetColor();
                 }
             }
-
-#if DEBUG
-            Console.ReadKey();
-#endif
         }
     }
 }
