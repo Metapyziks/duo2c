@@ -85,8 +85,8 @@ namespace DUO2C.Parsers
         public override String Message
         {
             get {
-                return String.Format("{0}({1}:{2}) {3} : {4}",
-                    SourcePath ?? "", Line, Column, GetType().Name, MessageNoLocation);
+                return String.Format("{0}({1}:{2}) {3} : {4}", SourcePath ?? "",
+                    Line, Column, (InnerException ?? this).GetType().Name, MessageNoLocation);
             }
         }
 
@@ -118,7 +118,7 @@ namespace DUO2C.Parsers
         /// <param name="clone">Parser exception to clone</param>
         /// <param name="srcPath">Path to the file that was being parsed</param>
         public ParserException(ParserException clone, String srcPath)
-            : base(clone.MessageNoLocation)
+            : base(clone.MessageNoLocation, clone)
         {
             SourcePath = srcPath;
             SourceIndex = clone.SourceIndex;

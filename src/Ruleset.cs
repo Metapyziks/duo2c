@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 
 using DUO2C.Parsers;
 
@@ -47,23 +48,35 @@ namespace DUO2C
         static Parser BuildList(Ruleset ruleset, IEnumerable<ParseNode> nodes)
         {
             Parser curr = null;
-            foreach (var node in nodes) {
+            foreach (var node in nodes.Reverse()) {
                 // Build individual term
                 var term = BuildTerm(ruleset, ((BranchNode) node).Children);
 
                 if (curr == null) {
                     // First term list becomes the current
                     curr = term;
-                } else if (term is OptionalParser && ((OptionalParser) term).Left == null) {
-                    // If new term is optional, attach the previous terms to it
-                    curr = new OptionalParser(ruleset, curr, ((OptionalParser) term).Right);
-                } else if (term is OptionalRepeatParser && ((OptionalRepeatParser) term).Left == null) {
-                    // If new term is a repeated optional, attach the previous terms to it
-                    curr = new OptionalRepeatParser(ruleset, curr, ((OptionalRepeatParser) term).Right);
-                } else {
-                    // Concatenate new term with the previous ones
-                    curr = new ConcatParser(ruleset, curr, term);
+                    continue;
                 }
+                
+                if (curr is ConcatParser) {
+                    var left = ((BinaryParser) curr).Left as BinaryParser;
+                    var right = ((BinaryParser) curr).Right;
+                    Parser combined = null;
+
+                    if (left is OptionalParser && left.Left == null) {
+                        combined = new OptionalParser(ruleset, term, left.Right);
+                    } else if (left is OptionalRepeatParser && left.Left == null) {
+                        combined = new OptionalRepeatParser(ruleset, term, left.Right);
+                    }
+
+                    if (combined != null) {
+                        curr = new ConcatParser(ruleset, combined, right);
+                        continue;
+                    }
+                }
+
+                // Concatenate new term with the previous ones
+                curr = new ConcatParser(ruleset, term, curr);
             }
             return curr;
         }
@@ -182,7 +195,7 @@ namespace DUO2C
         public static Ruleset FromString(String bnf)
         {
             // Parse the syntax structure
-            var tree = (BranchNode) GetEBNFRuleset().Parse(bnf);
+            var tree = (BranchNode) GetEBNFRuleset().ParseString(bnf);
             var parsed = new Ruleset();
 
             // Prepare a list of rules to build after all tokens are declared
@@ -242,17 +255,29 @@ namespace DUO2C
         /// </summary>
         /// <param name="str">String to parse the structure of</param>
         /// <returns>Node tree representing the string's structure</returns>
-        public ParseNode Parse(String str)
+        public ParseNode ParseString(String str)
         {
-            if (IsMatch(str)) {
-                // If the string is valid, parse it
-                int i = 0;
-                var tree = _root.Parse(str, ref i);
-                return tree;
-            } else {
-                // TODO: Add some kind of error reporting
-                return null;
+            int i = 0;
+            var tree = _root.Parse(str, ref i);
+            return tree;
+        }
+
+        /// <summary>
+        /// Attempt to parse the structure of the contents of a file using this Ruleset.
+        /// </summary>
+        /// <param name="filepath">Path of the file to be parsed</param>
+        /// <returns>Node tree representing the file's structure</returns>
+        public ParseNode ParseFile(String filepath)
+        {
+#if !DEBUG
+            try {
+#endif
+                return ParseString(File.ReadAllText(filepath));
+#if !DEBUG
+            } catch (ParserException e) {
+                throw new ParserException(e, filepath);
             }
+#endif
         }
 
         /// <summary>
