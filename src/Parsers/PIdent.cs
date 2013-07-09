@@ -20,7 +20,7 @@
             while (i < str.Length && (char.IsLetter(str[i]) || (j > 0 && char.IsDigit(str[i])))) {
                 ++i; ++j;
             }
-            if (j > 0) return true;
+            if (j > 0 && !Ruleset.IsKeyword(str.Substring(init, j))) return true;
             i = init; return false;
         }
 

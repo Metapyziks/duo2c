@@ -213,14 +213,16 @@ namespace DUO2C
         }
 
         Parser _root;
-        Dictionary<PToken, Parser> _dict;
+        Dictionary<PToken, Parser> _rules;
+        SortedSet<String> _keywords;
 
         /// <summary>
         /// Constructor to create an empty Ruleset.
         /// </summary>
         public Ruleset()
         {
-            _dict = new Dictionary<PToken, Parser>();
+            _rules = new Dictionary<PToken, Parser>();
+            _keywords = new SortedSet<String>();
         }
 
         /// <summary>
@@ -252,7 +254,7 @@ namespace DUO2C
         public PToken CreateTokenParser(String token, bool flatten = false, bool root = false)
         {
             var rule = new PToken(this, token, flatten);
-            _dict.Add(rule, null);
+            _rules.Add(rule, null);
             if (root) _root = rule;
             return rule;
         }
@@ -265,7 +267,18 @@ namespace DUO2C
         /// <returns>Parser for the given keyword</returns>
         public PKeyword CreateKeywordParser(String keyword)
         {
+            _keywords.Add(keyword);
             return new PKeyword(this, keyword);
+        }
+
+        /// <summary>
+        /// Identifies is a given string has been registered as a keyword.
+        /// </summary>
+        /// <param name="str">String that may potentially be a keyword</param>
+        /// <returns>True if the given string has been registered as a keyword</returns>
+        public bool IsKeyword(String str)
+        {
+            return _keywords.Contains(str);
         }
 
         /// <summary>
@@ -293,12 +306,12 @@ namespace DUO2C
         /// <param name="parser">Parser describing the production rule</param>
         public void Add(PToken token, Parser parser)
         {
-            var prev = _dict[token];
+            var prev = _rules[token];
             if (prev == null) {
-                _dict[token] = parser;
+                _rules[token] = parser;
             } else {
                 // If a production already exists, combine them in a disjunction
-                _dict[token] = new EitherOrParser(this, prev, parser);
+                _rules[token] = new EitherOrParser(this, prev, parser);
             }
         }
 
@@ -310,7 +323,7 @@ namespace DUO2C
         /// null if one isn't found</returns>
         public PToken GetTokenReference(String name)
         {
-            return _dict.Keys.FirstOrDefault(x => x.Token == name);
+            return _rules.Keys.FirstOrDefault(x => x.Token == name);
         }
 
         /// <summary>
@@ -320,17 +333,17 @@ namespace DUO2C
         /// <returns>Parser that corresponds with the given token</returns>
         public Parser GetReferencedParser(PToken token)
         {
-            return _dict[token];
+            return _rules[token];
         }
 
         public IEnumerator<KeyValuePair<PToken, Parser>> GetEnumerator()
         {
-            return _dict.GetEnumerator();
+            return _rules.GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return _dict.GetEnumerator();
+            return _rules.GetEnumerator();
         }
     }
 }
