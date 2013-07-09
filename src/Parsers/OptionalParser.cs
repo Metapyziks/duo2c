@@ -55,12 +55,13 @@ namespace DUO2C.Parsers
             }
         }
 
-        protected override IEnumerable<int> FindSyntaxError(string str, int i, ParserExceptionWrapper wrapper)
+        public override IEnumerable<int> FindSyntaxError(string str, int i, out ParserException exception)
         {
+            exception = null;
             SortedSet<int> indices = new SortedSet<int>();
             List<int> left;
             if (Left != null) {
-                left = Left.FindSyntaxError(str, i, out wrapper.Payload).ToList();
+                left = Left.FindSyntaxError(str, i, out exception).ToList();
             } else {
                 left = new List<int> { i };
             }
@@ -70,8 +71,8 @@ namespace DUO2C.Parsers
                 foreach (int k in Right.FindSyntaxError(str, j, out innerError)) {
                     indices.Add(k);
                 }
-                if (innerError != null && (wrapper.Payload == null || innerError.SourceIndex > wrapper.Payload.SourceIndex)) {
-                    wrapper.Payload = innerError;
+                if (innerError != null && (exception == null || innerError.SourceIndex > exception.SourceIndex)) {
+                    exception = innerError;
                 }
             }
             return indices;

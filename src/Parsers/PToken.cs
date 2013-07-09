@@ -107,10 +107,9 @@ namespace DUO2C.Parsers
             }
         }
 
-        protected override IEnumerable<int> FindSyntaxError(string str, int i, ParserExceptionWrapper wrapper)
+        public override IEnumerable<int> FindSyntaxError(string str, int i, out ParserException exception)
         {
-            var indices = Parser.FindSyntaxError(str, i, out wrapper.Payload);
-            return indices;
+            return Parser.FindSyntaxError(str, i, out exception);
         }
 
         public override string ToString()

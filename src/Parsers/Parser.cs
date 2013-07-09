@@ -12,12 +12,7 @@ namespace DUO2C.Parsers
     /// </summary>
     public abstract class Parser : IEnumerable<Parser>
     {
-        protected class ParserExceptionWrapper
-        {
-            public ParserException Payload = null;
-        }
-
-        private static IEnumerable<int> _sEmptyIndexArray = new int[0];
+        protected static IEnumerable<int> EmptyIndexArray = new int[0];
 
         /// <summary>
         /// Utility function to ignore whitespace and comments.
@@ -93,16 +88,6 @@ namespace DUO2C.Parsers
 
         /// <summary>
         /// Attempts to find the first syntax error encountered using this parser
-        /// from the given index.
-        /// </summary>
-        /// <param name="str">String being parsed</param>
-        /// <param name="i">Current index</param>
-        /// <param name="wrapper">Container for an exception if it is encountered</param>
-        /// <returns>First syntax error found, if any. Otherwise, null.</returns>
-        protected abstract IEnumerable<int> FindSyntaxError(String str, int i, ParserExceptionWrapper wrapper);
-
-        /// <summary>
-        /// Attempts to find the first syntax error encountered using this parser
         /// from the given index. Also returns an enumerable containing all possible
         /// valid positions the parser may be at after parsing.
         /// </summary>
@@ -110,16 +95,7 @@ namespace DUO2C.Parsers
         /// <param name="i">Current index</param>
         /// <param name="exception">Outputted exception</param>
         /// <returns>Enumerable over all valid indices.</returns>
-        public IEnumerable<int> FindSyntaxError(String str, int i, out ParserException exception)
-        {
-            ParserExceptionWrapper wrapper = new ParserExceptionWrapper();
-            var indices = FindSyntaxError(str, i, wrapper).ToArray() ?? _sEmptyIndexArray;
-            exception = wrapper.Payload;
-            if (exception == null && indices.Count() == 0) {
-                System.Diagnostics.Debugger.Break();
-            }
-            return indices;
-        }
+        public abstract IEnumerable<int> FindSyntaxError(String str, int i, out ParserException exception);
 
         /// <summary>
         /// Literally does nothing, used for aesthetics.

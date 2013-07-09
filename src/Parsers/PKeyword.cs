@@ -75,12 +75,14 @@ namespace DUO2C.Parsers
             return new LeafNode(i - Keyword.Length, Keyword.Length, Keyword, "keyword");
         }
 
-        protected override IEnumerable<int> FindSyntaxError(string str, int i, ParserExceptionWrapper wrapper)
+        public override IEnumerable<int> FindSyntaxError(string str, int i, out ParserException exception)
         {
-            wrapper.Payload = new KeywordExpectedException(Keyword, str, i);
             if (IsMatch(str, ref i)) {
-                wrapper.Payload = null;
-                yield return i;
+                exception = null;
+                return new int[] { i };
+            } else {
+                exception = new KeywordExpectedException(Keyword, str, i);
+                return EmptyIndexArray;
             }
         }
 
