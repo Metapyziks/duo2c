@@ -22,10 +22,20 @@ namespace DUO2C.Parsers
         /// <returns>The most useful exception</returns>
         protected static ParserException ChooseParserException(ParserException a, ParserException b)
         {
-            if (a == null || (b != null && b.SourceIndex > a.SourceIndex)) {
-                return b;
-            } else {
+            if (a == null && b == null) {
+                return null;
+            } else if (b == null) {
                 return a;
+            } else if (a == null) {
+                return b;
+            } else if (a.SourceIndex > b.SourceIndex) {
+                return a;
+            } else if (b.SourceIndex > a.SourceIndex) {
+                return b;
+            } else if (a.Utility >= b.Utility) {
+                return a;
+            } else {
+                return b;
             }
         }
 

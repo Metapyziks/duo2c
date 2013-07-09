@@ -6,6 +6,7 @@ namespace DUO2C.Parsers
     /// <summary>
     /// Exception thrown when a digit is expected but not found.
     /// </summary>
+    [ExceptionUtility(10)]
     public class DigitExpectedException : ParserException
     {
         /// <summary>

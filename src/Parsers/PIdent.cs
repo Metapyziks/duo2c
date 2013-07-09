@@ -6,6 +6,7 @@ namespace DUO2C.Parsers
     /// <summary>
     /// Exception thrown when an identifier is expected but not found.
     /// </summary>
+    [ExceptionUtility(30)]
     public class IdentifierExpectedException : ParserException
     {
         /// <summary>

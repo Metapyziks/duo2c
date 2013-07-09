@@ -6,6 +6,7 @@ namespace DUO2C.Parsers
     /// <summary>
     /// Exception thrown when a keyword is expected but not found.
     /// </summary>
+    [ExceptionUtility(20)]
     public class KeywordExpectedException : ParserException
     {
         /// <summary>

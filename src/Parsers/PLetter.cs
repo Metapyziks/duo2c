@@ -6,6 +6,7 @@ namespace DUO2C.Parsers
     /// <summary>
     /// Exception thrown when a letter is expected but not found.
     /// </summary>
+    [ExceptionUtility(10)]
     public class LetterExpectedException : ParserException
     {
         /// <summary>

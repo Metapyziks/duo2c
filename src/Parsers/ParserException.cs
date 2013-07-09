@@ -8,8 +8,31 @@ using System.Threading.Tasks;
 namespace DUO2C.Parsers
 {
     /// <summary>
+    /// Attribute used to compare the usefulness of syntax
+    /// parsing errors.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
+    public class ExceptionUtilityAttribute : Attribute
+    {
+        /// <summary>
+        /// The usefulness of this parser exception.
+        /// </summary>
+        public int Utility { get; private set; }
+
+        /// <summary>
+        /// Creates a new ExceptionUtility attribute.
+        /// </summary>
+        /// <param name="utility">The usefulness of this parser exception</param>
+        public ExceptionUtilityAttribute(int utility)
+        {
+            Utility = utility;
+        }
+    }
+
+    /// <summary>
     /// Base class for exceptions thrown by the parsing process.
     /// </summary>
+    [ExceptionUtility(0)]
     public class ParserException : Exception
     {
         /// <summary>
@@ -87,6 +110,17 @@ namespace DUO2C.Parsers
             get {
                 return String.Format("{0}({1}:{2}) {3} : {4}", SourcePath ?? "",
                     Line, Column, (InnerException ?? this).GetType().Name, MessageNoLocation);
+            }
+        }
+
+        /// <summary>
+        /// The usefulness of this parser exception.
+        /// </summary>
+        public int Utility
+        {
+            get {
+                var attrib = GetType().GetCustomAttributes(typeof(ExceptionUtilityAttribute), true)[0];
+                return ((ExceptionUtilityAttribute) attrib).Utility;
             }
         }
 

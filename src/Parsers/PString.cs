@@ -6,6 +6,7 @@ namespace DUO2C.Parsers
     /// <summary>
     /// Exception thrown when an string literal is expected but not found.
     /// </summary>
+    [ExceptionUtility(50)]
     public class StringExpectedException : ParserException
     {
         /// <summary>
