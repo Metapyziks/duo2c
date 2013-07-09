@@ -1,5 +1,23 @@
-﻿namespace DUO2C.Parsers
+﻿using System;
+
+namespace DUO2C.Parsers
 {
+    /// <summary>
+    /// Exception thrown when an string literal is expected but not found.
+    /// </summary>
+    public class StringExpectedException : ParserException
+    {
+        /// <summary>
+        /// Constructor to create a new digit expected exception, containing
+        /// information about the location in the source string that the exception
+        /// occurred.
+        /// </summary>
+        /// <param name="str">The source string being parsed</param>
+        /// <param name="index">Start index in the source string of the exception</param>
+        public StringExpectedException(String str, int index)
+            : base("String literal expected", str, index) { }
+    }
+
     /// <summary>
     /// Atomic parser that parses a string literal surrounded by either
     /// single or double quotes.
@@ -39,6 +57,15 @@
             int j = i;
             IsMatch(str, ref i);
             return new LeafNode(j, i - j, str.Substring(j + 1, i - j - 2), "string");
+        }
+
+        public override ParserException FindSyntaxErrors(string str, ref int i)
+        {
+            if (!IsMatch(str, ref i)) {
+                return new StringExpectedException(str, i);
+            } else {
+                return null;
+            }
         }
 
         public override string ToString()

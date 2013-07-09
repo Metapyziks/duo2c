@@ -106,6 +106,15 @@ namespace DUO2C.Parsers
             }
         }
 
+        public override ParserException FindSyntaxErrors(string str, ref int i)
+        {
+            int init = i;
+            SkipWhitespace(str, ref i);
+            var error = Parser.FindSyntaxErrors(str, ref i);
+            if (error == null) i = init;
+            return error;
+        }
+
         public override string ToString()
         {
             return Token.ToString();

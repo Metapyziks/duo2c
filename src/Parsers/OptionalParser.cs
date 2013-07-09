@@ -54,6 +54,11 @@ namespace DUO2C.Parsers
             }
         }
 
+        public override ParserException FindSyntaxErrors(string str, ref int i)
+        {
+            return Left.FindSyntaxErrors(str, ref i) ?? Right.FindSyntaxErrors(str, ref i);
+        }
+
         public override string ToString()
         {
             return (Left != null ? Left.ToString() + " " : "") + "[" + Right.ToString() + "]";

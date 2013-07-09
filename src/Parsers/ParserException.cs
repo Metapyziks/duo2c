@@ -10,7 +10,7 @@ namespace DUO2C.Parsers
     /// <summary>
     /// Base class for exceptions thrown by the parsing process.
     /// </summary>
-    class ParserException : Exception
+    public class ParserException : Exception
     {
         /// <summary>
         /// Utility function that finds the line and column number of a 

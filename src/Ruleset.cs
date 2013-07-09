@@ -257,9 +257,13 @@ namespace DUO2C
         /// <returns>Node tree representing the string's structure</returns>
         public ParseNode ParseString(String str)
         {
-            int i = 0;
-            var tree = _root.Parse(str, ref i);
-            return tree;
+            int i = 0, j = 0;
+            if (_root.IsMatch(str, ref i)) {
+                var tree = _root.Parse(str, ref j);
+                return tree;
+            } else {
+                throw _root.FindSyntaxErrors(str, ref j);
+            }
         }
 
         /// <summary>
@@ -269,15 +273,11 @@ namespace DUO2C
         /// <returns>Node tree representing the file's structure</returns>
         public ParseNode ParseFile(String filepath)
         {
-#if !DEBUG
             try {
-#endif
                 return ParseString(File.ReadAllText(filepath));
-#if !DEBUG
             } catch (ParserException e) {
                 throw new ParserException(e, filepath);
             }
-#endif
         }
 
         /// <summary>

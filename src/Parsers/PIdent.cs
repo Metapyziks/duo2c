@@ -1,5 +1,23 @@
-﻿namespace DUO2C.Parsers
+﻿using System;
+
+namespace DUO2C.Parsers
 {
+    /// <summary>
+    /// Exception thrown when an identifier is expected but not found.
+    /// </summary>
+    public class IdentifierExpectedException : ParserException
+    {
+        /// <summary>
+        /// Constructor to create a new digit expected exception, containing
+        /// information about the location in the source string that the exception
+        /// occurred.
+        /// </summary>
+        /// <param name="str">The source string being parsed</param>
+        /// <param name="index">Start index in the source string of the exception</param>
+        public IdentifierExpectedException(String str, int index)
+            : base("Identifier expected", str, index) { }
+    }
+
     /// <summary>
     /// Atomic parser that parses an identifier.
     /// </summary>
@@ -30,6 +48,15 @@
             int j = i;
             IsMatch(str, ref i);
             return new LeafNode(j, i - j, str.Substring(j, i - j), "ident");
+        }
+
+        public override ParserException FindSyntaxErrors(string str, ref int i)
+        {
+            if (!IsMatch(str, ref i)) {
+                return new IdentifierExpectedException(str, i);
+            } else {
+                return null;
+            }
         }
 
         public override string ToString()

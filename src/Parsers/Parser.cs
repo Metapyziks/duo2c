@@ -82,6 +82,15 @@ namespace DUO2C.Parsers
         /// <param name="i">Current index</param>
         /// <returns>Node representing the symbol parsed from the string</returns>
         public abstract ParseNode Parse(String str, ref int i);
+
+        /// <summary>
+        /// Attempts to find the first syntax error encountered using this parser
+        /// from the given index.
+        /// </summary>
+        /// <param name="str">String being parsed</param>
+        /// <param name="i">Current index</param>
+        /// <returns>First syntax error found, if any. Otherwise, null.</returns>
+        public abstract ParserException FindSyntaxErrors(String str, ref int i);
         
         /// <summary>
         /// Literally does nothing, used for aesthetics.

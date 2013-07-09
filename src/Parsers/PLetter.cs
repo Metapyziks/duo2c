@@ -1,5 +1,23 @@
-﻿namespace DUO2C.Parsers
+﻿using System;
+
+namespace DUO2C.Parsers
 {
+    /// <summary>
+    /// Exception thrown when a letter is expected but not found.
+    /// </summary>
+    public class LetterExpectedException : ParserException
+    {
+        /// <summary>
+        /// Constructor to create a new letter expected exception, containing
+        /// information about the location in the source string that the exception
+        /// occurred.
+        /// </summary>
+        /// <param name="str">The source string being parsed</param>
+        /// <param name="index">Start index in the source string of the exception</param>
+        public LetterExpectedException(String str, int index)
+            : base("Letter expected", str, index) { }
+    }
+
     /// <summary>
     /// Atomic parser that parses a single letter.
     /// </summary>
@@ -23,6 +41,15 @@
         public override ParseNode Parse(string str, ref int i)
         {
             return new LeafNode(i, 1, str[i++].ToString(), "letter");
+        }
+
+        public override ParserException FindSyntaxErrors(string str, ref int i)
+        {
+            if (!IsMatch(str, ref i)) {
+                return new LetterExpectedException(str, i);
+            } else {
+                return null;
+            }
         }
 
         public override string ToString()

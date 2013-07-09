@@ -1,4 +1,6 @@
-﻿namespace DUO2C.Parsers
+﻿using System;
+
+namespace DUO2C.Parsers
 {
     /// <summary>
     /// Parser that attempts two parsers, selecting the first
@@ -33,6 +35,22 @@
                 return Left.Parse(str, ref i);
             } else {
                 return Right.Parse(str, ref i);
+            }
+        }
+
+        public override ParserException FindSyntaxErrors(string str, ref int i)
+        {
+            int j = i;
+            var left = Left.FindSyntaxErrors(str, ref j);
+            int k = i;
+            var right = Right.FindSyntaxErrors(str, ref k);
+
+            if (j >= k) {
+                i = j;
+                return left;
+            } else {
+                i = k;
+                return right;
             }
         }
 

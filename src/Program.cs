@@ -18,19 +18,15 @@ namespace DUO2C
 #else
                 var ruleset = Ruleset.FromString(Properties.Resources.oberon2);
 #endif
-#if !DEBUG
                 try {
-#endif
                     var tree = ruleset.ParseFile(args[0]);
                     var outpath = Path.GetDirectoryName(args[0])
                         + Path.DirectorySeparatorChar + "output.txt";
                     File.WriteAllText(outpath, tree.ToString());
                     Console.WriteLine("Parsed successfully");
-#if !DEBUG
                 } catch (Parsers.ParserException e) {
                     Console.WriteLine(e.Message);
                 }
-#endif
             }
 
 #if DEBUG

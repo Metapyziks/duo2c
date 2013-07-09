@@ -5,7 +5,7 @@ namespace DUO2C.Parsers
     /// <summary>
     /// Exception thrown when a keyword is expected but not found.
     /// </summary>
-    class KeywordExpectedException : ParserException
+    public class KeywordExpectedException : ParserException
     {
         /// <summary>
         /// The keyword that was expected.
@@ -68,14 +68,19 @@ namespace DUO2C.Parsers
         public override ParseNode Parse(string str, ref int i)
         {
             SkipWhitespace(str, ref i);
-
-            if (i + Keyword.Length > str.Length || str.Substring(i, Keyword.Length) != Keyword) {
-                throw new KeywordExpectedException(Keyword, str, i);
-            }
                 
             i += Keyword.Length;
 
             return new LeafNode(i - Keyword.Length, Keyword.Length, Keyword, "keyword");
+        }
+
+        public override ParserException FindSyntaxErrors(string str, ref int i)
+        {
+            if (!IsMatch(str, ref i)) {
+                return new KeywordExpectedException(Keyword, str, i);
+            } else {
+                return null;
+            }
         }
 
         public override string ToString()
