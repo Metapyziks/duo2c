@@ -19,9 +19,11 @@
         /// <summary>
         /// Abstract constructor to create a new BinaryParser.
         /// </summary>
+        /// <param name="ruleset">The ruleset that will contain this parser</param>
         /// <param name="left">Parser to be utilised or tested first</param>
         /// <param name="right">Parser to be utilised or tested second</param>
-        public BinaryParser(Parser left, Parser right)
+        public BinaryParser(Ruleset ruleset, Parser left, Parser right)
+            : base(ruleset)
         {
             Left = left;
             Right = right;

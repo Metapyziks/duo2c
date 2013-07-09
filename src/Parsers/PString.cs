@@ -6,6 +6,13 @@
     /// </summary>
     public class PString : Parser
     {
+        /// <summary>
+        /// Constructor to create a new string literal parser.
+        /// </summary>
+        /// <param name="ruleset">The ruleset that will contain this parser</param>
+        public PString(Ruleset ruleset)
+            : base(ruleset) { }
+
         public override bool IsMatch(string str, ref int i)
         {
             int init = i;

@@ -11,10 +11,11 @@ namespace DUO2C.Parsers
         /// <summary>
         /// Constructor to create a new OptionalParser.
         /// </summary>
+        /// <param name="ruleset">The ruleset that will contain this parser</param>
         /// <param name="left">Parser to be matched first</param>
         /// <param name="right">Parser to optionally attempt second</param>
-        public OptionalParser(Parser left, Parser right)
-            : base(left, right) { }
+        public OptionalParser(Ruleset ruleset, Parser left, Parser right)
+            : base(ruleset, left, right) { }
 
         public override bool IsMatch(string str, ref int i)
         {

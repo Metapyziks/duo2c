@@ -32,7 +32,7 @@ namespace DUO2C
                     curr = list;
                 } else {
                     // Chain together multiple term lists in a disjunction
-                    curr = new EitherOrParser(curr, list);
+                    curr = new EitherOrParser(ruleset, curr, list);
                 }
             }
             return curr;
@@ -56,13 +56,13 @@ namespace DUO2C
                     curr = term;
                 } else if (term is OptionalParser && ((OptionalParser) term).Left == null) {
                     // If new term is optional, attach the previous terms to it
-                    curr = new OptionalParser(curr, ((OptionalParser) term).Right);
+                    curr = new OptionalParser(ruleset, curr, ((OptionalParser) term).Right);
                 } else if (term is OptionalRepeatParser && ((OptionalRepeatParser) term).Left == null) {
                     // If new term is a repeated optional, attach the previous terms to it
-                    curr = new OptionalRepeatParser(curr, ((OptionalRepeatParser) term).Right);
+                    curr = new OptionalRepeatParser(ruleset, curr, ((OptionalRepeatParser) term).Right);
                 } else {
                     // Concatenate new term with the previous ones
-                    curr = new ConcatParser(curr, term);
+                    curr = new ConcatParser(ruleset, curr, term);
                 }
             }
             return curr;
@@ -82,18 +82,18 @@ namespace DUO2C
                 var node = (LeafNode) nodes.First();
                 if (node.Token == "string") {
                     // String literals are keywords
-                    return new PKeyword(node.String);
+                    return ruleset.CreateKeywordParser(node.String);
                 } else if (node.Token == "ident") {
                     switch (node.String) {
                         // Check for various predefined parsers
                         case "string":
-                            return new PString();
+                            return ruleset.CreateStringParser();
                         case "letter":
-                            return new PLetter();
+                            return new PLetter(ruleset);
                         case "digit":
-                            return new PDigit();
+                            return new PDigit(ruleset);
                         case "ident":
-                            return new PIdent();
+                            return ruleset.CreateIdentifierParser();
 
                         default:
                             // Otherwise, look for a matching rule
@@ -101,7 +101,7 @@ namespace DUO2C
                             if (rule != null) return rule;
 
                             // If no matching rule is found, assume term is a keyword
-                            return new PKeyword(node.String);
+                            return ruleset.CreateKeywordParser(node.String);
                     }
                 } else {
                     // I can't think of anything that lead to here, but to be safe...
@@ -112,10 +112,10 @@ namespace DUO2C
                 var expr = BuildExpr(ruleset, ((BranchNode) nodes.ElementAt(1)).Children);
                 if (nodes.First().String == "[") {
                     // Square braces surround an optional expression
-                    return new OptionalParser(null, expr);
+                    return new OptionalParser(ruleset, null, expr);
                 } else if (nodes.First().String == "{") {
                     // Delorean braces surround a repeated optional expression
-                    return new OptionalRepeatParser(null, expr);
+                    return new OptionalRepeatParser(ruleset, null, expr);
                 } else {
                     // Otherwise, assume the expression is surrounded by normal braces
                     return expr;
@@ -133,41 +133,41 @@ namespace DUO2C
         {
             if (_sEBNFRuleset == null) {
                 // If the ruleset hasn't been constructed yet, do so now
-                _sEBNFRuleset = new Ruleset();
-
-                // Define some simple parsers to use
-                var ident = new PIdent();
-                var str = new PString();
+                var ruleset = _sEBNFRuleset = new Ruleset();
 
                 // Define keywords
-                var eq = new PKeyword("=");
-                var fs = new PKeyword(".");
-                var pipe = new PKeyword("|");
-                var flat = new PKeyword("*");
-                var pbOpen = new PKeyword("(");
-                var pbClose = new PKeyword(")");
-                var sbOpen = new PKeyword("[");
-                var sbClose = new PKeyword("]");
-                var cbOpen = new PKeyword("{");
-                var cbClose = new PKeyword("}");
+                var eq = ruleset.CreateKeywordParser("=");
+                var fs = ruleset.CreateKeywordParser(".");
+                var pipe = ruleset.CreateKeywordParser("|");
+                var flat = ruleset.CreateKeywordParser("*");
+                var pbOpen = ruleset.CreateKeywordParser("(");
+                var pbClose = ruleset.CreateKeywordParser(")");
+                var sbOpen = ruleset.CreateKeywordParser("[");
+                var sbClose = ruleset.CreateKeywordParser("]");
+                var cbOpen = ruleset.CreateKeywordParser("{");
+                var cbClose = ruleset.CreateKeywordParser("}");
+
+                // Define some simple parsers to use
+                var ident = ruleset.CreateIdentifierParser();
+                var str = ruleset.CreateStringParser();
                 
                 // Define tokens
-                var rSyntax = _sEBNFRuleset.CreateRuleToken("Syntax", false, true);
-                var rRule = _sEBNFRuleset.CreateRuleToken("Rule");
-                var rExpr = _sEBNFRuleset.CreateRuleToken("Expr");
-                var rList = _sEBNFRuleset.CreateRuleToken("List");
-                var rTerm = _sEBNFRuleset.CreateRuleToken("Term");
+                var rSyntax = ruleset.CreateTokenParser("Syntax", false, true);
+                var rRule = ruleset.CreateTokenParser("Rule");
+                var rExpr = ruleset.CreateTokenParser("Expr");
+                var rList = ruleset.CreateTokenParser("List");
+                var rTerm = ruleset.CreateTokenParser("Term");
 
                 // Define production rules
-                _sEBNFRuleset.Add(rSyntax,  null *(+rRule));
-                _sEBNFRuleset.Add(rRule,    +ident [+flat] +eq +rExpr +fs);
-                _sEBNFRuleset.Add(rExpr,    +rList *(+pipe +rList));
-                _sEBNFRuleset.Add(rList,    +rTerm *(+rTerm));
-                _sEBNFRuleset.Add(rTerm,    (+pbOpen +rExpr +pbClose)
-                                          | (+sbOpen +rExpr +sbClose)
-                                          | (+cbOpen +rExpr +cbClose)
-                                          | +str
-                                          | +ident);
+                ruleset.Add(rSyntax, null * (+rRule));
+                ruleset.Add(rRule, +ident[+flat] + eq + rExpr + fs);
+                ruleset.Add(rExpr, +rList * (+pipe + rList));
+                ruleset.Add(rList, +rTerm * (+rTerm));
+                ruleset.Add(rTerm, (+pbOpen + rExpr + pbClose)
+                                 | (+sbOpen +rExpr +sbClose)
+                                 | (+cbOpen +rExpr +cbClose)
+                                 | +str
+                                 | +ident);
             }
 
             return _sEBNFRuleset;
@@ -195,7 +195,7 @@ namespace DUO2C
 
                 // Tokens marked with a * are flattened into one node
                 bool flatten = children.ElementAt(1).String == "*";
-                var token = parsed.CreateRuleToken(name, flatten, first);
+                var token = parsed.CreateTokenParser(name, flatten, first);
 
                 // If the token is marked to be flattened, the expression will
                 // be one more node along in the array
@@ -249,12 +249,41 @@ namespace DUO2C
         /// are flattened to a single leaf node</param>
         /// <param name="root">If true, this token is used as the initial production rule</param>
         /// <returns>Parser that refers to this token</returns>
-        public PToken CreateRuleToken(String token, bool flatten = false, bool root = false)
+        public PToken CreateTokenParser(String token, bool flatten = false, bool root = false)
         {
             var rule = new PToken(this, token, flatten);
             _dict.Add(rule, null);
             if (root) _root = rule;
             return rule;
+        }
+
+        /// <summary>
+        /// Declares a keyword to be used in this ruleset's grammar, and returns a parser
+        /// for that keyword.
+        /// </summary>
+        /// <param name="keyword">Keyword to declare</param>
+        /// <returns>Parser for the given keyword</returns>
+        public PKeyword CreateKeywordParser(String keyword)
+        {
+            return new PKeyword(this, keyword);
+        }
+
+        /// <summary>
+        /// Creates a new parser that will match valid identifiers.
+        /// </summary>
+        /// <returns>Parser that matches identifiers</returns>
+        public PIdent CreateIdentifierParser()
+        {
+            return new PIdent(this);
+        }
+
+        /// <summary>
+        /// Creates a new parser that will match string literals.
+        /// </summary>
+        /// <returns>Parser that matches string literals</returns>
+        public PString CreateStringParser()
+        {
+            return new PString(this);
         }
 
         /// <summary>
@@ -269,7 +298,7 @@ namespace DUO2C
                 _dict[token] = parser;
             } else {
                 // If a production already exists, combine them in a disjunction
-                _dict[token] = new EitherOrParser(prev, parser);
+                _dict[token] = new EitherOrParser(this, prev, parser);
             }
         }
 

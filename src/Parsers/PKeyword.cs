@@ -15,8 +15,10 @@ namespace DUO2C.Parsers
         /// <summary>
         /// Creates a new keyword parser matching a specified keyword.
         /// </summary>
+        /// <param name="ruleset">The ruleset that will contain this parser</param>
         /// <param name="keyword">The keyword to match</param>
-        public PKeyword(String keyword)
+        public PKeyword(Ruleset ruleset, String keyword)
+            : base(ruleset)
         {
             Keyword = keyword;
         }

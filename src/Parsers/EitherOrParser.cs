@@ -9,10 +9,11 @@
         /// <summary>
         /// Constructor to create a new EitherOrParser.
         /// </summary>
+        /// <param name="ruleset">The ruleset that will contain this parser</param>
         /// <param name="left">Parser to be attempted first</param>
         /// <param name="right">Parser to be attempted second</param>
-        public EitherOrParser(Parser left, Parser right)
-            : base(left, right) { }
+        public EitherOrParser(Ruleset ruleset, Parser left, Parser right)
+            : base(ruleset, left, right) { }
 
         public override bool IsMatch(string str, ref int i)
         {

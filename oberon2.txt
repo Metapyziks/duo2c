@@ -1,5 +1,4 @@
-﻿CodeFile     = Module {Module}.
-Module       = MODULE ident ";" [ImportList] DeclSeq
+﻿Module       = MODULE ident ";" [ImportList] DeclSeq
                [BEGIN StatementSeq] END ident ".".
 ImportList   = IMPORT [ident ":="] ident {"," [ident ":="] ident} ";".
 DeclSeq      = { CONST {ConstDecl ";" } | TYPE {TypeDecl ";"}

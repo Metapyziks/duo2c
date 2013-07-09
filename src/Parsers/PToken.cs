@@ -28,7 +28,6 @@ namespace DUO2C.Parsers
             get { return Token.Length > 0 && char.IsUpper(Token[0]); }
         }
 
-        private Ruleset _ruleset;
         private Parser _parser;
 
         /// <summary>
@@ -39,7 +38,7 @@ namespace DUO2C.Parsers
         {
             get {
                 if (_parser == null) {
-                    _parser = _ruleset.GetReferencedParser(this);
+                    _parser = Ruleset.GetReferencedParser(this);
                 }
 
                 return _parser;
@@ -67,10 +66,10 @@ namespace DUO2C.Parsers
         /// <param name="flatten">Parsed structures will be flattened into
         /// a single leaf node if this value is true</param>
         public PToken(Ruleset ruleset, String token, bool flatten)
+            : base(ruleset)
         {
             _parser = null;
 
-            _ruleset = ruleset;
             Token = token;
             Flatten = flatten;
         }

@@ -49,6 +49,21 @@ namespace DUO2C.Parsers
         }
 
         /// <summary>
+        /// The ruleset that will contain this parser.
+        /// </summary>
+        protected Ruleset Ruleset { get; private set; }
+
+        /// <summary>
+        /// Abstract constructor to create a new Parser that will be contained
+        /// within a given ruleset.
+        /// </summary>
+        /// <param name="ruleset">The ruleset that will contain this parser</param>
+        public Parser(Ruleset ruleset)
+        {
+            Ruleset = ruleset;
+        }
+
+        /// <summary>
         /// Decides if the next immediate symbol in the given string matches the
         /// format specified by this parser. If a match is found, <paramref name="i"/>
         /// will be increased to point to the end of the match.
@@ -86,7 +101,7 @@ namespace DUO2C.Parsers
         /// <returns>A combined concatenation parser</returns>
         public static Parser operator +(Parser left, Parser right)
         {
-            return new ConcatParser(left, right);
+            return new ConcatParser(left.Ruleset, left, right);
         }
 
         /// <summary>
@@ -99,7 +114,7 @@ namespace DUO2C.Parsers
         /// <returns>A combined either-or parser</returns>
         public static Parser operator |(Parser left, Parser right)
         {
-            return new EitherOrParser(left, right);
+            return new EitherOrParser(left.Ruleset, left, right);
         }
 
         /// <summary>
@@ -110,7 +125,7 @@ namespace DUO2C.Parsers
         /// <returns>A combined right-optional parser</returns>
         public Parser this[Parser parser]
         {
-            get { return new OptionalParser(this, parser); }
+            get { return new OptionalParser(Ruleset, this, parser); }
         }
 
         /// <summary>
@@ -123,7 +138,7 @@ namespace DUO2C.Parsers
         /// <returns>A combined right-optional-repeat parser</returns>
         public static Parser operator *(Parser left, Parser right)
         {
-            return new OptionalRepeatParser(left, right);
+            return new OptionalRepeatParser((left ?? right).Ruleset, left, right);
         }
 
         public IEnumerator<Parser> GetEnumerator()

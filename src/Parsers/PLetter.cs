@@ -5,6 +5,13 @@
     /// </summary>
     public class PLetter : Parser
     {
+        /// <summary>
+        /// Constructor to create a new letter parser.
+        /// </summary>
+        /// <param name="ruleset">The ruleset that will contain this parser</param>
+        public PLetter(Ruleset ruleset)
+            : base(ruleset) { }
+
         public override bool IsMatch(string str, ref int i)
         {
             if (i < str.Length && char.IsLetter(str[i])) {

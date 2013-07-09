@@ -5,6 +5,13 @@
     /// </summary>
     public class PIdent : Parser
     {
+        /// <summary>
+        /// Constructor to create a new identifier parser.
+        /// </summary>
+        /// <param name="ruleset">The ruleset that will contain this parser</param>
+        public PIdent(Ruleset ruleset)
+            : base(ruleset) { }
+
         public override bool IsMatch(string str, ref int i)
         {
             int init = i;

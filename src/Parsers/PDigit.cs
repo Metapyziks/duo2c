@@ -5,6 +5,13 @@
     /// </summary>
     public class PDigit : Parser
     {
+        /// <summary>
+        /// Constructor to create a new digit parser.
+        /// </summary>
+        /// <param name="ruleset">The ruleset that will contain this parser</param>
+        public PDigit(Ruleset ruleset)
+            : base(ruleset) { }
+
         public override bool IsMatch(string str, ref int i)
         {
             if (i < str.Length && char.IsDigit(str[i])) {
