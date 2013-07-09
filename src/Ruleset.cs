@@ -226,15 +226,27 @@ namespace DUO2C
         }
 
         /// <summary>
+        /// Establishes whether a given string matches the grammar defined
+        /// by this ruleset.
+        /// </summary>
+        /// <param name="str">String to examine the validity of</param>
+        /// <returns>True if the given string is valid</returns>
+        public bool IsMatch(String str)
+        {
+            int i = 0;
+            return _root.IsMatch(str, ref i);
+        }
+
+        /// <summary>
         /// Attempt to parse the structure of a string using this Ruleset.
         /// </summary>
         /// <param name="str">String to parse the structure of</param>
         /// <returns>Node tree representing the string's structure</returns>
         public ParseNode Parse(String str)
         {
-            int i = 0, j = 0;
-            if (_root.IsMatch(str, ref j)) {
+            if (IsMatch(str)) {
                 // If the string is valid, parse it
+                int i = 0;
                 var tree = _root.Parse(str, ref i);
                 return tree;
             } else {
