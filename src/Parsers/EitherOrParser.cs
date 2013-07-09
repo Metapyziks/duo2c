@@ -40,20 +40,20 @@ namespace DUO2C.Parsers
             }
         }
 
-        protected override IEnumerable<int> FindSyntaxError(string str, int i)
+        protected override IEnumerable<int> FindSyntaxError(string str, int i, ParserExceptionWrapper wrapper)
         {
             ParserException left, right;
             var indices = Left.FindSyntaxError(str, i, out left).Union(Right.FindSyntaxError(str, i, out right));
-            foreach (int j in indices) {
-                yield return j;
-            }
+
             if (left != null && right != null) {
-                throw left.SourceIndex >= right.SourceIndex ? left : right;
+                wrapper.Payload = left.SourceIndex >= right.SourceIndex ? left : right;
             } else if (left != null) {
-                throw left;
+                wrapper.Payload = left;
             } else if (right != null) {
-                throw right;
+                wrapper.Payload = right;
             }
+
+            return indices;
         }
 
         public override string ToString()

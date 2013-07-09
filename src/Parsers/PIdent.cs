@@ -51,12 +51,12 @@ namespace DUO2C.Parsers
             return new LeafNode(j, i - j, str.Substring(j, i - j), "ident");
         }
 
-        protected override IEnumerable<int> FindSyntaxError(string str, int i)
+        protected override IEnumerable<int> FindSyntaxError(string str, int i, ParserExceptionWrapper wrapper)
         {
+            wrapper.Payload = new IdentifierExpectedException(str, i);
             if (IsMatch(str, ref i)) {
+                wrapper.Payload = null;
                 yield return i;
-            } else {
-                throw new IdentifierExpectedException(str, i);
             }
         }
 

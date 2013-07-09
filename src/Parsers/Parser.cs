@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -11,6 +12,11 @@ namespace DUO2C.Parsers
     /// </summary>
     public abstract class Parser : IEnumerable<Parser>
     {
+        protected class ParserExceptionWrapper
+        {
+            public ParserException Payload = null;
+        }
+
         private static IEnumerable<int> _sEmptyIndexArray = new int[0];
 
         /// <summary>
@@ -91,8 +97,9 @@ namespace DUO2C.Parsers
         /// </summary>
         /// <param name="str">String being parsed</param>
         /// <param name="i">Current index</param>
+        /// <param name="wrapper">Container for an exception if it is encountered</param>
         /// <returns>First syntax error found, if any. Otherwise, null.</returns>
-        protected abstract IEnumerable<int> FindSyntaxError(String str, int i);
+        protected abstract IEnumerable<int> FindSyntaxError(String str, int i, ParserExceptionWrapper wrapper);
 
         /// <summary>
         /// Attempts to find the first syntax error encountered using this parser
@@ -102,20 +109,16 @@ namespace DUO2C.Parsers
         /// <param name="str">String being parsed</param>
         /// <param name="i">Current index</param>
         /// <param name="exception">Outputted exception</param>
-        /// <returns></returns>
+        /// <returns>Enumerable over all valid indices.</returns>
         public IEnumerable<int> FindSyntaxError(String str, int i, out ParserException exception)
         {
-            exception = null;
-
-            List<int> list = new List<int>();
-            try {
-                foreach (var index in (FindSyntaxError(str, i) ?? _sEmptyIndexArray)) {
-                    list.Add(index);
-                }
-            } catch (ParserException e) {
-                exception = e;
+            ParserExceptionWrapper wrapper = new ParserExceptionWrapper();
+            var indices = FindSyntaxError(str, i, wrapper).ToArray() ?? _sEmptyIndexArray;
+            exception = wrapper.Payload;
+            if (exception == null && indices.Count() == 0) {
+                System.Diagnostics.Debugger.Break();
             }
-            return list;
+            return indices;
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DUO2C.Parsers
@@ -62,17 +63,14 @@ namespace DUO2C.Parsers
             }
         }
 
-        protected override IEnumerable<int> FindSyntaxError(string str, int i)
+        protected override IEnumerable<int> FindSyntaxError(string str, int i, ParserExceptionWrapper wrapper)
         {
-            ParserException error;
-
             SortedSet<int> indices = new SortedSet<int>();
             List<int> fresh;
             if (Left != null) {
-                fresh = Left.FindSyntaxError(str, i, out error).ToList();
+                fresh = Left.FindSyntaxError(str, i, out wrapper.Payload).ToList();
             } else {
                 fresh = new List<int> { i };
-                error = null;
             }
             List<int> stale = new List<int>();
 
@@ -87,14 +85,13 @@ namespace DUO2C.Parsers
                     foreach (int k in Right.FindSyntaxError(str, j, out innerError)) {
                         if (indices.Add(k)) fresh.Add(k);
                     }
-                    if (innerError != null && (error == null || innerError.SourceIndex > error.SourceIndex)) {
-                        error = innerError;
+                    if (innerError != null && (wrapper.Payload == null || innerError.SourceIndex > wrapper.Payload.SourceIndex)) {
+                        wrapper.Payload = innerError;
                     }
                 }
             }
 
-            foreach (int index in indices) yield return index;
-            if (error != null) throw error;
+            return indices;
         }
 
         public override string ToString()

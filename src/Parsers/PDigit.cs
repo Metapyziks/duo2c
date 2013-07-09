@@ -44,12 +44,12 @@ namespace DUO2C.Parsers
             return new LeafNode(i, 1, str[i++].ToString(), "digit");
         }
 
-        protected override IEnumerable<int> FindSyntaxError(string str, int i)
+        protected override IEnumerable<int> FindSyntaxError(string str, int i, ParserExceptionWrapper wrapper)
         {
             if (IsMatch(str, ref i)) {
                 yield return i;
             } else {
-                throw new DigitExpectedException(str, i);
+                wrapper.Payload = new DigitExpectedException(str, i);
             }
         }
 
