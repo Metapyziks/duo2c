@@ -3,6 +3,31 @@
 namespace DUO2C.Parsers
 {
     /// <summary>
+    /// Exception thrown when a keyword is expected but not found.
+    /// </summary>
+    class KeywordExpectedException : ParserException
+    {
+        /// <summary>
+        /// The keyword that was expected.
+        /// </summary>
+        public String Keyword { get; private set; }
+
+        /// <summary>
+        /// Constructor to create a new keyword expected exception, containing
+        /// information about the location in the source string that the exception
+        /// occurred, and the keyword that was expected.
+        /// </summary>
+        /// <param name="keyword">The keyword that was expected</param>
+        /// <param name="str">The source string being parsed</param>
+        /// <param name="index">Start index in the source string of the exception</param>
+        public KeywordExpectedException(String keyword, String str, int index)
+            : base(String.Format("Expected \"{0}\"", keyword), str, index)
+        {
+            Keyword = keyword;
+        }
+    }
+
+    /// <summary>
     /// Atomic parser that parses a specified keyword.
     /// </summary>
     public class PKeyword : Parser
@@ -43,7 +68,13 @@ namespace DUO2C.Parsers
         public override ParseNode Parse(string str, ref int i)
         {
             SkipWhitespace(str, ref i);
+
+            if (i + Keyword.Length > str.Length || str.Substring(i, Keyword.Length) != Keyword) {
+                throw new KeywordExpectedException(Keyword, str, i);
+            }
+                
             i += Keyword.Length;
+
             return new LeafNode(i - Keyword.Length, Keyword.Length, Keyword, "keyword");
         }
 

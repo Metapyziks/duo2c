@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DUO2C.src.Parsers
+namespace DUO2C.Parsers
 {
     /// <summary>
     /// Base class for exceptions thrown by the parsing process.
@@ -61,12 +61,6 @@ namespace DUO2C.src.Parsers
         public int SourceIndex { get; private set; }
 
         /// <summary>
-        /// Length of the symbol that caused this exception in the original
-        /// source string.
-        /// </summary>
-        public int Length { get; private set; }
-
-        /// <summary>
         /// Line number in the source string where this exception occurred.
         /// </summary>
         public int Line { get; private set; }
@@ -101,18 +95,17 @@ namespace DUO2C.src.Parsers
         /// about the location in the source string that the exception occurred.
         /// </summary>
         /// <param name="message">The message that describes the error</param>
-        /// <param name="src">The source string being parsed</param>
+        /// <param name="str">The source string being parsed</param>
         /// <param name="index">Start index in the source string of the exception</param>
         /// <param name="length">Length of the symbol that caused the exception</param>
-        public ParserException(String message, String src, int index, int length)
+        public ParserException(String message, String str, int index)
             : base(message)
         {
             SourcePath = null;
             SourceIndex = index;
-            Length = length;
 
             int line, column;
-            FindSymbolLocation(src, index, out line, out column);
+            FindSymbolLocation(str, index, out line, out column);
 
             Line = line;
             Column = column;
@@ -129,7 +122,6 @@ namespace DUO2C.src.Parsers
         {
             SourcePath = srcPath;
             SourceIndex = clone.SourceIndex;
-            Length = clone.Length;
             Line = clone.Line;
             Column = clone.Column;
         }

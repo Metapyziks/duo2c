@@ -82,7 +82,7 @@ namespace DUO2C.Parsers
         /// <param name="i">Current index</param>
         /// <returns>Node representing the symbol parsed from the string</returns>
         public abstract ParseNode Parse(String str, ref int i);
-
+        
         /// <summary>
         /// Literally does nothing, used for aesthetics.
         /// </summary>
