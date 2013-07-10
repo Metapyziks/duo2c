@@ -47,8 +47,10 @@ namespace DUO2C.Parsers
                 nodes.Add(left);
                 ParserException innerError;
                 foreach (var right in Right.Parse(str, left.EndIndex, whitespace, out innerError)) {
-                    // If left side is null, don't bother concatenating
-                    if (left.IsNull) {
+                    if (right.IsNull) {
+                        continue;
+                    } else if (left.IsNull) {
+                        // If left side is null, don't bother concatenating
                         nodes.Add(right);
                     } else if (left is BranchNode && left.Token == null) {
                         // If the parsed left hand side is a branch with no assigned token,

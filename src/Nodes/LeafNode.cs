@@ -10,6 +10,8 @@ namespace DUO2C.Nodes
         private String _string;
         public override String String { get { return _string; } }
 
+        public override bool IsNull { get { return false; } }
+
         /// <summary>
         /// Constructor for a new LeafNode.
         /// </summary>

@@ -33,65 +33,53 @@ namespace DUO2C.Parsers
             i = init; return false;
         }
 
-        public override ParseNode Parse(string str, ref int i, bool whitespace)
-        {
-            var left = Left == null ? null : Left.Parse(str, ref i, whitespace);
-
-            var right = new List<ParseNode>();
-
-            int init = i;
-            while (Right.IsMatch(str, ref i, whitespace)) {
-                i = init;
-                // Match the right parser as many times as possible
-                right.Add(Right.Parse(str, ref i, whitespace));
-                init = i;
-            }
-
-            if (left == null) {
-                if (right.Count() > 0) return new BranchNode(right);
-                return new BranchNode(i);
-            }
-
-            if (right.Count() == 0) return left;
-
-            if (left is BranchNode && left.Token == null) {
-                // If the parsed left hand side is a branch with no assigned token,
-                // append the parsed right hand side
-                return new BranchNode(((BranchNode) left).Children.Concat(right));
-            } else {
-                // Otherwise, create a new branch with only the matches parsed here
-                return new BranchNode(new ParseNode[] { left }.Concat(right));
-            }
-        }
-
-        public override IEnumerable<int> FindSyntaxError(string str, int i, bool whitespace, out ParserException exception)
+        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out ParserException exception)
         {
             exception = null;
-            SortedSet<int> indices = new SortedSet<int>();
-            List<int> fresh;
+            SortedSet<ParseNode> nodes = new SortedSet<ParseNode>();
+            List<ParseNode> fresh;
             if (Left != null) {
-                fresh = Left.FindSyntaxError(str, i, whitespace, out exception).ToList();
+                fresh = Left.Parse(str, i, whitespace, out exception).ToList();
             } else {
-                fresh = new List<int> { i };
+                fresh = new List<ParseNode> { new BranchNode(i) };
             }
-            List<int> stale = new List<int>();
+            List<ParseNode> stale = new List<ParseNode>();
 
-            foreach (int j in fresh) indices.Add(j);
+            foreach (var left in fresh) nodes.Add(left);
 
             while (fresh.Count > 0) {
                 stale = fresh;
-                fresh = new List<int>();
+                fresh = new List<ParseNode>();
 
-                foreach (int j in stale) {
+                foreach (var left in stale) {
                     ParserException innerError;
-                    foreach (int k in Right.FindSyntaxError(str, j, whitespace, out innerError)) {
-                        if (indices.Add(k)) fresh.Add(k);
+                    foreach (var right in Right.Parse(str, left.EndIndex, whitespace, out innerError)) {
+                        ParseNode next = null;
+                        if (right.IsNull) {
+                            continue;
+                        } else if (left.IsNull) {
+                            // If left side is null, don't bother concatenating
+                            next = right;
+                        } else if (left is BranchNode && left.Token == null) {
+                            // If the parsed left hand side is a branch with no assigned token,
+                            // append the parsed right hand side
+                            next = new BranchNode(((BranchNode) left).Children.Concat(new ParseNode[] { right }));
+                        } else if (right is BranchNode && right.Token == null) {
+                            // If the parsed right hand side is a branch with no assigned token,
+                            // prepend the parsed left hand side
+                            next = new BranchNode(new ParseNode[] { left }.Concat(((BranchNode) right).Children));
+                        } else {
+                            // Otherwise, create a new branch with only the two parsed results
+                            next = new BranchNode(new ParseNode[] { left, right });
+                        }
+                        fresh.Add(next);
+                        nodes.Add(next);
                     }
                     exception = ChooseParserException(exception, innerError);
                 }
             }
 
-            return indices;
+            return nodes;
         }
 
         public override string ToString()
