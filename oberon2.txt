@@ -39,7 +39,7 @@ ConstExpr    = Expr.
 Expr         = SimpleExpr [Relation SimpleExpr].
 SimpleExpr   = ["+" | "-"] Term {AddOp Term}.
 Term         = Factor {MulOp Factor}.
-Factor       = Number | character | string | NIL | Set | "(" Expr ")"
+Factor       = character | Number | string | NIL | Set | "(" Expr ")"
              | "~" Factor | Designator ["(" [ExprList] ")"].
 Set          = "{" [Element {"," Element}] "}".
 Element      = Expr [".." Expr].
@@ -56,7 +56,7 @@ Number       = real | integer.
 integer*     = digit {hexDigit} "H" | digit {digit}.
 real*        = digit {digit} "." {digit} [scaleFactor].
 scaleFactor  = ("E" | "D") ["+" | "-"] digit {digit}.
-hexDigit     = digit | "A" | "B" | "C" | "D" | "E" | "F".
+hexDigit     = "A" | "B" | "C" | "D" | "E" | "F" | digit.
 character*   = digit {hexDigit} "X".
 commentOpen  = "(*".
 commentClose = "*)".

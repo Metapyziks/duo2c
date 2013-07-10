@@ -62,7 +62,7 @@ namespace DUO2C.Parsers
                 }
             }
 
-            if (i < str.Length && char.IsLetter(str[i - 1]) && char.IsLetter(str[i])) {
+            if (whitespace && i < str.Length && char.IsLetterOrDigit(str[i - 1]) && char.IsLetterOrDigit(str[i])) {
                 // If the word being parsed hasn't ended, reject
                 i = init; return false;
             }
