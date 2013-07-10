@@ -17,7 +17,9 @@ namespace DUO2C
                 try {
                     var tree = ruleset.ParseFile(args[0]);
                     var outpath = Path.GetDirectoryName(args[0])
-                        + Path.DirectorySeparatorChar + "output.txt";
+                        + Path.DirectorySeparatorChar
+                        + Path.GetFileNameWithoutExtension(args[0])
+                        + ".syntax";
                     File.WriteAllText(outpath, tree.ToString());
                 } catch (Parsers.ParserException e) {
                     Console.ForegroundColor = ConsoleColor.Red;
