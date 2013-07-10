@@ -13,11 +13,7 @@ namespace DUO2C
                 Console.WriteLine("Usage: {0} <source-file-path>",
                     Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().MainModule.FileName));
             } else {
-#if LINUX
-                var ruleset = Ruleset.FromFile(File.ReadAllText("oberon2.txt"));
-#else
-                var ruleset = Ruleset.FromString(Properties.Resources.oberon2);
-#endif
+                var ruleset = Ruleset.FromString(File.ReadAllText("oberon2.txt"));
                 try {
                     var tree = ruleset.ParseFile(args[0]);
                     var outpath = Path.GetDirectoryName(args[0])

@@ -205,7 +205,7 @@ namespace DUO2C
             foreach (var rule in tree) {
                 var children = ((BranchNode) rule).Children;
                 var name = children.First().String;
-
+                
                 // Tokens marked with a * are flattened into one node
                 bool flatten = children.ElementAt(1).String == "*";
                 var token = parsed.CreateTokenParser(name, flatten, first);

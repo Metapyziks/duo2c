@@ -49,20 +49,17 @@ namespace DUO2C.Parsers
             while (i < str.Length) {
                 if (char.IsWhiteSpace(str[i])) {
                     ++i;
-                } else if (i < str.Length - 3 && str[i] == '(' && str[i + 1] == '*') {
+                } else {
                     // Comments are prefixed with "(*" and end with "*)"
                     int init = i;
                     SkipComment(str, ref i);
 
                     // Abort if no comments were skipped
                     if (init == i) return;
-                } else {
-                    // If we haven't moved anywhere, abort
-                    return;
                 }
             }
         }
-
+        
         Parser _commentOpenParser;
         Parser _commentCloseParser;
 
