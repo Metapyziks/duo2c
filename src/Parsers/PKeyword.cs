@@ -50,10 +50,10 @@ namespace DUO2C.Parsers
             Keyword = keyword;
         }
 
-        public override bool IsMatch(string str, ref int i)
+        public override bool IsMatch(string str, ref int i, bool whitespace)
         {
             int init = i;
-            SkipWhitespace(str, ref i);
+            if (whitespace) SkipWhitespace(str, ref i);
             for (int j = 0; j < Keyword.Length; ++i, ++j) {
                 if (i >= str.Length || str[i] != Keyword[j]) {
                     i = init; return false;
@@ -67,18 +67,16 @@ namespace DUO2C.Parsers
             return true;
         }
 
-        public override ParseNode Parse(string str, ref int i)
+        public override ParseNode Parse(string str, ref int i, bool whitespace)
         {
-            SkipWhitespace(str, ref i);
-                
+            if (whitespace) SkipWhitespace(str, ref i);
             i += Keyword.Length;
-
             return new LeafNode(i - Keyword.Length, Keyword.Length, Keyword, "keyword");
         }
 
-        public override IEnumerable<int> FindSyntaxError(string str, int i, out ParserException exception)
+        public override IEnumerable<int> FindSyntaxError(string str, int i, bool whitespace, out ParserException exception)
         {
-            if (IsMatch(str, ref i)) {
+            if (IsMatch(str, ref i, whitespace)) {
                 exception = null;
                 return new int[] { i };
             } else {

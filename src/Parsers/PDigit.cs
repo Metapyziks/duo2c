@@ -32,22 +32,25 @@ namespace DUO2C.Parsers
         public PDigit(Ruleset ruleset)
             : base(ruleset) { }
 
-        public override bool IsMatch(string str, ref int i)
+        public override bool IsMatch(string str, ref int i, bool whitespace)
         {
+            int init = i;
+            if (whitespace) SkipWhitespace(str, ref i);
             if (i < str.Length && char.IsDigit(str[i])) {
                 ++i; return true;
             }
-            return false;
+            i = init; return false;
         }
 
-        public override ParseNode Parse(string str, ref int i)
+        public override ParseNode Parse(string str, ref int i, bool whitespace)
         {
+            if (whitespace) SkipWhitespace(str, ref i);
             return new LeafNode(i, 1, str[i++].ToString(), "digit");
         }
 
-        public override IEnumerable<int> FindSyntaxError(string str, int i, out ParserException exception)
+        public override IEnumerable<int> FindSyntaxError(string str, int i, bool whitespace, out ParserException exception)
         {
-            if (IsMatch(str, ref i)) {
+            if (IsMatch(str, ref i, whitespace)) {
                 exception = null;
                 return new int[] { i };
             } else {

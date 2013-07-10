@@ -44,7 +44,7 @@ namespace DUO2C.Parsers
         /// </summary>
         /// <param name="str">String being parsed</param>
         /// <param name="i">Current index</param>
-        protected static void SkipWhitespace(String str, ref int i)
+        protected void SkipWhitespace(String str, ref int i)
         {
             while (i < str.Length) {
                 if (char.IsWhiteSpace(str[i])) {
@@ -63,17 +63,30 @@ namespace DUO2C.Parsers
             }
         }
 
-        static Regex _sCommentPattern = new Regex("\\(\\*.*\\*\\)");
+        Parser _commentOpenParser;
+        Parser _commentCloseParser;
 
         /// <summary>
         /// Utility function to ignore the next immediate comment.
         /// </summary>
         /// <param name="str">String being parsed</param>
         /// <param name="i">Current index</param>
-        static void SkipComment(String str, ref int i)
+        void SkipComment(String str, ref int i)
         {
-            var match = _sCommentPattern.Match(str, i);
-            if (match.Success && match.Index == i) i += match.Length;
+            _commentOpenParser = _commentOpenParser ?? Ruleset.GetTokenReference("commentOpen");
+            _commentCloseParser = _commentCloseParser ?? Ruleset.GetTokenReference("commentClose");
+
+            if (_commentOpenParser == null || _commentCloseParser == null) return;
+
+            int init = i;
+            if (!_commentOpenParser.IsMatch(str, ref i, false)) return;
+
+            while(!_commentCloseParser.IsMatch(str, ref i, false)) {
+                if (i >= str.Length) {
+                    i = init; return;
+                }
+                ++i;
+            }
         }
 
         /// <summary>
@@ -99,7 +112,7 @@ namespace DUO2C.Parsers
         /// <param name="str">String being parsed</param>
         /// <param name="i">Current index</param>
         /// <returns>True if the next symbol matches this parser's format</returns>
-        public abstract bool IsMatch(String str, ref int i);
+        public abstract bool IsMatch(String str, ref int i, bool whitespace);
 
         /// <summary>
         /// Parses the next immediate symbol from the given string, assuming it
@@ -109,7 +122,7 @@ namespace DUO2C.Parsers
         /// <param name="str">String being parsed</param>
         /// <param name="i">Current index</param>
         /// <returns>Node representing the symbol parsed from the string</returns>
-        public abstract ParseNode Parse(String str, ref int i);
+        public abstract ParseNode Parse(String str, ref int i, bool whitespace);
 
         /// <summary>
         /// Attempts to find the first syntax error encountered using this parser
@@ -120,7 +133,7 @@ namespace DUO2C.Parsers
         /// <param name="i">Current index</param>
         /// <param name="exception">Outputted exception</param>
         /// <returns>Enumerable over all valid indices.</returns>
-        public abstract IEnumerable<int> FindSyntaxError(String str, int i, out ParserException exception);
+        public abstract IEnumerable<int> FindSyntaxError(String str, int i, bool whitespace, out ParserException exception);
 
         /// <summary>
         /// Literally does nothing, used for aesthetics.

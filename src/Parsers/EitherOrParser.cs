@@ -19,31 +19,32 @@ namespace DUO2C.Parsers
         public EitherOrParser(Ruleset ruleset, Parser left, Parser right)
             : base(ruleset, left, right) { }
 
-        public override bool IsMatch(string str, ref int i)
+        public override bool IsMatch(string str, ref int i, bool whitespace)
         {
             int init = i;
-            if (Left.IsMatch(str, ref i)) return true;
+            if (Left.IsMatch(str, ref i, whitespace)) return true;
 
             // Reset index before attempting second parser
             i = init;
-            if (Right.IsMatch(str, ref i)) return true;
+            if (Right.IsMatch(str, ref i, whitespace)) return true;
             i = init; return false;
         }
 
-        public override ParseNode Parse(string str, ref int i)
+        public override ParseNode Parse(string str, ref int i, bool whitespace)
         {
             int j = i;
-            if (Left.IsMatch(str, ref j)) {
-                return Left.Parse(str, ref i);
+            if (Left.IsMatch(str, ref j, whitespace)) {
+                return Left.Parse(str, ref i, whitespace);
             } else {
-                return Right.Parse(str, ref i);
+                return Right.Parse(str, ref i, whitespace);
             }
         }
 
-        public override IEnumerable<int> FindSyntaxError(string str, int i, out ParserException exception)
+        public override IEnumerable<int> FindSyntaxError(string str, int i, bool whitespace, out ParserException exception)
         {
             ParserException right;
-            var indices = Left.FindSyntaxError(str, i, out exception).Union(Right.FindSyntaxError(str, i, out right));
+            var indices = Left.FindSyntaxError(str, i, whitespace, out exception)
+                .Union(Right.FindSyntaxError(str, i, whitespace, out right));
             exception = ChooseParserException(exception, right);
             return indices;
         }

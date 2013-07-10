@@ -50,7 +50,7 @@ namespace DUO2C.Parsers
         /// If true, leading whitespace will be ignored when matching
         /// this token.
         /// </summary>
-        public bool IgnoreLeadingWhitespace
+        public bool IgnoreWhitespace
         {
             get { return Token.Length > 0 && char.IsUpper(Token[0]); }
         }
@@ -101,24 +101,24 @@ namespace DUO2C.Parsers
             Flatten = flatten;
         }
 
-        public override bool IsMatch(string str, ref int i)
+        public override bool IsMatch(string str, ref int i, bool whitespace)
         {
             // Trigger matching event
             if (MatchTested != null) MatchTested(this, new EventArgs());
 
             int init = i;
-            SkipWhitespace(str, ref i);
-            if (Parser.IsMatch(str, ref i)) return true;
+            if (IgnoreWhitespace) SkipWhitespace(str, ref i);
+            if (Parser.IsMatch(str, ref i, IgnoreWhitespace)) return true;
             i = init; return false;
         }
 
-        public override ParseNode Parse(string str, ref int i)
+        public override ParseNode Parse(string str, ref int i, bool whitespace)
         {
             // Trigger parsing event
             if (Parsed != null) Parsed(this, new EventArgs());
 
-            SkipWhitespace(str, ref i);
-            var tree = Parser.Parse(str, ref i);
+            if (IgnoreWhitespace) SkipWhitespace(str, ref i);
+            var tree = Parser.Parse(str, ref i, IgnoreWhitespace);
             if (Flatten) {
                 return new LeafNode(tree.SourceIndex, tree.Length, tree.String, Token);
             } else if (tree.Token == null) {
@@ -133,9 +133,10 @@ namespace DUO2C.Parsers
             }
         }
 
-        public override IEnumerable<int> FindSyntaxError(string str, int i, out ParserException exception)
+        public override IEnumerable<int> FindSyntaxError(string str, int i, bool whitespace, out ParserException exception)
         {
-            var indices = Parser.FindSyntaxError(str, i, out exception);
+            if (IgnoreWhitespace) SkipWhitespace(str, ref i);
+            var indices = Parser.FindSyntaxError(str, i, IgnoreWhitespace, out exception);
             if (indices.Count() == 0) {
                 exception = ChooseParserException(exception, new TokenExpectedException(Token, str, i));
             }

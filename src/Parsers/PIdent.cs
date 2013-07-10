@@ -32,10 +32,10 @@ namespace DUO2C.Parsers
         public PIdent(Ruleset ruleset)
             : base(ruleset) { }
 
-        public override bool IsMatch(string str, ref int i)
+        public override bool IsMatch(string str, ref int i, bool whitespace)
         {
             int init = i;
-            SkipWhitespace(str, ref i);
+            if (whitespace) SkipWhitespace(str, ref i);
             int j = 0;
             while (i < str.Length && (char.IsLetter(str[i]) || (j > 0 && char.IsDigit(str[i])))) {
                 ++i; ++j;
@@ -44,17 +44,17 @@ namespace DUO2C.Parsers
             i = init; return false;
         }
 
-        public override ParseNode Parse(string str, ref int i)
+        public override ParseNode Parse(string str, ref int i, bool whitespace)
         {
-            SkipWhitespace(str, ref i);
+            if (whitespace) SkipWhitespace(str, ref i);
             int j = i;
-            IsMatch(str, ref i);
+            IsMatch(str, ref i, whitespace);
             return new LeafNode(j, i - j, str.Substring(j, i - j), "ident");
         }
 
-        public override IEnumerable<int> FindSyntaxError(string str, int i, out ParserException exception)
+        public override IEnumerable<int> FindSyntaxError(string str, int i, bool whitespace, out ParserException exception)
         {
-            if (IsMatch(str, ref i)) {
+            if (IsMatch(str, ref i, whitespace)) {
                 exception = null;
                 return new int[] { i };
             } else {

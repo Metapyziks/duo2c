@@ -17,17 +17,17 @@ namespace DUO2C.Parsers
         public ConcatParser(Ruleset ruleset, Parser left, Parser right)
             : base(ruleset, left, right) { }
 
-        public override bool IsMatch(string str, ref int i)
+        public override bool IsMatch(string str, ref int i, bool whitespace)
         {
             int init = i;
-            if (Left.IsMatch(str, ref i) && Right.IsMatch(str, ref i)) return true;
+            if (Left.IsMatch(str, ref i, whitespace) && Right.IsMatch(str, ref i, whitespace)) return true;
             i = init; return false;
         }
 
-        public override ParseNode Parse(string str, ref int i)
+        public override ParseNode Parse(string str, ref int i, bool whitespace)
         {
-            var left = Left.Parse(str, ref i);
-            var right = Right.Parse(str, ref i);
+            var left = Left.Parse(str, ref i, whitespace);
+            var right = Right.Parse(str, ref i, whitespace);
 
             // If either side is null, don't bother concatenating
             if (left == null) return right;
@@ -43,12 +43,12 @@ namespace DUO2C.Parsers
             }
         }
 
-        public override IEnumerable<int> FindSyntaxError(string str, int i, out ParserException exception)
+        public override IEnumerable<int> FindSyntaxError(string str, int i, bool whitespace, out ParserException exception)
         {
             SortedSet<int> indices = new SortedSet<int>();
-            foreach (int j in Left.FindSyntaxError(str, i, out exception)) {
+            foreach (int j in Left.FindSyntaxError(str, i, whitespace, out exception)) {
                 ParserException innerError;
-                foreach (int k in Right.FindSyntaxError(str, j, out innerError)) {
+                foreach (int k in Right.FindSyntaxError(str, j, whitespace, out innerError)) {
                     indices.Add(k);
                 }
                 exception = ChooseParserException(exception, innerError);

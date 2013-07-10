@@ -247,7 +247,7 @@ namespace DUO2C
         public bool IsMatch(String str)
         {
             int i = 0;
-            return _root.IsMatch(str, ref i);
+            return _root.IsMatch(str, ref i, true);
         }
 
         /// <summary>
@@ -257,13 +257,13 @@ namespace DUO2C
         /// <returns>Node tree representing the string's structure</returns>
         public ParseNode ParseString(String str)
         {
-            int i = 0, j = 0;
-            if (_root.IsMatch(str, ref i)) {
-                var tree = _root.Parse(str, ref j);
+            if (IsMatch(str)) {
+                int i = 0;
+                var tree = _root.Parse(str, ref i, true);
                 return tree;
             } else {
                 ParserException error;
-                _root.FindSyntaxError(str, 0, out error);
+                _root.FindSyntaxError(str, 0, true, out error);
                 throw error;
             }
         }

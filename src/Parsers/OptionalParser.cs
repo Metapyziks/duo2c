@@ -18,12 +18,12 @@ namespace DUO2C.Parsers
         public OptionalParser(Ruleset ruleset, Parser left, Parser right)
             : base(ruleset, left, right) { }
 
-        public override bool IsMatch(string str, ref int i)
+        public override bool IsMatch(string str, ref int i, bool whitespace)
         {
             int init = i;
-            if (Left == null || Left.IsMatch(str, ref i)) {
+            if (Left == null || Left.IsMatch(str, ref i, whitespace)) {
                 init = i;
-                if (Right.IsMatch(str, ref i)) return true;
+                if (Right.IsMatch(str, ref i, whitespace)) return true;
 
                 // Reset index to before the last match was attempted
                 i = init; return true;
@@ -31,18 +31,18 @@ namespace DUO2C.Parsers
             i = init; return false;
         }
 
-        public override ParseNode Parse(string str, ref int i)
+        public override ParseNode Parse(string str, ref int i, bool whitespace)
         {
-            var left = (Left == null) ? null : Left.Parse(str, ref i);
+            var left = (Left == null) ? null : Left.Parse(str, ref i, whitespace);
 
             int j = i;
-            if (!Right.IsMatch(str, ref j)) {
+            if (!Right.IsMatch(str, ref j, whitespace)) {
                 // If the optional parser doesn't match, just
                 // return the left result (may be null)
                 return left;
             }
 
-            var right = Right.Parse(str, ref i);
+            var right = Right.Parse(str, ref i, whitespace);
             if (left == null) return right;
 
             if (left is BranchNode && left.Token == null) {
@@ -55,20 +55,20 @@ namespace DUO2C.Parsers
             }
         }
 
-        public override IEnumerable<int> FindSyntaxError(string str, int i, out ParserException exception)
+        public override IEnumerable<int> FindSyntaxError(string str, int i, bool whitespace, out ParserException exception)
         {
             exception = null;
             SortedSet<int> indices = new SortedSet<int>();
             List<int> left;
             if (Left != null) {
-                left = Left.FindSyntaxError(str, i, out exception).ToList();
+                left = Left.FindSyntaxError(str, i, whitespace, out exception).ToList();
             } else {
                 left = new List<int> { i };
             }
             foreach (int j in left) {
                 indices.Add(j);
                 ParserException innerError;
-                foreach (int k in Right.FindSyntaxError(str, j, out innerError)) {
+                foreach (int k in Right.FindSyntaxError(str, j, whitespace, out innerError)) {
                     indices.Add(k);
                 }
                 exception = ChooseParserException(exception, innerError);

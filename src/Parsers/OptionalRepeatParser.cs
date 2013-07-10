@@ -19,12 +19,12 @@ namespace DUO2C.Parsers
         public OptionalRepeatParser(Ruleset ruleset, Parser left, Parser right)
             : base(ruleset, left, right) { }
 
-        public override bool IsMatch(string str, ref int i)
+        public override bool IsMatch(string str, ref int i, bool whitespace)
         {
             int init = i;
-            if (Left == null || Left.IsMatch(str, ref i)) {
+            if (Left == null || Left.IsMatch(str, ref i, whitespace)) {
                 init = i;
-                while (Right.IsMatch(str, ref i)) init = i;
+                while (Right.IsMatch(str, ref i, whitespace)) init = i;
 
                 // Reset index to before the last match was attempted
                 i = init; return true;
@@ -32,17 +32,17 @@ namespace DUO2C.Parsers
             i = init; return false;
         }
 
-        public override ParseNode Parse(string str, ref int i)
+        public override ParseNode Parse(string str, ref int i, bool whitespace)
         {
-            var left = Left == null ? null : Left.Parse(str, ref i);
+            var left = Left == null ? null : Left.Parse(str, ref i, whitespace);
 
             var right = new List<ParseNode>();
 
             int init = i;
-            while (Right.IsMatch(str, ref i)) {
+            while (Right.IsMatch(str, ref i, whitespace)) {
                 i = init;
                 // Match the right parser as many times as possible
-                right.Add(Right.Parse(str, ref i));
+                right.Add(Right.Parse(str, ref i, whitespace));
                 init = i;
             }
 
@@ -63,13 +63,13 @@ namespace DUO2C.Parsers
             }
         }
 
-        public override IEnumerable<int> FindSyntaxError(string str, int i, out ParserException exception)
+        public override IEnumerable<int> FindSyntaxError(string str, int i, bool whitespace, out ParserException exception)
         {
             exception = null;
             SortedSet<int> indices = new SortedSet<int>();
             List<int> fresh;
             if (Left != null) {
-                fresh = Left.FindSyntaxError(str, i, out exception).ToList();
+                fresh = Left.FindSyntaxError(str, i, whitespace, out exception).ToList();
             } else {
                 fresh = new List<int> { i };
             }
@@ -83,7 +83,7 @@ namespace DUO2C.Parsers
 
                 foreach (int j in stale) {
                     ParserException innerError;
-                    foreach (int k in Right.FindSyntaxError(str, j, out innerError)) {
+                    foreach (int k in Right.FindSyntaxError(str, j, whitespace, out innerError)) {
                         if (indices.Add(k)) fresh.Add(k);
                     }
                     exception = ChooseParserException(exception, innerError);

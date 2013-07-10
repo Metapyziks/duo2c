@@ -33,10 +33,10 @@ namespace DUO2C.Parsers
         public PString(Ruleset ruleset)
             : base(ruleset) { }
 
-        public override bool IsMatch(string str, ref int i)
+        public override bool IsMatch(string str, ref int i, bool whitespace)
         {
             int init = i;
-            SkipWhitespace(str, ref i);
+            if (whitespace) SkipWhitespace(str, ref i);
             if (i < str.Length && (str[i] == '"' || str[i] == '\'')) {
                 char startChar = str[i];
                 while (++i < str.Length) {
@@ -53,17 +53,17 @@ namespace DUO2C.Parsers
         }
 
         // TODO: Add proper support for escape characters
-        public override ParseNode Parse(string str, ref int i)
+        public override ParseNode Parse(string str, ref int i, bool whitespace)
         {
-            SkipWhitespace(str, ref i);
+            if (whitespace) SkipWhitespace(str, ref i);
             int j = i;
-            IsMatch(str, ref i);
+            IsMatch(str, ref i, whitespace);
             return new LeafNode(j, i - j, str.Substring(j + 1, i - j - 2), "string");
         }
 
-        public override IEnumerable<int> FindSyntaxError(string str, int i, out ParserException exception)
+        public override IEnumerable<int> FindSyntaxError(string str, int i, bool whitespace, out ParserException exception)
         {
-            if (IsMatch(str, ref i)) {
+            if (IsMatch(str, ref i, whitespace)) {
                 exception = null;
                 return new int[] { i };
             } else {
