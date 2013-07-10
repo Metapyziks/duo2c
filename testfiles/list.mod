@@ -12,13 +12,16 @@
     (*** declare procedures ***)
 
     PROCEDURE (l : List) Add* (v : Integer);
+    VAR
+        x : Integer;
     BEGIN
+        x := 34.8 + 12 / 2.6;
         IF l = NIL THEN
             NEW(l);             (* create record instance *)
-            l.value := v
+            l.value := v;
         ELSE
-            l.next.Add(v)      (* recursive call to .add(n) *)
-        END
+            l.next.Add(v);      (* recursive call to .add(n) *)
+        END;
     END Add;
 
     PROCEDURE (l : List) Get* () : Integer;
@@ -26,12 +29,12 @@
         v : Integer;
     BEGIN
         IF l = NIL THEN
-            RETURN 0           (* .get() must always return an INTEGER *)
+            RETURN 0;           (* .get() must always return an INTEGER *)
         ELSE
             v := l.value;       (* this line will crash if l is NIL *)
             l := l.next;
-            RETURN v
-        END
+            RETURN v;
+        END;
     END Get;
 
 END Lists.

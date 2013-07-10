@@ -18,7 +18,7 @@ Type         = ARRAY [ConstExpr {"," ConstExpr}] OF Type
              | PROCEDURE [FormalPars]
              | Qualident.
 FieldList    = IdentList ":" Type.
-StatementSeq = Statement {";" Statement}.
+StatementSeq = Statement {";" Statement} [";"].
 Statement    = IF Expr THEN StatementSeq {ELSIF Expr THEN StatementSeq}
                [ELSE StatementSeq] END 
              | CASE Expr OF Case {"|" Case} [ELSE StatementSeq] END 
@@ -39,8 +39,8 @@ ConstExpr    = Expr.
 Expr         = SimpleExpr [Relation SimpleExpr].
 SimpleExpr   = ["+" | "-"] Term {AddOp Term}.
 Term         = Factor {MulOp Factor}.
-Factor       = Designator ["(" [ExprList] ")"] | Number | character | string
-             | NIL | Set | "(" Expr ")" | "~" Factor.
+Factor       = Number | character | string | NIL | Set | "(" Expr ")"
+             | "~" Factor | Designator ["(" [ExprList] ")"].
 Set          = "{" [Element {"," Element}] "}".
 Element      = Expr [".." Expr].
 Relation     = "=" | "#" | "<" | "<=" | ">" | ">=" | IN | IS.
