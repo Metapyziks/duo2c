@@ -23,9 +23,10 @@ namespace DUO2C.Nodes
             _string = str;
         }
 
-        public override String ToString(string indent)
+        public override String ToString(String indent)
         {
-            return String.Format("{0}<{1} index=\"{2}\" length=\"{3}\">{4}</{1}>", indent, Token, SourceIndex, Length, _string);
+            return String.Format("{0}<{1} index=\"{2}\" length=\"{3}\">{4}</{1}>",
+                indent, Token, SourceIndex, Length, _string);
         }
     }
 }
