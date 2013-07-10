@@ -20,12 +20,22 @@ namespace DUO2C.Nodes
         /// <summary>
         /// Start index of this node in the original source string.
         /// </summary>
-        public int SourceIndex { get; private set; }
+        public int StartIndex { get; private set; }
 
         /// <summary>
         /// Length of this node in the original source string.
         /// </summary>
         public int Length { get; private set; }
+
+        /// <summary>
+        /// End index of this node in the original source string.
+        /// </summary>
+        public int EndIndex { get { return StartIndex + Length; } }
+
+        /// <summary>
+        /// Gets a value representing if this null is useless.
+        /// </summary>
+        public abstract bool IsNull { get; }
 
         /// <summary>
         /// Abstract constructor for a new ParseNode.
@@ -35,7 +45,7 @@ namespace DUO2C.Nodes
         /// <param name="token">String identifying the type of this node</param>
         public ParseNode(int index, int length, String token = null)
         {
-            SourceIndex = index;
+            StartIndex = index;
             Length = length;
 
             Token = token;

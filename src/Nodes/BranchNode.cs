@@ -17,7 +17,7 @@ namespace DUO2C.Nodes
         /// <returns>Source index of the list</returns>
         static int GetBranchIndex(IEnumerable<ParseNode> children)
         {
-            return children.First().SourceIndex;
+            return children.First().StartIndex;
         }
 
         /// <summary>
@@ -27,13 +27,18 @@ namespace DUO2C.Nodes
         /// <returns>Source length of the list</returns>
         static int GetBranchLength(IEnumerable<ParseNode> children)
         {
-            return children.Last().SourceIndex - children.First().SourceIndex + children.Last().Length;
+            return children.Last().StartIndex - children.First().StartIndex + children.Last().Length;
         }
 
         /// <summary>
         /// Collection of child nodes within this node.
         /// </summary>
         public IEnumerable<ParseNode> Children { get; private set; }
+
+        public override bool IsNull
+        {
+            get { return Token == null && Children.Count() == 0; }
+        }
 
         public override String String
         {
@@ -73,7 +78,7 @@ namespace DUO2C.Nodes
         {
             var nl = Environment.NewLine;
             var nextIndent = indent + "  ";
-            return String.Format("{0}<{1} index=\"{2}\" length=\"{3}\">", indent, Token, SourceIndex, Length)
+            return String.Format("{0}<{1} index=\"{2}\" length=\"{3}\">", indent, Token, StartIndex, Length)
                 + nl + String.Join(nl, Children.Select(x => (x != null ? x.ToString(nextIndent) : "null")))
                 + nl + indent + String.Format("</{0}>", Token);
         }

@@ -31,23 +31,13 @@ namespace DUO2C.Parsers
             i = init; return false;
         }
 
-        public override ParseNode Parse(string str, ref int i, bool whitespace)
-        {
-            int j = i;
-            if (Left.IsMatch(str, ref j, whitespace)) {
-                return Left.Parse(str, ref i, whitespace);
-            } else {
-                return Right.Parse(str, ref i, whitespace);
-            }
-        }
-
-        public override IEnumerable<int> FindSyntaxError(string str, int i, bool whitespace, out ParserException exception)
+        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out ParserException exception)
         {
             ParserException right;
-            var indices = Left.FindSyntaxError(str, i, whitespace, out exception)
-                .Union(Right.FindSyntaxError(str, i, whitespace, out right));
+            var nodes = Left.Parse(str, i, whitespace, out exception)
+                .Union(Right.Parse(str, i, whitespace, out right));
             exception = ChooseParserException(exception, right);
-            return indices;
+            return nodes;
         }
 
         public override string ToString()

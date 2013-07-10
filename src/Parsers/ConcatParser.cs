@@ -26,36 +26,33 @@ namespace DUO2C.Parsers
             i = init; return false;
         }
 
-        public override ParseNode Parse(string str, ref int i, bool whitespace)
+        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out ParserException exception)
         {
-            var left = Left.Parse(str, ref i, whitespace);
-            var right = Right.Parse(str, ref i, whitespace);
-
-            // If either side is null, don't bother concatenating
-            if (left == null) return right;
-            if (right == null) return left;
-
-            if (left is BranchNode && left.Token == null) {
-                // If the parsed left hand side is a branch with no assigned token,
-                // append the parsed right hand side
-                return new BranchNode(((BranchNode) left).Children.Concat(new ParseNode[] { right }));
-            } else {
-                // Otherwise, create a new branch with only the two parsed results
-                return new BranchNode(new ParseNode[] { left, right });
-            }
-        }
-
-        public override IEnumerable<int> FindSyntaxError(string str, int i, bool whitespace, out ParserException exception)
-        {
-            SortedSet<int> indices = new SortedSet<int>();
-            foreach (int j in Left.FindSyntaxError(str, i, whitespace, out exception)) {
+            SortedSet<ParseNode> nodes = new SortedSet<ParseNode>(NodeComparer);
+            foreach (var left in Left.Parse(str, i, whitespace, out exception)) {
                 ParserException innerError;
-                foreach (int k in Right.FindSyntaxError(str, j, whitespace, out innerError)) {
-                    indices.Add(k);
+                foreach (var right in Right.Parse(str, left.EndIndex, whitespace, out innerError)) {
+                    // If either side is null, don't bother concatenating
+                    if (left.IsNull) {
+                        nodes.Add(right);
+                    } else if (right.IsNull) {
+                        nodes.Add(left);
+                    } else if (left is BranchNode && left.Token == null) {
+                        // If the parsed left hand side is a branch with no assigned token,
+                        // append the parsed right hand side
+                        nodes.Add(new BranchNode(((BranchNode) left).Children.Concat(new ParseNode[] { right })));
+                    } else if (right is BranchNode && right.Token == null) {
+                        // If the parsed right hand side is a branch with no assigned token,
+                        // prepend the parsed left hand side
+                        nodes.Add(new BranchNode(new ParseNode[] { left }.Concat(((BranchNode) right).Children)));
+                    } else {
+                        // Otherwise, create a new branch with only the two parsed results
+                        nodes.Add(new BranchNode(new ParseNode[] { left, right }));
+                    }
                 }
                 exception = ChooseParserException(exception, innerError);
             }
-            return indices;
+            return nodes;
         }
 
         public override string ToString()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 
 using DUO2C.Nodes;
@@ -12,7 +13,10 @@ namespace DUO2C.Parsers
     /// </summary>
     public abstract class Parser : IEnumerable<Parser>
     {
-        protected static IEnumerable<int> EmptyIndexArray = new int[0];
+        protected static readonly IEnumerable<int> EmptyIndexArray = new int[0];
+        protected static readonly IComparer<ParseNode> NodeComparer = Comparer<ParseNode>.Create((a, b) => {
+            return a.EndIndex - b.EndIndex;
+        });
 
         /// <summary>
         /// Utility function that compares two exceptions and returns the most useful.
@@ -108,29 +112,21 @@ namespace DUO2C.Parsers
         /// </summary>
         /// <param name="str">String being parsed</param>
         /// <param name="i">Current index</param>
+        /// <param name="whitespace">Specifies if whitespace should be ignored</param>
         /// <returns>True if the next symbol matches this parser's format</returns>
         public abstract bool IsMatch(String str, ref int i, bool whitespace);
 
         /// <summary>
-        /// Parses the next immediate symbol from the given string, assuming it
-        /// matches the parser's format, and increases <paramref name="i"/> to point
-        /// to the end of the match.
+        /// Parses the next immediate symbol from the given string in as many valid
+        /// ways as possible, and also outputs the syntax error that is furthest into
+        /// the string that it finds.
         /// </summary>
         /// <param name="str">String being parsed</param>
         /// <param name="i">Current index</param>
-        /// <returns>Node representing the symbol parsed from the string</returns>
-        public abstract ParseNode Parse(String str, ref int i, bool whitespace);
-
-        /// <summary>
-        /// Attempts to find the first syntax error encountered using this parser
-        /// from the given index. Also returns an enumerable containing all possible
-        /// valid positions the parser may be at after parsing.
-        /// </summary>
-        /// <param name="str">String being parsed</param>
-        /// <param name="i">Current index</param>
+        /// <param name="whitespace">Specifies if whitespace should be ignored</param>
         /// <param name="exception">Outputted exception</param>
-        /// <returns>Enumerable over all valid indices.</returns>
-        public abstract IEnumerable<int> FindSyntaxError(String str, int i, bool whitespace, out ParserException exception);
+        /// <returns>Enumeration of all possible valid nodes parsed</returns>
+        public abstract IEnumerable<ParseNode> Parse(String str, int i, bool whitespace, out ParserException exception);
 
         /// <summary>
         /// Literally does nothing, used for aesthetics.

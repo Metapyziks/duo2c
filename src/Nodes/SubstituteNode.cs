@@ -68,13 +68,13 @@ namespace DUO2C.Nodes
         /// </summary>
         /// <param name="original">The original parse node to be substituted</param>
         public SubstituteNode(ParseNode original)
-            : base(original.SourceIndex, original.Length,
+            : base(original.StartIndex, original.Length,
                 original.String, original.Token) { }
 
         public override string ToString(String indent)
         {
             var attribs = new List<String> {
-                String.Format("index=\"{0}\"", SourceIndex),
+                String.Format("index=\"{0}\"", StartIndex),
                 String.Format("length=\"{0}\"", Length)
             };
             foreach (var prop in GetType().GetProperties()) {
