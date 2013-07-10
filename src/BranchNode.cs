@@ -73,9 +73,9 @@ namespace DUO2C
         {
             var nl = Environment.NewLine;
             var nextIndent = indent + "  ";
-            return String.Format("{0}\"{1}\" @({2}, {3}) : ", indent, Token, SourceIndex, Length) + "{"
-                + nl + String.Join("," + nl, Children.Select(x => (x != null ? x.ToString(nextIndent) : "null")))
-                + nl + indent + "}";
+            return String.Format("{0}<{1} index=\"{2}\" length=\"{3}\">", indent, Token, SourceIndex, Length)
+                + nl + String.Join(nl, Children.Select(x => (x != null ? x.ToString(nextIndent) : "null")))
+                + nl + indent + String.Format("</{0}>", Token);
         }
 
         public IEnumerator<ParseNode> GetEnumerator()

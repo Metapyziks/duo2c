@@ -25,7 +25,7 @@ namespace DUO2C
 
         public override String ToString(string indent)
         {
-            return String.Format("{0}\"{1}\" @({2}, {3}) : \"{4}\"", indent, Token, SourceIndex, Length, _string);
+            return String.Format("{0}<{1} index=\"{2}\" length=\"{3}\">{4}</{1}>", indent, Token, SourceIndex, Length, _string);
         }
     }
 }
