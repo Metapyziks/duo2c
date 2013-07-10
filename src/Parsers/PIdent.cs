@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using DUO2C.Nodes;
+
 namespace DUO2C.Parsers
 {
     /// <summary>

@@ -41,9 +41,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\BranchNode.cs" />
-    <Compile Include="src\LeafNode.cs" />
-    <Compile Include="src\ParseNode.cs" />
+    <Compile Include="src\Nodes\BranchNode.cs" />
+    <Compile Include="src\Nodes\LeafNode.cs" />
+    <Compile Include="src\Nodes\NInteger.cs" />
+    <Compile Include="src\Nodes\ParseNode.cs" />
+    <Compile Include="src\Nodes\SubstituteNode.cs" />
     <Compile Include="src\Parsers\BinaryParser.cs" />
     <Compile Include="src\Parsers\ConcatParser.cs" />
     <Compile Include="src\Parsers\EitherOrParser.cs" />

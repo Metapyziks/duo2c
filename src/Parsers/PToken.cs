@@ -1,6 +1,9 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+
+using DUO2C.Nodes;
 
 namespace DUO2C.Parsers
 {
@@ -56,6 +59,7 @@ namespace DUO2C.Parsers
         }
 
         private Parser _parser;
+        private ConstructorInfo _subCtor;
 
         /// <summary>
         /// Property that hides retrieving the parser referenced by
@@ -99,6 +103,15 @@ namespace DUO2C.Parsers
 
             Token = token;
             Flatten = flatten;
+
+            var subType = Assembly.GetExecutingAssembly().GetTypes().Where(x => {
+                var attrib = x.GetCustomAttribute<SubstituteTokenAttribute>();
+                return attrib != null && attrib.Token == Token;
+            }).FirstOrDefault();
+
+            if (subType != null) {
+                _subCtor = subType.GetConstructor(new Type[] { typeof(ParseNode) });
+            }
         }
 
         public override bool IsMatch(string str, ref int i, bool whitespace)
@@ -118,19 +131,24 @@ namespace DUO2C.Parsers
             if (Parsed != null) Parsed(this, new EventArgs());
 
             if (IgnoreWhitespace) SkipWhitespace(str, ref i);
-            var tree = Parser.Parse(str, ref i, IgnoreWhitespace);
+            var node = Parser.Parse(str, ref i, IgnoreWhitespace);
             if (Flatten) {
-                return new LeafNode(tree.SourceIndex, tree.Length, tree.String, Token);
-            } else if (tree.Token == null) {
+                node = new LeafNode(node.SourceIndex, node.Length, node.String, Token);
+            } else if (node.Token == null) {
                 // If the produced node has no token, use the
                 // this token name
-                tree.Token = Token;
-                return tree;
+                node.Token = Token;
             } else {
                 // Otherwise, encapsulate with a new node with this
                 // token name
-                return new BranchNode(new ParseNode[] { tree }, Token);
+                node = new BranchNode(new ParseNode[] { node }, Token);
             }
+
+            if (_subCtor != null) {
+                node = (ParseNode) _subCtor.Invoke(new Object[] { node });
+            }
+
+            return node;
         }
 
         public override IEnumerable<int> FindSyntaxError(string str, int i, bool whitespace, out ParserException exception)

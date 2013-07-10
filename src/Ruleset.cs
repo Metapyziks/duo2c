@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
+using System.Linq;
 
+using DUO2C.Nodes;
 using DUO2C.Parsers;
 
 namespace DUO2C

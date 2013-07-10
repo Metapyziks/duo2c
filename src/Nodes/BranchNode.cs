@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace DUO2C
+namespace DUO2C.Nodes
 {
     /// <summary>
     /// Represents nodes that contain other child nodes.

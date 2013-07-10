@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DUO2C
+namespace DUO2C.Nodes
 {
     /// <summary>
     /// Represents nodes that cannot contain children.

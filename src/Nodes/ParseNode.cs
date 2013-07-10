@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DUO2C
+namespace DUO2C.Nodes
 {
     /// <summary>
     /// Abstract class for a node parsed from a string.
