@@ -44,6 +44,7 @@
     <Compile Include="src\Nodes\BranchNode.cs" />
     <Compile Include="src\Nodes\LeafNode.cs" />
     <Compile Include="src\Nodes\NInteger.cs" />
+    <Compile Include="src\Nodes\NReal.cs" />
     <Compile Include="src\Nodes\ParseNode.cs" />
     <Compile Include="src\Nodes\SubstituteNode.cs" />
     <Compile Include="src\Parsers\BinaryParser.cs" />

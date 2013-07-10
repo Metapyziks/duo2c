@@ -15,7 +15,7 @@
     VAR
         x : Integer;
     BEGIN
-        x := 34.8 + 12 / 2.6;
+        x := 34.8D0 + 712 / 2.6;
         IF l = NIL THEN
             NEW(l);             (* create record instance *)
             l.value := v;
