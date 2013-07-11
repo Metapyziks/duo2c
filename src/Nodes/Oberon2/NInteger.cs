@@ -1,24 +1,15 @@
 ﻿using System;
 using System.Globalization;
 
+using DUO2C.Semantics;
+
 namespace DUO2C.Nodes.Oberon2
 {
-    /// <summary>
-    /// An enumeration of all integer types in Oberon-2
-    /// </summary>
-    public enum IntegerType : byte
-    {
-        BYTE = 1,
-        SHORTINT = 2,
-        INTEGER = 4,
-        LONGINT = 8
-    }
-
     /// <summary>
     /// Substitution node for integers.
     /// </summary>
     [SubstituteToken("integer")]
-    public class NInteger : SubstituteNode
+    public class NInteger : ExpressionElement
     {
         /// <summary>
         /// The parsed value of the integer.
@@ -37,17 +28,17 @@ namespace DUO2C.Nodes.Oberon2
         /// based on the number of bytes required to store it.
         /// </summary>
         [Serialize("type")]
-        public IntegerType Type
+        public IntegerRange Type
         {
             get {
                 if (sbyte.MinValue <= Value && Value <= sbyte.MaxValue) {
-                    return IntegerType.BYTE;
+                    return IntegerRange.BYTE;
                 } else if (short.MinValue <= Value && Value <= short.MaxValue) {
-                    return IntegerType.SHORTINT;
+                    return IntegerRange.SHORTINT;
                 } else if (int.MinValue <= Value && Value <= int.MaxValue) {
-                    return IntegerType.INTEGER;
+                    return IntegerRange.INTEGER;
                 } else {
-                    return IntegerType.LONGINT;
+                    return IntegerRange.LONGINT;
                 }
             }
         }
@@ -66,6 +57,11 @@ namespace DUO2C.Nodes.Oberon2
             } else {
                 Value = int.Parse(base.String);
             }
+        }
+
+        public override OberonType FinalType()
+        {
+            return new IntegerType(Type);
         }
     }
 }
