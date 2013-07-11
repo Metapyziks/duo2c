@@ -17,7 +17,7 @@ namespace DUO2C.Nodes.Oberon2
     }
 
     [SubstituteToken("Expr")]
-    public class NExpr : SubstituteNode
+    public class NExpr : ExpressionElement
     {
         [Serialize("operator", ExprOperator.None)]
         public ExprOperator Operator { get; private set; }

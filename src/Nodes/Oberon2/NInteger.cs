@@ -23,22 +23,31 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
+        public override OberonType FinalType
+        {
+            get { return new IntegerType(Range); }
+        }
+
+        public override bool IsConstant
+        {
+            get { return true; }
+        }
+
         /// <summary>
         /// Finds the type of integer this literal represents
         /// based on the number of bytes required to store it.
         /// </summary>
-        [Serialize("type")]
-        public IntegerRange Type
+        public IntegerRange Range
         {
             get {
                 if (sbyte.MinValue <= Value && Value <= sbyte.MaxValue) {
-                    return IntegerRange.BYTE;
+                    return IntegerRange.Byte;
                 } else if (short.MinValue <= Value && Value <= short.MaxValue) {
-                    return IntegerRange.SHORTINT;
+                    return IntegerRange.ShortInt;
                 } else if (int.MinValue <= Value && Value <= int.MaxValue) {
-                    return IntegerRange.INTEGER;
+                    return IntegerRange.Integer;
                 } else {
-                    return IntegerRange.LONGINT;
+                    return IntegerRange.LongInt;
                 }
             }
         }
@@ -57,11 +66,6 @@ namespace DUO2C.Nodes.Oberon2
             } else {
                 Value = int.Parse(base.String);
             }
-        }
-
-        public override OberonType FinalType()
-        {
-            return new IntegerType(Type);
         }
     }
 }

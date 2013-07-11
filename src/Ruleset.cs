@@ -264,7 +264,10 @@ namespace DUO2C
         {
             ParserException error;
             var tree = _root.Parse(str, 0, true, out error).LastOrDefault();
-            if (tree == null || tree.EndIndex < str.TrimEnd().Length) throw error;
+            if (tree == null || tree.EndIndex < str.TrimEnd().Length) {
+                error.FindLocationInfo(str);
+                throw error;
+            }
             return tree;
         }
 
@@ -275,10 +278,12 @@ namespace DUO2C
         /// <returns>Node tree representing the file's structure</returns>
         public ParseNode ParseFile(String filepath)
         {
+            String src = File.ReadAllText(filepath);
             try {
-                return ParseString(File.ReadAllText(filepath));
+                return ParseString(src);
             } catch (ParserException e) {
-                throw new ParserException(e, filepath);
+                e.SetSourcePath(filepath);
+                throw e;
             }
         }
 

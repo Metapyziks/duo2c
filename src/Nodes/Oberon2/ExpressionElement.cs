@@ -13,6 +13,8 @@ namespace DUO2C.Nodes.Oberon2
         public ExpressionElement(ParseNode original, bool leaf = false, bool hasPayload = true)
             : base(original, leaf, hasPayload) { }
 
-        public abstract OberonType FinalType();
+        [Serialize("type")]
+        public abstract OberonType FinalType { get; }
+        public abstract bool IsConstant { get; }
     }
 }

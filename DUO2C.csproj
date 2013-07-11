@@ -71,7 +71,7 @@
     <Compile Include="src\Parsers\OptionalParser.cs" />
     <Compile Include="src\Parsers\OptionalRepeatParser.cs" />
     <Compile Include="src\Parsers\Parser.cs" />
-    <Compile Include="src\Parsers\ParserException.cs" />
+    <Compile Include="src\ParserException.cs" />
     <Compile Include="src\Parsers\PDigit.cs" />
     <Compile Include="src\Parsers\PIdent.cs" />
     <Compile Include="src\Parsers\PKeyword.cs" />
@@ -82,6 +82,7 @@
     <Compile Include="src\Program.cs" />
     <Compile Include="src\Properties\AssemblyInfo.cs" />
     <Compile Include="src\Semantics\OberonType.cs" />
+    <Compile Include="src\Semantics\TypeMismatchException.cs" />
     <Compile Include="src\Tools.cs" />
   </ItemGroup>
   <ItemGroup>

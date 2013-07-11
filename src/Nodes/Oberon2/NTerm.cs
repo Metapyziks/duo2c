@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 
+using DUO2C.Semantics;
+
 namespace DUO2C.Nodes.Oberon2
 {
     public enum TermOperator : byte
@@ -14,7 +16,7 @@ namespace DUO2C.Nodes.Oberon2
     }
 
     [SubstituteToken("Term")]
-    public class NTerm : SubstituteNode
+    public class NTerm : ExpressionElement
     {
         [Serialize("operator", TermOperator.None)]
         public TermOperator Operator { get; private set; }
@@ -27,6 +29,18 @@ namespace DUO2C.Nodes.Oberon2
         public NTerm Next
         {
             get { return Children.Count() == 1 ? null : (NTerm) Children.Last(); }
+        }
+
+        public override OberonType FinalType
+        {
+            get
+            {
+                if (Next == null) {
+                    return Factor.FinalType;
+                } else {
+
+                }
+            }
         }
 
         public NTerm(ParseNode original)
@@ -50,6 +64,26 @@ namespace DUO2C.Nodes.Oberon2
                         Operator = TermOperator.None; break;
                 }
                 Children = new ParseNode[] { Factor, Next };
+
+                if (Operator == TermOperator.IntDivide || Operator == TermOperator.Modulo) {
+                    if (!(Factor.FinalType is IntegerType)) {
+                        throw new TypeMismatchException(IntegerType.Default, Factor);
+                    } else if (!(Next.FinalType is IntegerType)) {
+                        throw new TypeMismatchException(IntegerType.Default, Next);
+                    }
+                } else if (Operator == TermOperator.And) {
+                    if (!(Factor.FinalType is BooleanType)) {
+                        throw new TypeMismatchException(BooleanType.Default, Factor);
+                    } else if (!(Next.FinalType is BooleanType)) {
+                        throw new TypeMismatchException(BooleanType.Default, Next);
+                    }
+                } else {
+                    if (!(Factor.FinalType is NumericType)) {
+                        throw new TypeMismatchException(NumericType.Default, Factor);
+                    } else if (!(Next.FinalType is NumericType)) {
+                        throw new TypeMismatchException(NumericType.Default, Next);
+                    }
+                }
             }
         }
     }

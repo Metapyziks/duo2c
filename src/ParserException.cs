@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DUO2C.Parsers
+namespace DUO2C
 {
     /// <summary>
     /// Attribute used to compare the usefulness of syntax
@@ -79,6 +79,12 @@ namespace DUO2C.Parsers
         public int SourceIndex { get; private set; }
 
         /// <summary>
+        /// Length of the element that caused this exception in the original
+        /// source string.
+        /// </summary>
+        public int SourceLength { get; private set; }
+
+        /// <summary>
         /// Line number in the source string where this exception occurred.
         /// </summary>
         public int Line { get; private set; }
@@ -124,35 +130,30 @@ namespace DUO2C.Parsers
         /// about the location in the source string that the exception occurred.
         /// </summary>
         /// <param name="message">The message that describes the error</param>
-        /// <param name="str">The source string being parsed</param>
         /// <param name="index">Start index in the source string of the exception</param>
-        /// <param name="length">Length of the symbol that caused the exception</param>
-        public ParserException(String message, String str, int index)
+        public ParserException(String message, int index, int length = 0)
             : base(message)
         {
             SourcePath = null;
             SourceIndex = index;
+            SourceLength = length;
 
+            Line = -1;
+            Column = -1;
+        }
+
+        internal void FindLocationInfo(String srcString)
+        {
             int line, column;
-            FindSymbolLocation(str, index, out line, out column);
+            FindSymbolLocation(srcString, SourceIndex, out line, out column);
 
             Line = line;
             Column = column;
         }
 
-        /// <summary>
-        /// Constructor to create a clone of a parser exception, but with a given
-        /// source file path to be presented with the exception message.
-        /// </summary>
-        /// <param name="clone">Parser exception to clone</param>
-        /// <param name="srcPath">Path to the file that was being parsed</param>
-        public ParserException(ParserException clone, String srcPath)
-            : base(clone.MessageNoLocation, clone)
+        internal void SetSourcePath(String srcPath)
         {
             SourcePath = srcPath;
-            SourceIndex = clone.SourceIndex;
-            Line = clone.Line;
-            Column = clone.Column;
         }
     }
 }

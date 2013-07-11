@@ -22,8 +22,17 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        [Serialize("type")]
-        public RealRange Type { get; private set; }
+        public override OberonType FinalType
+        {
+            get { return new RealType(Range); }
+        }
+
+        public override bool IsConstant
+        {
+            get { return true; }
+        }
+
+        public RealRange Range { get; private set; }
 
         /// <summary>
         /// Constructor to create a new real number substitution node.
@@ -35,18 +44,13 @@ namespace DUO2C.Nodes.Oberon2
             int expStart = Math.Max(base.String.IndexOf('E'), base.String.IndexOf('D'));
             if (expStart == -1) {
                 Value = double.Parse(base.String);
-                Type = RealRange.REAL;
+                Range = RealRange.Real;
             } else {
                 double mantissa = double.Parse(base.String.Substring(0, expStart));
                 double exponent = double.Parse(base.String.Substring(expStart + 1));
                 Value = mantissa * Math.Pow(10.0, exponent);
-                Type = base.String[expStart] == 'E' ? RealRange.REAL : RealRange.LONGREAL;
+                Range = base.String[expStart] == 'E' ? RealRange.Real : RealRange.LongReal;
             }
-        }
-
-        public override OberonType FinalType()
-        {
-            return new RealType(Type);
         }
     }
 }

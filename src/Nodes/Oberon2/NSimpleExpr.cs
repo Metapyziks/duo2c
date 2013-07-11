@@ -12,7 +12,7 @@ namespace DUO2C.Nodes.Oberon2
     }
 
     [SubstituteToken("SimpleExpr")]
-    public class NSimpleExpr : SubstituteNode
+    public class NSimpleExpr : ExpressionElement
     {
         [Serialize("operator", SimpleExprOperator.None)]
         public SimpleExprOperator Operator { get; private set; }

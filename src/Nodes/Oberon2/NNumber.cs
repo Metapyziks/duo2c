@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Globalization;
-
 using System.Linq;
+
+using DUO2C.Semantics;
 
 namespace DUO2C.Nodes.Oberon2
 {
@@ -9,21 +10,29 @@ namespace DUO2C.Nodes.Oberon2
     /// Substitution node for numbers.
     /// </summary>
     [SubstituteToken("number")]
-    public class NNumber : SubstituteNode
+    public class NNumber : ExpressionElement
     {
-        public SubstituteNode Inner { get; private set; }
+        public ExpressionElement Inner { get; private set; }
         
         public override string String
         {
-            get {
-                return Inner.String;
-            }
+            get { return Inner.String; }
+        }
+
+        public override OberonType FinalType
+        {
+            get { return Inner.FinalType; }
+        }
+
+        public override bool IsConstant
+        {
+            get { return Inner.IsConstant; }
         }
 
         public NNumber(ParseNode original)
             : base(original, false)
         {
-            Inner = (SubstituteNode) Children.First();
+            Inner = (ExpressionElement) Children.First();
         }
     }
 }
