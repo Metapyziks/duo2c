@@ -43,13 +43,25 @@
   <ItemGroup>
     <Compile Include="src\Nodes\BranchNode.cs" />
     <Compile Include="src\Nodes\LeafNode.cs" />
+    <Compile Include="src\Nodes\Oberon2\DesignatorOperation.cs" />
     <Compile Include="src\Nodes\Oberon2\NCharacter.cs" />
     <Compile Include="src\Nodes\NIdent.cs" />
+    <Compile Include="src\Nodes\Oberon2\NDesignator.cs" />
+    <Compile Include="src\Nodes\Oberon2\NExpr.cs" />
+    <Compile Include="src\Nodes\Oberon2\NFactor.cs" />
     <Compile Include="src\Nodes\Oberon2\NIdentDef.cs" />
+    <Compile Include="src\Nodes\Oberon2\NIndexer.cs" />
     <Compile Include="src\Nodes\Oberon2\NInteger.cs" />
+    <Compile Include="src\Nodes\Oberon2\NMemberAccess.cs" />
+    <Compile Include="src\Nodes\Oberon2\NNumber.cs" />
+    <Compile Include="src\Nodes\Oberon2\NPtrResolve.cs" />
     <Compile Include="src\Nodes\Oberon2\NQualIdent.cs" />
     <Compile Include="src\Nodes\Oberon2\NReal.cs" />
     <Compile Include="src\Nodes\NString.cs" />
+    <Compile Include="src\Nodes\Oberon2\NSimpleExpr.cs" />
+    <Compile Include="src\Nodes\Oberon2\NTerm.cs" />
+    <Compile Include="src\Nodes\Oberon2\NTypeGuard.cs" />
+    <Compile Include="src\Nodes\Oberon2\NUnary.cs" />
     <Compile Include="src\Nodes\ParseNode.cs" />
     <Compile Include="src\Nodes\SubstituteNode.cs" />
     <Compile Include="src\Parsers\BinaryParser.cs" />

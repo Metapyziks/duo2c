@@ -46,13 +46,20 @@ namespace DUO2C.Nodes
         public String Name { get; private set; }
 
         /// <summary>
+        /// If the specified property has this value, it will be
+        /// ignored.
+        /// </summary>
+        public Object OmitValue { get; private set; }
+
+        /// <summary>
         /// Constructor to create a new node property serialize
         /// attribute with a given name for the serialized attribute.
         /// </summary>
         /// <param name="name">Attribute name to use when serializing</param>
-        public SerializeAttribute(String name)
+        public SerializeAttribute(String name, Object omitValue = null)
         {
             Name = name;
+            OmitValue = omitValue;
         }
     }
 
@@ -90,28 +97,33 @@ namespace DUO2C.Nodes
         public override String SerializeXML()
         {
             var attribs = new List<String> {
-                String.Format("index=\"{0}\"", StartIndex),
-                String.Format("length=\"{0}\"", Length)
+                // String.Format("index=\"{0}\"", StartIndex),
+                // String.Format("length=\"{0}\"", Length)
             };
 
             foreach (var prop in GetType().GetProperties()) {
                 var attrib = prop.GetCustomAttribute<SerializeAttribute>();
                 if (attrib != null) {
                     var val = prop.GetValue(this);
-                    if (val != null) {
+                    if (attrib.OmitValue != null) {
+                        val = val;
+                    }
+                    if (val != null && !val.Equals(attrib.OmitValue)) {
                         attribs.Add(String.Format("{0}=\"{1}\"", attrib.Name,
                             prop.GetValue(this).ToString()));
                     }
                 }
             }
 
+            var attribStr = (attribs.Count() > 0) ? " " + String.Join(" ", attribs) : "";
+
             if (!HasPayload) {
-                return String.Format("<{0} {1} />", Token, String.Join(" ", attribs));
+                return String.Format("<{0}{1} />", Token, attribStr);
             } if (IsLeaf) {
-                return String.Format("<{0} {1}>{2}</{0}>", Token, String.Join(" ", attribs), String);
+                return String.Format("<{0}{1}>{2}</{0}>", Token, attribStr, String);
             } else {
                 var nl = Environment.NewLine;
-                return String.Format("<{0} {1}>", Token, String.Join(" ", attribs))
+                return String.Format("<{0}{1}>", Token, attribStr)
                     + (Children.Count() > 0 ? nl + String.Join(nl, Children.Select(x => x.SerializeXML())) : "")
                         .Replace("\n", "\n  ") + nl + String.Format("</{0}>", Token);
             }

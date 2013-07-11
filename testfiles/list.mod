@@ -1,40 +1,88 @@
-﻿MODULE Lists;
-
-    (*** declare global constants, types and variables ***)
+﻿MODULE PointerBirds;
+    IMPORT Out;
 
     TYPE
-        List*    = POINTER TO Lists.ListNode;
-        ListNode = RECORD
-            value : Integer;
-            next  : List;
+        BirdRec*   = RECORD
+            sound* : ARRAY 10 OF Char;
         END;
+        DuckRec*   = RECORD (BirdRec) END;
+        CuckooRec* = RECORD (BirdRec) END;
 
-    (*** declare procedures ***)
+        Bird   = POINTER TO BirdRec;
+        Cuckoo = POINTER TO CuckooRec;
+        Duck   = POINTER TO DuckRec;
 
-    PROCEDURE (l : List) Add* (v : Integer);
-    VAR
-        x : Integer;
+   VAR
+       pb : Bird;
+       pc : Cuckoo;
+       pd : Duck;
+       x : Real;
+
+    PROCEDURE SetDuckSound* (bird : Duck);
     BEGIN
-        x := 34.8D0 + 712 / 2.6 - 05AX;
-        IF l = NIL THEN
-            NEW(l);             (* create record instance *)
-            l.value := v;
-        ELSE
-            l.next.Add(v);      (* recursive call to .add(n) *)
-        END;
-    END Add;
+        x := (34.5 + 98.245 - 23.6) * 12 - 8.7;
+        bird.sound := "Quack!"
+    END SetDuckSound;
 
-    PROCEDURE (l : List) Get* () : Integer;
-    VAR
-        v : Integer;
+    PROCEDURE SetCuckooSound* (bird : Cuckoo);
     BEGIN
-        IF l = NIL THEN
-            RETURN 0;           (* .get() must always return an INTEGER *)
-        ELSE
-            v := l.value;       (* this line will crash if l is NIL *)
-            l := l.next;
-            RETURN v;
-        END;
-    END Get;
+        bird.sound := "Cuckoo!"
+    END SetCuckooSound;
 
-END Lists.
+    PROCEDURE SetSound* (bird : Bird);
+    BEGIN
+        WITH bird : Cuckoo DO
+             SetCuckooSound(bird)
+           | bird : Duck DO
+             SetDuckSound(bird)
+        ELSE
+             bird.sound := "Tweet!"
+        END
+    END SetSound;
+
+BEGIN
+    NEW(pc);
+    NEW(pd);
+
+    SetCuckooSound(pc);
+    SetDuckSound(pd);
+
+    Out.Ln; Out.String(pc^.sound); Out.Ln;
+    Out.Ln; Out.String(pd^.sound); Out.Ln;
+
+    SetSound(pc);
+    SetSound(pd);
+
+    Out.Ln; Out.String(pc^.sound); Out.Ln;
+    Out.Ln; Out.String(pd^.sound); Out.Ln;
+
+(* -------------------------------------- *)
+(* Pass dynamic type to procedure         *)
+
+    pb := pd;
+
+    SetDuckSound(pb(Duck));
+    Out.Ln; Out.String(pb^.sound); Out.Ln;
+
+    pb := pc;
+
+    SetCuckooSound(pb(Cuckoo));
+    Out.Ln; Out.String(pb^.sound); Out.Ln;
+
+(* -------------------------------------- *)
+
+    SetSound(pb);
+    Out.Ln; Out.String(pb^.sound); Out.Ln;
+
+    pb := pd;
+
+    SetSound(pb);
+    Out.Ln; Out.String(pb^.sound); Out.Ln;
+
+(* -------------------------------------- *)
+
+    NEW(pb);
+
+    SetSound(pb);
+    Out.Ln; Out.String(pb^.sound); Out.Ln
+END PointerBirds.

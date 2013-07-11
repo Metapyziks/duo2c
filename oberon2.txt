@@ -17,7 +17,7 @@ Type          = QualIdent
 FieldList     = [IdentList ":" Type].
 StatementSeq  = Statement {";" Statement}.
 Statement     = [ Designator ":=" Expr
-              | Designator ["(" [ExprList] ")"]
+              | Invocation
               | IF Expr THEN StatementSeq {ELSIF Expr THEN StatementSeq} [ELSE StatementSeq] END
               | CASE Expr OF Case {"|" Case} [ELSE StatementSeq] END
               | WHILE Expr DO StatementSeq END
@@ -32,15 +32,21 @@ CaseLabels    = ConstExpr [".." ConstExpr].
 Guard         = QualIdent ":" QualIdent.
 ConstExpr     = Expr.
 Expr          = SimpleExpr [Relation SimpleExpr].
-SimpleExpr    = ["+" | "-"] Term {AddOp Term}.
-Term          = Factor {MulOp Factor}.
-Factor        = Designator ["(" [ExprList] ")"] | number | character | string | NIL | Set | "(" Expr ")" | " ~ " Factor.
+SimpleExpr    = Term [AddOp SimpleExpr].
+Term          = Factor [MulOp Term].
+Factor        = Invocation | number | character | string | NIL | Set | "(" Expr ")" | Unary.
+Unary         = ("+" | "-" | "~") Factor.
 Set           = "{" [Element {"," Element}] "}".
 Element       = Expr [".." Expr].
 Relation      = "=" | "#" | "<" | "<=" | ">" | ">=" | IN | IS.
 AddOp         = "+" | "-" | OR.
 MulOp         = "*" | "/" | DIV | MOD | "&".
-Designator    = QualIdent {"." ident | "[" ExprList "]" | "^" | "(" QualIdent ")"}.
+Invocation    = Designator ["(" [ExprList] ")"].
+Designator    = QualIdent {MemberAccess | Indexer | PtrResolve | TypeGuard}.
+MemberAccess  = "." ident.
+Indexer       = "[" ExprList "]".
+PtrResolve    = "^".
+TypeGuard     = "(" QualIdent ")".
 ExprList      = Expr {"," Expr}.
 IdentList     = IdentDef {"," IdentDef}.
 QualIdent     = [ident "."] ident.
