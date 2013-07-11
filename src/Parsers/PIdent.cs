@@ -16,10 +16,9 @@ namespace DUO2C.Parsers
         /// information about the location in the source string that the exception
         /// occurred.
         /// </summary>
-        /// <param name="str">The source string being parsed</param>
         /// <param name="index">Start index in the source string of the exception</param>
-        public IdentifierExpectedException(String str, int index)
-            : base("Identifier expected", str, index) { }
+        public IdentifierExpectedException(int index)
+            : base("Identifier expected", index) { }
     }
 
     /// <summary>
@@ -53,7 +52,7 @@ namespace DUO2C.Parsers
                 exception = null;
                 return new ParseNode[] { Ruleset.GetSubstitution(new LeafNode(j, i - j, str.Substring(j, i - j), "ident")) };
             } else {
-                exception = new IdentifierExpectedException(str, i);
+                exception = new IdentifierExpectedException(i);
                 return EmptyNodeArray;
             }
         }

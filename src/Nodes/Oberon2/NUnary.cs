@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 
+using DUO2C.Semantics;
+
 namespace DUO2C.Nodes.Oberon2
 {
     public enum UnaryOperator : byte
@@ -11,7 +13,7 @@ namespace DUO2C.Nodes.Oberon2
     }
 
     [SubstituteToken("Unary")]
-    public class NUnary : SubstituteNode
+    public class NUnary : ExpressionElement
     {
         [Serialize("operator")]
         public UnaryOperator Operator { get; private set; }
@@ -19,6 +21,16 @@ namespace DUO2C.Nodes.Oberon2
         public NFactor Factor
         {
             get { return (NFactor) Children.First(); }
+        }
+
+        public override OberonType FinalType
+        {
+            get { return Factor.FinalType; }
+        }
+
+        public override bool IsConstant
+        {
+            get { return Factor.IsConstant; }
         }
 
         public NUnary(ParseNode original)
@@ -33,6 +45,14 @@ namespace DUO2C.Nodes.Oberon2
                     Operator = UnaryOperator.Not; break;
             }
             Children = new ParseNode[] { Children.Last() };
+
+            if (Operator == UnaryOperator.Not) {
+                if (!(FinalType is BooleanType)) {
+                    throw new TypeMismatchException(BooleanType.Default, Factor);
+                }
+            } else if (!(FinalType is SetType) && !(FinalType is NumericType)) {
+                throw new TypeMismatchException(NumericType.Default, Factor);
+            }
         }
     }
 }

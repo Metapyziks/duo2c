@@ -7,7 +7,7 @@ namespace DUO2C.Nodes.Oberon2
     /// Substitution node for pointer resolving.
     /// </summary>
     [SubstituteToken("PtrResolve")]
-    class NPtrResolve : DesignatorOperation
+    class NPtrResolve : Selector
     {
         public NPtrResolve(ParseNode original)
             : base(original, true, false)

@@ -7,7 +7,7 @@ namespace DUO2C.Nodes.Oberon2
     /// Substitution node for indexers.
     /// </summary>
     [SubstituteToken("Indexer")]
-    class NIndexer : DesignatorOperation
+    class NIndexer : Selector
     {
         public NIndexer(ParseNode original)
             : base(original, false)

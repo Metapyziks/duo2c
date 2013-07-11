@@ -1,12 +1,14 @@
 ﻿using System.Globalization;
 
+using DUO2C.Semantics;
+
 namespace DUO2C.Nodes.Oberon2
 {
     /// <summary>
     /// Substitution node for characters.
     /// </summary>
     [SubstituteToken("character")]
-    public class NCharacter : SubstituteNode
+    public class NCharacter : ExpressionElement
     {
         /// <summary>
         /// The parsed value of the character.
@@ -18,6 +20,16 @@ namespace DUO2C.Nodes.Oberon2
             get {
                 return ((ushort) Value).ToString("X4");
             }
+        }
+
+        public override OberonType FinalType
+        {
+            get { return CharType.Default; }
+        }
+
+        public override bool IsConstant
+        {
+            get { return true; }
         }
 
         /// <summary>

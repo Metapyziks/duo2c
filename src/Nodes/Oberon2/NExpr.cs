@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 
+using DUO2C.Semantics;
+
 namespace DUO2C.Nodes.Oberon2
 {
     public enum ExprOperator : byte
@@ -32,6 +34,16 @@ namespace DUO2C.Nodes.Oberon2
             get { return Children.Count() == 1 ? null : (NExpr) Children.Last(); }
         }
 
+        public override OberonType FinalType
+        {
+            get { return Next == null ? SimpleExpr.FinalType : BooleanType.Default; }
+        }
+
+        public override bool IsConstant
+        {
+            get { return SimpleExpr.IsConstant && (Next == null || Next.IsConstant); }
+        }
+
         public NExpr(ParseNode original)
             : base(original, false)
         {
@@ -59,6 +71,25 @@ namespace DUO2C.Nodes.Oberon2
                         Operator = ExprOperator.None; break;
                 }
                 Children = new ParseNode[] { SimpleExpr, Next };
+
+                var left = SimpleExpr.FinalType;
+                var right = Next.FinalType;
+
+                if (Operator == ExprOperator.InSet) {
+                    if (!(left is IntegerType)) {
+                        throw new TypeMismatchException(IntegerType.Default, SimpleExpr);
+                    } else if (!(right is SetType)) {
+                        throw new TypeMismatchException(SetType.Default, Next);
+                    }
+                } else if (Operator == ExprOperator.Equals || Operator == ExprOperator.NotEquals) {
+                    if (!left.CanTestEquality(right)) {
+                        throw new TypeMismatchException(left, Next);
+                    }
+                } else {
+                    if (!left.CanCompare(right)) {
+                        throw new TypeMismatchException(left, Next);
+                    }
+                }
             }
         }
     }

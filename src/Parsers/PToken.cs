@@ -23,10 +23,9 @@ namespace DUO2C.Parsers
         /// information about the location in the source string that the exception
         /// occurred.
         /// </summary>
-        /// <param name="str">The source string being parsed</param>
         /// <param name="index">Start index in the source string of the exception</param>
-        public TokenExpectedException(String token, String str, int index)
-            : base(String.Format("{0} expected", token), str, index)
+        public TokenExpectedException(String token, int index)
+            : base(String.Format("{0} expected", token), index)
         {
             Token = token;
         }
@@ -105,7 +104,7 @@ namespace DUO2C.Parsers
             if (IgnoreWhitespace) SkipWhitespace(str, ref i);
             var nodes = Parser.Parse(str, i, IgnoreWhitespace, out exception);
             if (nodes.Count() == 0) {
-                exception = ChooseParserException(exception, new TokenExpectedException(Token, str, i));
+                exception = ChooseParserException(exception, new TokenExpectedException(Token, i));
             }
             nodes = nodes.Select(node => {
                 if (Flatten) {

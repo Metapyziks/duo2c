@@ -10,7 +10,7 @@ namespace DUO2C.Nodes.Oberon2
     /// Substitution node for type guards.
     /// </summary>
     [SubstituteToken("TypeGuard")]
-    class NTypeGuard : DesignatorOperation
+    class NTypeGuard : Selector
     {
         public NQualIdent Type { get; private set; }
 

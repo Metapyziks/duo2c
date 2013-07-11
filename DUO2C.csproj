@@ -43,10 +43,11 @@
   <ItemGroup>
     <Compile Include="src\Nodes\BranchNode.cs" />
     <Compile Include="src\Nodes\LeafNode.cs" />
-    <Compile Include="src\Nodes\Oberon2\DesignatorOperation.cs" />
     <Compile Include="src\Nodes\Oberon2\ExpressionElement.cs" />
     <Compile Include="src\Nodes\Oberon2\NCharacter.cs" />
     <Compile Include="src\Nodes\NIdent.cs" />
+    <Compile Include="src\Nodes\Oberon2\NInvocation.cs" />
+    <Compile Include="src\Nodes\Oberon2\NString.cs" />
     <Compile Include="src\Nodes\Oberon2\NDesignator.cs" />
     <Compile Include="src\Nodes\Oberon2\NExpr.cs" />
     <Compile Include="src\Nodes\Oberon2\NFactor.cs" />

@@ -16,10 +16,9 @@ namespace DUO2C.Parsers
         /// information about the location in the source string that the exception
         /// occurred.
         /// </summary>
-        /// <param name="str">The source string being parsed</param>
         /// <param name="index">Start index in the source string of the exception</param>
-        public DigitExpectedException(String str, int index)
-            : base("Digit expected", str, index) { }
+        public DigitExpectedException(int index)
+            : base("Digit expected", index) { }
     }
 
     /// <summary>
@@ -51,7 +50,7 @@ namespace DUO2C.Parsers
                 exception = null;
                 return new ParseNode[] { new LeafNode(i, 1, str[i].ToString(), "digit") };
             } else {
-                exception = new DigitExpectedException(str, i);
+                exception = new DigitExpectedException(i);
                 return EmptyNodeArray;
             }
         }

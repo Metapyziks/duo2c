@@ -23,7 +23,7 @@ namespace DUO2C
                         + Path.GetFileNameWithoutExtension(args[0])
                         + ".syntax";
                     File.WriteAllText(outpath, tree.ToString());
-                } catch (Parsers.ParserException e) {
+                } catch (ParserException e) {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(e.Message);
                     Console.ResetColor();

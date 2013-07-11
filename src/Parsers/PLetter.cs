@@ -16,10 +16,9 @@ namespace DUO2C.Parsers
         /// information about the location in the source string that the exception
         /// occurred.
         /// </summary>
-        /// <param name="str">The source string being parsed</param>
         /// <param name="index">Start index in the source string of the exception</param>
-        public LetterExpectedException(String str, int index)
-            : base("Letter expected", str, index) { }
+        public LetterExpectedException(int index)
+            : base("Letter expected", index) { }
     }
 
     /// <summary>
@@ -51,7 +50,7 @@ namespace DUO2C.Parsers
                 exception = null;
                 return new ParseNode[] { new LeafNode(i, 1, str[i].ToString(), "letter") };
             } else {
-                exception = new LetterExpectedException(str, i);
+                exception = new LetterExpectedException(i);
                 return EmptyNodeArray;
             }
         }

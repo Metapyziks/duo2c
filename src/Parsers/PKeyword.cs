@@ -22,10 +22,9 @@ namespace DUO2C.Parsers
         /// occurred, and the keyword that was expected.
         /// </summary>
         /// <param name="keyword">The keyword that was expected</param>
-        /// <param name="str">The source string being parsed</param>
         /// <param name="index">Start index in the source string of the exception</param>
-        public KeywordExpectedException(String keyword, String str, int index)
-            : base(String.Format("Expected the symbol \"{0}\"", keyword), str, index)
+        public KeywordExpectedException(String keyword, int index)
+            : base(String.Format("Expected the symbol \"{0}\"", keyword), index)
         {
             Keyword = keyword;
         }
@@ -76,7 +75,7 @@ namespace DUO2C.Parsers
                 exception = null;
                 return new ParseNode[] { new LeafNode(i - Keyword.Length, Keyword.Length, Keyword, "keyword") };
             } else {
-                exception = new KeywordExpectedException(Keyword, str, i);
+                exception = new KeywordExpectedException(Keyword, i);
                 return EmptyNodeArray;
             }
         }

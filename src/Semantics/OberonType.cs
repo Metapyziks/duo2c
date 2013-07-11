@@ -6,9 +6,69 @@ using System.Threading.Tasks;
 
 namespace DUO2C.Semantics
 {
-    public abstract class OberonType { }
+    public abstract class OberonType
+    {
+        public abstract bool CanTestEquality(OberonType other);
+        public abstract bool CanCompare(OberonType other);
+    }
 
     public abstract class StaticType : OberonType { }
+
+    public class CharType : OberonType
+    {
+        public static readonly CharType Default = new CharType();
+
+        public override string ToString()
+        {
+            return "CHAR";
+        }
+
+        public override bool CanTestEquality(OberonType other)
+        {
+            return CanCompare(other);
+        }
+
+        public override bool CanCompare(OberonType other)
+        {
+            return other is CharType || (other is ArrayType && ((ArrayType) other).ElementType is CharType);
+        }
+    }
+
+    public class ArrayType : OberonType
+    {
+        public OberonType ElementType { get; private set; }
+        public int Length { get; private set; }
+
+        public ArrayType(OberonType elementType, int length = -1)
+        {
+            ElementType = elementType;
+            Length = length;
+        }
+
+        public override string ToString()
+        {
+            return String.Format("ARRAY {0}OF {1}", (Length > -1 ? Length + " " : ""), ElementType);
+        }
+
+        public override bool CanTestEquality(OberonType other)
+        {
+            return CanCompare(other);
+        }
+
+        public override bool CanCompare(OberonType other)
+        {
+            if (ElementType is CharType) {
+                if (other is CharType) {
+                    return true;
+                } else if (other is ArrayType) {
+                    var otherArray = (ArrayType) other;
+                    return otherArray.ElementType is CharType;
+                }
+            }
+
+            return false;
+        }
+    }
 
     public class SetType : OberonType
     {
@@ -17,6 +77,16 @@ namespace DUO2C.Semantics
         public override string ToString()
         {
             return "SET";
+        }
+
+        public override bool CanTestEquality(OberonType other)
+        {
+            return other is SetType;
+        }
+
+        public override bool CanCompare(OberonType other)
+        {
+            return false;
         }
     }
 
@@ -27,6 +97,16 @@ namespace DUO2C.Semantics
         public override string ToString()
         {
             return "BOOLEAN";
+        }
+
+        public override bool CanTestEquality(OberonType other)
+        {
+            return other is BooleanType;
+        }
+
+        public override bool CanCompare(OberonType other)
+        {
+            return false;
         }
     }
 
@@ -50,6 +130,16 @@ namespace DUO2C.Semantics
             } else {
                 return b;
             }
+        }
+
+        public override bool CanTestEquality(OberonType other)
+        {
+            return other is NumericType;
+        }
+
+        public override bool CanCompare(OberonType other)
+        {
+            return other is NumericType;
         }
     }
 
