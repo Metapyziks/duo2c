@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 
+using DUO2C.Semantics;
+
 namespace DUO2C.Nodes.Oberon2
 {
     public enum SimpleExprOperator : byte
@@ -25,6 +27,16 @@ namespace DUO2C.Nodes.Oberon2
         public NSimpleExpr Next
         {
             get { return Children.Count() == 1 ? null : (NSimpleExpr) Children.Last(); }
+        }
+
+        public override OberonType FinalType
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public override bool IsConstant
+        {
+            get { throw new NotImplementedException(); }
         }
 
         public NSimpleExpr(ParseNode original)

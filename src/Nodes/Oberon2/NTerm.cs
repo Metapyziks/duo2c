@@ -38,9 +38,23 @@ namespace DUO2C.Nodes.Oberon2
                 if (Next == null) {
                     return Factor.FinalType;
                 } else {
-
+                    if (Operator == TermOperator.And) {
+                        return BooleanType.Default;
+                    } else if (Factor.FinalType is SetType) {
+                        return Factor.FinalType;
+                    } else if (Operator == TermOperator.Divide) {
+                        return NumericType.Largest(RealType.Default,
+                            NumericType.Largest((NumericType) Factor.FinalType, (NumericType) Next.FinalType));
+                    } else {
+                        return NumericType.Largest((NumericType) Factor.FinalType, (NumericType) Next.FinalType);
+                    }
                 }
             }
+        }
+
+        public override bool IsConstant
+        {
+            get { return Factor.IsConstant && (Next == null || Next.IsConstant); }
         }
 
         public NTerm(ParseNode original)
@@ -65,22 +79,25 @@ namespace DUO2C.Nodes.Oberon2
                 }
                 Children = new ParseNode[] { Factor, Next };
 
+                var left = Factor.FinalType;
+                var right = Next.FinalType;
+
                 if (Operator == TermOperator.IntDivide || Operator == TermOperator.Modulo) {
-                    if (!(Factor.FinalType is IntegerType)) {
+                    if (!(left is IntegerType)) {
                         throw new TypeMismatchException(IntegerType.Default, Factor);
-                    } else if (!(Next.FinalType is IntegerType)) {
+                    } else if (!(right is IntegerType)) {
                         throw new TypeMismatchException(IntegerType.Default, Next);
                     }
                 } else if (Operator == TermOperator.And) {
-                    if (!(Factor.FinalType is BooleanType)) {
+                    if (!(left is BooleanType)) {
                         throw new TypeMismatchException(BooleanType.Default, Factor);
-                    } else if (!(Next.FinalType is BooleanType)) {
+                    } else if (!(right is BooleanType)) {
                         throw new TypeMismatchException(BooleanType.Default, Next);
                     }
-                } else {
-                    if (!(Factor.FinalType is NumericType)) {
+                } else if (!(left is SetType) || !(right is SetType)) {
+                    if (!(left is NumericType)) {
                         throw new TypeMismatchException(NumericType.Default, Factor);
-                    } else if (!(Next.FinalType is NumericType)) {
+                    } else if (!(right is NumericType)) {
                         throw new TypeMismatchException(NumericType.Default, Next);
                     }
                 }

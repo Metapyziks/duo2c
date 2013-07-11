@@ -10,6 +10,16 @@ namespace DUO2C.Semantics
 
     public abstract class StaticType : OberonType { }
 
+    public class SetType : OberonType
+    {
+        public static readonly SetType Default = new SetType();
+
+        public override string ToString()
+        {
+            return "SET";
+        }
+    }
+
     public class BooleanType : StaticType
     {
         public static readonly BooleanType Default = new BooleanType();
@@ -28,6 +38,19 @@ namespace DUO2C.Semantics
         {
             return "NUMERIC";
         }
+
+        public static NumericType Largest(NumericType a, NumericType b)
+        {
+            if (a is RealType && b is RealType) {
+                return RealType.Largest((RealType) a, (RealType) b);
+            } else if (a is IntegerType && b is IntegerType) {
+                return IntegerType.Largest((IntegerType) a, (IntegerType) b);
+            } else if (a is RealType) {
+                return a;
+            } else {
+                return b;
+            }
+        }
     }
 
     /// <summary>
@@ -43,7 +66,12 @@ namespace DUO2C.Semantics
 
     public class IntegerType : NumericType
     {
-        public static readonly IntegerType Default = new IntegerType(IntegerRange.Integer);
+        public static readonly new IntegerType Default = new IntegerType(IntegerRange.Integer);
+
+        public static IntegerType Largest(IntegerType a, IntegerType b)
+        {
+            return a.Range >= b.Range ? a : b;
+        }
 
         public IntegerRange Range { get; private set; }
 
@@ -69,7 +97,12 @@ namespace DUO2C.Semantics
 
     public class RealType : NumericType
     {
-        public static readonly RealType Default = new RealType(RealRange.Real);
+        public static readonly new RealType Default = new RealType(RealRange.Real);
+
+        public static RealType Largest(RealType a, RealType b)
+        {
+            return a.Range >= b.Range ? a : b;
+        }
 
         public RealRange Range { get; private set; }
 
