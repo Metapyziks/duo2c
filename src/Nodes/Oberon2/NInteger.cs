@@ -58,7 +58,7 @@ namespace DUO2C.Nodes.Oberon2
         /// </summary>
         /// <param name="original">The original parse node to be substituted</param>
         public NInteger(ParseNode original)
-            : base(original)
+            : base(original, true)
         {
             if (base.String.EndsWith("H")) {
                 // Hex integer literals end with a "H"

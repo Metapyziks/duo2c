@@ -24,7 +24,7 @@ namespace DUO2C.Nodes
         /// </summary>
         /// <param name="original">The original parse node to be substituted</param>
         public NIdent(ParseNode original)
-            : base(original)
+            : base(original, true)
         {
             _string = base.String.Trim();
         }

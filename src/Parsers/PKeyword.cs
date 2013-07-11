@@ -74,7 +74,7 @@ namespace DUO2C.Parsers
             int j = i;
             if (IsMatch(str, ref i, whitespace)) {
                 exception = null;
-                return new LeafNode(i - Keyword.Length, Keyword.Length, Keyword, "keyword");
+                return new ParseNode[] { new LeafNode(i - Keyword.Length, Keyword.Length, Keyword, "keyword") };
             } else {
                 exception = new KeywordExpectedException(Keyword, str, i);
                 return EmptyNodeArray;

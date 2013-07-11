@@ -60,7 +60,7 @@ namespace DUO2C.Parsers
             int j = i;
             if (IsMatch(str, ref i, whitespace)) {
                 exception = null;
-                return new NString(new LeafNode(j, i - j, str.Substring(j, i - j), "string"));
+                return new ParseNode[] { Ruleset.GetSubstitution(new LeafNode(j, i - j, str.Substring(j, i - j), "string")) };
             } else {
                 exception = new StringExpectedException(str, i);
                 return EmptyNodeArray;

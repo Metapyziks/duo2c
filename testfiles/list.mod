@@ -3,7 +3,7 @@
     (*** declare global constants, types and variables ***)
 
     TYPE
-        List*    = POINTER TO ListNode;
+        List*    = POINTER TO Lists.ListNode;
         ListNode = RECORD
             value : Integer;
             next  : List;

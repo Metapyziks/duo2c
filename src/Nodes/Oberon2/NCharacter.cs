@@ -25,7 +25,7 @@ namespace DUO2C.Nodes.Oberon2
         /// </summary>
         /// <param name="original">The original parse node to be substituted</param>
         public NCharacter(ParseNode original)
-            : base(original)
+            : base(original, false)
         {
             Value = (char) ushort.Parse(base.String.Substring(0, base.String.Length - 1), NumberStyles.HexNumber);
         }

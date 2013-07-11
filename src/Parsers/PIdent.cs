@@ -51,7 +51,7 @@ namespace DUO2C.Parsers
             int j = i;
             if (IsMatch(str, ref i, whitespace)) {
                 exception = null;
-                return new LeafNode(j, i - j, str.Substring(j, i - j), "ident");
+                return new ParseNode[] { Ruleset.GetSubstitution(new LeafNode(j, i - j, str.Substring(j, i - j), "ident")) };
             } else {
                 exception = new IdentifierExpectedException(str, i);
                 return EmptyNodeArray;

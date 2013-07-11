@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 
@@ -59,34 +60,61 @@ namespace DUO2C.Nodes
     /// Abstract base class for nodes that substitute generic branch or
     /// leaf nodes and provide some semantical parsing.
     /// </summary>
-    public abstract class SubstituteNode : LeafNode
+    public abstract class SubstituteNode : BranchNode
     {
+        public bool IsLeaf
+        {
+            get; private set;
+        }
+
+        public bool HasPayload
+        {
+            get; private set;
+        }
+
         /// <summary>
         /// Abstract constructor, the parameter list of which must be used
         /// by any extending classes that wish to be used as valid substitution
         /// nodes.
         /// </summary>
         /// <param name="original">The original parse node to be substituted</param>
-        public SubstituteNode(ParseNode original)
-            : base(original.StartIndex, original.Length,
-                original.String, original.Token) { }
+        public SubstituteNode(ParseNode original, bool leaf = true, bool hasPayload = true)
+            : base(original is BranchNode
+                ? ((BranchNode) original).Children
+                : new ParseNode[] { original }, original.Token)
+        {
+            IsLeaf = leaf;
+            HasPayload = hasPayload;
+        }
 
-        public override string ToString(String indent)
+        public override String SerializeXML()
         {
             var attribs = new List<String> {
                 String.Format("index=\"{0}\"", StartIndex),
                 String.Format("length=\"{0}\"", Length)
             };
+
             foreach (var prop in GetType().GetProperties()) {
                 var attrib = prop.GetCustomAttribute<SerializeAttribute>();
                 if (attrib != null) {
-                    attribs.Add(String.Format("{0}=\"{1}\"", attrib.Name,
-                        prop.GetValue(this).ToString()));
+                    var val = prop.GetValue(this);
+                    if (val != null) {
+                        attribs.Add(String.Format("{0}=\"{1}\"", attrib.Name,
+                            prop.GetValue(this).ToString()));
+                    }
                 }
             }
 
-            return String.Format("{0}<{1} {2}>{3}</{1}>",
-                indent, Token, String.Join(" ", attribs), String);
+            if (!HasPayload) {
+                return String.Format("<{0} {1} />", Token, String.Join(" ", attribs));
+            } if (IsLeaf) {
+                return String.Format("<{0} {1}>{2}</{0}>", Token, String.Join(" ", attribs), String);
+            } else {
+                var nl = Environment.NewLine;
+                return String.Format("<{0} {1}>", Token, String.Join(" ", attribs))
+                    + (Children.Count() > 0 ? nl + String.Join(nl, Children.Select(x => x.SerializeXML())) : "")
+                        .Replace("\n", "\n  ") + nl + String.Format("</{0}>", Token);
+            }
         }
     }
 }

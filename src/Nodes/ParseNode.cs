@@ -53,15 +53,13 @@ namespace DUO2C.Nodes
 
         public override String ToString()
         {
-            return ToString(String.Empty);
+            return SerializeXML();
         }
 
         /// <summary>
-        /// Converts the value of this instance to a System.String, allowing
-        /// for the result to be indented using a specified prefix.
+        /// Converts the value of this instance to a System.String.
         /// </summary>
-        /// <param name="indent">Prefix to indent the result with</param>
         /// <returns>System.String representing the value of this instance</returns>
-        public abstract String ToString(String indent);
+        public abstract String SerializeXML();
     }
 }

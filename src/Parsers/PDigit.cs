@@ -49,7 +49,7 @@ namespace DUO2C.Parsers
             int j = i;
             if (IsMatch(str, ref j, whitespace)) {
                 exception = null;
-                return new LeafNode(i, 1, str[i].ToString(), "digit");
+                return new ParseNode[] { new LeafNode(i, 1, str[i].ToString(), "digit") };
             } else {
                 exception = new DigitExpectedException(str, i);
                 return EmptyNodeArray;

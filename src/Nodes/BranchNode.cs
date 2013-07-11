@@ -33,7 +33,7 @@ namespace DUO2C.Nodes
         /// <summary>
         /// Collection of child nodes within this node.
         /// </summary>
-        public IEnumerable<ParseNode> Children { get; private set; }
+        public IEnumerable<ParseNode> Children { get; protected set; }
 
         public override bool IsNull
         {
@@ -74,13 +74,12 @@ namespace DUO2C.Nodes
             Children = new ParseNode[0];
         }
 
-        public override String ToString(string indent)
+        public override String SerializeXML()
         {
             var nl = Environment.NewLine;
-            var nextIndent = indent + "  ";
-            return String.Format("{0}<{1} index=\"{2}\" length=\"{3}\">", indent, Token, StartIndex, Length)
-                + nl + String.Join(nl, Children.Select(x => x.ToString(nextIndent)))
-                + nl + indent + String.Format("</{0}>", Token);
+            return String.Format("<{0} index=\"{1}\" length=\"{2}\">", Token, StartIndex, Length)
+                + (Children.Count() > 0 ? nl + String.Join(nl, Children.Select(x => x.SerializeXML())) : "")
+                    .Replace("\n", "\n  ") + nl + String.Format("</{0}>", Token);
         }
 
         public IEnumerator<ParseNode> GetEnumerator()
@@ -90,7 +89,7 @@ namespace DUO2C.Nodes
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return Children.GetEnumerator();
+            return GetEnumerator();
         }
     }
 }

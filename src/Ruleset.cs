@@ -93,7 +93,7 @@ namespace DUO2C
         {
             if (nodes.Count() == 1) {
                 // If there is only one node, expect a literal or rule reference
-                var node = (LeafNode) nodes.First();
+                var node = nodes.First();
                 if (node.Token == "string") {
                     // String literals are keywords
                     return ruleset.CreateKeywordParser(node.String);
@@ -424,7 +424,7 @@ namespace DUO2C
         {
             foreach (var t in Assembly.GetExecutingAssembly().GetTypes().Where(t => {
                 return t.Extends(typeof(SubstituteNode)) && t.Namespace.StartsWith(ns)
-                    && (recursive || t.Namespace == ns);
+                    && (recursive || t.Namespace == ns) && t.GetCustomAttribute<SubstituteTokenAttribute>() != null;
             })) AddSubstitution(t);
         }
 

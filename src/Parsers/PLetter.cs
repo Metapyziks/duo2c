@@ -49,7 +49,7 @@ namespace DUO2C.Parsers
             int j = i;
             if (IsMatch(str, ref j, whitespace)) {
                 exception = null;
-                return new LeafNode(i, 1, str[i].ToString(), "letter");
+                return new ParseNode[] { new LeafNode(i, 1, str[i].ToString(), "letter") };
             } else {
                 exception = new LetterExpectedException(str, i);
                 return EmptyNodeArray;

@@ -6,12 +6,12 @@ TypeDecl      = IdentDef "=" Type.
 VarDecl       = IdentList ":" Type.
 ProcDecl      = PROCEDURE [Receiver] IdentDef [FormalPars] ";" DeclSeq [BEGIN StatementSeq] END ident.
 ForwardDecl   = PROCEDURE "^" [Receiver] IdentDef [FormalPars].
-FormalPars    = "(" [FPSection {";" FPSection}] ")" [":" Qualident].
+FormalPars    = "(" [FPSection {";" FPSection}] ")" [":" QualIdent].
 FPSection     = [VAR] ident {"," ident} ":" Type.
 Receiver      = "(" [VAR] ident ":" ident ")".
-Type          = Qualident
+Type          = QualIdent
               | ARRAY [ConstExpr {"," ConstExpr}] OF Type
-              | RECORD ["("Qualident")"] FieldList {";" FieldList} END
+              | RECORD ["("QualIdent")"] FieldList {";" FieldList} END
               | POINTER TO Type
               | PROCEDURE [FormalPars].
 FieldList     = [IdentList ":" Type].
@@ -26,11 +26,10 @@ Statement     = [ Designator ":=" Expr
               | LOOP StatementSeq END
               | WITH Guard DO StatementSeq {"|" Guard DO StatementSeq} [ELSE StatementSeq] END
               | EXIT
-              | RETURN [Expr]
-      ].        
+              | RETURN [Expr] ].
 Case          = [CaseLabels {"," CaseLabels} ":" StatementSeq].
 CaseLabels    = ConstExpr [".." ConstExpr].
-Guard         = Qualident ":" Qualident.
+Guard         = QualIdent ":" QualIdent.
 ConstExpr     = Expr.
 Expr          = SimpleExpr [Relation SimpleExpr].
 SimpleExpr    = ["+" | "-"] Term {AddOp Term}.
@@ -41,10 +40,10 @@ Element       = Expr [".." Expr].
 Relation      = "=" | "#" | "<" | "<=" | ">" | ">=" | IN | IS.
 AddOp         = "+" | "-" | OR.
 MulOp         = "*" | "/" | DIV | MOD | "&".
-Designator    = Qualident {"." ident | "[" ExprList "]" | "^" | "(" Qualident ")"}.
+Designator    = QualIdent {"." ident | "[" ExprList "]" | "^" | "(" QualIdent ")"}.
 ExprList      = Expr {"," Expr}.
 IdentList     = IdentDef {"," IdentDef}.
-Qualident     = [ident "."] ident.
+QualIdent     = [ident "."] ident.
 IdentDef      = ident ["*" | "-"].
 character     = digit {hexDigit} "X".
 number        = integer | real.

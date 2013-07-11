@@ -33,12 +33,11 @@ namespace DUO2C.Nodes.Oberon2
         public RealType Type { get; private set; }
 
         /// <summary>
-        /// Constructor to create a new real number substitution
-        /// node.
+        /// Constructor to create a new real number substitution node.
         /// </summary>
         /// <param name="original">The original parse node to be substituted</param>
         public NReal(ParseNode original)
-            : base(original)
+            : base(original, true)
         {
             int expStart = Math.Max(base.String.IndexOf('E'), base.String.IndexOf('D'));
             if (expStart == -1) {

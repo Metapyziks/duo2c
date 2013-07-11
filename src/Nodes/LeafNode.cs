@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Collections.Generic;
 
 namespace DUO2C.Nodes
@@ -6,7 +7,7 @@ namespace DUO2C.Nodes
     /// <summary>
     /// Represents nodes that cannot contain children.
     /// </summary>
-    public class LeafNode : ParseNode, IEnumerable<ParseNode>
+    public class LeafNode : ParseNode
     {
         private String _string;
         public override String String { get { return _string; } }
@@ -26,20 +27,10 @@ namespace DUO2C.Nodes
             _string = str;
         }
 
-        public override String ToString(String indent)
+        public override string SerializeXML()
         {
-            return String.Format("{0}<{1} index=\"{2}\" length=\"{3}\">{4}</{1}>",
-                indent, Token, StartIndex, Length, _string);
-        }
-
-        public IEnumerator<ParseNode> GetEnumerator()
-        {
-            yield return this; // Oh wow
-        }
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
+            return String.Format("<{0} index=\"{1}\" length=\"{2}\">{3}</{0}>",
+                Token, StartIndex, Length, String);
         }
     }
 }
