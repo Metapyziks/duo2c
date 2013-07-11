@@ -44,20 +44,15 @@ namespace DUO2C.Parsers
             i = init; return false;
         }
 
-        public override ParseNode Parse(string str, ref int i, bool whitespace)
+        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out ParserException exception)
         {
-            if (whitespace) SkipWhitespace(str, ref i);
-            return new LeafNode(i, 1, str[i++].ToString(), "digit");
-        }
-
-        public override IEnumerable<int> FindSyntaxError(string str, int i, bool whitespace, out ParserException exception)
-        {
-            if (IsMatch(str, ref i, whitespace)) {
+            int j = i;
+            if (IsMatch(str, ref j, whitespace)) {
                 exception = null;
-                return new int[] { i };
+                return new LeafNode(i, 1, str[i].ToString(), "digit");
             } else {
                 exception = new DigitExpectedException(str, i);
-                return EmptyIndexArray;
+                return EmptyNodeArray;
             }
         }
 

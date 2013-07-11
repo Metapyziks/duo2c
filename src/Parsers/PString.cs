@@ -55,22 +55,15 @@ namespace DUO2C.Parsers
         }
 
         // TODO: Add proper support for escape characters
-        public override ParseNode Parse(string str, ref int i, bool whitespace)
+        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out ParserException exception)
         {
-            if (whitespace) SkipWhitespace(str, ref i);
             int j = i;
-            IsMatch(str, ref i, whitespace);
-            return new LeafNode(j, i - j, str.Substring(j + 1, i - j - 2), "string");
-        }
-
-        public override IEnumerable<int> FindSyntaxError(string str, int i, bool whitespace, out ParserException exception)
-        {
             if (IsMatch(str, ref i, whitespace)) {
                 exception = null;
-                return new int[] { i };
+                return new LeafNode(j, i - j, str.Substring(j + 1, i - j - 2), "string");
             } else {
                 exception = new StringExpectedException(str, i);
-                return EmptyIndexArray;
+                return EmptyNodeArray;
             }
         }
 

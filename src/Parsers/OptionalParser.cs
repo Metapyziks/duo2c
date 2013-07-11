@@ -36,7 +36,7 @@ namespace DUO2C.Parsers
         public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out ParserException exception)
         {
             exception = null;
-            SortedSet<ParseNode> nodes = new SortedSet<ParseNode>();
+            SortedSet<ParseNode> nodes = new SortedSet<ParseNode>(NodeComparer);
             List<ParseNode> leftNodes;
             if (Left != null) {
                 leftNodes = Left.Parse(str, i, whitespace, out exception).ToList();

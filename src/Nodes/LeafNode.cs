@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DUO2C.Nodes
 {
     /// <summary>
     /// Represents nodes that cannot contain children.
     /// </summary>
-    public class LeafNode : ParseNode
+    public class LeafNode : ParseNode, IEnumerable<ParseNode>
     {
         private String _string;
         public override String String { get { return _string; } }
@@ -29,6 +30,16 @@ namespace DUO2C.Nodes
         {
             return String.Format("{0}<{1} index=\"{2}\" length=\"{3}\">{4}</{1}>",
                 indent, Token, StartIndex, Length, _string);
+        }
+
+        public IEnumerator<ParseNode> GetEnumerator()
+        {
+            yield return this; // Oh wow
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

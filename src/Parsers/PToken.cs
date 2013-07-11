@@ -125,40 +125,33 @@ namespace DUO2C.Parsers
             i = init; return false;
         }
 
-        public override ParseNode Parse(string str, ref int i, bool whitespace)
-        {
-            // Trigger parsing event
-            if (Parsed != null) Parsed(this, new EventArgs());
-
-            if (IgnoreWhitespace) SkipWhitespace(str, ref i);
-            var node = Parser.Parse(str, ref i, IgnoreWhitespace);
-            if (Flatten) {
-                node = new LeafNode(node.SourceIndex, node.Length, node.String, Token);
-            } else if (node.Token == null) {
-                // If the produced node has no token, use the
-                // this token name
-                node.Token = Token;
-            } else {
-                // Otherwise, encapsulate with a new node with this
-                // token name
-                node = new BranchNode(new ParseNode[] { node }, Token);
-            }
-
-            if (_subCtor != null) {
-                node = (ParseNode) _subCtor.Invoke(new Object[] { node });
-            }
-
-            return node;
-        }
-
-        public override IEnumerable<int> FindSyntaxError(string str, int i, bool whitespace, out ParserException exception)
+        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out ParserException exception)
         {
             if (IgnoreWhitespace) SkipWhitespace(str, ref i);
-            var indices = Parser.FindSyntaxError(str, i, IgnoreWhitespace, out exception);
-            if (indices.Count() == 0) {
+            var nodes = Parser.Parse(str, i, IgnoreWhitespace, out exception);
+            if (nodes.Count() == 0) {
                 exception = ChooseParserException(exception, new TokenExpectedException(Token, str, i));
             }
-            return indices;
+            nodes = nodes.Select(node => {
+                if (Flatten) {
+                    node = new LeafNode(node.StartIndex, node.Length, node.String, Token);
+                } else if (node.Token == null) {
+                    // If the produced node has no token, use the
+                    // this token name
+                    node.Token = Token;
+                } else {
+                    // Otherwise, encapsulate with a new node with this
+                    // token name
+                    node = new BranchNode(new ParseNode[] { node }, Token);
+                }
+
+                if (_subCtor != null) {
+                    node = (ParseNode) _subCtor.Invoke(new Object[] { node });
+                }
+
+                return node;
+            }).ToArray();
+            return nodes;
         }
 
         public override string ToString()

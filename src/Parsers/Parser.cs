@@ -13,7 +13,7 @@ namespace DUO2C.Parsers
     /// </summary>
     public abstract class Parser : IEnumerable<Parser>
     {
-        protected static readonly IEnumerable<int> EmptyIndexArray = new int[0];
+        protected static readonly IEnumerable<ParseNode> EmptyNodeArray = new ParseNode[0];
         protected static readonly IComparer<ParseNode> NodeComparer = Comparer<ParseNode>.Create((a, b) => {
             return a.EndIndex - b.EndIndex;
         });
