@@ -197,7 +197,6 @@ namespace DUO2C
         {
             // Parse the syntax structure
             var tree = (BranchNode) GetEBNFRuleset().ParseString(bnf);
-            File.WriteAllText("oberon2.syntax", tree.ToString());
             var parsed = new Ruleset();
 
             // Prepare a list of rules to build after all tokens are declared
@@ -260,8 +259,8 @@ namespace DUO2C
         public ParseNode ParseString(String str)
         {
             ParserException error;
-            var tree = _root.Parse(str, 0, true, out error).Last();
-            if (tree.EndIndex < str.TrimEnd().Length) throw error;
+            var tree = _root.Parse(str, 0, true, out error).LastOrDefault();
+            if (tree == null || tree.EndIndex < str.TrimEnd().Length) throw error;
             return tree;
         }
 
