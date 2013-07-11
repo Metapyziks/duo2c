@@ -43,9 +43,11 @@
   <ItemGroup>
     <Compile Include="src\Nodes\BranchNode.cs" />
     <Compile Include="src\Nodes\LeafNode.cs" />
-    <Compile Include="src\Nodes\NCharacter.cs" />
-    <Compile Include="src\Nodes\NInteger.cs" />
-    <Compile Include="src\Nodes\NReal.cs" />
+    <Compile Include="src\Nodes\Oberon2\NCharacter.cs" />
+    <Compile Include="src\Nodes\NIdent.cs" />
+    <Compile Include="src\Nodes\Oberon2\NInteger.cs" />
+    <Compile Include="src\Nodes\Oberon2\NReal.cs" />
+    <Compile Include="src\Nodes\NString.cs" />
     <Compile Include="src\Nodes\ParseNode.cs" />
     <Compile Include="src\Nodes\SubstituteNode.cs" />
     <Compile Include="src\Parsers\BinaryParser.cs" />
@@ -64,6 +66,7 @@
     <Compile Include="src\Ruleset.cs" />
     <Compile Include="src\Program.cs" />
     <Compile Include="src\Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Tools.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="oberon2.txt">
@@ -73,6 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+    <Folder Include="src\Nodes\EBNF\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace DUO2C.Nodes
+namespace DUO2C.Nodes.Oberon2
 {
     /// <summary>
     /// An enumeration of all real number types in Oberon-2
     /// </summary>
-    enum RealType : byte
+    public enum RealType : byte
     {
         REAL = 4,
         LONGREAL = 8
@@ -15,7 +15,7 @@ namespace DUO2C.Nodes
     /// Substitution node for real numbers.
     /// </summary>
     [SubstituteToken("real")]
-    class NReal : SubstituteNode
+    public class NReal : SubstituteNode
     {
         /// <summary>
         /// The parsed value of the real number.

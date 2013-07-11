@@ -1,12 +1,12 @@
 ﻿using System.Globalization;
 
-namespace DUO2C.Nodes
+namespace DUO2C.Nodes.Oberon2
 {
     /// <summary>
     /// Substitution node for characters.
     /// </summary>
     [SubstituteToken("character")]
-    class NCharacter : SubstituteNode
+    public class NCharacter : SubstituteNode
     {
         /// <summary>
         /// The parsed value of the character.

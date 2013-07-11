@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
+using System.Reflection;
 using DUO2C.Nodes;
 using DUO2C.Parsers;
 
@@ -173,11 +173,11 @@ namespace DUO2C
                 var rTerm = ruleset.CreateTokenParser("Term");
 
                 // Define production rules
-                ruleset.Add(rSyntax, null * (+rRule));
-                ruleset.Add(rRule, +ident[+flat] + eq + rExpr + fs);
-                ruleset.Add(rExpr, +rList * (+pipe + rList));
-                ruleset.Add(rList, +rTerm * (+rTerm));
-                ruleset.Add(rTerm, (+pbOpen + rExpr + pbClose)
+                ruleset.AddRule(rSyntax, null * (+rRule));
+                ruleset.AddRule(rRule, +ident[+flat] + eq + rExpr + fs);
+                ruleset.AddRule(rExpr, +rList * (+pipe + rList));
+                ruleset.AddRule(rList, +rTerm * (+rTerm));
+                ruleset.AddRule(rTerm, (+pbOpen + rExpr + pbClose)
                                  | (+sbOpen +rExpr +sbClose)
                                  | (+cbOpen +rExpr +cbClose)
                                  | +str
@@ -220,7 +220,7 @@ namespace DUO2C
 
             // Build rules
             foreach (var rule in toBuild) {
-                parsed.Add(rule.Key, BuildExpr(parsed, rule.Value));
+                parsed.AddRule(rule.Key, BuildExpr(parsed, rule.Value));
             }
 
             return parsed;
@@ -228,6 +228,7 @@ namespace DUO2C
 
         Parser _root;
         Dictionary<PToken, Parser> _rules;
+        Dictionary<String, ConstructorInfo> _subs;
         SortedSet<String> _keywords;
 
         /// <summary>
@@ -236,7 +237,10 @@ namespace DUO2C
         public Ruleset()
         {
             _rules = new Dictionary<PToken, Parser>();
+            _subs = new Dictionary<String, ConstructorInfo>();
             _keywords = new SortedSet<String>();
+
+            AddSubstitutionNS(typeof(SubstituteNode).Namespace, false);            
         }
 
         /// <summary>
@@ -339,7 +343,7 @@ namespace DUO2C
         /// </summary>
         /// <param name="token">Token to assign the new production rule to</param>
         /// <param name="parser">Parser describing the production rule</param>
-        public void Add(PToken token, Parser parser)
+        public void AddRule(PToken token, Parser parser)
         {
             var prev = _rules[token];
             if (prev == null) {
@@ -369,6 +373,79 @@ namespace DUO2C
         public Parser GetReferencedParser(PToken token)
         {
             return _rules[token];
+        }
+
+        /// <summary>
+        /// Adds a substitution type with either a given token name to
+        /// substitute, or the default token for that type.
+        /// </summary>
+        /// <param name="subType">The type that will be substituted in</param>
+        /// <param name="token">Token type to substitute (Optional)</param>
+        public void AddSubstitution(Type subType, String token = null)
+        {
+            if (token == null) {
+                var attrib = subType.GetCustomAttribute<SubstituteTokenAttribute>();
+                if (attrib != null) {
+                    token = attrib.Token;
+                } else {
+                    throw new Exception(String.Format("No token specified when adding the substitution type \"{0}\".",
+                        subType.FullName));
+                }
+            }
+
+            var ctor = subType.GetConstructor(new Type[] { typeof(ParseNode) });
+            if (ctor != null) {
+                if (_subs.ContainsKey(token)) {
+                    _subs[token] = ctor;
+                } else {
+                    _subs.Add(token, ctor);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adds a substitution type with either a given token name to
+        /// substitute, or the default token for that type.
+        /// </summary>
+        /// <typeparam name="T">The type that will be substituted in</typeparam>
+        /// <param name="token">Token type to substitute (Optional)</param>
+        public void AddSubstitution<T>(String token = null)
+            where T : SubstituteNode
+        {
+            AddSubstitution(typeof(T), token);
+        }
+
+        /// <summary>
+        /// Adds all types in the given namespace to the substitution dictionary.
+        /// </summary>
+        /// <param name="ns">Namespace to add</param>
+        /// <param name="recursive">Add sub-namespaces too</param>
+        public void AddSubstitutionNS(String ns, bool recursive = false)
+        {
+            foreach (var t in Assembly.GetExecutingAssembly().GetTypes().Where(t => {
+                return t.Extends(typeof(SubstituteNode)) && t.Namespace.StartsWith(ns)
+                    && (recursive || t.Namespace == ns);
+            })) AddSubstitution(t);
+        }
+
+        /// <summary>
+        /// Attempts to substitute a node with a previously registered
+        /// substitution if one exists, returning the result.
+        /// </summary>
+        /// <param name="node">The node to be substituted</param>
+        /// <returns>The substitution if one is found, otherwise the original node</returns>
+        public ParseNode GetSubstitution(ParseNode node)
+        {
+            if (node.Token == null || !_subs.ContainsKey(node.Token)) {
+                return node;
+            } else {
+                var type = _subs[node.Token];
+                if (node.GetType() == type) {
+                    return node;
+                } else {
+                    return (ParseNode) _subs[node.Token].Invoke(new Object[] { node });
+                }
+            }
         }
 
         public IEnumerator<KeyValuePair<PToken, Parser>> GetEnumerator()

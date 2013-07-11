@@ -60,7 +60,7 @@ namespace DUO2C.Parsers
             int j = i;
             if (IsMatch(str, ref i, whitespace)) {
                 exception = null;
-                return new LeafNode(j, i - j, str.Substring(j + 1, i - j - 2), "string");
+                return new NString(new LeafNode(j, i - j, str.Substring(j, i - j), "string"));
             } else {
                 exception = new StringExpectedException(str, i);
                 return EmptyNodeArray;

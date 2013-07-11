@@ -79,7 +79,7 @@ namespace DUO2C.Nodes
             var nl = Environment.NewLine;
             var nextIndent = indent + "  ";
             return String.Format("{0}<{1} index=\"{2}\" length=\"{3}\">", indent, Token, StartIndex, Length)
-                + nl + String.Join(nl, Children.Select(x => (x != null ? x.ToString(nextIndent) : "null")))
+                + nl + String.Join(nl, Children.Select(x => x.ToString(nextIndent)))
                 + nl + indent + String.Format("</{0}>", Token);
         }
 

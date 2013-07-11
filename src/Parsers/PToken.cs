@@ -59,7 +59,6 @@ namespace DUO2C.Parsers
         }
 
         private Parser _parser;
-        private ConstructorInfo _subCtor;
 
         /// <summary>
         /// Property that hides retrieving the parser referenced by
@@ -77,18 +76,6 @@ namespace DUO2C.Parsers
         }
 
         /// <summary>
-        /// Event used for debugging purposes when this token is about
-        /// to be tested for a match.
-        /// </summary>
-        public event EventHandler MatchTested;
-
-        /// <summary>
-        /// Event used for debugging purposes when this token is about
-        /// to be parsed.
-        /// </summary>
-        public event EventHandler Parsed;
-
-        /// <summary>
         /// Constructor to create a new token reference parser.
         /// </summary>
         /// <param name="ruleset">Ruleset that represents the grammar that
@@ -103,22 +90,10 @@ namespace DUO2C.Parsers
 
             Token = token;
             Flatten = flatten;
-
-            var subType = Assembly.GetExecutingAssembly().GetTypes().Where(x => {
-                var attrib = x.GetCustomAttribute<SubstituteTokenAttribute>();
-                return attrib != null && attrib.Token == Token;
-            }).FirstOrDefault();
-
-            if (subType != null) {
-                _subCtor = subType.GetConstructor(new Type[] { typeof(ParseNode) });
-            }
         }
 
         public override bool IsMatch(string str, ref int i, bool whitespace)
         {
-            // Trigger matching event
-            if (MatchTested != null) MatchTested(this, new EventArgs());
-
             int init = i;
             if (IgnoreWhitespace) SkipWhitespace(str, ref i);
             if (Parser.IsMatch(str, ref i, IgnoreWhitespace)) return true;
@@ -145,11 +120,7 @@ namespace DUO2C.Parsers
                     node = new BranchNode(new ParseNode[] { node }, Token);
                 }
 
-                if (_subCtor != null) {
-                    node = (ParseNode) _subCtor.Invoke(new Object[] { node });
-                }
-
-                return node;
+                return Ruleset.GetSubstitution(node);
             }).ToArray();
             return nodes;
         }

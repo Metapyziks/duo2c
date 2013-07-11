@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Globalization;
 
-namespace DUO2C.Nodes
+namespace DUO2C.Nodes.Oberon2
 {
     /// <summary>
     /// An enumeration of all integer types in Oberon-2
     /// </summary>
-    enum IntegerType : byte
+    public enum IntegerType : byte
     {
         BYTE = 1,
         SHORTINT = 2,
@@ -18,7 +18,7 @@ namespace DUO2C.Nodes
     /// Substitution node for integers.
     /// </summary>
     [SubstituteToken("integer")]
-    class NInteger : SubstituteNode
+    public class NInteger : SubstituteNode
     {
         /// <summary>
         /// The parsed value of the integer.

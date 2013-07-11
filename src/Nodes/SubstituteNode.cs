@@ -9,7 +9,7 @@ namespace DUO2C.Nodes
     /// node should substitute.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
-    class SubstituteTokenAttribute : Attribute
+    public class SubstituteTokenAttribute : Attribute
     {
         /// <summary>
         /// The token that is matched and substituted by the class
@@ -36,7 +36,7 @@ namespace DUO2C.Nodes
     /// attribute name.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    class SerializeAttribute : Attribute
+    public class SerializeAttribute : Attribute
     {
         /// <summary>
         /// Attribute name to use when serializing the property
@@ -59,7 +59,7 @@ namespace DUO2C.Nodes
     /// Abstract base class for nodes that substitute generic branch or
     /// leaf nodes and provide some semantical parsing.
     /// </summary>
-    abstract class SubstituteNode : LeafNode
+    public abstract class SubstituteNode : LeafNode
     {
         /// <summary>
         /// Abstract constructor, the parameter list of which must be used

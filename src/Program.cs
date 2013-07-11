@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Reflection;
 using System.IO;
 
 namespace DUO2C
@@ -14,6 +15,8 @@ namespace DUO2C
                     Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().MainModule.FileName));
             } else {
                 var ruleset = Ruleset.FromString(File.ReadAllText("oberon2.txt"));
+                ruleset.AddSubstitutionNS("DUO2C.Nodes.Oberon2", true);
+
                 try {
                     var tree = ruleset.ParseFile(args[0]);
                     var outpath = Path.GetDirectoryName(args[0])
