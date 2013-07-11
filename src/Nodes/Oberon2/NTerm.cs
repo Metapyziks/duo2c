@@ -41,7 +41,7 @@ namespace DUO2C.Nodes.Oberon2
                     if (Operator == TermOperator.And) {
                         return BooleanType.Default;
                     } else if (Factor.FinalType is SetType) {
-                        return Factor.FinalType;
+                        return SetType.Default;
                     } else if (Operator == TermOperator.Divide) {
                         return NumericType.Largest(RealType.Default,
                             NumericType.Largest((NumericType) Factor.FinalType, (NumericType) Next.FinalType));

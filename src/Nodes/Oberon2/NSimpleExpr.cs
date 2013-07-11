@@ -31,12 +31,25 @@ namespace DUO2C.Nodes.Oberon2
 
         public override OberonType FinalType
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                if (Next == null) {
+                    return Term.FinalType;
+                } else {
+                    if (Operator == SimpleExprOperator.Or) {
+                        return BooleanType.Default;
+                    } else if (Term.FinalType is SetType) {
+                        return SetType.Default;
+                    } else {
+                        return NumericType.Largest((NumericType) Term.FinalType, (NumericType) Next.FinalType);
+                    }
+                }
+            }
         }
 
         public override bool IsConstant
         {
-            get { throw new NotImplementedException(); }
+            get { return Term.IsConstant && (Next == null || Next.IsConstant); }
         }
 
         public NSimpleExpr(ParseNode original)
@@ -56,6 +69,23 @@ namespace DUO2C.Nodes.Oberon2
                         Operator = SimpleExprOperator.None; break;
                 }
                 Children = new ParseNode[] { Term, Next };
+
+                var left = Term.FinalType;
+                var right = Next.FinalType;
+
+                if (Operator == SimpleExprOperator.Or) {
+                    if (!(left is BooleanType)) {
+                        throw new TypeMismatchException(BooleanType.Default, Term);
+                    } else if (!(right is BooleanType)) {
+                        throw new TypeMismatchException(BooleanType.Default, Next);
+                    }
+                } else if (!(left is SetType) || !(right is SetType)) {
+                    if (!(left is NumericType)) {
+                        throw new TypeMismatchException(NumericType.Default, Term);
+                    } else if (!(right is NumericType)) {
+                        throw new TypeMismatchException(NumericType.Default, Next);
+                    }
+                }
             }
         }
     }
