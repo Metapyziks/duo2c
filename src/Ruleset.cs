@@ -431,6 +431,12 @@ namespace DUO2C
                 return t.Extends(typeof(SubstituteNode)) && t.Namespace.StartsWith(ns)
                     && (recursive || t.Namespace == ns) && t.GetCustomAttribute<SubstituteTokenAttribute>() != null;
             })) AddSubstitution(t);
+
+            foreach (var rule in _rules) {
+                if (!_subs.ContainsKey(rule.Key.Token)) {
+                    System.Diagnostics.Debug.WriteLine("WARNING: No substitute defined for {0}!", (Object) rule.Key.Token);
+                }
+            }
         }
 
         /// <summary>

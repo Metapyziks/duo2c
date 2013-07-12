@@ -17,6 +17,8 @@ namespace DUO2C.Nodes.Oberon2
 
         [Serialize("type")]
         public abstract OberonType FinalType { get; }
+
+        [Serialize("const")]
         public abstract bool IsConstant { get; }
 
         public abstract IEnumerable<ParserException> CheckTypes();

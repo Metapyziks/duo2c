@@ -16,24 +16,25 @@ Type          = QualIdent
               | PROCEDURE [FormalPars].
 FieldList     = [IdentList ":" Type].
 StatementSeq  = Statement {";" Statement}.
-Statement     = [ Designator ":=" Expr
-              | Invocation
-              | IF Expr THEN StatementSeq {ELSIF Expr THEN StatementSeq} [ELSE StatementSeq] END
-              | CASE Expr OF Case {"|" Case} [ELSE StatementSeq] END
-              | WHILE Expr DO StatementSeq END
-              | REPEAT StatementSeq UNTIL Expr
-              | FOR ident ":=" Expr TO Expr [BY ConstExpr] DO StatementSeq END
-              | LOOP StatementSeq END
-              | WITH Guard DO StatementSeq {"|" Guard DO StatementSeq} [ELSE StatementSeq] END
-              | EXIT
-              | RETURN [Expr] ].
+Statement     = [ Assignment | Invocation | IfThenElse | SwitchCase | WhileLoop | RepeatUntil
+              | ForLoop | UncondLoop | WithDo | Exit | Return ].
+Assignment    = Designator ":=" Expr.
+IfThenElse    = IF Expr THEN StatementSeq {ELSIF Expr THEN StatementSeq} [ELSE StatementSeq] END.
+SwitchCase    = CASE Expr OF Case {"|" Case} [ELSE StatementSeq] END.
+WhileLoop     = WHILE Expr DO StatementSeq END.
+RepeatUntil   = REPEAT StatementSeq UNTIL Expr.
+ForLoop       = FOR ident ":=" Expr TO Expr [BY ConstExpr] DO StatementSeq END.
+UncondLoop    = LOOP StatementSeq END.
+WithDo        = WITH Guard DO StatementSeq {"|" Guard DO StatementSeq} [ELSE StatementSeq] END.
+Exit          = EXIT.
+Return        = RETURN [Expr].
 Case          = [CaseLabels {"," CaseLabels} ":" StatementSeq].
 CaseLabels    = ConstExpr [".." ConstExpr].
 Guard         = QualIdent ":" QualIdent.
 ConstExpr     = Expr.
 Expr          = SimpleExpr [Relation SimpleExpr].
-SimpleExpr    = Term [AddOp SimpleExpr].
-Term          = Factor [MulOp Term].
+SimpleExpr    = Term {AddOp Term}.
+Term          = Factor {MulOp Factor}.
 Factor        = Invocation | number | character | string | Nil | Set | "(" Expr ")" | Unary.
 Nil           = NIL.
 Unary         = ("+" | "-" | "~") Factor.

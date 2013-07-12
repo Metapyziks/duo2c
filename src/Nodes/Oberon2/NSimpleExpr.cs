@@ -20,21 +20,21 @@ namespace DUO2C.Nodes.Oberon2
         [Serialize("operator", SimpleExprOperator.None)]
         public SimpleExprOperator Operator { get; private set; }
 
-        public NTerm Term
+        public NSimpleExpr Prev
         {
-            get { return (NTerm) Children.First(); }
+            get { return Children.Count() == 1 ? null : (NSimpleExpr) Children.First(); }
         }
 
-        public NSimpleExpr Next
+        public NTerm Term
         {
-            get { return Children.Count() == 1 ? null : (NSimpleExpr) Children.Last(); }
+            get { return (NTerm) Children.Last(); }
         }
 
         public override OberonType FinalType
         {
             get
             {
-                if (Next == null) {
+                if (Prev == null) {
                     return Term.FinalType;
                 } else {
                     if (Operator == SimpleExprOperator.Or) {
@@ -42,7 +42,7 @@ namespace DUO2C.Nodes.Oberon2
                     } else if (Term.FinalType is SetType) {
                         return SetType.Default;
                     } else {
-                        return NumericType.Largest((NumericType) Term.FinalType, (NumericType) Next.FinalType);
+                        return NumericType.Largest((NumericType) Term.FinalType, (NumericType) Prev.FinalType);
                     }
                 }
             }
@@ -50,7 +50,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override bool IsConstant
         {
-            get { return Term.IsConstant && (Next == null || Next.IsConstant); }
+            get { return Term.IsConstant && (Prev == null || Prev.IsConstant); }
         }
 
         public NSimpleExpr(ParseNode original)
@@ -59,7 +59,9 @@ namespace DUO2C.Nodes.Oberon2
             if (Children.Count() == 1) {
                 Operator = SimpleExprOperator.None;
             } else {
-                switch (Children.ElementAt(1).String) {
+                var op = Children.ElementAt(Children.Count() - 2);
+
+                switch (op.String) {
                     case "+":
                         Operator = SimpleExprOperator.Add; break;
                     case "-":
@@ -70,7 +72,10 @@ namespace DUO2C.Nodes.Oberon2
                         Operator = SimpleExprOperator.None; break;
                 }
 
-                Children = new ParseNode[] { Term, Next };
+                Children = new ParseNode[] {
+                    new NSimpleExpr(new BranchNode(Children.Take(Children.Count() - 2), Token)),
+                    Term
+                };
             }
         }
 
@@ -83,28 +88,28 @@ namespace DUO2C.Nodes.Oberon2
                 yield return e;
             }
 
-            if (Next != null) {
-                foreach (var e in Next.CheckTypes()) {
+            if (Prev != null) {
+                foreach (var e in Prev.CheckTypes()) {
                     innerFound = true;
                     yield return e;
                 }
             }
 
-            if (!innerFound && Next != null) {
+            if (!innerFound && Prev != null) {
                 var left = Term.FinalType;
-                var right = Next.FinalType;
+                var right = Prev.FinalType;
 
                 if (Operator == SimpleExprOperator.Or) {
                     if (!(left is BooleanType)) {
                         yield return new TypeMismatchException(BooleanType.Default, Term);
                     } else if (!(right is BooleanType)) {
-                        yield return new TypeMismatchException(BooleanType.Default, Next);
+                        yield return new TypeMismatchException(BooleanType.Default, Prev);
                     }
                 } else if (!(left is SetType) || !(right is SetType)) {
                     if (!(left is NumericType)) {
                         yield return new TypeMismatchException(NumericType.Default, Term);
                     } else if (!(right is NumericType)) {
-                        yield return new TypeMismatchException(NumericType.Default, Next);
+                        yield return new TypeMismatchException(NumericType.Default, Prev);
                     }
                 }
             }

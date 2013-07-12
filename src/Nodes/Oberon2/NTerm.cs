@@ -22,21 +22,21 @@ namespace DUO2C.Nodes.Oberon2
         [Serialize("operator", TermOperator.None)]
         public TermOperator Operator { get; private set; }
 
-        public NFactor Factor
+        public NTerm Prev
         {
-            get { return (NFactor) Children.First(); }
+            get { return Children.Count() == 1 ? null : (NTerm) Children.First(); }
         }
 
-        public NTerm Next
+        public NFactor Factor
         {
-            get { return Children.Count() == 1 ? null : (NTerm) Children.Last(); }
+            get { return (NFactor) Children.Last(); }
         }
 
         public override OberonType FinalType
         {
             get
             {
-                if (Next == null) {
+                if (Prev == null) {
                     return Factor.FinalType;
                 } else {
                     if (Operator == TermOperator.And) {
@@ -45,9 +45,9 @@ namespace DUO2C.Nodes.Oberon2
                         return SetType.Default;
                     } else if (Operator == TermOperator.Divide) {
                         return NumericType.Largest(RealType.Default,
-                            NumericType.Largest((NumericType) Factor.FinalType, (NumericType) Next.FinalType));
+                            NumericType.Largest((NumericType) Factor.FinalType, (NumericType) Prev.FinalType));
                     } else {
-                        return NumericType.Largest((NumericType) Factor.FinalType, (NumericType) Next.FinalType);
+                        return NumericType.Largest((NumericType) Factor.FinalType, (NumericType) Prev.FinalType);
                     }
                 }
             }
@@ -55,7 +55,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override bool IsConstant
         {
-            get { return Factor.IsConstant && (Next == null || Next.IsConstant); }
+            get { return Factor.IsConstant && (Prev == null || Prev.IsConstant); }
         }
 
         public NTerm(ParseNode original)
@@ -64,7 +64,8 @@ namespace DUO2C.Nodes.Oberon2
             if (Children.Count() == 1) {
                 Operator = TermOperator.None;
             } else {
-                switch (Children.ElementAt(1).String) {
+                var op = Children.ElementAt(Children.Count() - 2);
+                switch (op.String) {
                     case "*":
                         Operator = TermOperator.Multiply; break;
                     case "/":
@@ -79,7 +80,10 @@ namespace DUO2C.Nodes.Oberon2
                         Operator = TermOperator.None; break;
                 }
 
-                Children = new ParseNode[] { Factor, Next };
+                Children = new ParseNode[] {
+                    new NTerm(new BranchNode(Children.Take(Children.Count() - 2), Token)),
+                    Factor
+                };
             }
         }
 
@@ -92,34 +96,34 @@ namespace DUO2C.Nodes.Oberon2
                 yield return e;
             }
 
-            if (Next != null) {
-                foreach (var e in Next.CheckTypes()) {
+            if (Prev != null) {
+                foreach (var e in Prev.CheckTypes()) {
                     innerFound = true;
                     yield return e;
                 }
             }
 
-            if (!innerFound && Next != null) {
+            if (!innerFound && Prev != null) {
                 var left = Factor.FinalType;
-                var right = Next.FinalType;
+                var right = Prev.FinalType;
 
                 if (Operator == TermOperator.IntDivide || Operator == TermOperator.Modulo) {
                     if (!(left is IntegerType)) {
                         yield return new TypeMismatchException(IntegerType.Default, Factor);
                     } else if (!(right is IntegerType)) {
-                        yield return new TypeMismatchException(IntegerType.Default, Next);
+                        yield return new TypeMismatchException(IntegerType.Default, Prev);
                     }
                 } else if (Operator == TermOperator.And) {
                     if (!(left is BooleanType)) {
                         yield return new TypeMismatchException(BooleanType.Default, Factor);
                     } else if (!(right is BooleanType)) {
-                        yield return new TypeMismatchException(BooleanType.Default, Next);
+                        yield return new TypeMismatchException(BooleanType.Default, Prev);
                     }
                 } else if (!(left is SetType) || !(right is SetType)) {
                     if (!(left is NumericType)) {
                         yield return new TypeMismatchException(NumericType.Default, Factor);
                     } else if (!(right is NumericType)) {
-                        yield return new TypeMismatchException(NumericType.Default, Next);
+                        yield return new TypeMismatchException(NumericType.Default, Prev);
                     }
                 }
             }

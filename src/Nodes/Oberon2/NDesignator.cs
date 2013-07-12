@@ -43,7 +43,7 @@ namespace DUO2C.Nodes.Oberon2
         // TODO: Lookup actual type
         public override OberonType FinalType
         {
-            get { return IntegerType.Default; }
+            get { return PointerType.NilPointer; }
         }
 
         public override bool IsConstant
