@@ -14,6 +14,38 @@ namespace DUO2C.Semantics
 
     public abstract class StaticType : OberonType { }
 
+    public class PointerType : OberonType
+    {
+        public static readonly PointerType NilPointer = new PointerType(null);
+
+        public OberonType ResolvedType { get; private set; }
+
+        public PointerType(OberonType resolvedType)
+        {
+            ResolvedType = resolvedType;
+        }
+
+        public override bool CanTestEquality(OberonType other)
+        {
+            if (other is PointerType) {
+                var type = ((PointerType) other).ResolvedType;
+                return type == null || type == ResolvedType;
+            } else {
+                return false;
+            }
+        }
+
+        public override bool CanCompare(OberonType other)
+        {
+            return false;
+        }
+
+        public override string ToString()
+        {
+            return ResolvedType == null ? "NIL" : "POINTER TO " + ResolvedType.ToString();
+        }
+    }
+
     public class CharType : OberonType
     {
         public static readonly CharType Default = new CharType();

@@ -47,6 +47,7 @@
     <Compile Include="src\Nodes\Oberon2\NCharacter.cs" />
     <Compile Include="src\Nodes\NIdent.cs" />
     <Compile Include="src\Nodes\Oberon2\NInvocation.cs" />
+    <Compile Include="src\Nodes\Oberon2\NNil.cs" />
     <Compile Include="src\Nodes\Oberon2\NString.cs" />
     <Compile Include="src\Nodes\Oberon2\NDesignator.cs" />
     <Compile Include="src\Nodes\Oberon2\NExpr.cs" />

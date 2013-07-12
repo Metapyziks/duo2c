@@ -20,7 +20,7 @@
 
     PROCEDURE SetDuckSound* (bird : Duck);
     BEGIN
-        x := (34.5 + 98.245 - "HI HI") * 12 - 8.7;
+        x := (34.5 + 98.245 - NIL) * 12 - 8.7;
         bird.sound := "Quack!"
     END SetDuckSound;
 
