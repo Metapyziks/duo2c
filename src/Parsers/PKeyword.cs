@@ -24,7 +24,7 @@ namespace DUO2C.Parsers
         /// <param name="keyword">The keyword that was expected</param>
         /// <param name="index">Start index in the source string of the exception</param>
         public KeywordExpectedException(String keyword, int index)
-            : base(String.Format("Expected the symbol \"{0}\"", keyword), index)
+            : base(ParserError.Syntax, String.Format("Expected the symbol \"{0}\"", keyword), index)
         {
             Keyword = keyword;
         }

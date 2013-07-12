@@ -104,10 +104,14 @@ namespace DUO2C.Nodes
             foreach (var prop in GetType().GetProperties()) {
                 var attrib = prop.GetCustomAttribute<SerializeAttribute>(true);
                 if (attrib != null) {
-                    var val = prop.GetValue(this);
-                    if (val != null && !val.Equals(attrib.OmitValue)) {
-                        attribs.Add(String.Format("{0}=\"{1}\"", attrib.Name,
-                            prop.GetValue(this).ToString()));
+                    try {
+                        var val = prop.GetValue(this);
+                        if (val != null && !val.Equals(attrib.OmitValue)) {
+                            attribs.Add(String.Format("{0}=\"{1}\"", attrib.Name,
+                                prop.GetValue(this).ToString()));
+                        }
+                    } catch (TargetInvocationException e) {
+                        continue;
                     }
                 }
             }

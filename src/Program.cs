@@ -24,6 +24,12 @@ namespace DUO2C
                         + ".syntax";
                     File.WriteAllText(outpath, tree.ToString());
                 } catch (ParserException e) {
+                    // TODO: Clean up
+                    if (e.Line == -1) {
+                        e.FindLocationInfo(File.ReadAllText(args[0]));
+                        e.SetSourcePath(args[0]);
+                    }
+
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(e.Message);
                     Console.ResetColor();

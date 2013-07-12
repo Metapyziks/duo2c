@@ -18,7 +18,7 @@ namespace DUO2C.Parsers
         /// </summary>
         /// <param name="index">Start index in the source string of the exception</param>
         public LetterExpectedException(int index)
-            : base("Letter expected", index) { }
+            : base(ParserError.Syntax, "Letter expected", index) { }
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using DUO2C.Semantics;
@@ -44,14 +45,26 @@ namespace DUO2C.Nodes.Oberon2
                 case "~":
                     Operator = UnaryOperator.Not; break;
             }
-            Children = new ParseNode[] { Children.Last() };
 
-            if (Operator == UnaryOperator.Not) {
-                if (!(FinalType is BooleanType)) {
-                    throw new TypeMismatchException(BooleanType.Default, Factor);
+            Children = new ParseNode[] { Children.Last() };
+        }
+
+        public override IEnumerable<ParserException> CheckTypes()
+        {
+            bool foundInner = false;
+            foreach (var e in Factor.CheckTypes()) {
+                foundInner = true;
+                yield return e;
+            }
+
+            if (!foundInner) {
+                if (Operator == UnaryOperator.Not) {
+                    if (!(FinalType is BooleanType)) {
+                        yield return new TypeMismatchException(BooleanType.Default, Factor);
+                    }
+                } else if (!(FinalType is SetType) && !(FinalType is NumericType)) {
+                    yield return new TypeMismatchException(NumericType.Default, Factor);
                 }
-            } else if (!(FinalType is SetType) && !(FinalType is NumericType)) {
-                throw new TypeMismatchException(NumericType.Default, Factor);
             }
         }
     }

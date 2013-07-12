@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 using DUO2C.Semantics;
@@ -66,6 +67,11 @@ namespace DUO2C.Nodes.Oberon2
             } else {
                 Value = int.Parse(base.String);
             }
+        }
+
+        public override IEnumerable<ParserException> CheckTypes()
+        {
+            return EmptyExceptionArray;
         }
     }
 }

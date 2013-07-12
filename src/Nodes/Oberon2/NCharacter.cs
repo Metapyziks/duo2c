@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Collections.Generic;
+using System.Globalization;
 
 using DUO2C.Semantics;
 
@@ -40,6 +41,11 @@ namespace DUO2C.Nodes.Oberon2
             : base(original, true)
         {
             Value = (char) ushort.Parse(base.String.Substring(0, base.String.Length - 1), NumberStyles.HexNumber);
+        }
+
+        public override IEnumerable<ParserException> CheckTypes()
+        {
+            return EmptyExceptionArray;
         }
     }
 }

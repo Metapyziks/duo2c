@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
@@ -33,6 +34,11 @@ namespace DUO2C.Nodes.Oberon2
             : base(original, false)
         {
             Inner = (ExpressionElement) Children.First();
+        }
+
+        public override IEnumerable<ParserException> CheckTypes()
+        {
+            return EmptyExceptionArray;
         }
     }
 }

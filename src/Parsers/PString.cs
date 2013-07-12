@@ -18,7 +18,7 @@ namespace DUO2C.Parsers
         /// </summary>
         /// <param name="index">Start index in the source string of the exception</param>
         public StringExpectedException(int index)
-            : base("String literal expected", index) { }
+            : base(ParserError.Syntax, "String literal expected", index) { }
     }
 
     /// <summary>
@@ -59,7 +59,12 @@ namespace DUO2C.Parsers
             int j = i;
             if (IsMatch(str, ref i, whitespace)) {
                 exception = null;
-                return new ParseNode[] { Ruleset.GetSubstitution(new LeafNode(j, i - j, str.Substring(j, i - j), "string")) };
+                try {
+                    return new ParseNode[] { Ruleset.GetSubstitution(new LeafNode(j, i - j, str.Substring(j, i - j), "string")) };
+                } catch (ParserException e) {
+                    exception = e;
+                    return EmptyNodeArray;
+                }
             } else {
                 exception = new StringExpectedException(i);
                 return EmptyNodeArray;

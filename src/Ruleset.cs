@@ -448,7 +448,11 @@ namespace DUO2C
                 if (node.GetType() == type) {
                     return node;
                 } else {
-                    return (ParseNode) _subs[node.Token].Invoke(new Object[] { node });
+                    try {
+                        return (ParseNode) _subs[node.Token].Invoke(new Object[] { node });
+                    } catch (TargetInvocationException e) {
+                        throw e.InnerException;
+                    }
                 }
             }
         }

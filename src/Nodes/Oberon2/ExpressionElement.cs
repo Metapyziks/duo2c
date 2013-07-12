@@ -10,11 +10,15 @@ namespace DUO2C.Nodes.Oberon2
 {
     public abstract class ExpressionElement : SubstituteNode
     {
+        protected static readonly IEnumerable<ParserException> EmptyExceptionArray = new ParserException[0];
+
         public ExpressionElement(ParseNode original, bool leaf = false, bool hasPayload = true)
             : base(original, leaf, hasPayload) { }
 
         [Serialize("type")]
         public abstract OberonType FinalType { get; }
         public abstract bool IsConstant { get; }
+
+        public abstract IEnumerable<ParserException> CheckTypes();
     }
 }

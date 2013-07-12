@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using DUO2C.Semantics;
 
@@ -51,6 +52,11 @@ namespace DUO2C.Nodes.Oberon2
                 Value = mantissa * Math.Pow(10.0, exponent);
                 Range = base.String[expStart] == 'E' ? RealRange.Real : RealRange.LongReal;
             }
+        }
+
+        public override IEnumerable<ParserException> CheckTypes()
+        {
+            return EmptyExceptionArray;
         }
     }
 }

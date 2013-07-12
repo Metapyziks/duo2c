@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using DUO2C.Semantics;
@@ -29,6 +30,11 @@ namespace DUO2C.Nodes.Oberon2
             if (Children.Count() == 3) {
                 Children = new ParseNode[] { Children.ElementAt(1) };
             }
+        }
+
+        public override IEnumerable<ParserException> CheckTypes()
+        {
+            return Inner.CheckTypes();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using DUO2C.Semantics;
@@ -70,27 +71,58 @@ namespace DUO2C.Nodes.Oberon2
                     default:
                         Operator = ExprOperator.None; break;
                 }
-                Children = new ParseNode[] { SimpleExpr, Next };
 
+                Children = new ParseNode[] { SimpleExpr, Next };
+            }
+        }
+
+        public override IEnumerable<ParserException> CheckTypes()
+        {
+            bool innerFound = false;
+
+            foreach (var e in SimpleExpr.CheckTypes()) {
+                innerFound = true;
+                yield return e;
+            }
+
+            if (Next != null) {
+                foreach (var e in Next.CheckTypes()) {
+                    innerFound = true;
+                    yield return e;
+                }
+            }
+
+            if (!innerFound && Next != null) {
                 var left = SimpleExpr.FinalType;
                 var right = Next.FinalType;
 
                 if (Operator == ExprOperator.InSet) {
                     if (!(left is IntegerType)) {
-                        throw new TypeMismatchException(IntegerType.Default, SimpleExpr);
+                        yield return new TypeMismatchException(IntegerType.Default, SimpleExpr);
                     } else if (!(right is SetType)) {
-                        throw new TypeMismatchException(SetType.Default, Next);
+                        yield return new TypeMismatchException(SetType.Default, Next);
                     }
                 } else if (Operator == ExprOperator.Equals || Operator == ExprOperator.NotEquals) {
                     if (!left.CanTestEquality(right)) {
-                        throw new TypeMismatchException(left, Next);
+                        yield return new TypeMismatchException(left, Next);
                     }
                 } else {
                     if (!left.CanCompare(right)) {
-                        throw new TypeMismatchException(left, Next);
+                        yield return new TypeMismatchException(left, Next);
                     }
                 }
             }
+        }
+
+        public override string SerializeXML()
+        {
+            // TEMPORARY HACK
+            var exceptions = CheckTypes();
+            if (exceptions.Count() > 0) {
+                throw exceptions.First();
+            }
+
+            return base.SerializeXML();
         }
     }
 }

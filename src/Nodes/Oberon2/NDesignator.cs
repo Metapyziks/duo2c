@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using DUO2C.Semantics;
@@ -59,6 +60,22 @@ namespace DUO2C.Nodes.Oberon2
                     new NDesignator(new BranchNode(prev, Token)),
                     Children.Last()
                 };
+            }
+        }
+
+        public override IEnumerable<ParserException> CheckTypes()
+        {
+            bool foundInner = false;
+            if (!IsRoot) {
+                var exceptions = ((NDesignator) Element).CheckTypes();
+                foreach (var e in exceptions) {
+                    foundInner = true;
+                    yield return e;
+                }
+            }
+
+            if (!foundInner) {
+                // TODO: More checks
             }
         }
     }

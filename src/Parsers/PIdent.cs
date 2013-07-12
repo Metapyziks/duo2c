@@ -18,7 +18,7 @@ namespace DUO2C.Parsers
         /// </summary>
         /// <param name="index">Start index in the source string of the exception</param>
         public IdentifierExpectedException(int index)
-            : base("Identifier expected", index) { }
+            : base(ParserError.Syntax, "Identifier expected", index) { }
     }
 
     /// <summary>
@@ -50,7 +50,12 @@ namespace DUO2C.Parsers
             int j = i;
             if (IsMatch(str, ref i, whitespace)) {
                 exception = null;
-                return new ParseNode[] { Ruleset.GetSubstitution(new LeafNode(j, i - j, str.Substring(j, i - j), "ident")) };
+                try {
+                    return new ParseNode[] { Ruleset.GetSubstitution(new LeafNode(j, i - j, str.Substring(j, i - j), "ident")) };
+                } catch (ParserException e) {
+                    exception = e;
+                    return EmptyNodeArray;
+                }
             } else {
                 exception = new IdentifierExpectedException(i);
                 return EmptyNodeArray;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using DUO2C.Semantics;
@@ -68,22 +69,42 @@ namespace DUO2C.Nodes.Oberon2
                     default:
                         Operator = SimpleExprOperator.None; break;
                 }
-                Children = new ParseNode[] { Term, Next };
 
+                Children = new ParseNode[] { Term, Next };
+            }
+        }
+
+        public override IEnumerable<ParserException> CheckTypes()
+        {
+            bool innerFound = false;
+
+            foreach (var e in Term.CheckTypes()) {
+                innerFound = true;
+                yield return e;
+            }
+
+            if (Next != null) {
+                foreach (var e in Next.CheckTypes()) {
+                    innerFound = true;
+                    yield return e;
+                }
+            }
+
+            if (!innerFound && Next != null) {
                 var left = Term.FinalType;
                 var right = Next.FinalType;
 
                 if (Operator == SimpleExprOperator.Or) {
                     if (!(left is BooleanType)) {
-                        throw new TypeMismatchException(BooleanType.Default, Term);
+                        yield return new TypeMismatchException(BooleanType.Default, Term);
                     } else if (!(right is BooleanType)) {
-                        throw new TypeMismatchException(BooleanType.Default, Next);
+                        yield return new TypeMismatchException(BooleanType.Default, Next);
                     }
                 } else if (!(left is SetType) || !(right is SetType)) {
                     if (!(left is NumericType)) {
-                        throw new TypeMismatchException(NumericType.Default, Term);
+                        yield return new TypeMismatchException(NumericType.Default, Term);
                     } else if (!(right is NumericType)) {
-                        throw new TypeMismatchException(NumericType.Default, Next);
+                        yield return new TypeMismatchException(NumericType.Default, Next);
                     }
                 }
             }

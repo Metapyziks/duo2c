@@ -18,7 +18,7 @@ namespace DUO2C.Parsers
         /// </summary>
         /// <param name="index">Start index in the source string of the exception</param>
         public DigitExpectedException(int index)
-            : base("Digit expected", index) { }
+            : base(ParserError.Syntax, "Digit expected", index) { }
     }
 
     /// <summary>

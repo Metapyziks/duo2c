@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using DUO2C.Semantics;
@@ -77,28 +78,48 @@ namespace DUO2C.Nodes.Oberon2
                     default:
                         Operator = TermOperator.None; break;
                 }
-                Children = new ParseNode[] { Factor, Next };
 
+                Children = new ParseNode[] { Factor, Next };
+            }
+        }
+
+        public override IEnumerable<ParserException> CheckTypes()
+        {
+            bool innerFound = false;
+
+            foreach (var e in Factor.CheckTypes()) {
+            innerFound = true;
+                yield return e;
+            }
+
+            if (Next != null) {
+                foreach (var e in Next.CheckTypes()) {
+                    innerFound = true;
+                    yield return e;
+                }
+            }
+
+            if (!innerFound && Next != null) {
                 var left = Factor.FinalType;
                 var right = Next.FinalType;
 
                 if (Operator == TermOperator.IntDivide || Operator == TermOperator.Modulo) {
                     if (!(left is IntegerType)) {
-                        throw new TypeMismatchException(IntegerType.Default, Factor);
+                        yield return new TypeMismatchException(IntegerType.Default, Factor);
                     } else if (!(right is IntegerType)) {
-                        throw new TypeMismatchException(IntegerType.Default, Next);
+                        yield return new TypeMismatchException(IntegerType.Default, Next);
                     }
                 } else if (Operator == TermOperator.And) {
                     if (!(left is BooleanType)) {
-                        throw new TypeMismatchException(BooleanType.Default, Factor);
+                        yield return new TypeMismatchException(BooleanType.Default, Factor);
                     } else if (!(right is BooleanType)) {
-                        throw new TypeMismatchException(BooleanType.Default, Next);
+                        yield return new TypeMismatchException(BooleanType.Default, Next);
                     }
                 } else if (!(left is SetType) || !(right is SetType)) {
                     if (!(left is NumericType)) {
-                        throw new TypeMismatchException(NumericType.Default, Factor);
+                        yield return new TypeMismatchException(NumericType.Default, Factor);
                     } else if (!(right is NumericType)) {
-                        throw new TypeMismatchException(NumericType.Default, Next);
+                        yield return new TypeMismatchException(NumericType.Default, Next);
                     }
                 }
             }

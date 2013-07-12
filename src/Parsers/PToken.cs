@@ -25,7 +25,7 @@ namespace DUO2C.Parsers
         /// </summary>
         /// <param name="index">Start index in the source string of the exception</param>
         public TokenExpectedException(String token, int index)
-            : base(String.Format("{0} expected", token), index)
+            : base(ParserError.Syntax, String.Format("{0} expected", token), index)
         {
             Token = token;
         }
@@ -106,6 +106,7 @@ namespace DUO2C.Parsers
             if (nodes.Count() == 0) {
                 exception = ChooseParserException(exception, new TokenExpectedException(Token, i));
             }
+            var except = exception;
             nodes = nodes.Select(node => {
                 if (Flatten) {
                     node = new LeafNode(node.StartIndex, node.Length, node.String, Token);
@@ -119,8 +120,14 @@ namespace DUO2C.Parsers
                     node = new BranchNode(new ParseNode[] { node }, Token);
                 }
 
-                return Ruleset.GetSubstitution(node);
-            }).ToArray();
+                try {
+                    return Ruleset.GetSubstitution(node);
+                } catch (ParserException e) {
+                    except = ChooseParserException(except, e);
+                    return null;
+                }
+            }).Where(x => x != null).ToArray();
+            exception = except;
             return nodes;
         }
 

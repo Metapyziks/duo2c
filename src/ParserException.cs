@@ -24,6 +24,12 @@ namespace DUO2C
         }
     }
 
+    public enum ParserError
+    {
+        Syntax,
+        Type
+    }
+
     /// <summary>
     /// Base class for exceptions thrown by the parsing process.
     /// </summary>
@@ -102,6 +108,8 @@ namespace DUO2C
             get { return base.Message; }
         }
 
+        public ParserError ErrorType { get; private set; }
+
         /// <summary>
         /// Gets a message that describes the current ParseException, along with
         /// the location it occurred.
@@ -109,8 +117,8 @@ namespace DUO2C
         public override String Message
         {
             get {
-                return String.Format("{0}({1}:{2}) syntax error : {3}", SourcePath ?? "",
-                    Line, Column, MessageNoLocation);
+                return String.Format("{0}({1}:{2}) {3} error : {4}", SourcePath ?? "",
+                    Line, Column, ErrorType.ToString().ToLower(), MessageNoLocation);
             }
         }
 
@@ -131,9 +139,11 @@ namespace DUO2C
         /// </summary>
         /// <param name="message">The message that describes the error</param>
         /// <param name="index">Start index in the source string of the exception</param>
-        public ParserException(String message, int index, int length = 0)
+        public ParserException(ParserError type, String message, int index, int length = 0)
             : base(message)
         {
+            ErrorType = type;
+
             SourcePath = null;
             SourceIndex = index;
             SourceLength = length;

@@ -32,5 +32,11 @@ namespace DUO2C.Nodes.Oberon2
         {
             Children = Children.Where(x => x is NDesignator || x.Token == "ExprList");
         }
+
+        // TODO: Actually check something
+        public override IEnumerable<ParserException> CheckTypes()
+        {
+            return EmptyExceptionArray;
+        }
     }
 }

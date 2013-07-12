@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using DUO2C.Semantics;
 
@@ -38,6 +39,11 @@ namespace DUO2C.Nodes.Oberon2
             : base(original, true)
         {
             _string = base.String.Substring(1, base.String.Length - 2);
+        }
+
+        public override IEnumerable<ParserException> CheckTypes()
+        {
+            return EmptyExceptionArray;
         }
     }
 }
