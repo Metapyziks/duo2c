@@ -87,17 +87,17 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public override IEnumerable<ParserException> CheckTypes()
+        public override IEnumerable<ParserException> FindTypeErrors()
         {
             bool innerFound = false;
 
-            foreach (var e in Factor.CheckTypes()) {
+            foreach (var e in Factor.FindTypeErrors()) {
             innerFound = true;
                 yield return e;
             }
 
             if (Prev != null) {
-                foreach (var e in Prev.CheckTypes()) {
+                foreach (var e in Prev.FindTypeErrors()) {
                     innerFound = true;
                     yield return e;
                 }

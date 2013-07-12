@@ -49,10 +49,10 @@ namespace DUO2C.Nodes.Oberon2
             Children = new ParseNode[] { Children.Last() };
         }
 
-        public override IEnumerable<ParserException> CheckTypes()
+        public override IEnumerable<ParserException> FindTypeErrors()
         {
             bool foundInner = false;
-            foreach (var e in Factor.CheckTypes()) {
+            foreach (var e in Factor.FindTypeErrors()) {
                 foundInner = true;
                 yield return e;
             }

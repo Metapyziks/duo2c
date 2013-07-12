@@ -63,11 +63,11 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public override IEnumerable<ParserException> CheckTypes()
+        public override IEnumerable<ParserException> FindTypeErrors()
         {
             bool foundInner = false;
             if (!IsRoot) {
-                var exceptions = ((NDesignator) Element).CheckTypes();
+                var exceptions = ((NDesignator) Element).FindTypeErrors();
                 foreach (var e in exceptions) {
                     foundInner = true;
                     yield return e;

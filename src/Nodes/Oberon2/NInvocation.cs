@@ -34,7 +34,7 @@ namespace DUO2C.Nodes.Oberon2
         }
 
         // TODO: Actually check something
-        public override IEnumerable<ParserException> CheckTypes()
+        public override IEnumerable<ParserException> FindTypeErrors()
         {
             return EmptyExceptionArray;
         }

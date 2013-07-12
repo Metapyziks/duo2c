@@ -32,9 +32,9 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public override IEnumerable<ParserException> CheckTypes()
+        public override IEnumerable<ParserException> FindTypeErrors()
         {
-            return Inner.CheckTypes();
+            return Inner.FindTypeErrors();
         }
     }
 }

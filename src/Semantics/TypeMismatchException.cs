@@ -10,7 +10,6 @@ using DUO2C.Nodes.Oberon2;
 
 namespace DUO2C.Semantics
 {
-    [ExceptionUtility(200)]
     public class TypeMismatchException : ParserException
     {
         public OberonType Expected { get; private set; }

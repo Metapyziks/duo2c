@@ -25,24 +25,24 @@ namespace DUO2C.Nodes.Oberon2
         [Serialize("operator", ExprOperator.None)]
         public ExprOperator Operator { get; private set; }
 
-        public NSimpleExpr SimpleExpr
+        public NExpr Prev
         {
-            get { return (NSimpleExpr) Children.First(); }
+            get { return Children.Count() == 1 ? null : (NExpr) Children.First(); }
         }
 
-        public NExpr Next
+        public NSimpleExpr SimpleExpr
         {
-            get { return Children.Count() == 1 ? null : (NExpr) Children.Last(); }
+            get { return (NSimpleExpr) Children.Last(); }
         }
 
         public override OberonType FinalType
         {
-            get { return Next == null ? SimpleExpr.FinalType : BooleanType.Default; }
+            get { return Prev == null ? SimpleExpr.FinalType : BooleanType.Default; }
         }
 
         public override bool IsConstant
         {
-            get { return SimpleExpr.IsConstant && (Next == null || Next.IsConstant); }
+            get { return SimpleExpr.IsConstant && (Prev == null || Prev.IsConstant); }
         }
 
         public NExpr(ParseNode original)
@@ -72,43 +72,46 @@ namespace DUO2C.Nodes.Oberon2
                         Operator = ExprOperator.None; break;
                 }
 
-                Children = new ParseNode[] { SimpleExpr, Next };
+                Children = new ParseNode[] {
+                    new NExpr(new BranchNode(Children.Take(Children.Count() - 2), Token)),
+                    SimpleExpr
+                };
             }
         }
 
-        public override IEnumerable<ParserException> CheckTypes()
+        public override IEnumerable<ParserException> FindTypeErrors()
         {
             bool innerFound = false;
 
-            foreach (var e in SimpleExpr.CheckTypes()) {
+            foreach (var e in SimpleExpr.FindTypeErrors()) {
                 innerFound = true;
                 yield return e;
             }
 
-            if (Next != null) {
-                foreach (var e in Next.CheckTypes()) {
+            if (Prev != null) {
+                foreach (var e in Prev.FindTypeErrors()) {
                     innerFound = true;
                     yield return e;
                 }
             }
 
-            if (!innerFound && Next != null) {
+            if (!innerFound && Prev != null) {
                 var left = SimpleExpr.FinalType;
-                var right = Next.FinalType;
+                var right = Prev.FinalType;
 
                 if (Operator == ExprOperator.InSet) {
                     if (!(left is IntegerType)) {
                         yield return new TypeMismatchException(IntegerType.Default, SimpleExpr);
                     } else if (!(right is SetType)) {
-                        yield return new TypeMismatchException(SetType.Default, Next);
+                        yield return new TypeMismatchException(SetType.Default, Prev);
                     }
                 } else if (Operator == ExprOperator.Equals || Operator == ExprOperator.NotEquals) {
                     if (!left.CanTestEquality(right)) {
-                        yield return new TypeMismatchException(left, Next);
+                        yield return new TypeMismatchException(left, Prev);
                     }
                 } else {
                     if (!left.CanCompare(right)) {
-                        yield return new TypeMismatchException(left, Next);
+                        yield return new TypeMismatchException(left, Prev);
                     }
                 }
             }
@@ -117,7 +120,7 @@ namespace DUO2C.Nodes.Oberon2
         public override string SerializeXML()
         {
             // TEMPORARY HACK
-            var exceptions = CheckTypes();
+            var exceptions = FindTypeErrors();
             if (exceptions.Count() > 0) {
                 throw exceptions.First();
             }

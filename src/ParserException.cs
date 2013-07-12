@@ -91,6 +91,12 @@ namespace DUO2C
         public int SourceLength { get; private set; }
 
         /// <summary>
+        /// Substring of the source element that caused this exception if one is
+        /// available, otherwise null.
+        /// </summary>
+        public String SourceString { get; private set; }
+
+        /// <summary>
         /// Line number in the source string where this exception occurred.
         /// </summary>
         public int Line { get; private set; }
@@ -117,8 +123,9 @@ namespace DUO2C
         public override String Message
         {
             get {
-                return String.Format("{0}({1}:{2}) {3} error : {4}", SourcePath ?? "",
-                    Line, Column, ErrorType.ToString().ToLower(), MessageNoLocation);
+                return String.Format("{0}({1}:{2}) {3} error : {4}{5}", SourcePath ?? "",
+                    Line, Column, ErrorType.ToString().ToLower(), MessageNoLocation,
+                    SourceString != null ? String.Format(" ({0})", SourceString) : "");
             }
         }
 
@@ -159,6 +166,10 @@ namespace DUO2C
 
             Line = line;
             Column = column;
+
+            if (SourceLength > 0) {
+                SourceString = srcString.Substring(SourceIndex, SourceLength);
+            }
         }
 
         internal void SetSourcePath(String srcPath)

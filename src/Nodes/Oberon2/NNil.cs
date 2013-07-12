@@ -27,7 +27,7 @@ namespace DUO2C.Nodes.Oberon2
             get { return true; }
         }
 
-        public override IEnumerable<ParserException> CheckTypes()
+        public override IEnumerable<ParserException> FindTypeErrors()
         {
             return EmptyExceptionArray;
         }
