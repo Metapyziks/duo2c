@@ -85,7 +85,7 @@ namespace DUO2C.Nodes
         /// nodes.
         /// </summary>
         /// <param name="original">The original parse node to be substituted</param>
-        public SubstituteNode(ParseNode original, bool leaf = true, bool hasPayload = true)
+        public SubstituteNode(ParseNode original, bool leaf, bool hasPayload = true)
             : base(original is BranchNode
                 ? ((BranchNode) original).Children
                 : new ParseNode[] { original }, original.Token)

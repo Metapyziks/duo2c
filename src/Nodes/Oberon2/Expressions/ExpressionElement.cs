@@ -12,7 +12,7 @@ namespace DUO2C.Nodes.Oberon2
     {
         protected static readonly IEnumerable<ParserException> EmptyExceptionArray = new ParserException[0];
 
-        public ExpressionElement(ParseNode original, bool leaf = false, bool hasPayload = true)
+        public ExpressionElement(ParseNode original, bool leaf, bool hasPayload = true)
             : base(original, leaf, hasPayload) { }
 
         public abstract OberonType FinalType { get; }

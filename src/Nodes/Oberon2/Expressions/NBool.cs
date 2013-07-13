@@ -8,6 +8,7 @@ using DUO2C.Semantics;
 
 namespace DUO2C.Nodes.Oberon2
 {
+    [SubstituteToken("Bool")]
     public class NBool : ExpressionElement
     {
         public override OberonType FinalType

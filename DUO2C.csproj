@@ -43,8 +43,13 @@
   <ItemGroup>
     <Compile Include="src\Nodes\BranchNode.cs" />
     <Compile Include="src\Nodes\LeafNode.cs" />
+    <Compile Include="src\Nodes\Oberon2\Declarations\Declaration.cs" />
+    <Compile Include="src\Nodes\Oberon2\Declarations\NProcDecl.cs" />
+    <Compile Include="src\Nodes\Oberon2\Declarations\NVarDecl.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\ExpressionElement.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NBool.cs" />
+    <Compile Include="src\Nodes\Oberon2\Declarations\NConstDecl.cs" />
+    <Compile Include="src\Nodes\Oberon2\NIdentList.cs" />
     <Compile Include="src\Nodes\Oberon2\NImportList.cs" />
     <Compile Include="src\Nodes\Oberon2\Types\NArrayType.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NCharacter.cs" />
@@ -73,7 +78,7 @@
     <Compile Include="src\Nodes\Oberon2\Types\NType.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NTypeGuard.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NUnary.cs" />
-    <Compile Include="src\Nodes\Oberon2\Types\NTypeDecl.cs" />
+    <Compile Include="src\Nodes\Oberon2\Declarations\NTypeDecl.cs" />
     <Compile Include="src\Nodes\Oberon2\Types\TypeDefinition.cs" />
     <Compile Include="src\Nodes\ParseNode.cs" />
     <Compile Include="src\Nodes\SubstituteNode.cs" />

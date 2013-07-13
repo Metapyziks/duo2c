@@ -7,24 +7,15 @@ using System.Threading.Tasks;
 namespace DUO2C.Nodes.Oberon2
 {
     [SubstituteToken("TypeDecl")]
-    public class NTypeDecl : SubstituteNode
+    public class NTypeDecl : Declaration
     {
-        public String Identifier
+        public NType Type
         {
-            get {
-                return Children.First().String;
-            }
-        }
-
-        public AccessModifier Visibility
-        {
-            get {
-                return ((NIdentDef) Children.First()).Visibility;
-            }
+            get { return (NType) Children.Last(); }
         }
 
         public NTypeDecl(ParseNode original)
-            : base(original, false)
+            : base(original)
         {
             Children = Children.Where(x => x is NIdentDef || x is NType);
         }
