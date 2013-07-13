@@ -26,7 +26,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override OberonType Type
         {
-            get { return new ArrayType(ElementDefinition.Type); }
+            get { return new ArrayType(ElementDefinition.Type, Length); }
         }
 
         public NArrayType(ParseNode original)

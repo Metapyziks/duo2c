@@ -44,7 +44,7 @@ namespace DUO2C.Nodes.Oberon2
                     } else if (Factor.FinalType is SetType) {
                         return SetType.Default;
                     } else if (Operator == TermOperator.Divide) {
-                        return NumericType.Largest(RealType.Default,
+                        return NumericType.Largest(RealType.Real,
                             NumericType.Largest((NumericType) Factor.FinalType, (NumericType) Prev.FinalType));
                     } else {
                         return NumericType.Largest((NumericType) Factor.FinalType, (NumericType) Prev.FinalType);
@@ -109,9 +109,9 @@ namespace DUO2C.Nodes.Oberon2
 
                 if (Operator == TermOperator.IntDivide || Operator == TermOperator.Modulo) {
                     if (!(left is IntegerType)) {
-                        yield return new TypeMismatchException(IntegerType.Default, Factor);
+                        yield return new TypeMismatchException(IntegerType.Integer, Factor);
                     } else if (!(right is IntegerType)) {
-                        yield return new TypeMismatchException(IntegerType.Default, Prev);
+                        yield return new TypeMismatchException(IntegerType.Integer, Prev);
                     }
                 } else if (Operator == TermOperator.And) {
                     if (!(left is BooleanType)) {

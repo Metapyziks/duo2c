@@ -10,7 +10,15 @@ FormalPars    = "(" [FPSection {";" FPSection}] ")" [":" QualIdent].
 FPSection     = [VAR] ident {"," ident} ":" Type.
 Receiver      = "(" [VAR] ident ":" ident ")".
 Type          = OberonType | NamedType | ArrayType | RecordType | PtrType | ProcType.
-OberonType    = LONGINT | INTEGER | SHORTINT | BYTE | LONGREAL | REAL | BOOLEAN | SET | CHAR.
+OberonType    = "LONGINT"   | "LongInt"
+              | "INTEGER"   | "Integer"
+              | "SHORTINT"  | "ShortInt"
+              | "BYTE"      | "Byte"
+              | "LONGREAL"  | "LongReal"
+              | "REAL"      | "Real"
+              | "BOOLEAN"   | "Boolean"
+              | "SET"       | "Set"
+              | "CHAR"      | "Char".
 NamedType     = QualIdent.
 ArrayType     = ARRAY [ConstExpr {"," ConstExpr}] OF Type.
 RecordType    = RECORD ["("QualIdent")"] FieldList {";" FieldList} END.
@@ -37,9 +45,10 @@ ConstExpr     = Expr.
 Expr          = SimpleExpr [Relation SimpleExpr].
 SimpleExpr    = Term {AddOp Term}.
 Term          = Factor {MulOp Factor}.
-Factor        = Invocation | number | character | string | Nil | Set | "(" Expr ")" | Unary.
+Factor        = Invocation | number | character | string | Bool | Nil | Set | "(" Expr ")" | Unary.
 Nil           = NIL.
 Unary         = ("+" | "-" | "~") Factor.
+Bool          = "TRUE" | "FALSE".
 Set           = "{" [Element {"," Element}] "}".
 Element       = Expr [".." Expr].
 Relation      = "=" | "#" | "<" | "<=" | ">" | ">=" | IN | IS.

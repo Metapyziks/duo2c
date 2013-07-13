@@ -101,7 +101,7 @@ namespace DUO2C.Nodes.Oberon2
 
                 if (Operator == ExprOperator.InSet) {
                     if (!(left is IntegerType)) {
-                        yield return new TypeMismatchException(IntegerType.Default, SimpleExpr);
+                        yield return new TypeMismatchException(IntegerType.Integer, SimpleExpr);
                     } else if (!(right is SetType)) {
                         yield return new TypeMismatchException(SetType.Default, Prev);
                     }
