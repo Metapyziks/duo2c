@@ -43,6 +43,8 @@ namespace DUO2C.Nodes.Oberon2
                     new NType(new BranchNode(new ParseNode[] { new NArrayType(new BranchNode(Children.Skip(1), Token)) }, "Type"))
                 };
             }
+
+            Children = Children.Where(x => x is NType);
         }
     }
 }

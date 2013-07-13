@@ -20,7 +20,7 @@ namespace DUO2C.Nodes.Oberon2
         /// The identifier without an access modifier.
         /// </summary>
         [Serialize("access")]
-        public AccessModifier AccessModifier { get; private set; }
+        public AccessModifier Visibility { get; private set; }
 
         /// <summary>
         /// The identifier without an access modifier.
@@ -44,12 +44,12 @@ namespace DUO2C.Nodes.Oberon2
             Identifier = Children.First().String;
             if (Children.Count() > 1) {
                 if (Children.Last().String == "*") {
-                    AccessModifier = AccessModifier.Public;
+                    Visibility = AccessModifier.Public;
                 } else {
-                    AccessModifier = AccessModifier.ReadOnly;
+                    Visibility = AccessModifier.ReadOnly;
                 }
             } else {
-                AccessModifier = AccessModifier.Private;
+                Visibility = AccessModifier.Private;
             }
         }
     }

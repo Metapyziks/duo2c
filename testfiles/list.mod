@@ -39,7 +39,6 @@
              bird.sound := "Tweet!"
         END
     END SetSound;
-
 BEGIN
     NEW(pc);
     NEW(pd);

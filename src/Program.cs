@@ -17,7 +17,11 @@ namespace DUO2C
                 ruleset.AddSubstitutionNS("DUO2C.Nodes.Oberon2", true);
 
                 try {
+                    var timer = new Stopwatch();
+                    timer.Start();
                     var tree = ruleset.ParseFile(args[0]);
+                    timer.Stop();
+                    Console.WriteLine("File parsed in {0}ms", timer.ElapsedMilliseconds);
                     var outpath = Path.GetDirectoryName(args[0])
                         + Path.DirectorySeparatorChar
                         + Path.GetFileNameWithoutExtension(args[0])

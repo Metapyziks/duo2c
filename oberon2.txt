@@ -21,7 +21,7 @@ OberonType    = "LONGINT"   | "LongInt"
               | "CHAR"      | "Char".
 NamedType     = QualIdent.
 ArrayType     = ARRAY [ConstExpr {"," ConstExpr}] OF Type.
-RecordType    = RECORD ["("QualIdent")"] FieldList {";" FieldList} END.
+RecordType    = RECORD ["("NamedType")"] FieldList {";" FieldList} END.
 PtrType       = POINTER TO Type.
 ProcType      = PROCEDURE [FormalPars].
 FieldList     = [IdentList ":" Type].

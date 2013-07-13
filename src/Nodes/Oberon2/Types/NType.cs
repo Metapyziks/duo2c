@@ -16,7 +16,6 @@ namespace DUO2C.Nodes.Oberon2
             get { return (TypeDefinition) Children.First(); }
         }
 
-        [Serialize("type")]
         public override OberonType Type
         {
             get { return Inner.Type; }
