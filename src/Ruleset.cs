@@ -262,8 +262,10 @@ namespace DUO2C
         /// <returns>Node tree representing the string's structure</returns>
         public ParseNode ParseString(String str)
         {
+            str = str.TrimEnd();
             ParserException error;
-            var tree = _root.Parse(str, 0, true, out error).LastOrDefault();
+            var trees = _root.Parse(str, 0, true, out error).Where(x => x.EndIndex >= str.Length).ToArray();
+            var tree = trees.LastOrDefault();
             if (tree == null || tree.EndIndex < str.TrimEnd().Length) {
                 error.FindLocationInfo(str);
                 throw error;

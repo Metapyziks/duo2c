@@ -17,7 +17,7 @@
             NEW(l);             (* create record instance *)
             l.value := v
         ELSE
-            l.next.Add(v)      (* recursive call to .add(n) *)
+            l.next.Add(v(List))      (* recursive call to .add(n) *)
         END
     END Add;
 

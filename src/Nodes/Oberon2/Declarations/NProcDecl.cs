@@ -69,6 +69,24 @@ namespace DUO2C.Nodes.Oberon2
             get { return Children.FirstOrDefault() as NReceiver; }
         }
 
+        public IEnumerable<NFPSection> FPSections
+        {
+            get {
+                var pars = (NFormalPars) Children.FirstOrDefault(x => x is NFormalPars);
+                if (pars == null) return null;
+                return pars.FPSections;
+            }
+        }
+
+        public NType ReturnType
+        {
+            get {
+                var pars = (NFormalPars) Children.FirstOrDefault(x => x is NFormalPars);
+                if (pars == null) return null;
+                return pars.ReturnType;
+            }
+        }
+
         private NIdentDef _identDef;
         public override NIdentDef IdentDef
         {
@@ -86,10 +104,12 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("ProcDecl")]
     public class NProcDecl : NForwardDecl
     {
-        public NProcDecl(ParseNode original)
-            : base(original)
+        public NStatementSeq Statements
         {
-
+            get { return (NStatementSeq) Children.FirstOrDefault(x => x is NStatementSeq); }
         }
+
+        public NProcDecl(ParseNode original)
+            : base(original) { }
     }
 }
