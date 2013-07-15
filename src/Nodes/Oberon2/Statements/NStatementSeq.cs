@@ -9,15 +9,20 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("StatementSeq")]
     public class NStatementSeq : SubstituteNode, ITypeErrorSource
     {
+        public IEnumerable<NStatement> Statements
+        {
+            get { return Children.Select(x => (NStatement)x ); }
+        }
+
         public NStatementSeq(ParseNode original)
             : base(original, false)
         {
-
+            Children = Children.Where(x => x is NStatement);
         }
 
         public IEnumerable<ParserException> FindTypeErrors()
         {
-            return Children.SelectMany(x => ((NStatement) x).FindTypeErrors());
+            return Statements.SelectMany(x => x.FindTypeErrors());
         }
     }
 }

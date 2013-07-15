@@ -45,6 +45,7 @@
     <Compile Include="src\Nodes\ITypeErrorSource.cs" />
     <Compile Include="src\Nodes\LeafNode.cs" />
     <Compile Include="src\Nodes\Oberon2\Declarations\Declaration.cs" />
+    <Compile Include="src\Nodes\Oberon2\Declarations\NDeclSeq.cs" />
     <Compile Include="src\Nodes\Oberon2\Declarations\NProcDecl.cs" />
     <Compile Include="src\Nodes\Oberon2\Declarations\NVarDecl.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\ExpressionElement.cs" />
