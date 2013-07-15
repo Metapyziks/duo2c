@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Linq;
 
+using DUO2C.Semantics;
+
 namespace DUO2C.Nodes.Oberon2
 {
-    public enum AccessModifier : byte
-    {
-        Private = 0,
-        ReadOnly = 1,
-        Public = 2
-    }
-
     /// <summary>
     /// Substitution node for identifier definitions.
     /// </summary>

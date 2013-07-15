@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DUO2C.Nodes.Oberon2;
 
 namespace DUO2C.Semantics
 {
@@ -46,23 +47,49 @@ namespace DUO2C.Semantics
         }
     }
 
-    public class CharType : OberonType
+    public enum AccessModifier : byte
     {
-        public static readonly CharType Default = new CharType();
+        Private = 0,
+        ReadOnly = 1,
+        Public = 2
+    }
 
-        public override string ToString()
+    public class RecordType : OberonType
+    {
+        private class Field
         {
-            return "CHAR";
+            public String Identifier { get; private set; }
+            public AccessModifier Visibility { get; private set; }
+            public OberonType Type { get; private set; }
+
+            public Field(String identifier, AccessModifier visibility, OberonType type)
+            {
+                Identifier = identifier;
+                Visibility = visibility;
+                Type = type;
+            }
+        }
+
+        private NNamedType _superRecordName;
+        private Dictionary<String, Field> _fields;
+
+        public RecordType(NRecordType node)
+        {
+            _superRecordName = node.SuperRecord;
+
+            _fields = node.Fields.Select(x =>
+                new Field(x.Key.Identifier, x.Key.Visibility, x.Value.Type)
+            ).ToDictionary(x => x.Identifier);
         }
 
         public override bool CanTestEquality(OberonType other)
         {
-            return CanCompare(other);
+            throw new NotImplementedException();
         }
 
         public override bool CanCompare(OberonType other)
         {
-            return other is CharType || (other is ArrayType && ((ArrayType) other).ElementType is CharType);
+            throw new NotImplementedException();
         }
     }
 
@@ -139,6 +166,26 @@ namespace DUO2C.Semantics
         public override bool CanCompare(OberonType other)
         {
             return false;
+        }
+    }
+
+    public class CharType : OberonType
+    {
+        public static readonly CharType Default = new CharType();
+
+        public override string ToString()
+        {
+            return "CHAR";
+        }
+
+        public override bool CanTestEquality(OberonType other)
+        {
+            return CanCompare(other);
+        }
+
+        public override bool CanCompare(OberonType other)
+        {
+            return other is CharType || (other is ArrayType && ((ArrayType) other).ElementType is CharType);
         }
     }
 

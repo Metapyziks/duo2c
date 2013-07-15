@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using DUO2C.Semantics;
+
 namespace DUO2C.Nodes.Oberon2
 {
-    public class Declaration : SubstituteNode
+    public class Declaration : SubstituteNode, ITypeErrorSource
     {
         public virtual NIdentDef IdentDef
         {
@@ -25,5 +27,12 @@ namespace DUO2C.Nodes.Oberon2
 
         public Declaration(ParseNode original)
             : base(original, false) { }
+
+        public IEnumerable<ParserException> FindTypeErrors()
+        {
+            return Children.SelectMany(x => (x is ITypeErrorSource)
+                ? ((ITypeErrorSource) x).FindTypeErrors()
+                : new ParserException[0]);
+        }
     }
 }

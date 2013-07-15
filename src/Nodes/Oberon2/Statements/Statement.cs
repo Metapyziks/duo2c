@@ -20,7 +20,7 @@ namespace DUO2C.Nodes.Oberon2
         {
             return Children.SelectMany(x => (x is ITypeErrorSource)
                 ? ((ITypeErrorSource) x).FindTypeErrors()
-                : (IEnumerable<ParserException>) new ParserException[0]);
+                : new ParserException[0]);
         }
     }
 

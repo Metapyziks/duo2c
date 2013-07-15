@@ -120,6 +120,64 @@ namespace DUO2C.Nodes.Oberon2
         }
 
         public NNamedType(ParseNode original)
-            : base(original, false) { }
+            : base(original, false)
+        {
+            Children = Children.Where(x => x is NQualIdent);
+        }
+    }
+
+    [SubstituteToken("FieldList")]
+    public class NFieldList : SubstituteNode
+    {
+        public NIdentList Identifiers
+        {
+            get { return (NIdentList) Children.First(); }
+        }
+
+        public NType Type
+        {
+            get { return (NType) Children.Last(); }
+        }
+
+        public NFieldList(ParseNode original)
+            : base(original, false)
+        {
+            Children = Children.Where(x => x is NIdentList || x is NType);
+        }
+    }
+
+    [SubstituteToken("RecordType")]
+    public class NRecordType : TypeDefinition
+    {
+        public NNamedType SuperRecord
+        {
+            get { return Children.FirstOrDefault() as NNamedType; }
+        }
+
+        public IEnumerable<NFieldList> FieldLists
+        {
+            get { return Children.Where(x => x is NFieldList).Select(x => (NFieldList) x); }
+        }
+
+        public override OberonType Type
+        {
+            get { return PointerType.NilPointer; }
+        }
+
+        public IEnumerable<KeyValuePair<NIdentDef, NType>> Fields
+        {
+            get {
+                return Children.Where(x => x is NFieldList).SelectMany(x => {
+                    var fl = (NFieldList) x;
+                    return fl.Identifiers.IdentDefs.Select(y => new KeyValuePair<NIdentDef, NType>(y, fl.Type));
+                });
+            }
+        }
+
+        public NRecordType(ParseNode original)
+            : base(original, false)
+        {
+            Children = Children.Where(x => x is NNamedType || x is NFieldList);
+        }
     }
 }

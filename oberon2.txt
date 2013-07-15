@@ -21,10 +21,10 @@ OberonType    = "LONGINT"   | "LongInt"
               | "CHAR"      | "Char".
 NamedType     = QualIdent.
 ArrayType     = ARRAY [ConstExpr {"," ConstExpr}] OF Type.
-RecordType    = RECORD ["("NamedType")"] FieldList {";" FieldList} END.
+RecordType    = RECORD ["("NamedType")"] [FieldList] {";" [FieldList]} END.
 PtrType       = POINTER TO Type.
 ProcType      = PROCEDURE [FormalPars].
-FieldList     = [IdentList ":" Type].
+FieldList     = IdentList ":" Type.
 StatementSeq  = Statement {";" Statement} [";"].
 Statement     = Assignment | Invocation | IfThenElse | SwitchCase | WhileLoop | RepeatUntil
               | ForLoop | UncondLoop | WithDo | Exit | Return.
