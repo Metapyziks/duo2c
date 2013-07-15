@@ -110,7 +110,7 @@ namespace DUO2C.Nodes
                             attribs.Add(String.Format("{0}=\"{1}\"", attrib.Name,
                                 prop.GetValue(this).ToString()));
                         }
-                    } catch (TargetInvocationException e) {
+                    } catch (TargetInvocationException) {
                         continue;
                     }
                 }
