@@ -12,7 +12,7 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("TypeGuard")]
     class NTypeGuard : Selector
     {
-        public NQualIdent Type { get; private set; }
+        public NNamedType Type { get; private set; }
 
         public override string String
         {
@@ -22,8 +22,8 @@ namespace DUO2C.Nodes.Oberon2
         public NTypeGuard(ParseNode original)
             : base(original, false)
         {
-            Children = Children.Where(x => x is NQualIdent);
-            Type = (NQualIdent) Children.First();
+            Children = Children.Where(x => x is NNamedType);
+            Type = (NNamedType) Children.First();
         }
     }
 }

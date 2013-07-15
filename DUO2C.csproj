@@ -55,7 +55,6 @@
     <Compile Include="src\Nodes\Oberon2\Statements\NStatement.cs" />
     <Compile Include="src\Nodes\Oberon2\Statements\NStatementSeq.cs" />
     <Compile Include="src\Nodes\Oberon2\Statements\Statement.cs" />
-    <Compile Include="src\Nodes\Oberon2\Types\NArrayType.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NCharacter.cs" />
     <Compile Include="src\Nodes\NIdent.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NConstExpr.cs" />
@@ -76,8 +75,6 @@
     <Compile Include="src\Nodes\NString.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NSimpleExpr.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NTerm.cs" />
-    <Compile Include="src\Nodes\Oberon2\Types\NOberonType.cs" />
-    <Compile Include="src\Nodes\Oberon2\Types\NPtrType.cs" />
     <Compile Include="src\Nodes\Oberon2\Types\NType.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NTypeGuard.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NUnary.cs" />

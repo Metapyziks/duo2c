@@ -168,56 +168,136 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("WhileLoop")]
     public class NWhileLoop : Statement
     {
+        public NExpr Condition 
+        {
+            get { return (NExpr) Children.First(); }
+        }
+
+        public NStatementSeq Body
+        {
+            get { return (NStatementSeq) Children.Last(); }
+        }
+
         public NWhileLoop(ParseNode original)
             : base(original)
         {
-
+            Children = Children.Where(x => x is NExpr || x is NStatementSeq);
         }
-
     }
 
     [SubstituteToken("RepeatUntil")]
     public class NRepeatUntil : Statement
     {
+        public NStatementSeq Body
+        {
+            get { return (NStatementSeq) Children.First(); }
+        }
+
+        public NExpr Condition
+        {
+            get { return (NExpr) Children.Last(); }
+        }
+
         public NRepeatUntil(ParseNode original)
             : base(original)
         {
-
+            Children = Children.Where(x => x is NExpr || x is NStatementSeq);
         }
-
     }
 
     [SubstituteToken("ForLoop")]
     public class NForLoop : Statement
     {
+        public String IteratorName
+        {
+            get { return Children.First().String; }
+        }
+
+        public NExpr Initial
+        {
+            get { return (NExpr) Children.ElementAt(1); }
+        }
+
+        public NExpr Final
+        {
+            get { return (NExpr) Children.ElementAt(2); }
+        }
+
+        public NConstExpr Increment
+        {
+            get { return Children.ElementAt(3) as NConstExpr; }
+        }
+
+        public NStatementSeq Body
+        {
+            get { return (NStatementSeq) Children.Last(); }
+        }
+
         public NForLoop(ParseNode original)
             : base(original)
         {
-
+            Children = Children.Where(x => x is NIdent || x is NExpr || x is NConstExpr || x is NStatementSeq);
         }
-
     }
 
     [SubstituteToken("UncondLoop")]
     public class NUncondLoop : Statement
     {
+        public NStatementSeq Body
+        {
+            get { return (NStatementSeq) Children.First(); }
+        }
+
         public NUncondLoop(ParseNode original)
             : base(original)
         {
+            Children = Children.Where(x => x is NStatementSeq);
+        }
+    }
 
+    [SubstituteToken("WithCase")]
+    public class NWithCase : SubstituteNode
+    {
+        public NQualIdent Identifier
+        {
+            get { return (NQualIdent) Children.First(); }
         }
 
+        public NNamedType Type
+        {
+            get { return (NNamedType) Children.ElementAt(1); }
+        }
+
+        public NStatementSeq Body
+        {
+            get { return (NStatementSeq) Children.Last(); }
+        }
+
+        public NWithCase(ParseNode original)
+            : base(original, false)
+        {
+            Children = Children.Where(x => x is NQualIdent || x is NNamedType || x is NStatementSeq);
+        }
     }
 
     [SubstituteToken("WithDo")]
     public class NWithDo : Statement
     {
+        public IEnumerable<NWithCase> Cases
+        {
+            get { return Children.Where(x => x is NWithCase).Select(x => (NWithCase) x); }
+        }
+
+        public NStatementSeq Else
+        {
+            get { return Children.Last() as NStatementSeq; }
+        }
+
         public NWithDo(ParseNode original)
             : base(original)
         {
-
+            Children = Children.Where(x => x is NWithCase || x is NStatementSeq);
         }
-
     }
 
     [SubstituteToken("Exit")]
@@ -226,19 +306,22 @@ namespace DUO2C.Nodes.Oberon2
         public NExit(ParseNode original)
             : base(original)
         {
-
+            Children = new ParseNode[0];
         }
-
     }
 
     [SubstituteToken("Return")]
     public class NReturn : Statement
     {
+        public NExpr Expression
+        {
+            get { return (NExpr) Children.FirstOrDefault(); }
+        }
+
         public NReturn(ParseNode original)
             : base(original)
         {
-
+            Children = Children.Where(x => x is NExpr);
         }
-
     }
 }

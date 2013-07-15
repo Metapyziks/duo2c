@@ -459,7 +459,7 @@ namespace DUO2C
                     try {
                         return (ParseNode) _subs[node.Token].Invoke(new Object[] { node });
                     } catch (TargetInvocationException e) {
-                        throw e.InnerException;
+                        throw e;
                     }
                 }
             }
