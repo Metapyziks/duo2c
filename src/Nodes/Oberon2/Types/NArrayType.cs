@@ -12,7 +12,7 @@ namespace DUO2C.Nodes.Oberon2
     public class NArrayType : TypeDefinition
     {
         [Serialize("length")]
-        public int Length { get; private set; }
+        public int ArrayLength { get; private set; }
 
         public NConstExpr LengthExpr
         {
@@ -26,7 +26,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override OberonType Type
         {
-            get { return new ArrayType(ElementDefinition.Type, Length); }
+            get { return new ArrayType(ElementDefinition.Type, ArrayLength); }
         }
 
         public NArrayType(ParseNode original)
@@ -35,7 +35,7 @@ namespace DUO2C.Nodes.Oberon2
             Children = Children.Where(x => x is NConstExpr || x is NType);
 
             // Temporary
-            Length = int.Parse(LengthExpr.String);
+            ArrayLength = int.Parse(LengthExpr.String);
 
             if (Children.Count() > 2) {
                 Children = new ParseNode[] {

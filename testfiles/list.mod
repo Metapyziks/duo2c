@@ -13,6 +13,7 @@
 
     PROCEDURE (l : List) Add* (v : Integer);
     BEGIN
+        v := 56.0 * 23 + (5 / 23);
         IF l = NIL THEN
             NEW(l);             (* create record instance *)
             l.value := v

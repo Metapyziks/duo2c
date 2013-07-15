@@ -8,7 +8,13 @@ SRCDIR = src
 
 SRC = \
 	$(SRCDIR)/*.cs \
-	Properties/*.cs \
+	$(SRCDIR)/Nodes/*.cs \
+	$(SRCDIR)/Nodes/Oberon2/*.cs \
+	$(SRCDIR)/Nodes/Oberon2/Declarations/*.cs \
+	$(SRCDIR)/Nodes/Oberon2/Expressions/*.cs \
+	$(SRCDIR)/Nodes/Oberon2/Types/*.cs \
+	$(SRCDIR)/Properties/*.cs \
+	$(SRCDIR)/Semantics/*.cs \
 	$(SRCDIR)/Parsers/*.cs
 
 TARGET = bin/release/DUO2C.exe

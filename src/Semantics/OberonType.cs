@@ -188,10 +188,10 @@ namespace DUO2C.Semantics
 
     public class IntegerType : NumericType
     {
-        public static readonly new IntegerType LongInt = new IntegerType(IntegerRange.LongInt);
-        public static readonly new IntegerType Integer = new IntegerType(IntegerRange.Integer);
-        public static readonly new IntegerType ShortInt = new IntegerType(IntegerRange.ShortInt);
-        public static readonly new IntegerType Byte = new IntegerType(IntegerRange.Byte);
+        public static readonly IntegerType LongInt = new IntegerType(IntegerRange.LongInt);
+        public static readonly IntegerType Integer = new IntegerType(IntegerRange.Integer);
+        public static readonly IntegerType ShortInt = new IntegerType(IntegerRange.ShortInt);
+        public static readonly IntegerType Byte = new IntegerType(IntegerRange.Byte);
 
         public static IntegerType Largest(IntegerType a, IntegerType b)
         {
@@ -222,8 +222,8 @@ namespace DUO2C.Semantics
 
     public class RealType : NumericType
     {
-        public static readonly new RealType LongReal = new RealType(RealRange.LongReal);
-        public static readonly new RealType Real = new RealType(RealRange.Real);
+        public static readonly RealType LongReal = new RealType(RealRange.LongReal);
+        public static readonly RealType Real = new RealType(RealRange.Real);
 
         public static RealType Largest(RealType a, RealType b)
         {

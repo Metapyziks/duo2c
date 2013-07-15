@@ -70,7 +70,6 @@ namespace DUO2C.Parsers
 
         public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out ParserException exception)
         {
-            int j = i;
             if (IsMatch(str, ref i, whitespace)) {
                 exception = null;
                 return new ParseNode[] { new LeafNode(i - Keyword.Length, Keyword.Length, Keyword, "keyword") };
