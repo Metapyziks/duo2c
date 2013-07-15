@@ -32,6 +32,11 @@ namespace DUO2C.Nodes.Oberon2
         [Serialize("byref")]
         public bool ByReference { get; private set; }
 
+        public IEnumerable<String> Identifiers
+        {
+            get { return Children.Where(x => x is NIdent).Select(x => x.String); }
+        }
+
         public NFPSection(ParseNode original)
             : base(original, false)
         {

@@ -30,7 +30,7 @@ namespace DUO2C.Semantics
         {
             if (other is PointerType) {
                 var type = ((PointerType) other).ResolvedType;
-                return type == null || type == ResolvedType;
+                return type == null || type.CanTestEquality(ResolvedType);
             } else {
                 return false;
             }
@@ -84,12 +84,52 @@ namespace DUO2C.Semantics
 
         public override bool CanTestEquality(OberonType other)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public override bool CanCompare(OberonType other)
         {
-            throw new NotImplementedException();
+            return false;
+        }
+    }
+
+    public class ProcedureType : OberonType
+    {
+        private class Parameter
+        {
+            public bool ByReference { get; private set; }
+            public String Identifier { get; private set; }
+
+            public Parameter(bool byRef, String ident)
+            {
+                ByReference = byRef;
+                Identifier = ident;
+            }
+        }
+
+        public OberonType ReturnType { get; private set; }
+        private Parameter[] _params;
+
+        public ProcedureType(NFormalPars paras)
+        {
+            if (paras != null) {
+                ReturnType = paras.ReturnType.Type;
+                _params = paras.FPSections.SelectMany(x => x.Identifiers.Select(y =>
+                    new Parameter(x.ByReference, y))).ToArray();
+            } else {
+                ReturnType = null;
+                _params = new Parameter[0];
+            }
+        }
+
+        public override bool CanTestEquality(OberonType other)
+        {
+            return other is ProcedureType;
+        }
+
+        public override bool CanCompare(OberonType other)
+        {
+            return false;
         }
     }
 

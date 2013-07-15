@@ -180,4 +180,37 @@ namespace DUO2C.Nodes.Oberon2
             Children = Children.Where(x => x is NNamedType || x is NFieldList);
         }
     }
+
+    [SubstituteToken("ProcType")]
+    public class NProcType : TypeDefinition
+    {
+        public IEnumerable<NFPSection> FPSections
+        {
+            get {
+                var pars = (NFormalPars) Children.FirstOrDefault(x => x is NFormalPars);
+                if (pars == null) return null;
+                return pars.FPSections;
+            }
+        }
+
+        public NType ReturnType
+        {
+            get {
+                var pars = (NFormalPars) Children.FirstOrDefault(x => x is NFormalPars);
+                if (pars == null) return null;
+                return pars.ReturnType;
+            }
+        }
+
+        public override OberonType Type
+        {
+            get { return new ProcedureType((NFormalPars) Children.FirstOrDefault()); }
+        }
+
+        public NProcType(ParseNode original)
+            : base(original, false)
+        {
+            Children = Children.Where(x => x is NFormalPars);
+        }
+    }
 }
