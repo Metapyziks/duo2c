@@ -50,6 +50,7 @@
     <Compile Include="src\Nodes\Oberon2\Expressions\ExpressionElement.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NBool.cs" />
     <Compile Include="src\Nodes\Oberon2\Declarations\NConstDecl.cs" />
+    <Compile Include="src\Nodes\Oberon2\Expressions\NSet.cs" />
     <Compile Include="src\Nodes\Oberon2\NIdentList.cs" />
     <Compile Include="src\Nodes\Oberon2\NImportList.cs" />
     <Compile Include="src\Nodes\Oberon2\Statements\NStatement.cs" />
