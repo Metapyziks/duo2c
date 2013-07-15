@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\Nodes\BranchNode.cs" />
+    <Compile Include="src\Nodes\ITypeErrorSource.cs" />
     <Compile Include="src\Nodes\LeafNode.cs" />
     <Compile Include="src\Nodes\Oberon2\Declarations\Declaration.cs" />
     <Compile Include="src\Nodes\Oberon2\Declarations\NProcDecl.cs" />
@@ -53,12 +54,12 @@
     <Compile Include="src\Nodes\Oberon2\NImportList.cs" />
     <Compile Include="src\Nodes\Oberon2\Statements\NStatement.cs" />
     <Compile Include="src\Nodes\Oberon2\Statements\NStatementSeq.cs" />
+    <Compile Include="src\Nodes\Oberon2\Statements\Statement.cs" />
     <Compile Include="src\Nodes\Oberon2\Types\NArrayType.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NCharacter.cs" />
     <Compile Include="src\Nodes\NIdent.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NConstExpr.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NExprList.cs" />
-    <Compile Include="src\Nodes\Oberon2\Expressions\NInvocation.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NNil.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NString.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NDesignator.cs" />

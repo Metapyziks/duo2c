@@ -8,7 +8,7 @@ using DUO2C.Semantics;
 
 namespace DUO2C.Nodes.Oberon2
 {
-    public abstract class ExpressionElement : SubstituteNode
+    public abstract class ExpressionElement : SubstituteNode, ITypeErrorSource
     {
         protected static readonly IEnumerable<ParserException> EmptyExceptionArray = new ParserException[0];
 
