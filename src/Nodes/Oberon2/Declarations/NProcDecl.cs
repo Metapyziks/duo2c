@@ -103,6 +103,7 @@ namespace DUO2C.Nodes.Oberon2
         {
             Children = Children.Where(x => x.Token != "keyword");
             _identDef = (NIdentDef) Children.First(x => x is NIdentDef);
+            Children = Children.Where(x => !(x is NIdent));
         }
     }
 

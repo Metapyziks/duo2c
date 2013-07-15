@@ -1,10 +1,10 @@
-﻿Module        = MODULE ident ";" [ImportList] DeclSeq [BEGIN StatementSeq] END ident ".".
+﻿Module        = MODULE ident ";" [ImportList] DeclSeq [BEGIN StatementSeq] END [ident] ".".
 ImportList    = IMPORT [ident ":="] ident {"," [ident ":="] ident} ";".
 DeclSeq       = { CONST {ConstDecl ";" } | TYPE {TypeDecl ";"} | VAR {VarDecl ";"}} {ProcDecl ";" | ForwardDecl ";"}.
 ConstDecl     = IdentDef "=" ConstExpr.
 TypeDecl      = IdentDef "=" Type.
 VarDecl       = IdentList ":" Type.
-ProcDecl      = PROCEDURE [Receiver] IdentDef [FormalPars] ";" DeclSeq [BEGIN StatementSeq] END ident.
+ProcDecl      = PROCEDURE [Receiver] IdentDef [FormalPars] ";" DeclSeq [BEGIN StatementSeq] END [ident].
 ForwardDecl   = PROCEDURE "^" [Receiver] IdentDef [FormalPars].
 FormalPars    = "(" [FPSection {";" FPSection}] ")" [":" Type].
 FPSection     = [VAR] ident {"," ident} ":" Type.
