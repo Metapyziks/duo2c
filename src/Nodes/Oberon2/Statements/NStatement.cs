@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace DUO2C.Nodes.Oberon2
 {
-    [SubstituteToken("StatementSeq")]
-    public class NStatementSeq : SubstituteNode
+    [SubstituteToken("Statement")]
+    public class NStatement : SubstituteNode
     {
-        public NStatementSeq(ParseNode original)
+        public NStatement(ParseNode original)
             : base(original, false)
         {
 

@@ -25,9 +25,9 @@ RecordType    = RECORD ["("NamedType")"] FieldList {";" FieldList} END.
 PtrType       = POINTER TO Type.
 ProcType      = PROCEDURE [FormalPars].
 FieldList     = [IdentList ":" Type].
-StatementSeq  = Statement {";" Statement}.
-Statement     = [ Assignment | Invocation | IfThenElse | SwitchCase | WhileLoop | RepeatUntil
-              | ForLoop | UncondLoop | WithDo | Exit | Return ].
+StatementSeq  = Statement {";" Statement} [";"].
+Statement     = Assignment | Invocation | IfThenElse | SwitchCase | WhileLoop | RepeatUntil
+              | ForLoop | UncondLoop | WithDo | Exit | Return.
 Assignment    = Designator ":=" Expr.
 IfThenElse    = IF Expr THEN StatementSeq {ELSIF Expr THEN StatementSeq} [ELSE StatementSeq] END.
 SwitchCase    = CASE Expr OF Case {"|" Case} [ELSE StatementSeq] END.

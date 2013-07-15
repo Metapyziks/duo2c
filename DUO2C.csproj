@@ -51,6 +51,7 @@
     <Compile Include="src\Nodes\Oberon2\Declarations\NConstDecl.cs" />
     <Compile Include="src\Nodes\Oberon2\NIdentList.cs" />
     <Compile Include="src\Nodes\Oberon2\NImportList.cs" />
+    <Compile Include="src\Nodes\Oberon2\Statements\NStatement.cs" />
     <Compile Include="src\Nodes\Oberon2\Statements\NStatementSeq.cs" />
     <Compile Include="src\Nodes\Oberon2\Types\NArrayType.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NCharacter.cs" />

@@ -13,13 +13,13 @@
 
     PROCEDURE (l : List) Add* (v : Integer);
     BEGIN
-        v := 56.0 * 23 + (5 / 23);
+        v := 56.0D0 * 23 + (5 / 23);
         IF l = NIL THEN
             NEW(l);             (* create record instance *)
             l.value := v
         ELSE
             l.next.Add(v(List))      (* recursive call to .add(n) *)
-        END
+        END;
     END Add;
 
     PROCEDURE (l : List) Get* () : Integer;
