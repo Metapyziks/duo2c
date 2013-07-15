@@ -154,6 +154,7 @@ namespace DUO2C
                 var fs = ruleset.CreateKeywordParser(".");
                 var pipe = ruleset.CreateKeywordParser("|");
                 var flat = ruleset.CreateKeywordParser("*");
+                var nosub = ruleset.CreateKeywordParser("!");
                 var pbOpen = ruleset.CreateKeywordParser("(");
                 var pbClose = ruleset.CreateKeywordParser(")");
                 var sbOpen = ruleset.CreateKeywordParser("[");
@@ -166,7 +167,7 @@ namespace DUO2C
                 var str = ruleset.CreateStringParser();
                 
                 // Define tokens
-                var rSyntax = ruleset.CreateTokenParser("Syntax", false, true);
+                var rSyntax = ruleset.CreateTokenParser("Syntax", false, false, true);
                 var rRule = ruleset.CreateTokenParser("Rule");
                 var rExpr = ruleset.CreateTokenParser("Expr");
                 var rList = ruleset.CreateTokenParser("List");
@@ -174,7 +175,7 @@ namespace DUO2C
 
                 // Define production rules
                 ruleset.AddRule(rSyntax, null * (+rRule));
-                ruleset.AddRule(rRule, +ident[+flat] + eq + rExpr + fs);
+                ruleset.AddRule(rRule, +ident [+flat[+nosub] | +nosub[+flat]] + eq + rExpr + fs);
                 ruleset.AddRule(rExpr, +rList * (+pipe + rList));
                 ruleset.AddRule(rList, +rTerm * (+rTerm));
                 ruleset.AddRule(rTerm, (+pbOpen + rExpr + pbClose)
@@ -209,11 +210,12 @@ namespace DUO2C
                 
                 // Tokens marked with a * are flattened into one node
                 bool flatten = children.ElementAt(1).String == "*";
-                var token = parsed.CreateTokenParser(name, flatten, first);
+                // Tokens marked with a ! shouldn't be substituted
+                bool nosub = children.ElementAt(1).String == "!";
 
-                // If the token is marked to be flattened, the expression will
-                // be one more node along in the array
-                int exprIndex = flatten ? 3 : 2;
+                var token = parsed.CreateTokenParser(name, flatten, nosub, first);
+
+                int exprIndex = flatten && nosub ? 4 : flatten || nosub ? 3 : 2;
                 toBuild.Add(token, ((BranchNode) children.ElementAt(exprIndex)).Children);
                 first = false;
             }
@@ -297,9 +299,9 @@ namespace DUO2C
         /// are flattened to a single leaf node</param>
         /// <param name="root">If true, this token is used as the initial production rule</param>
         /// <returns>Parser that refers to this token</returns>
-        public PToken CreateTokenParser(String token, bool flatten = false, bool root = false)
+        public PToken CreateTokenParser(String token, bool flatten = false, bool nosub = false, bool root = false)
         {
-            var rule = new PToken(this, token, flatten);
+            var rule = new PToken(this, token, flatten, nosub);
             _rules.Add(rule, null);
             if (root) _root = rule;
             return rule;
@@ -435,7 +437,7 @@ namespace DUO2C
             })) AddSubstitution(t);
 
             foreach (var rule in _rules) {
-                if (!_subs.ContainsKey(rule.Key.Token)) {
+                if (!rule.Key.NoSubstitution && !_subs.ContainsKey(rule.Key.Token)) {
                     System.Diagnostics.Debug.WriteLine("WARNING: No substitute defined for {0}!", (Object) rule.Key.Token);
                 }
             }
@@ -456,6 +458,10 @@ namespace DUO2C
                 if (node.GetType() == type) {
                     return node;
                 } else {
+                    var token = GetTokenReference(node.Token);
+                    if (token != null && token.NoSubstitution) {
+                        return node;
+                    }
                     try {
                         return (ParseNode) _subs[node.Token].Invoke(new Object[] { node });
                     } catch (TargetInvocationException e) {

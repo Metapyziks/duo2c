@@ -49,6 +49,11 @@ namespace DUO2C.Parsers
         public bool Flatten { get; private set; }
 
         /// <summary>
+        /// Parsed structures won't be substituted if this value is true.
+        /// </summary>
+        public bool NoSubstitution { get; private set; }
+
+        /// <summary>
         /// If true, leading whitespace will be ignored when matching
         /// this token.
         /// </summary>
@@ -82,13 +87,16 @@ namespace DUO2C.Parsers
         /// <param name="token">Name of the token to be referenced</param>
         /// <param name="flatten">Parsed structures will be flattened into
         /// a single leaf node if this value is true</param>
-        public PToken(Ruleset ruleset, String token, bool flatten)
+        /// <param name="nosub">Parsed structures won't be substituted if
+        /// this value is true</param>
+        public PToken(Ruleset ruleset, String token, bool flatten, bool nosub)
             : base(ruleset)
         {
             _parser = null;
 
             Token = token;
             Flatten = flatten;
+            NoSubstitution = nosub;
         }
 
         public override bool IsMatch(string str, ref int i, bool whitespace)

@@ -100,7 +100,7 @@ namespace DUO2C.Nodes.Oberon2
 
     }
 
-    [SubstituteToken("CaseLabel")]
+    [SubstituteToken("CaseLabels")]
     public class NCaseLabel : SubstituteNode
     {
         public NConstExpr Min

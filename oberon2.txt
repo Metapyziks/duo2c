@@ -51,9 +51,9 @@ Unary         = ("+" | "-" | "~") Factor.
 Bool          = "TRUE" | "FALSE".
 Set           = "{" [Element {"," Element}] "}".
 Element       = Expr [".." Expr].
-Relation      = "=" | "#" | "<" | "<=" | ">" | ">=" | IN | IS.
-AddOp         = "+" | "-" | OR.
-MulOp         = "*" | "/" | DIV | MOD | "&".
+Relation!     = "=" | "#" | "<" | "<=" | ">" | ">=" | IN | IS.
+AddOp!        = "+" | "-" | OR.
+MulOp!        = "*" | "/" | DIV | MOD | "&".
 Invocation    = Designator ["(" [ExprList] ")"].
 Designator    = QualIdent {MemberAccess | Indexer | PtrResolve | TypeGuard}.
 MemberAccess  = "." ident.
@@ -68,8 +68,8 @@ character     = digit {hexDigit} "X".
 number        = integer | real.
 integer       = digit {digit} | digit {hexDigit} "H".
 real          = digit {digit} "." {digit} [scaleFactor].
-scaleFactor   = ("E" | "D") ["+" | "-"] digit {digit}.
-hexDigit      = digit | "A" | "B" | "C" | "D" | "E" | "F".
-digit         = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9".
-commentOpen   = "(*".
-commentClose  = "*)".
+scaleFactor!  = ("E" | "D") ["+" | "-"] digit {digit}.
+hexDigit!     = digit | "A" | "B" | "C" | "D" | "E" | "F".
+digit!        = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9".
+commentOpen!  = "(*".
+commentClose! = "*)".
