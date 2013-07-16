@@ -27,7 +27,7 @@ namespace DUO2C
     public enum ParserError
     {
         Syntax,
-        Type
+        Semantic
     }
 
     /// <summary>
@@ -123,8 +123,8 @@ namespace DUO2C
         public override String Message
         {
             get {
-                return String.Format("{0}({1}:{2}) {3} error : {4}{5}", SourcePath ?? "",
-                    Line, Column, ErrorType.ToString().ToLower(), MessageNoLocation,
+                return String.Format("{0} ({1},{2}) : {3}{4}", SourcePath ?? "",
+                    Line, Column, MessageNoLocation,
                     SourceString != null ? String.Format(" ({0})", SourceString) : "");
             }
         }

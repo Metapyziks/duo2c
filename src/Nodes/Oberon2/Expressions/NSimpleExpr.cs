@@ -95,15 +95,15 @@ namespace DUO2C.Nodes.Oberon2
             }
 
             if (!innerFound && Prev != null) {
-                var left = Term.GetFinalType(scope);
-                var right = Prev.GetFinalType(scope);
+                var left = Prev.GetFinalType(scope);
+                var right = Term.GetFinalType(scope);
 
                 if (left == null) {
-                    yield return new UnresolvedTypeException(Term);
+                    yield return new UndeclaredIdentifierException(Prev);
                 }
 
                 if (right == null) {
-                    yield return new UnresolvedTypeException(Prev);
+                    yield return new UndeclaredIdentifierException(Term);
                 }
 
                 if (left != null && right != null) {

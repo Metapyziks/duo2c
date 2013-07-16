@@ -103,11 +103,11 @@ namespace DUO2C.Nodes.Oberon2
                 var right = SimpleExpr.GetFinalType(scope);
                 
                 if (left == null) {
-                    yield return new UnresolvedTypeException(SimpleExpr);
+                    yield return new UndeclaredIdentifierException(Prev);
                 }
 
                 if (right == null) {
-                    yield return new UnresolvedTypeException(Prev);
+                    yield return new UndeclaredIdentifierException(SimpleExpr);
                 }
 
                 if (left != null && right != null) {

@@ -15,8 +15,8 @@ namespace DUO2C.Semantics
         public String Operator { get; private set; }
 
         public OperandTypeException(OberonType left, OberonType right, String op, ParseNode node)
-            : base(ParserError.Type, String.Format("Operator '{0}' cannot be applied to "
-                + "operands of type '{1}' and '{2}'", op.ToString(), left.ToString(), right.ToString()),
+            : base(ParserError.Semantic, String.Format("Operator '{0}' cannot be applied to "
+                + "operands of types '{1}' and '{2}'", op.ToString(), left.ToString(), right.ToString()),
                 node.StartIndex, node.Length)
         {
             Left = left;
