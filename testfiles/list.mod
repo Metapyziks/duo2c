@@ -25,7 +25,7 @@
     VAR
         v : Integer;
     BEGIN
-        IF l = NIL THEN
+        IF l = 5 THEN
             RETURN 0           (* .get() must always return an INTEGER *)
         ELSIF l = NIL THEN
             RETURN 1 

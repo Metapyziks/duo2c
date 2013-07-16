@@ -17,6 +17,8 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("SimpleExpr")]
     public class NSimpleExpr : ExpressionElement
     {
+        private String _opString;
+
         [Serialize("operator", SimpleExprOperator.None)]
         public SimpleExprOperator Operator { get; private set; }
 
@@ -59,9 +61,9 @@ namespace DUO2C.Nodes.Oberon2
             if (Children.Count() == 1) {
                 Operator = SimpleExprOperator.None;
             } else {
-                var op = Children.ElementAt(Children.Count() - 2);
+                _opString = Children.ElementAt(Children.Count() - 2).String;
 
-                switch (op.String) {
+                switch (_opString) {
                     case "+":
                         Operator = SimpleExprOperator.Add; break;
                     case "-":
@@ -101,15 +103,15 @@ namespace DUO2C.Nodes.Oberon2
 
                 if (Operator == SimpleExprOperator.Or) {
                     if (!(left is BooleanType)) {
-                        yield return new TypeMismatchException(BooleanType.Default, Term);
+                        yield return new OperandTypeException(left, right, _opString, this);
                     } else if (!(right is BooleanType)) {
-                        yield return new TypeMismatchException(BooleanType.Default, Prev);
+                        yield return new OperandTypeException(left, right, _opString, this);
                     }
                 } else if (!(left is SetType) || !(right is SetType)) {
                     if (!(left is NumericType)) {
-                        yield return new TypeMismatchException(NumericType.Default, Term);
+                        yield return new OperandTypeException(left, right, _opString, this);
                     } else if (!(right is NumericType)) {
-                        yield return new TypeMismatchException(NumericType.Default, Prev);
+                        yield return new OperandTypeException(left, right, _opString, this);
                     }
                 }
             }

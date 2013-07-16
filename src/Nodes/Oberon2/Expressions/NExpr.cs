@@ -22,6 +22,8 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("Expr")]
     public class NExpr : ExpressionElement
     {
+        String _opString;
+
         [Serialize("operator", ExprOperator.None)]
         public ExprOperator Operator { get; private set; }
 
@@ -51,7 +53,8 @@ namespace DUO2C.Nodes.Oberon2
             if (Children.Count() == 1) {
                 Operator = ExprOperator.None;
             } else {
-                switch (Children.ElementAt(1).String) {
+                _opString = Children.ElementAt(1).String;
+                switch (_opString) {
                     case "=":
                         Operator = ExprOperator.Equals; break;
                     case "#":
@@ -101,17 +104,17 @@ namespace DUO2C.Nodes.Oberon2
 
                 if (Operator == ExprOperator.InSet) {
                     if (!(left is IntegerType)) {
-                        yield return new TypeMismatchException(IntegerType.Integer, SimpleExpr);
+                        yield return new OperandTypeException(left, right, _opString, this);
                     } else if (!(right is SetType)) {
-                        yield return new TypeMismatchException(SetType.Default, Prev);
+                        yield return new OperandTypeException(left, right, _opString, this);
                     }
                 } else if (Operator == ExprOperator.Equals || Operator == ExprOperator.NotEquals) {
                     if (!left.CanTestEquality(right)) {
-                        yield return new TypeMismatchException(left, Prev);
+                        yield return new OperandTypeException(left, right, _opString, this);
                     }
                 } else {
                     if (!left.CanCompare(right)) {
-                        yield return new TypeMismatchException(left, Prev);
+                        yield return new OperandTypeException(left, right, _opString, this);
                     }
                 }
             }

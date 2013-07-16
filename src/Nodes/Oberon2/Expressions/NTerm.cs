@@ -19,6 +19,8 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("Term")]
     public class NTerm : ExpressionElement
     {
+        String _opString;
+
         [Serialize("operator", TermOperator.None)]
         public TermOperator Operator { get; private set; }
 
@@ -64,8 +66,8 @@ namespace DUO2C.Nodes.Oberon2
             if (Children.Count() == 1) {
                 Operator = TermOperator.None;
             } else {
-                var op = Children.ElementAt(Children.Count() - 2);
-                switch (op.String) {
+                _opString = Children.ElementAt(Children.Count() - 2).String;
+                switch (_opString) {
                     case "*":
                         Operator = TermOperator.Multiply; break;
                     case "/":
@@ -109,21 +111,21 @@ namespace DUO2C.Nodes.Oberon2
 
                 if (Operator == TermOperator.IntDivide || Operator == TermOperator.Modulo) {
                     if (!(left is IntegerType)) {
-                        yield return new TypeMismatchException(IntegerType.Integer, Factor);
+                        yield return new OperandTypeException(left, right, _opString, this);
                     } else if (!(right is IntegerType)) {
-                        yield return new TypeMismatchException(IntegerType.Integer, Prev);
+                        yield return new OperandTypeException(left, right, _opString, this);
                     }
                 } else if (Operator == TermOperator.And) {
                     if (!(left is BooleanType)) {
-                        yield return new TypeMismatchException(BooleanType.Default, Factor);
+                        yield return new OperandTypeException(left, right, _opString, this);
                     } else if (!(right is BooleanType)) {
-                        yield return new TypeMismatchException(BooleanType.Default, Prev);
+                        yield return new OperandTypeException(left, right, _opString, this);
                     }
                 } else if (!(left is SetType) || !(right is SetType)) {
                     if (!(left is NumericType)) {
-                        yield return new TypeMismatchException(NumericType.Default, Factor);
+                        yield return new OperandTypeException(left, right, _opString, this);
                     } else if (!(right is NumericType)) {
-                        yield return new TypeMismatchException(NumericType.Default, Prev);
+                        yield return new OperandTypeException(left, right, _opString, this);
                     }
                 }
             }

@@ -397,7 +397,7 @@ namespace DUO2C
                 if (attrib != null) {
                     token = attrib.Token;
                 } else {
-                    throw new Exception(String.Format("No token specified when adding the substitution type \"{0}\".",
+                    throw new Exception(String.Format("No token specified when adding the substitution type '{0}'.",
                         subType.FullName));
                 }
             }
