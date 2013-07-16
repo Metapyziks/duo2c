@@ -106,6 +106,7 @@
     <Compile Include="src\Semantics\OperandTypeException.cs" />
     <Compile Include="src\Semantics\Scope.cs" />
     <Compile Include="src\Semantics\TypeMismatchException.cs" />
+    <Compile Include="src\Semantics\UnresolvedTypeException.cs" />
     <Compile Include="src\Tools.cs" />
   </ItemGroup>
   <ItemGroup>

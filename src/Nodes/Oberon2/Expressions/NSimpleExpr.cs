@@ -98,17 +98,27 @@ namespace DUO2C.Nodes.Oberon2
                 var left = Term.GetFinalType(scope);
                 var right = Prev.GetFinalType(scope);
 
-                if (Operator == SimpleExprOperator.Or) {
-                    if (!(left is BooleanType)) {
-                        yield return new OperandTypeException(left, right, _opString, this);
-                    } else if (!(right is BooleanType)) {
-                        yield return new OperandTypeException(left, right, _opString, this);
-                    }
-                } else if (!(left is SetType) || !(right is SetType)) {
-                    if (!(left is NumericType)) {
-                        yield return new OperandTypeException(left, right, _opString, this);
-                    } else if (!(right is NumericType)) {
-                        yield return new OperandTypeException(left, right, _opString, this);
+                if (left == null) {
+                    yield return new UnresolvedTypeException(Term);
+                }
+
+                if (right == null) {
+                    yield return new UnresolvedTypeException(Prev);
+                }
+
+                if (left != null && right != null) {
+                    if (Operator == SimpleExprOperator.Or) {
+                        if (!(left is BooleanType)) {
+                            yield return new OperandTypeException(left, right, _opString, this);
+                        } else if (!(right is BooleanType)) {
+                            yield return new OperandTypeException(left, right, _opString, this);
+                        }
+                    } else if (!(left is SetType) || !(right is SetType)) {
+                        if (!(left is NumericType)) {
+                            yield return new OperandTypeException(left, right, _opString, this);
+                        } else if (!(right is NumericType)) {
+                            yield return new OperandTypeException(left, right, _opString, this);
+                        }
                     }
                 }
             }

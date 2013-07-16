@@ -99,22 +99,32 @@ namespace DUO2C.Nodes.Oberon2
             }
 
             if (!innerFound && Prev != null) {
-                var left = SimpleExpr.GetFinalType(scope);
-                var right = Prev.GetFinalType(scope);
+                var left = Prev.GetFinalType(scope);
+                var right = SimpleExpr.GetFinalType(scope);
+                
+                if (left == null) {
+                    yield return new UnresolvedTypeException(SimpleExpr);
+                }
 
-                if (Operator == ExprOperator.InSet) {
-                    if (!(left is IntegerType)) {
-                        yield return new OperandTypeException(left, right, _opString, this);
-                    } else if (!(right is SetType)) {
-                        yield return new OperandTypeException(left, right, _opString, this);
-                    }
-                } else if (Operator == ExprOperator.Equals || Operator == ExprOperator.NotEquals) {
-                    if (!left.CanTestEquality(right)) {
-                        yield return new OperandTypeException(left, right, _opString, this);
-                    }
-                } else {
-                    if (!left.CanCompare(right)) {
-                        yield return new OperandTypeException(left, right, _opString, this);
+                if (right == null) {
+                    yield return new UnresolvedTypeException(Prev);
+                }
+
+                if (left != null && right != null) {
+                    if (Operator == ExprOperator.InSet) {
+                        if (!(left is IntegerType)) {
+                            yield return new OperandTypeException(left, right, _opString, this);
+                        } else if (!(right is SetType)) {
+                            yield return new OperandTypeException(left, right, _opString, this);
+                        }
+                    } else if (Operator == ExprOperator.Equals || Operator == ExprOperator.NotEquals) {
+                        if (!left.CanTestEquality(right)) {
+                            yield return new OperandTypeException(left, right, _opString, this);
+                        }
+                    } else {
+                        if (!left.CanCompare(right)) {
+                            yield return new OperandTypeException(left, right, _opString, this);
+                        }
                     }
                 }
             }

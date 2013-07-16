@@ -9,8 +9,10 @@ using DUO2C.Semantics;
 namespace DUO2C.Nodes.Oberon2
 {
     [SubstituteToken("Receiver")]
-    public class NReceiver : SubstituteNode
+    public class NReceiver : SubstituteNode, IDeclarationSource
     {
+        public bool ByReference { get; private set; }
+
         public String Identifier
         {
             get { return Children.First().String; }
@@ -22,14 +24,20 @@ namespace DUO2C.Nodes.Oberon2
         public NReceiver(ParseNode original)
             : base(original, true)
         {
+            ByReference = Children.ElementAt(1).Token == "keyword";
             Children = Children.Where(x => x.Token != "keyword");
             TypeName = Children.Last().String;
             Children = new ParseNode[] { Children.First() };
         }
+
+        public void FindDeclarations(Scope scope)
+        {
+            scope.Declare(Identifier, new UnresolvedType(TypeName));
+        }
     }
 
     [SubstituteToken("FPSection")]
-    public class NFPSection : SubstituteNode
+    public class NFPSection : SubstituteNode, IDeclarationSource
     {
         [Serialize("byref")]
         public bool ByReference { get; private set; }
@@ -51,10 +59,17 @@ namespace DUO2C.Nodes.Oberon2
 
             Children = Children.Where(x => x is NIdent || x is NType);
         }
+
+        public void FindDeclarations(Scope scope)
+        {
+            foreach (var ident in Identifiers) {
+                scope.Declare(ident, Type.Type);
+            }
+        }
     }
 
     [SubstituteToken("FormalPars")]
-    public class NFormalPars : SubstituteNode
+    public class NFormalPars : SubstituteNode, IDeclarationSource
     {
         public IEnumerable<NFPSection> FPSections
         {
@@ -70,6 +85,13 @@ namespace DUO2C.Nodes.Oberon2
             : base(original, false)
         {
             Children = Children.Where(x => x is NFPSection || x is NType);
+        }
+
+        public void FindDeclarations(Scope scope)
+        {
+            foreach (var section in FPSections) {
+                section.FindDeclarations(scope);
+            }
         }
     }
 
@@ -127,6 +149,8 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("ProcDecl")]
     public class NProcDecl : NForwardDecl
     {
+        private Scope _scope;
+
         public NStatementSeq Statements
         {
             get { return (NStatementSeq) Children.FirstOrDefault(x => x is NStatementSeq); }
@@ -134,5 +158,21 @@ namespace DUO2C.Nodes.Oberon2
 
         public NProcDecl(ParseNode original)
             : base(original) { }
+
+        public override void FindDeclarations(Scope scope)
+        {
+            base.FindDeclarations(scope);
+
+            _scope = new Scope(scope);
+
+            foreach (var child in Children.Where(x => x is IDeclarationSource)) {
+                ((IDeclarationSource) child).FindDeclarations(_scope);
+            }
+        }
+
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        {
+            return base.FindTypeErrors(_scope);
+        }
     }
 }

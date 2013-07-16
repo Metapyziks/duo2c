@@ -40,10 +40,14 @@ namespace DUO2C.Nodes.Oberon2
             get { return String.Format("{0}{1}", Element.String, Operation.String); }
         }
 
-        // TODO: Lookup actual type
         public override OberonType GetFinalType(Scope scope)
         {
-            return PointerType.NilPointer;
+            if (IsRoot) {
+                var ident = (NQualIdent) Element;
+                return scope[ident.Identifier, ident.Module];
+            } else {
+                return PointerType.NilPointer;
+            }
         }
 
         public override bool IsConstant(Scope scope)

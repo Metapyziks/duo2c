@@ -34,12 +34,19 @@ namespace DUO2C.Semantics
         public virtual OberonType this[String identifier, String module = null]
         {
             get {
+                OberonType type;
                 if (module != null) {
-                    return Parent != null ? Parent[identifier, module] : null;
+                    type = Parent != null ? Parent[identifier, module] : null;
                 } else {
-                    return _definitions.ContainsKey(identifier)
+                    type = _definitions.ContainsKey(identifier)
                         ? _definitions[identifier] : HasParent
                         ? Parent[identifier] : null;
+                }
+                if (type is UnresolvedType) {
+                    var ut = (UnresolvedType) type;
+                    return this[ut.Identifier, ut.Module];
+                } else {
+                    return type;
                 }
             }
         }
@@ -64,7 +71,7 @@ namespace DUO2C.Semantics
         public override OberonType this[string identifier, string module = null]
         {
             get {
-                return _modules.ContainsKey(module) ? _modules[module][identifier] : null;
+                return module != null && _modules.ContainsKey(module) ? _modules[module][identifier] : null;
             }
         }
     }

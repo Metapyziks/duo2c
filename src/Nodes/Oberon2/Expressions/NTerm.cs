@@ -106,23 +106,33 @@ namespace DUO2C.Nodes.Oberon2
                 var left = Factor.GetFinalType(scope);
                 var right = Prev.GetFinalType(scope);
 
-                if (Operator == TermOperator.IntDivide || Operator == TermOperator.Modulo) {
-                    if (!(left is IntegerType)) {
-                        yield return new OperandTypeException(left, right, _opString, this);
-                    } else if (!(right is IntegerType)) {
-                        yield return new OperandTypeException(left, right, _opString, this);
-                    }
-                } else if (Operator == TermOperator.And) {
-                    if (!(left is BooleanType)) {
-                        yield return new OperandTypeException(left, right, _opString, this);
-                    } else if (!(right is BooleanType)) {
-                        yield return new OperandTypeException(left, right, _opString, this);
-                    }
-                } else if (!(left is SetType) || !(right is SetType)) {
-                    if (!(left is NumericType)) {
-                        yield return new OperandTypeException(left, right, _opString, this);
-                    } else if (!(right is NumericType)) {
-                        yield return new OperandTypeException(left, right, _opString, this);
+                if (left == null) {
+                    yield return new UnresolvedTypeException(Factor);
+                }
+
+                if (right == null) {
+                    yield return new UnresolvedTypeException(Prev);
+                }
+
+                if (left != null && right != null) {
+                    if (Operator == TermOperator.IntDivide || Operator == TermOperator.Modulo) {
+                        if (!(left is IntegerType)) {
+                            yield return new OperandTypeException(left, right, _opString, this);
+                        } else if (!(right is IntegerType)) {
+                            yield return new OperandTypeException(left, right, _opString, this);
+                        }
+                    } else if (Operator == TermOperator.And) {
+                        if (!(left is BooleanType)) {
+                            yield return new OperandTypeException(left, right, _opString, this);
+                        } else if (!(right is BooleanType)) {
+                            yield return new OperandTypeException(left, right, _opString, this);
+                        }
+                    } else if (!(left is SetType) || !(right is SetType)) {
+                        if (!(left is NumericType)) {
+                            yield return new OperandTypeException(left, right, _opString, this);
+                        } else if (!(right is NumericType)) {
+                            yield return new OperandTypeException(left, right, _opString, this);
+                        }
                     }
                 }
             }
