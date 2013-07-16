@@ -8,7 +8,7 @@ using DUO2C.Semantics;
 
 namespace DUO2C.Nodes.Oberon2
 {
-    public class Declaration : SubstituteNode, ITypeErrorSource
+    public abstract class Declaration : SubstituteNode, ITypeErrorSource, IDeclarationSource
     {
         public virtual NIdentDef IdentDef
         {
@@ -28,11 +28,13 @@ namespace DUO2C.Nodes.Oberon2
         public Declaration(ParseNode original)
             : base(original, false) { }
 
-        public IEnumerable<ParserException> FindTypeErrors()
+        public IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
             return Children.SelectMany(x => (x is ITypeErrorSource)
-                ? ((ITypeErrorSource) x).FindTypeErrors()
+                ? ((ITypeErrorSource) x).FindTypeErrors(scope)
                 : new ParserException[0]);
         }
+
+        public abstract void FindDeclarations(Scope scope);    
     }
 }

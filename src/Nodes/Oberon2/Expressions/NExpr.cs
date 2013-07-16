@@ -37,14 +37,14 @@ namespace DUO2C.Nodes.Oberon2
             get { return (NSimpleExpr) Children.Last(); }
         }
 
-        public override OberonType FinalType
+        public override OberonType GetFinalType(Scope scope)
         {
-            get { return Prev == null ? SimpleExpr.FinalType : BooleanType.Default; }
+            return Prev == null ? SimpleExpr.GetFinalType(scope) : BooleanType.Default;
         }
 
-        public override bool IsConstant
+        public override bool IsConstant(Scope scope)
         {
-            get { return SimpleExpr.IsConstant && (Prev == null || Prev.IsConstant); }
+            return SimpleExpr.IsConstant(scope) && (Prev == null || Prev.IsConstant(scope));
         }
 
         public NExpr(ParseNode original)
@@ -82,25 +82,25 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors()
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
             bool innerFound = false;
 
-            foreach (var e in SimpleExpr.FindTypeErrors()) {
+            foreach (var e in SimpleExpr.FindTypeErrors(scope)) {
                 innerFound = true;
                 yield return e;
             }
 
             if (Prev != null) {
-                foreach (var e in Prev.FindTypeErrors()) {
+                foreach (var e in Prev.FindTypeErrors(scope)) {
                     innerFound = true;
                     yield return e;
                 }
             }
 
             if (!innerFound && Prev != null) {
-                var left = SimpleExpr.FinalType;
-                var right = Prev.FinalType;
+                var left = SimpleExpr.GetFinalType(scope);
+                var right = Prev.GetFinalType(scope);
 
                 if (Operator == ExprOperator.InSet) {
                     if (!(left is IntegerType)) {
@@ -118,17 +118,6 @@ namespace DUO2C.Nodes.Oberon2
                     }
                 }
             }
-        }
-
-        public override string SerializeXML()
-        {
-            // TEMPORARY HACK
-            var exceptions = FindTypeErrors();
-            if (exceptions.Count() > 0) {
-                throw exceptions.First();
-            }
-
-            return base.SerializeXML();
         }
     }
 }

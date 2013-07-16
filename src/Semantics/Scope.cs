@@ -21,12 +21,12 @@ namespace DUO2C.Semantics
             _definitions = new Dictionary<string,OberonType>();
         }
 
-        public void Define(String identifier, OberonType type)
+        public void Declare(String identifier, OberonType type)
         {
             _definitions.Add(identifier, type);
         }
 
-        public bool IsDefined(String identifier, String module = null)
+        public bool IsDeclared(String identifier, String module = null)
         {
             return this[identifier, module] != null;
         }

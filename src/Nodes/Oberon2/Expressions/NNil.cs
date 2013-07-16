@@ -17,17 +17,17 @@ namespace DUO2C.Nodes.Oberon2
             Children = new ParseNode[0];
         }
 
-        public override OberonType FinalType
+        public override OberonType GetFinalType(Scope scope)
         {
-            get { return PointerType.NilPointer; }
+            return PointerType.NilPointer;
         }
 
-        public override bool IsConstant
+        public override bool IsConstant(Scope scope)
         {
-            get { return true; }
+            return true;
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors()
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
             return EmptyExceptionArray;
         }

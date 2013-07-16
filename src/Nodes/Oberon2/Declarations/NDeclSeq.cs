@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using DUO2C.Semantics;
+
 namespace DUO2C.Nodes.Oberon2
 {
     [SubstituteToken("DeclSeq")]
-    public class NDeclSeq : SubstituteNode, ITypeErrorSource
+    public class NDeclSeq : SubstituteNode, ITypeErrorSource, IDeclarationSource
     {
         public IEnumerable<NConstDecl> Constants
         {
@@ -36,10 +38,17 @@ namespace DUO2C.Nodes.Oberon2
                 || x is NForwardDecl);
         }
 
-        public IEnumerable<ParserException> FindTypeErrors()
+        public void FindDeclarations(Scope scope)
+        {
+            foreach (var child in Children.Where(x => x is IDeclarationSource)) {
+                ((IDeclarationSource) child).FindDeclarations(scope);
+            }
+        }
+
+        public IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
             return Children.SelectMany(x => x is ITypeErrorSource
-                ? ((ITypeErrorSource) x).FindTypeErrors()
+                ? ((ITypeErrorSource) x).FindTypeErrors(scope)
                 : new ParserException[0]);
         }
     }

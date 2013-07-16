@@ -34,30 +34,27 @@ namespace DUO2C.Nodes.Oberon2
             get { return (NFactor) Children.Last(); }
         }
 
-        public override OberonType FinalType
+        public override OberonType GetFinalType(Scope scope)
         {
-            get
-            {
-                if (Prev == null) {
-                    return Factor.FinalType;
+            if (Prev == null) {
+                return Factor.GetFinalType(scope);
+            } else {
+                if (Operator == TermOperator.And) {
+                    return BooleanType.Default;
+                } else if (Factor.GetFinalType(scope) is SetType) {
+                    return SetType.Default;
+                } else if (Operator == TermOperator.Divide) {
+                    return NumericType.Largest(RealType.Real,
+                        NumericType.Largest((NumericType) Factor.GetFinalType(scope), (NumericType) Prev.GetFinalType(scope)));
                 } else {
-                    if (Operator == TermOperator.And) {
-                        return BooleanType.Default;
-                    } else if (Factor.FinalType is SetType) {
-                        return SetType.Default;
-                    } else if (Operator == TermOperator.Divide) {
-                        return NumericType.Largest(RealType.Real,
-                            NumericType.Largest((NumericType) Factor.FinalType, (NumericType) Prev.FinalType));
-                    } else {
-                        return NumericType.Largest((NumericType) Factor.FinalType, (NumericType) Prev.FinalType);
-                    }
+                    return NumericType.Largest((NumericType) Factor.GetFinalType(scope), (NumericType) Prev.GetFinalType(scope));
                 }
             }
         }
 
-        public override bool IsConstant
+        public override bool IsConstant(Scope scope)
         {
-            get { return Factor.IsConstant && (Prev == null || Prev.IsConstant); }
+            return Factor.IsConstant(scope) && (Prev == null || Prev.IsConstant(scope));
         }
 
         public NTerm(ParseNode original)
@@ -89,25 +86,25 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors()
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
             bool innerFound = false;
 
-            foreach (var e in Factor.FindTypeErrors()) {
+            foreach (var e in Factor.FindTypeErrors(scope)) {
             innerFound = true;
                 yield return e;
             }
 
             if (Prev != null) {
-                foreach (var e in Prev.FindTypeErrors()) {
+                foreach (var e in Prev.FindTypeErrors(scope)) {
                     innerFound = true;
                     yield return e;
                 }
             }
 
             if (!innerFound && Prev != null) {
-                var left = Factor.FinalType;
-                var right = Prev.FinalType;
+                var left = Factor.GetFinalType(scope);
+                var right = Prev.GetFinalType(scope);
 
                 if (Operator == TermOperator.IntDivide || Operator == TermOperator.Modulo) {
                     if (!(left is IntegerType)) {

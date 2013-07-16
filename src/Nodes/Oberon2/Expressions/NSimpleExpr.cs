@@ -32,27 +32,24 @@ namespace DUO2C.Nodes.Oberon2
             get { return (NTerm) Children.Last(); }
         }
 
-        public override OberonType FinalType
+        public override OberonType GetFinalType(Scope scope)
         {
-            get
-            {
-                if (Prev == null) {
-                    return Term.FinalType;
+            if (Prev == null) {
+                return Term.GetFinalType(scope);
+            } else {
+                if (Operator == SimpleExprOperator.Or) {
+                    return BooleanType.Default;
+                } else if (Term.GetFinalType(scope) is SetType) {
+                    return SetType.Default;
                 } else {
-                    if (Operator == SimpleExprOperator.Or) {
-                        return BooleanType.Default;
-                    } else if (Term.FinalType is SetType) {
-                        return SetType.Default;
-                    } else {
-                        return NumericType.Largest((NumericType) Term.FinalType, (NumericType) Prev.FinalType);
-                    }
+                    return NumericType.Largest((NumericType) Term.GetFinalType(scope), (NumericType) Prev.GetFinalType(scope));
                 }
             }
         }
 
-        public override bool IsConstant
+        public override bool IsConstant(Scope scope)
         {
-            get { return Term.IsConstant && (Prev == null || Prev.IsConstant); }
+            return Term.IsConstant(scope) && (Prev == null || Prev.IsConstant(scope));
         }
 
         public NSimpleExpr(ParseNode original)
@@ -81,25 +78,25 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors()
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
             bool innerFound = false;
 
-            foreach (var e in Term.FindTypeErrors()) {
+            foreach (var e in Term.FindTypeErrors(scope)) {
                 innerFound = true;
                 yield return e;
             }
 
             if (Prev != null) {
-                foreach (var e in Prev.FindTypeErrors()) {
+                foreach (var e in Prev.FindTypeErrors(scope)) {
                     innerFound = true;
                     yield return e;
                 }
             }
 
             if (!innerFound && Prev != null) {
-                var left = Term.FinalType;
-                var right = Prev.FinalType;
+                var left = Term.GetFinalType(scope);
+                var right = Prev.GetFinalType(scope);
 
                 if (Operator == SimpleExprOperator.Or) {
                     if (!(left is BooleanType)) {

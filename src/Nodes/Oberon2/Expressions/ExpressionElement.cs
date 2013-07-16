@@ -15,12 +15,10 @@ namespace DUO2C.Nodes.Oberon2
         public ExpressionElement(ParseNode original, bool leaf, bool hasPayload = true)
             : base(original, leaf, hasPayload) { }
 
-        [Serialize("type")]
-        public abstract OberonType FinalType { get; }
+        public abstract OberonType GetFinalType(Scope scope);
 
-        [Serialize("const")]
-        public abstract bool IsConstant { get; }
+        public abstract bool IsConstant(Scope scope);
 
-        public abstract IEnumerable<ParserException> FindTypeErrors();
+        public abstract IEnumerable<ParserException> FindTypeErrors(Scope scope);
     }
 }

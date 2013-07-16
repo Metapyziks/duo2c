@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using DUO2C.Semantics;
+
 namespace DUO2C.Nodes.Oberon2
 {
     [SubstituteToken("Receiver")]
@@ -31,6 +33,11 @@ namespace DUO2C.Nodes.Oberon2
     {
         [Serialize("byref")]
         public bool ByReference { get; private set; }
+
+        public NType Type
+        {
+            get { return (NType) Children.Last(); }
+        }
 
         public IEnumerable<String> Identifiers
         {
@@ -74,10 +81,15 @@ namespace DUO2C.Nodes.Oberon2
             get { return Children.FirstOrDefault() as NReceiver; }
         }
 
+        public NFormalPars FormalParams
+        {
+            get { return (NFormalPars) Children.FirstOrDefault(x => x is NFormalPars); }
+        }
+
         public IEnumerable<NFPSection> FPSections
         {
             get {
-                var pars = (NFormalPars) Children.FirstOrDefault(x => x is NFormalPars);
+                var pars = FormalParams;
                 if (pars == null) return null;
                 return pars.FPSections;
             }
@@ -86,7 +98,7 @@ namespace DUO2C.Nodes.Oberon2
         public NType ReturnType
         {
             get {
-                var pars = (NFormalPars) Children.FirstOrDefault(x => x is NFormalPars);
+                var pars = FormalParams;
                 if (pars == null) return null;
                 return pars.ReturnType;
             }
@@ -104,6 +116,11 @@ namespace DUO2C.Nodes.Oberon2
             Children = Children.Where(x => x.Token != "keyword");
             _identDef = (NIdentDef) Children.First(x => x is NIdentDef);
             Children = Children.Where(x => !(x is NIdent));
+        }
+
+        public override void FindDeclarations(Scope scope)
+        {
+            scope.Declare(Identifier, new ProcedureType(FormalParams));
         }
     }
 

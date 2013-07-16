@@ -23,14 +23,14 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public override OberonType FinalType
+        public override OberonType GetFinalType(Scope scope)
         {
-            get { return CharType.Default; }
+            return CharType.Default;
         }
 
-        public override bool IsConstant
+        public override bool IsConstant(Scope scope)
         {
-            get { return true; }
+            return true;
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace DUO2C.Nodes.Oberon2
             Value = (char) ushort.Parse(base.String.Substring(0, base.String.Length - 1), NumberStyles.HexNumber);
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors()
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
             return EmptyExceptionArray;
         }

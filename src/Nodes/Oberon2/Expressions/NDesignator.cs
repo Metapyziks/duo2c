@@ -41,14 +41,14 @@ namespace DUO2C.Nodes.Oberon2
         }
 
         // TODO: Lookup actual type
-        public override OberonType FinalType
+        public override OberonType GetFinalType(Scope scope)
         {
-            get { return PointerType.NilPointer; }
+            return PointerType.NilPointer;
         }
 
-        public override bool IsConstant
+        public override bool IsConstant(Scope scope)
         {
-            get { return false; }
+            return false;
         }
 
         public NDesignator(ParseNode original)
@@ -63,11 +63,11 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors()
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
             bool foundInner = false;
             if (!IsRoot) {
-                var exceptions = ((NDesignator) Element).FindTypeErrors();
+                var exceptions = ((NDesignator) Element).FindTypeErrors(scope);
                 foreach (var e in exceptions) {
                     foundInner = true;
                     yield return e;

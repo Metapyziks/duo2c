@@ -13,14 +13,14 @@ namespace DUO2C.Nodes.Oberon2
     {
         public NExpr Inner { get { return (NExpr) Children.First(); } }
 
-        public override OberonType FinalType
+        public override OberonType GetFinalType(Scope scope)
         {
-            get { return Inner.FinalType; }
+            return Inner.GetFinalType(scope);
         }
 
-        public override bool IsConstant
+        public override bool IsConstant(Scope scope)
         {
-            get { return true; }
+            return true;
         }
 
         public NConstExpr(ParseNode original)
@@ -29,26 +29,15 @@ namespace DUO2C.Nodes.Oberon2
 
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors()
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
-            foreach (var e in Inner.FindTypeErrors()) {
+            foreach (var e in Inner.FindTypeErrors(scope)) {
                 yield return e;
             }
 
-            if (!Inner.IsConstant) {
+            if (!Inner.IsConstant(scope)) {
                 yield return new ConstantExpectedException(Inner);
             }
-        }
-
-        public override string SerializeXML()
-        {
-            // TEMPORARY HACK
-            var exceptions = FindTypeErrors();
-            if (exceptions.Count() > 0) {
-                throw exceptions.First();
-            }
-
-            return base.SerializeXML();
         }
     }
 }

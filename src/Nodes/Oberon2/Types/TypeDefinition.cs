@@ -116,7 +116,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override OberonType Type
         {
-            get { return PointerType.NilPointer; }
+            get { return new UnresolvedType(Identifier.Identifier, Identifier.Module); }
         }
 
         public NNamedType(ParseNode original)
@@ -161,7 +161,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override OberonType Type
         {
-            get { return PointerType.NilPointer; }
+            get { return new RecordType(this); }
         }
 
         public IEnumerable<KeyValuePair<NIdentDef, NType>> Fields

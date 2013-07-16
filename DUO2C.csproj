@@ -42,7 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\Nodes\BranchNode.cs" />
-    <Compile Include="src\Nodes\ITypeErrorSource.cs" />
+    <Compile Include="src\Nodes\Interfaces.cs" />
     <Compile Include="src\Nodes\LeafNode.cs" />
     <Compile Include="src\Nodes\Oberon2\NModule.cs" />
     <Compile Include="src\Nodes\Oberon2\Declarations\Declaration.cs" />

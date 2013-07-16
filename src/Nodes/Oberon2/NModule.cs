@@ -5,12 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 using DUO2C.Nodes.Oberon2;
+using DUO2C.Semantics;
 
 namespace DUO2C.Nodes
 {
     [SubstituteToken("Module")]
-    public class NModule : SubstituteNode, ITypeErrorSource
+    public class NModule : SubstituteNode
     {
+        Scope _scope;
+
         [Serialize("name")]
         public String Identifier { get; private set; }
 
@@ -48,10 +51,16 @@ namespace DUO2C.Nodes
                 || x is NDeclSeq || x is NStatementSeq);
         }
 
-        public IEnumerable<ParserException> FindTypeErrors()
+        public void FindDeclarations(RootScope scope)
+        {
+            _scope = ((RootScope) scope).CreateModuleScope(Identifier);
+            Declarations.FindDeclarations(_scope);
+        }
+
+        public IEnumerable<ParserException> FindTypeErrors(RootScope scope)
         {
             return Children.SelectMany(x => x is ITypeErrorSource
-                ? ((ITypeErrorSource) x).FindTypeErrors()
+                ? ((ITypeErrorSource) x).FindTypeErrors(_scope)
                 : new ParserException[0]);
         }
     }

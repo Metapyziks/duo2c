@@ -32,20 +32,20 @@ namespace DUO2C.Nodes.Oberon2
             Children = Children.Where(x => x is NExpr);
         }
 
-        public IEnumerable<ParserException> FindTypeErrors()
+        public IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
             var errors = new List<ParserException>();
-            errors.AddRange(Min.FindTypeErrors());
+            errors.AddRange(Min.FindTypeErrors(scope));
             if (!SingleExpression) {
-                errors.AddRange(Max.FindTypeErrors());
+                errors.AddRange(Max.FindTypeErrors(scope));
             }
 
-            if (!(Min.FinalType is IntegerType)) {
-                errors.Add(new TypeMismatchException(IntegerType.Integer, Min));
+            if (!(Min.GetFinalType(scope) is IntegerType)) {
+                errors.Add(new TypeMismatchException(IntegerType.Integer, Min.GetFinalType(scope), Min));
             }
 
-            if (!SingleExpression && !(Max.FinalType is IntegerType)) {
-                errors.Add(new TypeMismatchException(IntegerType.Integer, Max));
+            if (!SingleExpression && !(Max.GetFinalType is IntegerType)) {
+                errors.Add(new TypeMismatchException(IntegerType.Integer, Max.GetFinalType(scope), Max));
             }
 
             return errors;
@@ -60,14 +60,14 @@ namespace DUO2C.Nodes.Oberon2
             get { return Children.Select(x => (NElement) x); }
         }
 
-        public override OberonType FinalType
+        public override OberonType GetFinalType(Scope scope)
         {
-            get { return SetType.Default; }
+            return SetType.Default;
         }
 
-        public override bool IsConstant
+        public override bool IsConstant(Scope scope)
         {
-            get { return Elements.All(x => x.Min.IsConstant && (x.SingleExpression || x.Max.IsConstant)); }
+            return Elements.All(x => x.Min.IsConstant(scope) && (x.SingleExpression || x.Max.IsConstant(scope)));
         }
 
         public NSet(ParseNode original)
@@ -76,9 +76,9 @@ namespace DUO2C.Nodes.Oberon2
             Children = Children.Where(x => x is NElement);
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors()
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
-            return Elements.SelectMany(x => x.FindTypeErrors());
+            return Elements.SelectMany(x => x.FindTypeErrors(scope));
         }
     }
 }

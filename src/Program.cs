@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 
 using DUO2C.Nodes;
+using DUO2C.Semantics;
 
 namespace DUO2C
 {
@@ -25,7 +26,13 @@ namespace DUO2C
                     var module = (NModule) ruleset.ParseFile(args[0]);
                     timer.Stop();
                     Console.WriteLine("File parsed in {0}ms", timer.ElapsedMilliseconds);
-                    var errors = module.FindTypeErrors();
+
+                    var root = new RootScope();
+                    // Includes would be here
+
+                    module.FindDeclarations(root);
+
+                    var errors = module.FindTypeErrors(root);
                     if (errors.Count() > 0) {
                         var src = File.ReadAllText(args[0]);
                         Console.ForegroundColor = ConsoleColor.Red;
@@ -34,7 +41,7 @@ namespace DUO2C
                         foreach (var error in errors) {
                             error.FindLocationInfo(src);
                             error.SetSourcePath(args[0]);
-                            Console.WriteLine("  {0}", error.Message);
+                            Console.WriteLine("- {0}", error.Message);
                         }
                         Console.ResetColor();
                     } else {

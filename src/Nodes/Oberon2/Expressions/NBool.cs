@@ -11,20 +11,20 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("Bool")]
     public class NBool : ExpressionElement
     {
-        public override OberonType FinalType
+        public override OberonType GetFinalType(Scope scope)
         {
-            get { return BooleanType.Default; }
+            return BooleanType.Default;
         }
 
-        public override bool IsConstant
+        public override bool IsConstant(Scope scope)
         {
-            get { return true; }
+            return true;
         }
 
         public NBool(ParseNode original)
             : base(original, true) { }
 
-        public override IEnumerable<ParserException> FindTypeErrors()
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
             return EmptyExceptionArray;
         }

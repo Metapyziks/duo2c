@@ -28,25 +28,22 @@ namespace DUO2C.Nodes.Oberon2
         /// Finds the type of integer this literal represents
         /// based on the number of bytes required to store it.
         /// </summary>
-        public override OberonType FinalType
+        public override OberonType GetFinalType(Scope scope)
         {
-            get
-            {
-                if (sbyte.MinValue <= Value && Value <= sbyte.MaxValue) {
-                    return IntegerType.Byte;
-                } else if (short.MinValue <= Value && Value <= short.MaxValue) {
-                    return IntegerType.ShortInt;
-                } else if (int.MinValue <= Value && Value <= int.MaxValue) {
-                    return IntegerType.Integer;
-                } else {
-                    return IntegerType.LongInt;
-                }
+            if (sbyte.MinValue <= Value && Value <= sbyte.MaxValue) {
+                return IntegerType.Byte;
+            } else if (short.MinValue <= Value && Value <= short.MaxValue) {
+                return IntegerType.ShortInt;
+            } else if (int.MinValue <= Value && Value <= int.MaxValue) {
+                return IntegerType.Integer;
+            } else {
+                return IntegerType.LongInt;
             }
         }
 
-        public override bool IsConstant
+        public override bool IsConstant(Scope scope)
         {
-            get { return true; }
+            return true;
         }
 
         /// <summary>
@@ -65,7 +62,7 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors()
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
             return EmptyExceptionArray;
         }

@@ -16,10 +16,10 @@ namespace DUO2C.Nodes.Oberon2
 
         }
 
-        public virtual IEnumerable<ParserException> FindTypeErrors()
+        public virtual IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
             return Children.SelectMany(x => (x is ITypeErrorSource)
-                ? ((ITypeErrorSource) x).FindTypeErrors()
+                ? ((ITypeErrorSource) x).FindTypeErrors(scope)
                 : new ParserException[0]);
         }
     }

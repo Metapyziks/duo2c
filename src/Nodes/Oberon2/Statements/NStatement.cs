@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using DUO2C.Semantics;
+
 namespace DUO2C.Nodes.Oberon2
 {
     [SubstituteToken("Statement")]
@@ -19,9 +21,9 @@ namespace DUO2C.Nodes.Oberon2
             Children = Children.Where(x => x is Statement);
         }
 
-        public IEnumerable<ParserException> FindTypeErrors()
+        public IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
-            return Inner.FindTypeErrors();
+            return Inner.FindTypeErrors(scope);
         }
     }
 }

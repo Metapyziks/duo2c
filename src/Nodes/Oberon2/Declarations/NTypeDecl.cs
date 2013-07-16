@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using DUO2C.Semantics;
+
 namespace DUO2C.Nodes.Oberon2
 {
     [SubstituteToken("TypeDecl")]
@@ -18,6 +20,11 @@ namespace DUO2C.Nodes.Oberon2
             : base(original)
         {
             Children = Children.Where(x => x is NIdentDef || x is NType);
+        }
+
+        public override void FindDeclarations(Scope scope)
+        {
+            scope.Declare(Identifier, Type.Type);
         }
     }
 }

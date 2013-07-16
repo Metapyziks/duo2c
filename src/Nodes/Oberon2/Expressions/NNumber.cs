@@ -20,14 +20,14 @@ namespace DUO2C.Nodes.Oberon2
             get { return Inner.String; }
         }
 
-        public override OberonType FinalType
+        public override OberonType GetFinalType(Scope scope)
         {
-            get { return Inner.FinalType; }
+            return Inner.GetFinalType(scope);
         }
 
-        public override bool IsConstant
+        public override bool IsConstant(Scope scope)
         {
-            get { return Inner.IsConstant; }
+            return Inner.IsConstant(scope);
         }
 
         public NNumber(ParseNode original)
@@ -36,7 +36,7 @@ namespace DUO2C.Nodes.Oberon2
             Inner = (ExpressionElement) Children.First();
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors()
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
             return EmptyExceptionArray;
         }

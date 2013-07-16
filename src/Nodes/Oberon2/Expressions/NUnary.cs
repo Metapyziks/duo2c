@@ -24,14 +24,14 @@ namespace DUO2C.Nodes.Oberon2
             get { return (NFactor) Children.First(); }
         }
 
-        public override OberonType FinalType
+        public override OberonType GetFinalType(Scope scope)
         {
-            get { return Factor.FinalType; }
+            return Factor.GetFinalType(scope);
         }
 
-        public override bool IsConstant
+        public override bool IsConstant(Scope scope)
         {
-            get { return Factor.IsConstant; }
+            return Factor.IsConstant(scope);
         }
 
         public NUnary(ParseNode original)
@@ -49,21 +49,22 @@ namespace DUO2C.Nodes.Oberon2
             Children = new ParseNode[] { Children.Last() };
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors()
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
             bool foundInner = false;
-            foreach (var e in Factor.FindTypeErrors()) {
+            foreach (var e in Factor.FindTypeErrors(scope)) {
                 foundInner = true;
                 yield return e;
             }
 
             if (!foundInner) {
+                var type = GetFinalType(scope);
                 if (Operator == UnaryOperator.Not) {
-                    if (!(FinalType is BooleanType)) {
-                        yield return new TypeMismatchException(BooleanType.Default, Factor);
+                    if (!(type is BooleanType)) {
+                        yield return new TypeMismatchException(BooleanType.Default, type, Factor);
                     }
-                } else if (!(FinalType is SetType) && !(FinalType is NumericType)) {
-                    yield return new TypeMismatchException(NumericType.Default, Factor);
+                } else if (!(type is SetType) && !(type is NumericType)) {
+                    yield return new TypeMismatchException(NumericType.Default, type, Factor);
                 }
             }
         }

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using DUO2C.Semantics;
+
 namespace DUO2C.Nodes.Oberon2
 {
     [SubstituteToken("VarDecl")]
@@ -18,7 +20,12 @@ namespace DUO2C.Nodes.Oberon2
 
         public NIdentList IdentList
         {
-            get { return (NIdentList) Children.First();}
+            get { return (NIdentList) Children.First(); }
+        }
+
+        public NType Type
+        {
+            get { return (NType) Children.Last(); }
         }
 
         public bool IsSingle
@@ -30,6 +37,13 @@ namespace DUO2C.Nodes.Oberon2
             : base(original)
         {
             Children = Children.Where(x => x is NIdentList || x is NType);
+        }
+
+        public override void FindDeclarations(Scope scope)
+        {
+            foreach (var ident in IdentList.IdentDefs) {
+                scope.Declare(ident.Identifier, Type.Type);
+            }
         }
     }
 }

@@ -15,6 +15,33 @@ namespace DUO2C.Semantics
 
     public abstract class StaticType : OberonType { }
 
+    public class UnresolvedType : OberonType
+    {
+        public String Identifier { get; private set; }
+        public String Module { get; private set; }
+
+        public UnresolvedType(String identifier, String module = null)
+        {
+            Identifier = identifier;
+            Module = module;
+        }
+
+        public override bool CanCompare(OberonType other)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool CanTestEquality(OberonType other)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string ToString()
+        {
+            return Module == null ? Identifier : String.Format("{0}.{1}", Module, Identifier);
+        }
+    }
+
     public class PointerType : OberonType
     {
         public static readonly PointerType NilPointer = new PointerType(null);
@@ -68,6 +95,11 @@ namespace DUO2C.Semantics
                 Visibility = visibility;
                 Type = type;
             }
+
+            public override string ToString()
+            {
+                return String.Format("{0} : {1}", Identifier, Type);
+            }
         }
 
         private NNamedType _superRecordName;
@@ -91,6 +123,18 @@ namespace DUO2C.Semantics
         {
             return false;
         }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            sb.Append("RECORD ");
+            if (_superRecordName != null) sb.AppendFormat("({0}) ", _superRecordName.Identifier);
+            foreach (var field in _fields) {
+                sb.AppendFormat("{0}; ", field.Value);
+            }
+            sb.Append("END");
+            return sb.ToString();
+        }
     }
 
     public class ProcedureType : OberonType
@@ -99,11 +143,13 @@ namespace DUO2C.Semantics
         {
             public bool ByReference { get; private set; }
             public String Identifier { get; private set; }
+            public OberonType Type { get; private set; }
 
-            public Parameter(bool byRef, String ident)
+            public Parameter(bool byRef, String ident, OberonType type)
             {
                 ByReference = byRef;
                 Identifier = ident;
+                Type = type;
             }
         }
 
@@ -113,9 +159,9 @@ namespace DUO2C.Semantics
         public ProcedureType(NFormalPars paras)
         {
             if (paras != null) {
-                ReturnType = paras.ReturnType.Type;
+                ReturnType = paras.ReturnType != null ? paras.ReturnType.Type : null;
                 _params = paras.FPSections.SelectMany(x => x.Identifiers.Select(y =>
-                    new Parameter(x.ByReference, y))).ToArray();
+                    new Parameter(x.ByReference, y, x.Type.Type))).ToArray();
             } else {
                 ReturnType = null;
                 _params = new Parameter[0];
@@ -130,6 +176,16 @@ namespace DUO2C.Semantics
         public override bool CanCompare(OberonType other)
         {
             return false;
+        }
+
+        public override string ToString()
+        {
+            String paramStr = String.Join(", ", _params.Select(x => x.Identifier + " : " + x.Type));
+            if (ReturnType != null) {
+                return String.Format("PROCEDURE ({0}) : {1}", paramStr, ReturnType);
+            } else {
+                return String.Format("PROCEDURE ({0})", paramStr);
+            }
         }
     }
 

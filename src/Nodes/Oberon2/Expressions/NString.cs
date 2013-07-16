@@ -20,14 +20,14 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public override OberonType FinalType
+        public override OberonType GetFinalType(Scope scope)
         {
-            get { return String.Length == 1 ? (OberonType) CharType.Default : new ArrayType(CharType.Default, String.Length); }
+            return String.Length == 1 ? (OberonType) CharType.Default : new ArrayType(CharType.Default, String.Length);
         }
 
-        public override bool IsConstant
+        public override bool IsConstant(Scope scope)
         {
-            get { return true; }
+            return true;
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace DUO2C.Nodes.Oberon2
             _string = base.String.Substring(1, base.String.Length - 2);
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors()
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
             return EmptyExceptionArray;
         }
