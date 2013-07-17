@@ -61,17 +61,20 @@ namespace DUO2C.Semantics
             _modules = new Dictionary<string,Scope>();
         }
 
-        public Scope CreateModuleScope(String identifier)
+        public Scope CreateModuleScope(ModuleType type)
         {
             var scope = new Scope(this);
-            _modules.Add(identifier, scope);
+            _modules.Add(type.Identifier, scope);
+            Declare(type.Identifier, type);
             return scope;
         }
 
         public override OberonType this[string identifier, string module = null]
         {
             get {
-                return module != null && _modules.ContainsKey(module) ? _modules[module][identifier] : null;
+                return module != null && _modules.ContainsKey(module)
+                    ? _modules[module][identifier]
+                    : base[identifier];
             }
         }
     }

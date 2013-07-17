@@ -23,5 +23,15 @@ namespace DUO2C.Semantics
             Right = right;
             Operator = op;
         }
+
+        public OperandTypeException(OberonType operand, String op, ParseNode node)
+            : base(ParserError.Semantic, String.Format("Operator '{0}' cannot be applied to "
+                + "an operand of type '{1}'", op.ToString(), operand.ToString()),
+                node.StartIndex, node.Length)
+        {
+            Left = operand;
+            Right = operand;
+            Operator = op;
+        }
     }
 }

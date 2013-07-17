@@ -12,10 +12,10 @@ namespace DUO2C.Nodes
     [SubstituteToken("Module")]
     public class NModule : SubstituteNode
     {
-        Scope _scope;
-
         [Serialize("name")]
         public String Identifier { get; private set; }
+
+        public ModuleType Type { get; private set; }
 
         public IEnumerable<String> Imports
         {
@@ -53,18 +53,19 @@ namespace DUO2C.Nodes
 
         public void FindDeclarations(RootScope scope)
         {
-            _scope = ((RootScope) scope).CreateModuleScope(Identifier);
+            Type = new ModuleType(Identifier, scope);
 
-            _scope.Declare("NEW", new ProcedureType(null, new[] {
-            });
+            Type.Scope.Declare("NEW", new ProcedureType(null, new[] {
+                new Parameter(true, "_", new PointerType(RecordType.Base))
+            }));
 
-            Declarations.FindDeclarations(_scope);
+            Declarations.FindDeclarations(Type.Scope);
         }
 
         public IEnumerable<ParserException> FindTypeErrors(RootScope scope)
         {
             return Children.SelectMany(x => x is ITypeErrorSource
-                ? ((ITypeErrorSource) x).FindTypeErrors(_scope)
+                ? ((ITypeErrorSource) x).FindTypeErrors(Type.Scope)
                 : new ParserException[0]);
         }
     }

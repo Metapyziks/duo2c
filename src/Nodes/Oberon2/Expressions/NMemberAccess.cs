@@ -7,7 +7,7 @@ namespace DUO2C.Nodes.Oberon2
     /// Substitution node for member accesses.
     /// </summary>
     [SubstituteToken("MemberAccess")]
-    class NMemberAccess : Selector
+    public class NMemberAccess : Selector
     {
         public String Identifier { get; private set; }
 

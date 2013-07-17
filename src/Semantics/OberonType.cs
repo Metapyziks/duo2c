@@ -21,6 +21,10 @@ namespace DUO2C.Semantics
 
         public bool IsResolved { get; private set; }
 
+        public virtual bool IsModule { get { return false; } }
+        public virtual bool IsPointer { get { return false; } }
+        public virtual bool IsRecord { get { return false; } }
+
         public virtual bool IsBool { get { return false; } }
         public virtual bool IsSet { get { return false; } }
         public virtual bool IsChar { get { return false; } }
@@ -37,7 +41,7 @@ namespace DUO2C.Semantics
             where TDst : OberonType
         {
             if (this is UnresolvedType) {
-                return ((UnresolvedType) this) as TDst;
+                return (TDst) ((UnresolvedType) this).ReferencedType;
             } else {
                 return (TDst) (Object) this;
             }
@@ -57,42 +61,61 @@ namespace DUO2C.Semantics
         public abstract bool CanCompare(OberonType other);
     }
 
+    public class ModuleType : OberonType
+    {
+        public String Identifier { get; private set; }
+
+        public Scope Scope { get; private set; }
+
+        public override bool IsModule
+        {
+            get { return true; }
+        }
+
+        public ModuleType(String identifier, RootScope scope)
+        {
+            Identifier = identifier;
+
+            Scope = scope.CreateModuleScope(this);
+        }
+
+        public override bool CanTestEquality(OberonType other)
+        {
+            return false;
+        }
+
+        public override bool CanCompare(OberonType other)
+        {
+            return false;
+        }
+
+        public override string ToString()
+        {
+            return "MODULE";
+        }
+    }
+
     public class UnresolvedType : OberonType
     {
-        public static explicit operator BooleanType(UnresolvedType ut)
-        {
-            return (BooleanType) ut.ReferencedType;
-        }
-
-        public static explicit operator CharType(UnresolvedType ut)
-        {
-            return (CharType) ut.ReferencedType;
-        }
-
-        public static explicit operator SetType(UnresolvedType ut)
-        {
-            return (SetType) ut.ReferencedType;
-        }
-
-        public static explicit operator NumericType(UnresolvedType ut)
-        {
-            return (NumericType) ut.ReferencedType;
-        }
-
-        public static explicit operator IntegerType(UnresolvedType ut)
-        {
-            return (IntegerType) ut.ReferencedType;
-        }
-
-        public static explicit operator RealType(UnresolvedType ut)
-        {
-            return (RealType) ut.ReferencedType;
-        }
-
         public OberonType ReferencedType { get; private set; }
 
         public String Identifier { get; private set; }
         public String Module { get; private set; }
+
+        public override bool IsModule
+        {
+            get { return ReferencedType != null && ReferencedType.IsModule; }
+        }
+
+        public override bool IsPointer
+        {
+            get { return ReferencedType != null && ReferencedType.IsPointer; }
+        }
+
+        public override bool IsRecord
+        {
+            get { return ReferencedType != null && ReferencedType.IsRecord; }
+        }
 
         public override bool IsBool
         {
@@ -159,6 +182,11 @@ namespace DUO2C.Semantics
 
         public OberonType ResolvedType { get; private set; }
 
+        public override bool IsPointer
+        {
+            get { return true; }
+        }
+
         public PointerType(OberonType resolvedType)
         {
             ResolvedType = resolvedType;
@@ -201,7 +229,7 @@ namespace DUO2C.Semantics
 
     public class RecordType : OberonType
     {
-        private static readonly RecordType Base = new RecordType();
+        public static readonly RecordType Base = new RecordType();
 
         private class Field
         {
@@ -227,6 +255,11 @@ namespace DUO2C.Semantics
 
         public RecordType SuperRecord { get; private set; }
 
+        public override bool IsRecord
+        {
+            get { return true; }
+        }
+
         private RecordType()
         {
             _superRecordIdent = null;
@@ -240,6 +273,21 @@ namespace DUO2C.Semantics
             _fields = node.Fields.Select(x =>
                 new Field(x.Key.Identifier, x.Key.Visibility, x.Value.Type)
             ).ToDictionary(x => x.Identifier);
+        }
+
+        public void BindProcedure(String ident, AccessModifier visibility, ProcedureType signature)
+        {
+            _fields.Add(ident, new Field(ident, visibility, signature));
+        }
+
+        public bool HasField(String ident)
+        {
+            return _fields.ContainsKey(ident);
+        }
+
+        public OberonType GetFieldType(String ident)
+        {
+            return _fields[ident].Type;
         }
 
         protected override void OnResolve(Scope scope)

@@ -27,7 +27,7 @@ namespace DUO2C.Nodes.Oberon2
             ByReference = Children.ElementAt(1).Token == "keyword";
             Children = Children.Where(x => x.Token != "keyword");
             TypeName = Children.Last().String;
-            Children = new ParseNode[] { Children.First() };
+            Children = Children.Where(x => x is NIdent);
         }
 
         public void FindDeclarations(Scope scope)
@@ -142,7 +142,38 @@ namespace DUO2C.Nodes.Oberon2
 
         public override void FindDeclarations(Scope scope)
         {
-            scope.Declare(Identifier, new ProcedureType(FormalParams));
+            if (Receiver == null) {
+                scope.Declare(Identifier, new ProcedureType(FormalParams));
+            } else {
+                var type = scope[Receiver.TypeName];
+
+                while (type != null && type.IsPointer) {
+                    type = type.As<PointerType>().ResolvedType;
+                    if (type != null) type.Resolve(scope);
+                }
+
+                if (type != null && type.IsRecord) {
+                    type.As<RecordType>().BindProcedure(Identifier, Visibility, new ProcedureType(FormalParams));
+                }
+            }
+        }
+
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        {
+            if (Receiver != null) {
+                var type = scope[Receiver.TypeName];
+
+                while (type != null && type.IsPointer) {
+                    type = type.As<PointerType>().ResolvedType;
+                    if (type != null) type.Resolve(scope);
+                }
+
+                if (type == null) {
+                    yield return new UndeclaredIdentifierException(Receiver.Children.Last());
+                } else if (!type.IsRecord) {
+                    yield return new TypeMismatchException(RecordType.Base, type, Receiver);
+                }
+            }
         }
     }
 
@@ -172,7 +203,9 @@ namespace DUO2C.Nodes.Oberon2
 
         public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
-            return base.FindTypeErrors(_scope);
+            return base.FindTypeErrors(scope).Union(Children.SelectMany(x => (x is ITypeErrorSource)
+                ? ((ITypeErrorSource) x).FindTypeErrors(_scope)
+                : new ParserException[0]));
         }
     }
 }

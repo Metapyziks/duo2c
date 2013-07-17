@@ -46,6 +46,30 @@ namespace DUO2C.Nodes.Oberon2
                 var ident = (NQualIdent) Element;
                 return scope[ident.Identifier, ident.Module];
             } else {
+                var prev = (NDesignator) Element;
+                var type = prev.GetFinalType(scope);
+
+                while (type.IsPointer) {
+                    type = type.As<PointerType>().ResolvedType;
+                }
+
+                if (Operation is NMemberAccess) {
+                    var op = (NMemberAccess) Operation;
+                    if (type.IsModule) {
+                        var mdl = type.As<ModuleType>();
+                        return mdl.Scope[op.Identifier];
+                    } else if (type.IsRecord) {
+                        var rec = type.As<RecordType>();
+                        return rec.GetFieldType(op.Identifier);
+                    }
+                } else if (Operation is NIndexer) {
+                    var op = (NIndexer) Operation;
+                } else if (Operation is NPtrResolve) {
+                    var op = (NPtrResolve) Operation;
+                } else if (Operation is NTypeGuard) {
+                    var op = (NTypeGuard) Operation;
+                }
+
                 return PointerType.NilPointer;
             }
         }
@@ -82,8 +106,42 @@ namespace DUO2C.Nodes.Oberon2
                 }
             }
 
-            if (!foundInner) {
-                // TODO: More checks
+            if (!foundInner && !IsRoot) {
+                var prev = (NDesignator) Element;
+                var type = prev.GetFinalType(scope);
+                type.Resolve(scope);
+
+                while (type != null && type.IsPointer) {
+                    type = type.As<PointerType>().ResolvedType;
+                    if (type != null) type.Resolve(scope);
+                }
+
+                if (type == null) {
+                    yield return new UndeclaredIdentifierException(Element);
+                } else {
+                    if (Operation is NMemberAccess) {
+                        var op = (NMemberAccess) Operation;
+                        if (type.IsModule) {
+                            var mdl = type.As<ModuleType>();
+                            if (!mdl.Scope.IsDeclared(op.Identifier)) {
+                                yield return new MemberNotFoundException(type, this);
+                            }
+                        } else if (type.IsRecord) {
+                            var rec = type.As<RecordType>();
+                            if (!rec.HasField(op.Identifier)) {
+                                yield return new MemberNotFoundException(type, this);
+                            }
+                        } else {
+                            yield return new OperandTypeException(type, ".", this);
+                        }
+                    } else if (Operation is NIndexer) {
+                        var op = (NIndexer) Operation;
+                    } else if (Operation is NPtrResolve) {
+                        var op = (NPtrResolve) Operation;
+                    } else if (Operation is NTypeGuard) {
+                        var op = (NTypeGuard) Operation;
+                    }
+                }
             }
         }
     }
