@@ -8,12 +8,19 @@ using DUO2C.Semantics;
 
 namespace DUO2C.Nodes.Oberon2
 {
-    public abstract class TypeDefinition : SubstituteNode
+    public abstract class TypeDefinition : SubstituteNode, ITypeErrorSource
     {
         public abstract OberonType Type { get; }
 
         public TypeDefinition(ParseNode original, bool leaf, bool hasPayload = true)
             : base(original, leaf, hasPayload) { }
+
+        public virtual IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        {
+            return Children.SelectMany(x => (x is ITypeErrorSource)
+                   ? ((ITypeErrorSource) x).FindTypeErrors(scope)
+                   : new ParserException[0]);
+        }
     }
 
     [SubstituteToken("ArrayType")]
@@ -124,10 +131,17 @@ namespace DUO2C.Nodes.Oberon2
         {
             Children = Children.Where(x => x is NQualIdent);
         }
+
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        {
+            if (scope[Identifier.Identifier, Identifier.Module] == null) {
+                yield return new UndeclaredIdentifierException(this);
+            }
+        }
     }
 
     [SubstituteToken("FieldList")]
-    public class NFieldList : SubstituteNode
+    public class NFieldList : SubstituteNode, ITypeErrorSource
     {
         public NIdentList Identifiers
         {
@@ -144,10 +158,17 @@ namespace DUO2C.Nodes.Oberon2
         {
             Children = Children.Where(x => x is NIdentList || x is NType);
         }
+
+        public IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        {
+            return Children.SelectMany(x => (x is ITypeErrorSource)
+                   ? ((ITypeErrorSource) x).FindTypeErrors(scope)
+                   : new ParserException[0]);
+        }
     }
 
     [SubstituteToken("RecordType")]
-    public class NRecordType : TypeDefinition
+    public class NRecordType : TypeDefinition, ITypeErrorSource
     {
         public NNamedType SuperRecord
         {

@@ -9,31 +9,142 @@ namespace DUO2C.Semantics
 {
     public abstract class OberonType
     {
+        public static bool CanTestEquality(OberonType a, OberonType b)
+        {
+            return a.CanTestEquality(b) || b.CanTestEquality(a);
+        }
+
+        public static bool CanCompare(OberonType a, OberonType b)
+        {
+            return a.CanCompare(b) || b.CanCompare(a);
+        }
+
+        public bool IsResolved { get; private set; }
+
+        public virtual bool IsBool { get { return false; } }
+        public virtual bool IsSet { get { return false; } }
+        public virtual bool IsChar { get { return false; } }
+        public virtual bool IsNumeric { get { return false; } }
+        public virtual bool IsInteger { get { return false; } }
+        public virtual bool IsReal { get { return false; } }
+
+        protected OberonType()
+        {
+            IsResolved = false;
+        }
+        
+        public TDst As<TDst>()
+            where TDst : OberonType
+        {
+            if (this is UnresolvedType) {
+                return ((UnresolvedType) this) as TDst;
+            } else {
+                return (TDst) (Object) this;
+            }
+        }
+
+        public void Resolve(Scope scope)
+        {
+            if (!IsResolved) {
+                IsResolved = true;
+                OnResolve(scope);
+            }
+        }
+
+        protected virtual void OnResolve(Scope scope) { }
+
         public abstract bool CanTestEquality(OberonType other);
         public abstract bool CanCompare(OberonType other);
     }
 
-    public abstract class StaticType : OberonType { }
-
     public class UnresolvedType : OberonType
     {
+        public static explicit operator BooleanType(UnresolvedType ut)
+        {
+            return (BooleanType) ut.ReferencedType;
+        }
+
+        public static explicit operator CharType(UnresolvedType ut)
+        {
+            return (CharType) ut.ReferencedType;
+        }
+
+        public static explicit operator SetType(UnresolvedType ut)
+        {
+            return (SetType) ut.ReferencedType;
+        }
+
+        public static explicit operator NumericType(UnresolvedType ut)
+        {
+            return (NumericType) ut.ReferencedType;
+        }
+
+        public static explicit operator IntegerType(UnresolvedType ut)
+        {
+            return (IntegerType) ut.ReferencedType;
+        }
+
+        public static explicit operator RealType(UnresolvedType ut)
+        {
+            return (RealType) ut.ReferencedType;
+        }
+
+        public OberonType ReferencedType { get; private set; }
+
         public String Identifier { get; private set; }
         public String Module { get; private set; }
+
+        public override bool IsBool
+        {
+            get { return ReferencedType != null && ReferencedType.IsBool; }
+        }
+
+        public override bool IsSet
+        {
+            get { return ReferencedType != null && ReferencedType.IsSet; }
+        }
+
+        public override bool IsChar
+        {
+            get { return ReferencedType != null && ReferencedType.IsChar; }
+        }
+
+        public override bool IsNumeric
+        {
+            get { return ReferencedType != null && ReferencedType.IsNumeric; }
+        }
+
+        public override bool IsInteger
+        {
+            get { return ReferencedType != null && ReferencedType.IsInteger; }
+        }
+
+        public override bool IsReal
+        {
+            get { return ReferencedType != null && ReferencedType.IsReal; }
+        }
 
         public UnresolvedType(String identifier, String module = null)
         {
             Identifier = identifier;
             Module = module;
+
+            ReferencedType = null;
+        }
+
+        protected override void OnResolve(Scope scope)
+        {
+            ReferencedType = scope[Identifier, Module];
         }
 
         public override bool CanCompare(OberonType other)
         {
-            throw new NotImplementedException();
+            return ReferencedType.CanCompare(other) || other.CanCompare(ReferencedType);
         }
 
         public override bool CanTestEquality(OberonType other)
         {
-            throw new NotImplementedException();
+            return ReferencedType.CanTestEquality(other) || other.CanTestEquality(ReferencedType);
         }
 
         public override string ToString()
@@ -51,6 +162,13 @@ namespace DUO2C.Semantics
         public PointerType(OberonType resolvedType)
         {
             ResolvedType = resolvedType;
+        }
+
+        protected override void OnResolve(Scope scope)
+        {
+            if (ResolvedType != null) {
+                ResolvedType.Resolve(scope);
+            }
         }
 
         public override bool CanTestEquality(OberonType other)
@@ -83,6 +201,8 @@ namespace DUO2C.Semantics
 
     public class RecordType : OberonType
     {
+        private static readonly RecordType Base = new RecordType();
+
         private class Field
         {
             public String Identifier { get; private set; }
@@ -102,16 +222,33 @@ namespace DUO2C.Semantics
             }
         }
 
-        private NNamedType _superRecordName;
+        private NQualIdent _superRecordIdent;
         private Dictionary<String, Field> _fields;
+
+        public RecordType SuperRecord { get; private set; }
+
+        private RecordType()
+        {
+            _superRecordIdent = null;
+            _fields = new Dictionary<string,Field>();
+        }
 
         public RecordType(NRecordType node)
         {
-            _superRecordName = node.SuperRecord;
+            _superRecordIdent = (node.SuperRecord != null ? node.SuperRecord.Identifier : null);
 
             _fields = node.Fields.Select(x =>
                 new Field(x.Key.Identifier, x.Key.Visibility, x.Value.Type)
             ).ToDictionary(x => x.Identifier);
+        }
+
+        protected override void OnResolve(Scope scope)
+        {
+            if (_superRecordIdent != null) {
+                SuperRecord = (RecordType) scope[_superRecordIdent.Identifier, _superRecordIdent.Module];
+            } else if (this != Base) {
+                SuperRecord = Base;
+            }
         }
 
         public override bool CanTestEquality(OberonType other)
@@ -128,7 +265,7 @@ namespace DUO2C.Semantics
         {
             var sb = new StringBuilder();
             sb.Append("RECORD ");
-            if (_superRecordName != null) sb.AppendFormat("({0}) ", _superRecordName.Identifier);
+            if (_superRecordIdent != null) sb.AppendFormat("({0}) ", _superRecordIdent.Identifier);
             foreach (var field in _fields) {
                 sb.AppendFormat("{0}; ", field.Value);
             }
@@ -137,22 +274,22 @@ namespace DUO2C.Semantics
         }
     }
 
+    public class Parameter
+    {
+        public bool ByReference { get; private set; }
+        public String Identifier { get; private set; }
+        public OberonType Type { get; private set; }
+
+        public Parameter(bool byRef, String ident, OberonType type)
+        {
+            ByReference = byRef;
+            Identifier = ident;
+            Type = type;
+        }
+    }
+
     public class ProcedureType : OberonType
     {
-        private class Parameter
-        {
-            public bool ByReference { get; private set; }
-            public String Identifier { get; private set; }
-            public OberonType Type { get; private set; }
-
-            public Parameter(bool byRef, String ident, OberonType type)
-            {
-                ByReference = byRef;
-                Identifier = ident;
-                Type = type;
-            }
-        }
-
         public OberonType ReturnType { get; private set; }
         private Parameter[] _params;
 
@@ -166,6 +303,12 @@ namespace DUO2C.Semantics
                 ReturnType = null;
                 _params = new Parameter[0];
             }
+        }
+
+        public ProcedureType(OberonType returnType, params Parameter[] args)
+        {
+            ReturnType = returnType;
+            _params = args;
         }
 
         public override bool CanTestEquality(OberonType other)
@@ -229,6 +372,8 @@ namespace DUO2C.Semantics
     {
         public static readonly SetType Default = new SetType();
 
+        public override bool IsSet { get { return true; } }
+
         public override string ToString()
         {
             return "SET";
@@ -245,9 +390,11 @@ namespace DUO2C.Semantics
         }
     }
 
-    public class BooleanType : StaticType
+    public class BooleanType : OberonType
     {
         public static readonly BooleanType Default = new BooleanType();
+
+        public override bool IsBool { get { return true; } }
 
         public override string ToString()
         {
@@ -269,6 +416,8 @@ namespace DUO2C.Semantics
     {
         public static readonly CharType Default = new CharType();
 
+        public override bool IsChar { get { return true; } }
+
         public override string ToString()
         {
             return "CHAR";
@@ -285,9 +434,11 @@ namespace DUO2C.Semantics
         }
     }
 
-    public class NumericType : StaticType
+    public class NumericType : OberonType
     {
         public static readonly NumericType Default = new NumericType();
+
+        public override bool IsNumeric { get { return true; } }
 
         public override string ToString()
         {
@@ -336,6 +487,8 @@ namespace DUO2C.Semantics
         public static readonly IntegerType ShortInt = new IntegerType(IntegerRange.ShortInt);
         public static readonly IntegerType Byte = new IntegerType(IntegerRange.Byte);
 
+        public override bool IsInteger { get { return true; } }
+
         public static IntegerType Largest(IntegerType a, IntegerType b)
         {
             return a.Range >= b.Range ? a : b;
@@ -367,6 +520,8 @@ namespace DUO2C.Semantics
     {
         public static readonly RealType LongReal = new RealType(RealRange.LongReal);
         public static readonly RealType Real = new RealType(RealRange.Real);
+
+        public override bool IsReal { get { return true; } }
 
         public static RealType Largest(RealType a, RealType b)
         {

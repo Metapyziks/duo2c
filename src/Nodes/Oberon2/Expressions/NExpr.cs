@@ -112,17 +112,18 @@ namespace DUO2C.Nodes.Oberon2
 
                 if (left != null && right != null) {
                     if (Operator == ExprOperator.InSet) {
-                        if (!(left is IntegerType)) {
+                        if (!left.IsInteger) {
                             yield return new OperandTypeException(left, right, _opString, this);
-                        } else if (!(right is SetType)) {
+                        }
+                        if (!right.IsSet) {
                             yield return new OperandTypeException(left, right, _opString, this);
                         }
                     } else if (Operator == ExprOperator.Equals || Operator == ExprOperator.NotEquals) {
-                        if (!left.CanTestEquality(right)) {
+                        if (!OberonType.CanTestEquality(left, right)) {
                             yield return new OperandTypeException(left, right, _opString, this);
                         }
                     } else {
-                        if (!left.CanCompare(right)) {
+                        if (!OberonType.CanCompare(left, right)) {
                             yield return new OperandTypeException(left, right, _opString, this);
                         }
                     }

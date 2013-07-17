@@ -42,12 +42,12 @@ namespace DUO2C.Semantics
                         ? _definitions[identifier] : HasParent
                         ? Parent[identifier] : null;
                 }
-                if (type is UnresolvedType) {
-                    var ut = (UnresolvedType) type;
-                    return this[ut.Identifier, ut.Module];
-                } else {
-                    return type;
+
+                if (type != null && !type.IsResolved) {
+                    type.Resolve(this);
                 }
+
+                return type;
             }
         }
     }

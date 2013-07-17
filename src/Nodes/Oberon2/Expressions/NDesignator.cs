@@ -76,6 +76,10 @@ namespace DUO2C.Nodes.Oberon2
                     foundInner = true;
                     yield return e;
                 }
+            } else {
+                if (GetFinalType(scope) == null) {
+                    yield return new UndeclaredIdentifierException(this);
+                }
             }
 
             if (!foundInner) {

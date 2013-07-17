@@ -44,13 +44,13 @@ namespace DUO2C
                             Console.WriteLine("- {0}", error.Message);
                         }
                         Console.ResetColor();
-                    } else {
+                    } //else {
                         var outpath = Path.GetDirectoryName(args[0])
                             + Path.DirectorySeparatorChar
                             + Path.GetFileNameWithoutExtension(args[0])
                             + ".syntax";
                         File.WriteAllText(outpath, module.ToString());
-                    }
+                    //}
                 } catch (ParserException e) {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(e.Message);

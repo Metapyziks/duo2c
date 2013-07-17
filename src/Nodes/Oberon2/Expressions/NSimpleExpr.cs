@@ -39,10 +39,10 @@ namespace DUO2C.Nodes.Oberon2
             } else {
                 if (Operator == SimpleExprOperator.Or) {
                     return BooleanType.Default;
-                } else if (Term.GetFinalType(scope) is SetType) {
+                } else if (Term.GetFinalType(scope).IsSet) {
                     return SetType.Default;
                 } else {
-                    return NumericType.Largest((NumericType) Term.GetFinalType(scope), (NumericType) Prev.GetFinalType(scope));
+                    return NumericType.Largest(Term.GetFinalType(scope).As<NumericType>(), Prev.GetFinalType(scope).As<NumericType>());
                 }
             }
         }
@@ -108,17 +108,11 @@ namespace DUO2C.Nodes.Oberon2
 
                 if (left != null && right != null) {
                     if (Operator == SimpleExprOperator.Or) {
-                        if (!(left is BooleanType)) {
-                            yield return new OperandTypeException(left, right, _opString, this);
-                        } else if (!(right is BooleanType)) {
+                        if (!left.IsBool || !right.IsBool) {
                             yield return new OperandTypeException(left, right, _opString, this);
                         }
-                    } else if (!(left is SetType) || !(right is SetType)) {
-                        if (!(left is NumericType)) {
-                            yield return new OperandTypeException(left, right, _opString, this);
-                        } else if (!(right is NumericType)) {
-                            yield return new OperandTypeException(left, right, _opString, this);
-                        }
+                    } else if ((!left.IsSet || !right.IsSet) && (!left.IsNumeric || !right.IsNumeric)) {
+                        yield return new OperandTypeException(left, right, _opString, this);
                     }
                 }
             }

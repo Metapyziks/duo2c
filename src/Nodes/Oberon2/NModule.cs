@@ -54,6 +54,10 @@ namespace DUO2C.Nodes
         public void FindDeclarations(RootScope scope)
         {
             _scope = ((RootScope) scope).CreateModuleScope(Identifier);
+
+            _scope.Declare("NEW", new ProcedureType(null, new[] {
+            });
+
             Declarations.FindDeclarations(_scope);
         }
 

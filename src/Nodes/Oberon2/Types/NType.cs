@@ -9,7 +9,7 @@ using DUO2C.Semantics;
 namespace DUO2C.Nodes.Oberon2
 {
     [SubstituteToken("Type")]
-    public class NType : TypeDefinition
+    public class NType : TypeDefinition, ITypeErrorSource
     {
         public TypeDefinition Inner
         {
@@ -23,5 +23,15 @@ namespace DUO2C.Nodes.Oberon2
 
         public NType(ParseNode original)
             : base(original, false) { }
+
+
+        public IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        {
+            if (Inner is ITypeErrorSource) {
+                return ((ITypeErrorSource) Inner).FindTypeErrors(scope);
+            } else {
+                return new ParserException[0];
+            }
+        }
     }
 }

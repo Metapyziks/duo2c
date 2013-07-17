@@ -41,13 +41,13 @@ namespace DUO2C.Nodes.Oberon2
             } else {
                 if (Operator == TermOperator.And) {
                     return BooleanType.Default;
-                } else if (Factor.GetFinalType(scope) is SetType) {
+                } else if (Factor.GetFinalType(scope).IsSet) {
                     return SetType.Default;
                 } else if (Operator == TermOperator.Divide) {
                     return NumericType.Largest(RealType.Real,
-                        NumericType.Largest((NumericType) Factor.GetFinalType(scope), (NumericType) Prev.GetFinalType(scope)));
+                        NumericType.Largest(Factor.GetFinalType(scope).As<NumericType>(), Prev.GetFinalType(scope).As<NumericType>()));
                 } else {
-                    return NumericType.Largest((NumericType) Factor.GetFinalType(scope), (NumericType) Prev.GetFinalType(scope));
+                    return NumericType.Largest(Factor.GetFinalType(scope).As<NumericType>(), Prev.GetFinalType(scope).As<NumericType>());
                 }
             }
         }
@@ -116,23 +116,15 @@ namespace DUO2C.Nodes.Oberon2
 
                 if (left != null && right != null) {
                     if (Operator == TermOperator.IntDivide || Operator == TermOperator.Modulo) {
-                        if (!(left is IntegerType)) {
-                            yield return new OperandTypeException(left, right, _opString, this);
-                        } else if (!(right is IntegerType)) {
+                        if (!left.IsInteger || !right.IsInteger) {
                             yield return new OperandTypeException(left, right, _opString, this);
                         }
                     } else if (Operator == TermOperator.And) {
-                        if (!(left is BooleanType)) {
-                            yield return new OperandTypeException(left, right, _opString, this);
-                        } else if (!(right is BooleanType)) {
+                        if (!left.IsBool || !right.IsBool) {
                             yield return new OperandTypeException(left, right, _opString, this);
                         }
-                    } else if (!(left is SetType) || !(right is SetType)) {
-                        if (!(left is NumericType)) {
-                            yield return new OperandTypeException(left, right, _opString, this);
-                        } else if (!(right is NumericType)) {
-                            yield return new OperandTypeException(left, right, _opString, this);
-                        }
+                    } else if ((!left.IsSet || !right.IsSet) && (!left.IsNumeric || !right.IsNumeric)) {
+                        yield return new OperandTypeException(left, right, _opString, this);
                     }
                 }
             }
