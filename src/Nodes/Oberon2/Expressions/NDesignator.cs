@@ -70,6 +70,14 @@ namespace DUO2C.Nodes.Oberon2
                     return type.As<PointerType>().ResolvedType.Resolve(scope);
                 } else if (Operation is NInvocation) {
                     var op = (NInvocation) Operation;
+                    if (type.IsProcedure) {
+                        return (type.As<ProcedureType>().ReturnType ?? PointerType.NilPointer).Resolve(scope);
+                    } else {
+                        var arg = op.Args.Expressions.First();
+                        var fact = arg.SimpleExpr.Term.Factor.Inner as NDesignator;
+                        var ident = (NQualIdent) fact.Element;
+                        return scope[ident.Identifier, ident.Module];
+                    }
                 }
 
                 return PointerType.NilPointer;
@@ -149,8 +157,10 @@ namespace DUO2C.Nodes.Oberon2
                         }
                     } else if (Operation is NInvocation) {
                         var op = (NInvocation) Operation;
-                        foreach (var e in op.Args.Expressions.SelectMany(x => x.FindTypeErrors(scope))) {
-                            yield return e;
+                        if (op.Args != null) {
+                            foreach (var e in op.Args.Expressions.SelectMany(x => x.FindTypeErrors(scope))) {
+                                yield return e;
+                            }
                         }
 
                         if (type.IsProcedure) {

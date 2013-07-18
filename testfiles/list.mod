@@ -22,11 +22,6 @@
         END;
     END Add;
 
-    PROCEDURE TestMeth (l : List) : List;
-    BEGIN
-        RETURN l;
-    END TestMeth;
-
     PROCEDURE (l : List) Get* () : Int32;
     VAR
         v : Int32;
@@ -39,5 +34,4 @@
             RETURN v
         END
     END Get;
-
 END Lists.

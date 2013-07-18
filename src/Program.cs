@@ -12,14 +12,16 @@ namespace DUO2C
     {
         static void WriteErrorHeader(String format, params object[] args)
         {
-            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Red;
+            for (int i = Console.BufferWidth; i > 0; --i) Console.Write("▄");
             Console.ForegroundColor = ConsoleColor.Black;
             Console.BackgroundColor = ConsoleColor.Red;
-            String text = String.Format(format, args);
-            while (text.Length < Console.WindowWidth) {
-                text = text + " ";
-            }
-            Console.WriteLine(text);
+            String text = String.Format(" " + format, args);
+            Console.Write(text);
+            for (int i = Console.BufferWidth; i > text.Length; --i) Console.Write(" ");
+            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.Red;
+            for (int i = Console.BufferWidth; i > 0; --i) Console.Write("▀");
             Console.ResetColor();
         }
 
