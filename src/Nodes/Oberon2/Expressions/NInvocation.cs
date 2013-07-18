@@ -10,11 +10,11 @@ namespace DUO2C.Nodes.Oberon2
     /// Substitution node for invocations / type guards.
     /// </summary>
     [SubstituteToken("Invocation")]
-    class NInvocation : Selector
+    public class NInvocation : Selector
     {
         public NExprList Args
         {
-            get { return (NExprList) Children.First(); }
+            get { return (NExprList) Children.FirstOrDefault(); }
         }
 
         public NInvocation(ParseNode original)

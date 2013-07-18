@@ -25,6 +25,7 @@ namespace DUO2C.Semantics
         public virtual bool IsPointer { get { return false; } }
         public virtual bool IsRecord { get { return false; } }
         public virtual bool IsArray { get { return false; } }
+        public virtual bool IsProcedure { get { return false; } }
 
         public virtual bool IsBool { get { return false; } }
         public virtual bool IsSet { get { return false; } }
@@ -124,6 +125,11 @@ namespace DUO2C.Semantics
             get { return ReferencedType != null && ReferencedType.IsArray; }
         }
 
+        public override bool IsProcedure
+        {
+            get { return ReferencedType != null && ReferencedType.IsProcedure; }
+        }
+
         public override bool IsBool
         {
             get { return ReferencedType != null && ReferencedType.IsBool; }
@@ -208,8 +214,8 @@ namespace DUO2C.Semantics
 
         public override bool CanTestEquality(OberonType other)
         {
-            if (other is PointerType) {
-                var type = ((PointerType) other).ResolvedType;
+            if (other.IsPointer) {
+                var type = other.As<PointerType>().ResolvedType;
                 return type == null || type.CanTestEquality(ResolvedType);
             } else {
                 return false;
@@ -300,7 +306,7 @@ namespace DUO2C.Semantics
         protected override void OnResolve(Scope scope)
         {
             if (_superRecordIdent != null) {
-                SuperRecord = (RecordType) scope[_superRecordIdent.Identifier, _superRecordIdent.Module];
+                SuperRecord = scope[_superRecordIdent.Identifier, _superRecordIdent.Module].As<RecordType>();
             } else if (this != Base) {
                 SuperRecord = Base;
             }
@@ -308,6 +314,10 @@ namespace DUO2C.Semantics
 
         public override bool CanTestEquality(OberonType other)
         {
+            if (!other.IsRecord) return false;
+
+            var rec = other.As<RecordType>();
+            if (rec == this || (rec.SuperRecord != null && CanTestEquality(rec.SuperRecord))) return true;
             return false;
         }
 
@@ -318,6 +328,8 @@ namespace DUO2C.Semantics
 
         public override string ToString()
         {
+            if (this == Base) return "RECORD";
+
             var sb = new StringBuilder();
             sb.Append("RECORD ");
             if (_superRecordIdent != null) sb.AppendFormat("({0}) ", _superRecordIdent.Identifier);
@@ -346,24 +358,49 @@ namespace DUO2C.Semantics
     public class ProcedureType : OberonType
     {
         public OberonType ReturnType { get; private set; }
-        private Parameter[] _params;
+        public Parameter[] Params { get; private set; }
+
+        public override bool IsProcedure
+        {
+            get { return true; }
+        }
 
         public ProcedureType(NFormalPars paras)
         {
             if (paras != null) {
                 ReturnType = paras.ReturnType != null ? paras.ReturnType.Type : null;
-                _params = paras.FPSections.SelectMany(x => x.Identifiers.Select(y =>
+                Params = paras.FPSections.SelectMany(x => x.Identifiers.Select(y =>
                     new Parameter(x.ByReference, y, x.Type.Type))).ToArray();
             } else {
                 ReturnType = null;
-                _params = new Parameter[0];
+                Params = new Parameter[0];
             }
         }
 
         public ProcedureType(OberonType returnType, params Parameter[] args)
         {
             ReturnType = returnType;
-            _params = args;
+            Params = args;
+        }
+
+        public IEnumerable<ParserException> MatchParameters(NInvocation invoc, Scope scope)
+        {
+            var args = invoc.Args != null ? invoc.Args.Expressions.ToArray() : new NExpr[0];
+            if (args.Length != Params.Length) {
+                yield return new ParserException(ParserError.Semantics, String.Format("Argument count mismatch, "
+                    + "expected {0}, received {1}", Params.Length, args.Count()), invoc.StartIndex, 0);
+            } else {
+                for (int i = 0; i < Params.Length; ++i) {
+                    var param = Params[i];
+                    var arg = args[i];
+
+                    var argType = arg.GetFinalType(scope);
+
+                    if (!param.Type.Resolve(scope).CanTestEquality(argType)) {
+                        yield return new TypeMismatchException(param.Type, argType, arg);
+                    }
+                }
+            }
         }
 
         public override bool CanTestEquality(OberonType other)
@@ -378,7 +415,7 @@ namespace DUO2C.Semantics
 
         public override string ToString()
         {
-            String paramStr = String.Join(", ", _params.Select(x => x.Identifier + " : " + x.Type));
+            String paramStr = String.Join(", ", Params.Select(x => x.Identifier + " : " + x.Type));
             if (ReturnType != null) {
                 return String.Format("PROCEDURE ({0}) : {1}", paramStr, ReturnType);
             } else {

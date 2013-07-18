@@ -10,6 +10,27 @@ namespace DUO2C
 {
     class Program
     {
+        static void WriteErrorHeader(String format, params object[] args)
+        {
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.BackgroundColor = ConsoleColor.Red;
+            String text = String.Format(format, args);
+            while (text.Length < Console.WindowWidth) {
+                text = text + " ";
+            }
+            Console.WriteLine(text);
+            Console.ResetColor();
+        }
+
+        static void WriteError(ParserException error)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.WriteLine(error.Message);
+            Console.ResetColor();
+        }
+
         static void Main(string[] args)
         {
             if (args.Length == 0) {
@@ -35,15 +56,14 @@ namespace DUO2C
                     var errors = module.FindTypeErrors(root);
                     if (errors.Count() > 0) {
                         var src = File.ReadAllText(args[0]);
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("Encountered {0} error{1} while compiling:",
+                        WriteErrorHeader("Encountered {0} error{1} while compiling:",
                             errors.Count(), errors.Count() != 1 ? "s" : "");
                         foreach (var error in errors) {
                             error.FindLocationInfo(src);
                             error.SetSourcePath(args[0]);
-                            Console.WriteLine("- {0}", error.Message);
+                            WriteError(error);
                         }
-                        Console.ResetColor();
+                        Console.WriteLine();
                     } //else {
                         var outpath = Path.GetDirectoryName(args[0])
                             + Path.DirectorySeparatorChar
@@ -52,9 +72,9 @@ namespace DUO2C
                         File.WriteAllText(outpath, module.ToString());
                     //}
                 } catch (ParserException e) {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(e.Message);
-                    Console.ResetColor();
+                    WriteErrorHeader("Encountered 1 error while parsing:");
+                    WriteError(e);
+                    Console.WriteLine();
                 }
             }
         }

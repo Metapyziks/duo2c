@@ -149,6 +149,40 @@ namespace DUO2C.Nodes.Oberon2
                         }
                     } else if (Operation is NInvocation) {
                         var op = (NInvocation) Operation;
+                        foreach (var e in op.Args.Expressions.SelectMany(x => x.FindTypeErrors(scope))) {
+                            yield return e;
+                        }
+
+                        if (type.IsProcedure) {
+                            var proc = type.As<ProcedureType>();
+                            foreach (var e in proc.MatchParameters(op, scope)) {
+                                yield return e;
+                            }
+                        } else {
+                            var badProc = true;
+                            if (op.Args.Expressions.Count() == 1) {
+                                var arg = op.Args.Expressions.First();
+                                if (arg.Prev == null && arg.SimpleExpr.Prev == null
+                                    && arg.SimpleExpr.Term.Prev == null) {
+                                    var fact = arg.SimpleExpr.Term.Factor.Inner as NDesignator;
+                                    if (fact != null && fact.IsRoot) {
+                                        badProc = false;
+                                        var ident = (NQualIdent) fact.Element;
+                                        var newType = scope[ident.Identifier, ident.Module];
+                                        if (newType == null) {
+                                            yield return new UndeclaredIdentifierException(ident);
+                                        } else if (!OberonType.CanTestEquality(type, newType)) {
+                                            yield return new ParserException(ParserError.Semantics,
+                                                String.Format("Cannot convert from {0} to {1}", type, newType),
+                                                StartIndex, Length);
+                                        }
+                                    }
+                                }
+                            }
+                            if (badProc) {
+                                yield return new ProcedureExpectedException(type, Element);
+                            }
+                        }
                     }
                 }
             }
