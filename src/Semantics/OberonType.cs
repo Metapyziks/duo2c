@@ -599,6 +599,11 @@ namespace DUO2C.Semantics
             Range = range;
         }
 
+        public override bool CanTestEquality(OberonType other)
+        {
+            return other.IsInteger && other.As<IntegerType>().Range <= Range;
+        }
+
         public override string ToString()
         {
             return Range.ToString().ToUpper();
@@ -631,6 +636,11 @@ namespace DUO2C.Semantics
         private RealType(RealRange range)
         {
             Range = range;
+        }
+
+        public override bool CanTestEquality(OberonType other)
+        {
+            return other.IsInteger || (other.IsReal && other.As<RealType>().Range <= Range);
         }
 
         public override string ToString()

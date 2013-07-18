@@ -1,13 +1,13 @@
 MODULE Test;
     TYPE
-        PointType   = Real;
-        Point2D*    = POINTER TO Point2DRec;
-        Point2DRec     = RECORD
+        PointType  = LongReal;
+        Point2D*   = POINTER TO Point2DRec;
+        Point2DRec = RECORD
             x : PointType;
             y : PointType;
         END;
-        Point3D*    = POINTER TO Point3DRec;
-        Point3DRec     = RECORD (Point2DRec)
+        Point3D*   = POINTER TO Point3DRec;
+        Point3DRec = RECORD (Point2DRec)
             z : PointType;
         END;
     VAR
@@ -75,7 +75,7 @@ BEGIN
     b := CreatePoint2D(-4, 3);               (* Invalid *)
 
     a := CreatePoint3D(6, 2, -1);
-    b := CreatePoint3D(3.824, 3.1E2, 12);
+    b := CreatePoint3D(3.824, 3.1D2, 12);
 
     a := a.Add(b);
     a := b.Sub(a);                           (* Invalid *)
