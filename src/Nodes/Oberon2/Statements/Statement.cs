@@ -56,6 +56,13 @@ namespace DUO2C.Nodes.Oberon2
             : base(original)
         {
             Children = Children.Where(x => x is NDesignator);
+            if (Invocation.IsRoot || !(Invocation.Operation is NInvocation)) {
+                Children = new ParseNode[] {
+                    new NDesignator(new BranchNode(new ParseNode[] {
+                        Invocation, new NInvocation(new BranchNode(Invocation.EndIndex, "Invocation"))
+                    }, Invocation.Token))
+                };
+            }
         }
     }
 
@@ -74,7 +81,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public NStatementSeq ElseBody
         {
-            get { return (NStatementSeq) Children.Last(x => x is NStatementSeq); }
+            get { return (NStatementSeq) Children.LastOrDefault(x => x is NStatementSeq); }
         }
 
         public NIfThenElse(ParseNode original)
@@ -93,6 +100,31 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        {
+            bool condErrorFound = false;
+            foreach (var e in Condition.FindTypeErrors(scope)) {
+                condErrorFound = true;
+                yield return e;
+            }
+
+            if (!condErrorFound) {
+                var condType = Condition.GetFinalType(scope);
+                if (!condType.IsBool) {
+                    yield return new TypeMismatchException(BooleanType.Default, condType, Condition);
+                }
+            }
+
+            foreach (var e in ThenBody.FindTypeErrors(scope)) {
+                yield return e;
+            }
+
+            if (ElseBody != null) {
+                foreach (var e in ElseBody.FindTypeErrors(scope)) {
+                    yield return e;
+                }
+            }
+        }
     }
 
     [SubstituteToken("CaseLabels")]

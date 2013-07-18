@@ -6,7 +6,7 @@ TypeDecl      = IdentDef "=" Type.
 VarDecl       = IdentList ":" Type.
 ProcDecl      = PROCEDURE [Receiver] IdentDef [FormalPars] ";" DeclSeq [BEGIN StatementSeq] END [ident].
 ForwardDecl   = PROCEDURE "^" [Receiver] IdentDef [FormalPars].
-FormalPars    = "(" [FPSection {";" FPSection}] ")" [":" Type].
+FormalPars    = ["(" [FPSection {";" FPSection}] ")"] [":" Type].
 FPSection     = [VAR] ident {"," ident} ":" Type.
 Receiver      = "(" [VAR] ident ":" ident ")".
 Type          = OberonType | NamedType | ArrayType | RecordType | PtrType | ProcType.

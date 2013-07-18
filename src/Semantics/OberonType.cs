@@ -295,12 +295,13 @@ namespace DUO2C.Semantics
 
         public bool HasField(String ident)
         {
-            return _fields.ContainsKey(ident);
+            return _fields.ContainsKey(ident) || (SuperRecord != null && SuperRecord.HasField(ident));
         }
 
         public OberonType GetFieldType(String ident)
         {
-            return _fields[ident].Type;
+            return _fields.ContainsKey(ident) ? _fields[ident].Type
+                : SuperRecord != null ? SuperRecord.GetFieldType(ident) : null;
         }
 
         protected override void OnResolve(Scope scope)

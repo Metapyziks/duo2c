@@ -16,22 +16,22 @@
     BEGIN
         IF l = NIL THEN
             NEW(l);                  (* create record instance *)
-            l.value := v
+            l.value := v;
         ELSE
-            l.next.Add(v(Int32))      (* recursive call to .add(n) *)
+            l.next.Add(v(Int32));    (* recursive call to .add(n) *)
         END;
     END Add;
 
-    PROCEDURE (l : List) Get* () : Int32;
+    PROCEDURE (l : List) Get* : Int32;
     VAR
         v : Int32;
     BEGIN
         IF l = NIL THEN
-            RETURN 0           (* .get() must always return an INTEGER *)
+            RETURN 0;          (* .get() must always return an INTEGER *)
         ELSE
             v := l.value;      (* this line will crash if l is NIL *)
             l := l.next;
-            RETURN v
+            RETURN v;
         END
     END Get;
 END Lists.
