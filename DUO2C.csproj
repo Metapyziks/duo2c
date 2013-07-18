@@ -79,7 +79,7 @@
     <Compile Include="src\Nodes\Oberon2\Expressions\NSimpleExpr.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NTerm.cs" />
     <Compile Include="src\Nodes\Oberon2\Types\NType.cs" />
-    <Compile Include="src\Nodes\Oberon2\Expressions\NTypeGuard.cs" />
+    <Compile Include="src\Nodes\Oberon2\Expressions\NInvocation.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NUnary.cs" />
     <Compile Include="src\Nodes\Oberon2\Declarations\NTypeDecl.cs" />
     <Compile Include="src\Nodes\Oberon2\Types\TypeDefinition.cs" />
@@ -101,10 +101,12 @@
     <Compile Include="src\Ruleset.cs" />
     <Compile Include="src\Program.cs" />
     <Compile Include="src\Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Semantics\ArrayExpectedException.cs" />
     <Compile Include="src\Semantics\ConstantExpectedException.cs" />
     <Compile Include="src\Semantics\MemberNotFoundException.cs" />
     <Compile Include="src\Semantics\OberonType.cs" />
     <Compile Include="src\Semantics\OperandTypeException.cs" />
+    <Compile Include="src\Semantics\PointerExpectedException.cs" />
     <Compile Include="src\Semantics\Scope.cs" />
     <Compile Include="src\Semantics\TypeMismatchException.cs" />
     <Compile Include="src\Semantics\UndeclaredIdentifierException.cs" />

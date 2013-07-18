@@ -26,9 +26,10 @@ PtrType       = POINTER TO Type.
 ProcType      = PROCEDURE [FormalPars].
 FieldList     = IdentList ":" Type.
 StatementSeq  = Statement {";" Statement} [";"].
-Statement     = Assignment | Invocation | IfThenElse | SwitchCase | WhileLoop | RepeatUntil
+Statement     = Assignment | InvocStmnt | IfThenElse | SwitchCase | WhileLoop | RepeatUntil
               | ForLoop | UncondLoop | WithDo | Exit | Return.
 Assignment    = Designator ":=" Expr.
+InvocStmnt	  = Designator.
 IfThenElse    = IF Expr THEN StatementSeq {ELSIF Expr THEN StatementSeq} [ELSE StatementSeq] END.
 SwitchCase    = CASE Expr OF [Case] {"|" [Case]} [ELSE StatementSeq] END.
 WhileLoop     = WHILE Expr DO StatementSeq END.
@@ -54,12 +55,11 @@ Element       = Expr [".." Expr].
 Relation!     = "=" | "#" | "<" | "<=" | ">" | ">=" | IN | IS.
 AddOp!        = "+" | "-" | OR.
 MulOp!        = "*" | "/" | DIV | MOD | "&".
-Invocation    = Designator ["(" [ExprList] ")"].
-Designator    = QualIdent {MemberAccess | Indexer | PtrResolve | TypeGuard}.
+Designator    = QualIdent {MemberAccess | Indexer | PtrResolve | Invocation}.
 MemberAccess  = "." ident.
 Indexer       = "[" ExprList "]".
 PtrResolve    = "^".
-TypeGuard     = "(" NamedType ")".
+Invocation    = "(" [ExprList] ")".
 ExprList      = Expr {"," Expr}.
 IdentList     = IdentDef {"," IdentDef}.
 QualIdent     = [ident "."] ident.

@@ -24,6 +24,7 @@ namespace DUO2C.Semantics
         public virtual bool IsModule { get { return false; } }
         public virtual bool IsPointer { get { return false; } }
         public virtual bool IsRecord { get { return false; } }
+        public virtual bool IsArray { get { return false; } }
 
         public virtual bool IsBool { get { return false; } }
         public virtual bool IsSet { get { return false; } }
@@ -47,12 +48,13 @@ namespace DUO2C.Semantics
             }
         }
 
-        public void Resolve(Scope scope)
+        public OberonType Resolve(Scope scope)
         {
             if (!IsResolved) {
                 IsResolved = true;
                 OnResolve(scope);
             }
+            return this;
         }
 
         protected virtual void OnResolve(Scope scope) { }
@@ -115,6 +117,11 @@ namespace DUO2C.Semantics
         public override bool IsRecord
         {
             get { return ReferencedType != null && ReferencedType.IsRecord; }
+        }
+
+        public override bool IsArray
+        {
+            get { return ReferencedType != null && ReferencedType.IsArray; }
         }
 
         public override bool IsBool
@@ -384,6 +391,11 @@ namespace DUO2C.Semantics
     {
         public OberonType ElementType { get; private set; }
         public int Length { get; private set; }
+
+        public override bool IsArray
+        {
+            get { return true; }
+        }
 
         public ArrayType(OberonType elementType, int length = -1)
         {

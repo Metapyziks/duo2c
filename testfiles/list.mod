@@ -29,7 +29,7 @@
         IF l = NIL THEN
             RETURN 0           (* .get() must always return an INTEGER *)
         ELSE
-            v := l.value;       (* this line will crash if l is NIL *)
+            v := l.value + a[2];       (* this line will crash if l is NIL *)
             l := l.next;
             RETURN v
         END

@@ -27,7 +27,7 @@ namespace DUO2C
     public enum ParserError
     {
         Syntax,
-        Semantic
+        Semantics
     }
 
     /// <summary>

@@ -13,7 +13,7 @@ namespace DUO2C.Semantics
         public ExpressionElement Element { get; private set; }
 
         public ConstantExpectedException(ExpressionElement element)
-            : base(ParserError.Semantic, "Constant value expected", element.StartIndex, element.Length)
+            : base(ParserError.Semantics, "Constant value expected", element.StartIndex, element.Length)
         {
             Element = element;
         }

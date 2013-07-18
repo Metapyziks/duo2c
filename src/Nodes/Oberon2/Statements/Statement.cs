@@ -44,23 +44,18 @@ namespace DUO2C.Nodes.Oberon2
         }
     }
 
-    [SubstituteToken("Invocation")]
-    public class NInvocation : Statement
+    [SubstituteToken("InvocStmnt")]
+    public class NInvocStmnt : Statement
     {
-        public NDesignator Procedure
+        public NDesignator Invocation
         {
             get { return (NDesignator) Children.First(); }
         }
 
-        public IEnumerable<NExpr> Arguments
-        {
-            get { return ((NExprList) Children.Last()).Expressions; }
-        }
-
-        public NInvocation(ParseNode original)
+        public NInvocStmnt(ParseNode original)
             : base(original)
         {
-            Children = Children.Where(x => x is NDesignator || x is NExprList);
+            Children = Children.Where(x => x is NDesignator);
         }
     }
 

@@ -15,7 +15,7 @@ namespace DUO2C.Semantics
         public NDesignator MemberAccess { get; private set; }
 
         public MemberNotFoundException(OberonType elementType, NDesignator memAccess)
-            : base(ParserError.Semantic, String.Format("Member '{0}' not found for type '{1}'",
+            : base(ParserError.Semantics, String.Format("Member '{0}' not found for type '{1}'",
                 ((NMemberAccess) memAccess.Operation).Identifier, elementType),
                 memAccess.StartIndex, memAccess.Length)
         {

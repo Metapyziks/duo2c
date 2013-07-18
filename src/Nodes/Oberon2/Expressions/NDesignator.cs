@@ -48,26 +48,28 @@ namespace DUO2C.Nodes.Oberon2
             } else {
                 var prev = (NDesignator) Element;
                 var type = prev.GetFinalType(scope);
-
-                while (type.IsPointer) {
-                    type = type.As<PointerType>().ResolvedType;
+                
+                if (Operation is NIndexer || Operation is NMemberAccess) {
+                    while (type.IsPointer) {
+                        type = type.As<PointerType>().ResolvedType;
+                    }
                 }
 
                 if (Operation is NMemberAccess) {
                     var op = (NMemberAccess) Operation;
                     if (type.IsModule) {
                         var mdl = type.As<ModuleType>();
-                        return mdl.Scope[op.Identifier];
+                        return mdl.Scope[op.Identifier].Resolve(scope);
                     } else if (type.IsRecord) {
                         var rec = type.As<RecordType>();
-                        return rec.GetFieldType(op.Identifier);
+                        return rec.GetFieldType(op.Identifier).Resolve(scope);
                     }
                 } else if (Operation is NIndexer) {
-                    var op = (NIndexer) Operation;
+                    return type.As<ArrayType>().ElementType.Resolve(scope);
                 } else if (Operation is NPtrResolve) {
-                    var op = (NPtrResolve) Operation;
-                } else if (Operation is NTypeGuard) {
-                    var op = (NTypeGuard) Operation;
+                    return type.As<PointerType>().ResolvedType.Resolve(scope);
+                } else if (Operation is NInvocation) {
+                    var op = (NInvocation) Operation;
                 }
 
                 return PointerType.NilPointer;
@@ -111,9 +113,11 @@ namespace DUO2C.Nodes.Oberon2
                 var type = prev.GetFinalType(scope);
                 type.Resolve(scope);
 
-                while (type != null && type.IsPointer) {
-                    type = type.As<PointerType>().ResolvedType;
-                    if (type != null) type.Resolve(scope);
+                if (Operation is NIndexer || Operation is NMemberAccess) {
+                    while (type != null && type.IsPointer) {
+                        type = type.As<PointerType>().ResolvedType;
+                        if (type != null) type.Resolve(scope);
+                    }
                 }
 
                 if (type == null) {
@@ -136,10 +140,15 @@ namespace DUO2C.Nodes.Oberon2
                         }
                     } else if (Operation is NIndexer) {
                         var op = (NIndexer) Operation;
+                        if (!type.IsArray) {
+                            yield return new ArrayExpectedException(type, this);
+                        }
                     } else if (Operation is NPtrResolve) {
-                        var op = (NPtrResolve) Operation;
-                    } else if (Operation is NTypeGuard) {
-                        var op = (NTypeGuard) Operation;
+                        if (!type.IsPointer) {
+                            yield return new PointerExpectedException(type, this);
+                        }
+                    } else if (Operation is NInvocation) {
+                        var op = (NInvocation) Operation;
                     }
                 }
             }

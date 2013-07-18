@@ -16,7 +16,7 @@ namespace DUO2C.Semantics
         public OberonType Actual { get; private set; }
 
         public TypeMismatchException(OberonType expected, OberonType actual, ParseNode node)
-            : base(ParserError.Semantic, String.Format("Expected {0}, found {1}", expected, actual),
+            : base(ParserError.Semantics, String.Format("Expected {0}, found {1}", expected, actual),
                 node.StartIndex, node.Length)
         {
             Expected = expected;

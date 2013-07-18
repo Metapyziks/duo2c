@@ -12,6 +12,6 @@ namespace DUO2C.Semantics
     public class UndeclaredIdentifierException : ParserException
     {
         public UndeclaredIdentifierException(ParseNode node)
-            : base(ParserError.Semantic, "Undeclared identifier", node.StartIndex, node.Length) { }
+            : base(ParserError.Semantics, "Undeclared identifier", node.StartIndex, node.Length) { }
     }
 }
