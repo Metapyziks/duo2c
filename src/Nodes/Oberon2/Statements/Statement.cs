@@ -42,6 +42,24 @@ namespace DUO2C.Nodes.Oberon2
         {
             Children = Children.Where(x => x is NDesignator || x is NExpr);
         }
+
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        {
+            var found = false;
+            foreach (var e in base.FindTypeErrors(scope)) {
+                found = true;
+                yield return e;
+            }
+
+            if (!found) {
+                var leftType = Assignee.GetFinalType(scope);
+                var rightType = Expression.GetFinalType(scope);
+
+                if (!leftType.CanTestEquality(rightType)) {
+                    yield return new TypeMismatchException(leftType, rightType, Expression);
+                }
+            }
+        }
     }
 
     [SubstituteToken("InvocStmnt")]
