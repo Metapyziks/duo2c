@@ -58,7 +58,7 @@ namespace DUO2C
                     var errors = module.FindTypeErrors(root);
                     if (errors.Count() > 0) {
                         var src = File.ReadAllText(args[0]);
-                        WriteErrorHeader("Encountered {0} error{1} while compiling:",
+                        WriteErrorHeader("Encountered {0} error{1} while performing type checks:",
                             errors.Count(), errors.Count() != 1 ? "s" : "");
                         foreach (var error in errors) {
                             error.FindLocationInfo(src);

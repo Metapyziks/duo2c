@@ -175,12 +175,12 @@ namespace DUO2C.Semantics
 
         public override bool CanCompare(OberonType other)
         {
-            return ReferencedType.CanCompare(other) || other.CanCompare(ReferencedType);
+            return ReferencedType.CanCompare(other);
         }
 
         public override bool CanTestEquality(OberonType other)
         {
-            return ReferencedType.CanTestEquality(other) || other.CanTestEquality(ReferencedType);
+            return ReferencedType.CanTestEquality(other);
         }
 
         public override string ToString()
@@ -216,7 +216,7 @@ namespace DUO2C.Semantics
         {
             if (other.IsPointer) {
                 var type = other.As<PointerType>().ResolvedType;
-                return type == null || type.CanTestEquality(ResolvedType);
+                return ResolvedType == null || type == null || ResolvedType.CanTestEquality(type);
             } else {
                 return false;
             }
@@ -545,25 +545,25 @@ namespace DUO2C.Semantics
 
         public static NumericType Largest(NumericType a, NumericType b)
         {
-            if (a is RealType && b is RealType) {
-                return RealType.Largest((RealType) a, (RealType) b);
-            } else if (a is IntegerType && b is IntegerType) {
-                return IntegerType.Largest((IntegerType) a, (IntegerType) b);
-            } else if (a is RealType) {
-                return a;
+            if (a.IsReal && b.IsReal) {
+                return RealType.Largest(a.As<RealType>(), b.As<RealType>());
+            } else if (a.IsInteger && b.IsInteger) {
+                return IntegerType.Largest(a.As<IntegerType>(), b.As<IntegerType>());
+            } else if (a.IsReal) {
+                return a.As<RealType>();
             } else {
-                return b;
+                return b.As<RealType>();
             }
         }
 
         public override bool CanTestEquality(OberonType other)
         {
-            return other is NumericType;
+            return other.IsNumeric;
         }
 
         public override bool CanCompare(OberonType other)
         {
-            return other is NumericType;
+            return other.IsNumeric;
         }
     }
 

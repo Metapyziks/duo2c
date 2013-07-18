@@ -228,6 +228,26 @@ namespace DUO2C.Nodes.Oberon2
         {
             Children = Children.Where(x => x is NExpr || x is NStatementSeq);
         }
+
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        {
+            bool condErrorFound = false;
+            foreach (var e in Condition.FindTypeErrors(scope)) {
+                condErrorFound = true;
+                yield return e;
+            }
+
+            if (!condErrorFound) {
+                var condType = Condition.GetFinalType(scope);
+                if (!condType.IsBool) {
+                    yield return new TypeMismatchException(BooleanType.Default, condType, Condition);
+                }
+            }
+
+            foreach (var e in Body.FindTypeErrors(scope)) {
+                yield return e;
+            }
+        }
     }
 
     [SubstituteToken("RepeatUntil")]
@@ -247,6 +267,26 @@ namespace DUO2C.Nodes.Oberon2
             : base(original)
         {
             Children = Children.Where(x => x is NExpr || x is NStatementSeq);
+        }
+
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        {
+            bool condErrorFound = false;
+            foreach (var e in Condition.FindTypeErrors(scope)) {
+                condErrorFound = true;
+                yield return e;
+            }
+
+            if (!condErrorFound) {
+                var condType = Condition.GetFinalType(scope);
+                if (!condType.IsBool) {
+                    yield return new TypeMismatchException(BooleanType.Default, condType, Condition);
+                }
+            }
+
+            foreach (var e in Body.FindTypeErrors(scope)) {
+                yield return e;
+            }
         }
     }
 
