@@ -28,8 +28,7 @@ namespace DUO2C
         static void WriteError(ParserException error)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.WriteLine(error.Message);
+            Console.WriteLine(" " + error.Message);
             Console.ResetColor();
         }
 

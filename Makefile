@@ -13,6 +13,7 @@ SRC = \
 	$(SRCDIR)/Nodes/Oberon2/Declarations/*.cs \
 	$(SRCDIR)/Nodes/Oberon2/Expressions/*.cs \
 	$(SRCDIR)/Nodes/Oberon2/Types/*.cs \
+	$(SRCDIR)/Nodes/Oberon2/Statements/*.cs \
 	$(SRCDIR)/Properties/*.cs \
 	$(SRCDIR)/Semantics/*.cs \
 	$(SRCDIR)/Parsers/*.cs

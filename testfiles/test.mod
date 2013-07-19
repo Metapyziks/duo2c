@@ -1,6 +1,6 @@
 MODULE Test;
     TYPE
-        PointType  = LongReal;
+        PointType  = Real;
         Point2D*   = POINTER TO Point2DRec;
         Point2DRec = RECORD
             x : PointType;
@@ -72,7 +72,7 @@ MODULE Test;
     END Sub;
 BEGIN
     a := CreatePoint2D(5.2, 8.4);
-    b := CreatePoint2D(-4, 3);               (* Invalid *)
+    b := CreatePoint2D(-4, 3)(Point3D);               (* Invalid *)
 
     a := CreatePoint3D(6, 2, -1);
     b := CreatePoint3D(3.824, 3.1D2, 12);
