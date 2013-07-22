@@ -40,11 +40,11 @@ namespace DUO2C.Nodes.Oberon2
                 errors.AddRange(Max.FindTypeErrors(scope));
             }
 
-            if (!(Min.GetFinalType(scope) is IntegerType)) {
+            if (!Min.GetFinalType(scope).IsInteger) {
                 errors.Add(new TypeMismatchException(IntegerType.Integer, Min.GetFinalType(scope), Min));
             }
 
-            if (!SingleExpression && !(Max.GetFinalType is IntegerType)) {
+            if (!SingleExpression && !Max.GetFinalType(scope).IsInteger) {
                 errors.Add(new TypeMismatchException(IntegerType.Integer, Max.GetFinalType(scope), Max));
             }
 

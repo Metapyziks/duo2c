@@ -27,7 +27,8 @@ ProcType      = PROCEDURE [FormalPars].
 FieldList     = IdentList ":" Type.
 StatementSeq  = Statement {";" Statement} [";"].
 Statement     = Assignment | InvocStmnt | IfThenElse | SwitchCase | WhileLoop | RepeatUntil
-              | ForLoop | UncondLoop | WithDo | Exit | Return.
+              | ForLoop | UncondLoop | WithDo | Exit | Return | Print.
+Print         = PRINT "(" Expr ")".
 Assignment    = Designator ":=" Expr.
 InvocStmnt	  = Designator.
 IfThenElse    = IF Expr THEN StatementSeq {ELSIF Expr THEN StatementSeq} [ELSE StatementSeq] END.
