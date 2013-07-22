@@ -291,8 +291,10 @@ namespace DUO2C.Nodes.Oberon2
     }
 
     [SubstituteToken("ForLoop")]
-    public class NForLoop : Statement
+    public class NForLoop : Statement, IDeclarationSource
     {
+        private Scope _scope;
+
         public String IteratorName
         {
             get { return Children.First().String; }
@@ -322,6 +324,62 @@ namespace DUO2C.Nodes.Oberon2
             : base(original)
         {
             Children = Children.Where(x => x is NIdent || x is NExpr || x is NConstExpr || x is NStatementSeq);
+        }
+        
+        public void FindDeclarations(Scope scope)
+        {
+            _scope = new Scope(scope);
+
+            if (Initial.FindTypeErrors(scope).Count() == 0 && Final.FindTypeErrors(scope).Count() == 0) {
+                _scope.Declare(IteratorName, NumericType.Largest(Initial.GetFinalType(scope).As<NumericType>(),
+                    Final.GetFinalType(scope).As<NumericType>()));
+            }
+
+            Body.FindDeclarations(_scope);
+        }
+
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        {
+            NumericType iteratorType = null;
+            if (_scope.IsDeclared(IteratorName)) {
+                iteratorType = _scope[IteratorName].As<NumericType>();
+            }
+
+            bool found = false;
+            foreach (var e in Initial.FindTypeErrors(scope)) {
+                found = true;
+                yield return e;
+            }
+
+            if (!found && !Initial.GetFinalType(scope).IsNumeric) {
+                yield return new TypeMismatchException(NumericType.Default, Initial.GetFinalType(scope), Initial);
+            }
+
+            foreach (var e in Final.FindTypeErrors(scope)) {
+                found = true;
+                yield return e;
+            }
+
+            if (!found && !Final.GetFinalType(scope).IsNumeric) {
+                yield return new TypeMismatchException(NumericType.Default, Final.GetFinalType(scope), Final);
+            }
+
+            if (Increment != null) {
+                foreach (var e in Increment.FindTypeErrors(_scope)) {
+                    found = true;
+                    yield return e;
+                }
+
+                if (!found && !iteratorType.CanTestEquality(Increment.GetFinalType(_scope))) {
+                    yield return new TypeMismatchException(iteratorType, Increment.GetFinalType(_scope), Increment);
+                }
+            }
+
+            if (!found) {
+                foreach (var e in Body.FindTypeErrors(_scope)) {
+                    yield return e;
+                }
+            }
         }
     }
 

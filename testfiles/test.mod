@@ -71,6 +71,10 @@ MODULE Test;
         RETURN dif;
     END Sub;
 BEGIN
+    FOR i := 1 TO 512 BY 256.2 DO
+        a := CreatePoint2D(i, 2);
+    END;
+
     a := CreatePoint2D(5.2, 8.4);
     b := CreatePoint2D(-4, 3);               (* Invalid *)
 

@@ -9,7 +9,7 @@ using DUO2C.Semantics;
 namespace DUO2C.Nodes.Oberon2
 {
     [SubstituteToken("Statement")]
-    public class NStatement : SubstituteNode, ITypeErrorSource
+    public class NStatement : SubstituteNode, ITypeErrorSource, IDeclarationSource
     {
         public Statement Inner {
             get { return (Statement) Children.First(); }
@@ -19,6 +19,13 @@ namespace DUO2C.Nodes.Oberon2
             : base(original, false)
         {
             Children = Children.Where(x => x is Statement);
+        }
+
+        public void FindDeclarations(Scope scope)
+        {
+            if (Inner is IDeclarationSource) {
+                ((IDeclarationSource) Inner).FindDeclarations(scope);
+            }
         }
 
         public IEnumerable<ParserException> FindTypeErrors(Scope scope)

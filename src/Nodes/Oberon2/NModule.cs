@@ -60,6 +60,10 @@ namespace DUO2C.Nodes
             }));
 
             Declarations.FindDeclarations(Type.Scope);
+
+            if (Body != null) {
+                Body.FindDeclarations(Type.Scope);
+            }
         }
 
         public IEnumerable<ParserException> FindTypeErrors(RootScope scope)
