@@ -10,28 +10,26 @@ MODULE Test;
         Point3DRec = RECORD (Point2DRec)
             z : PointType;
         END;
+        TestArray = ARRAY 12, 8 OF Integer;
     VAR
-        a : Point2D;
+        a : Point3D;
         b : Point3D;
+        c : Point3D;
 
-    PROCEDURE CreatePoint2D* (x : PointType; y : PointType) : Point2D;
-        VAR point : Point2D;
+    PROCEDURE (VAR this : Point2D) Create* (x : PointType; y : PointType);
     BEGIN
-        NEW(point);
-        point.x := x;
-        point.y := y;
-        RETURN point;
-    END CreatePoint2D;
+        NEW(this);
+        this.x := x;
+        this.y := y;
+    END Create;
 
-    PROCEDURE CreatePoint3D* (x : PointType; y : PointType; z : PointType) : Point3D;
-        VAR point : Point3D;
+    PROCEDURE (VAR this : Point3D) Create* (x : PointType; y : PointType; z : PointType);
     BEGIN
-        NEW(point);
-        point.x := x;
-        point.y := y;
-        point.z := z;
-        RETURN point;
-    END CreatePoint3D;
+        NEW(this);
+        this.x := x;
+        this.y := y;
+        this.z := z;
+    END Create;
 
     PROCEDURE (this : Point2D) Add* (that : Point2D) : Point2D;
         VAR sum : Point2D;
@@ -71,15 +69,8 @@ MODULE Test;
         RETURN dif;
     END Sub;
 BEGIN
-    a := CreatePoint2D(5.2, 8.4);
+    a.Create(5.2, -6, 8.4);
+    b.Create(3.824, 3.1D2, 12);
 
-    a := CreatePoint3D(6, 2, -1);
-    b := CreatePoint3D(3.824, 3.1D2, 12);
-
-    a := a.Add(b);
-
-    b := CreatePoint2D(-4, 3)(Point3D);
-    a := b.Sub(a(Point3D));
-    b := a.Add(b)(Point3D);
-    b := b.Sub(a(Point3D));
+    c := a.Add(b);
 END Test.

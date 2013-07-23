@@ -13,6 +13,11 @@ namespace DUO2C.Nodes.Oberon2
     {
         public abstract OberonType Type { get; }
 
+        public override string String
+        {
+            get { return (Type ?? PointerType.NilPointer).ToString(); }
+        }
+
         public TypeDefinition(ParseNode original, bool leaf, bool hasPayload = true)
             : base(original, leaf, hasPayload) { }
 
@@ -62,6 +67,11 @@ namespace DUO2C.Nodes.Oberon2
 
             Children = Children.Where(x => x is NType);
         }
+
+        public override void GenerateCode(GenerationContext ctx)
+        {
+            ctx = ctx + "[" + ArrayLength.ToString() + " x " + ElementDefinition + "]";
+        }
     }
 
     [SubstituteToken("OberonType")]
@@ -76,7 +86,7 @@ namespace DUO2C.Nodes.Oberon2
         public NOberonType(ParseNode original)
             : base(original, true)
         {
-            switch (String.ToUpper()) {
+            switch (original.String.ToUpper()) {
                 case "LONGINT":
                     _type = IntegerType.LongInt; break;
                 case "INTEGER":
@@ -102,7 +112,7 @@ namespace DUO2C.Nodes.Oberon2
         {
             if (_type is IntegerType) {
                 var it = (IntegerType) _type;
-                ctx.Write("i{0}", (int) it.Range);
+                ctx.Write("i{0}", (int) it.Range * 8);
             } else if (_type is RealType) {
                 var rt = (RealType) _type;
                 if (rt.Range == RealRange.Real) {
@@ -136,7 +146,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override void GenerateCode(GenerationContext ctx)
         {
-            ctx = ctx + (NType) Children.First() + " *";
+            ctx = ctx + (NType) Children.First() + "*";
         }
     }
 

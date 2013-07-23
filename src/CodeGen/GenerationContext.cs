@@ -59,6 +59,7 @@ namespace DUO2C.CodeGen
         {
             if (_newLine) {
                 _builder.Append(_indent);
+                _newLine = false;
             }
 
             if (args.Length == 0) {

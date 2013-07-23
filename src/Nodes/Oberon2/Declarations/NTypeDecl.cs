@@ -30,7 +30,10 @@ namespace DUO2C.Nodes.Oberon2
 
         public override void GenerateCode(GenerationContext ctx)
         {
-            ctx = ctx + "%" + Identifier + " = " + Type + ";";
+            ctx.NewLine();
+            ctx = ctx + "; " + Identifier + " = " + Type.String;
+            ctx.NewLine();
+            ctx = ctx + "%" + Identifier + " = type " + Type;
             ctx.NewLine();
         }
     }

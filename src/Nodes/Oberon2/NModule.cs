@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using DUO2C.CodeGen;
 using DUO2C.Nodes.Oberon2;
 using DUO2C.Semantics;
 
@@ -71,6 +72,17 @@ namespace DUO2C.Nodes
             return Children.SelectMany(x => x is ITypeErrorSource
                 ? ((ITypeErrorSource) x).FindTypeErrors(Type.Scope)
                 : new ParserException[0]);
+        }
+
+        public override void GenerateCode(GenerationContext ctx)
+        {
+            ctx = ctx + "; Module " + Identifier;
+            ctx.NewLine().Enter();
+
+            base.GenerateCode(ctx);
+
+            ctx.NewLine().NewLine().Leave();
+            ctx = ctx + "; End " + Identifier;
         }
     }
 }
