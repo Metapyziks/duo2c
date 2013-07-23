@@ -3,6 +3,8 @@ using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 
+using DUO2C.CodeGen;
+
 namespace DUO2C.Nodes
 {
     /// <summary>
@@ -127,6 +129,15 @@ namespace DUO2C.Nodes
                 return String.Format("<{0}{1}>", Token, attribStr)
                     + (Children.Count() > 0 ? nl + String.Join(nl, Children.Select(x => x.SerializeXML())) : "")
                         .Replace("\n", "\n  ") + nl + String.Format("</{0}>", Token);
+            }
+        }
+
+        public virtual void GenerateCode(GenerationContext ctx)
+        {
+            foreach (var child in Children) {
+                if (child is SubstituteNode) {
+                    ((SubstituteNode) child).GenerateCode(ctx);
+                }
             }
         }
     }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using DUO2C.CodeGen;
 using DUO2C.Semantics;
 
 namespace DUO2C.Nodes.Oberon2
@@ -96,6 +97,27 @@ namespace DUO2C.Nodes.Oberon2
                     _type = CharType.Default; break;
             }
         }
+
+        public override void GenerateCode(GenerationContext ctx)
+        {
+            if (_type is IntegerType) {
+                var it = (IntegerType) _type;
+                ctx.Write("i{0}", (int) it.Range);
+            } else if (_type is RealType) {
+                var rt = (RealType) _type;
+                if (rt.Range == RealRange.Real) {
+                    ctx.Write("float");
+                } else {
+                    ctx.Write("double");
+                }
+            } else if (_type is SetType) {
+                ctx.Write("i64");
+            } else if (_type is BooleanType) {
+                ctx.Write("i1");
+            } else if (_type is CharType) {
+                ctx.Write("i16");
+            }
+        }
     }
 
     [SubstituteToken("PtrType")]
@@ -110,6 +132,11 @@ namespace DUO2C.Nodes.Oberon2
             : base(original, false)
         {
             Children = Children.Where(x => x is NType);
+        }
+
+        public override void GenerateCode(GenerationContext ctx)
+        {
+            ctx = ctx + (NType) Children.First() + " *";
         }
     }
 
@@ -138,6 +165,11 @@ namespace DUO2C.Nodes.Oberon2
                 yield return new UndeclaredIdentifierException(this);
             }
         }
+
+        public override void GenerateCode(GenerationContext ctx)
+        {
+            ctx = ctx + "%" + Identifier.Identifier;
+        }
     }
 
     [SubstituteToken("FieldList")]
@@ -164,6 +196,13 @@ namespace DUO2C.Nodes.Oberon2
             return Children.SelectMany(x => (x is ITypeErrorSource)
                    ? ((ITypeErrorSource) x).FindTypeErrors(scope)
                    : new ParserException[0]);
+        }
+
+        public override void GenerateCode(GenerationContext ctx)
+        {
+            foreach (var ident in Identifiers.IdentDefs) {
+                ctx += Type;
+            }
         }
     }
 
@@ -199,6 +238,20 @@ namespace DUO2C.Nodes.Oberon2
             : base(original, false)
         {
             Children = Children.Where(x => x is NNamedType || x is NFieldList);
+        }
+
+        public override void GenerateCode(GenerationContext ctx)
+        {
+            ctx += "{";
+            if (SuperRecord != null) {
+                ctx += SuperRecord;
+                if (FieldLists.Count() > 0) ctx += ", ";
+            }
+            foreach (var fl in FieldLists) {
+                if (fl != FieldLists.First()) ctx += ", ";
+                ctx += fl;
+            }
+            ctx += "}";
         }
     }
 

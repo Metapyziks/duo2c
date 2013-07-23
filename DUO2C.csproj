@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\CodeGen\GenerationContext.cs" />
     <Compile Include="src\Nodes\BranchNode.cs" />
     <Compile Include="src\Nodes\Interfaces.cs" />
     <Compile Include="src\Nodes\LeafNode.cs" />

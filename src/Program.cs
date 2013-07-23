@@ -65,13 +65,16 @@ namespace DUO2C
                             WriteError(error);
                         }
                         Console.WriteLine();
-                    } //else {
+                    } else {
                         var outpath = Path.GetDirectoryName(args[0])
                             + Path.DirectorySeparatorChar
                             + Path.GetFileNameWithoutExtension(args[0])
-                            + ".syntax";
-                        File.WriteAllText(outpath, module.ToString());
-                    //}
+                            + ".ll";
+
+                        var ctx = new CodeGen.GenerationContext();
+                        module.GenerateCode(ctx);
+                        File.WriteAllText(outpath, ctx.GeneratedCode);
+                    }
                 } catch (ParserException e) {
                     WriteErrorHeader("Encountered 1 error while parsing:");
                     WriteError(e);

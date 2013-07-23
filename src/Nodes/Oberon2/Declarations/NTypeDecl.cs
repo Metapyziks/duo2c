@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using DUO2C.CodeGen;
 using DUO2C.Semantics;
 
 namespace DUO2C.Nodes.Oberon2
@@ -25,6 +26,12 @@ namespace DUO2C.Nodes.Oberon2
         public override void FindDeclarations(Scope scope)
         {
             scope.Declare(Identifier, Type.Type);
+        }
+
+        public override void GenerateCode(GenerationContext ctx)
+        {
+            ctx = ctx + "%" + Identifier + " = " + Type + ";";
+            ctx.NewLine();
         }
     }
 }

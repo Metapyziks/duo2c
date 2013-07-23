@@ -1,6 +1,6 @@
 MODULE Test;
     TYPE
-        PointType  = Real;
+        PointType  = LongReal;
         Point2D*   = POINTER TO Point2DRec;
         Point2DRec = RECORD
             x : PointType;
@@ -21,7 +21,7 @@ MODULE Test;
         point.x := x;
         point.y := y;
         RETURN point;
-       END CreatePoint2D;
+    END CreatePoint2D;
 
     PROCEDURE CreatePoint3D* (x : PointType; y : PointType; z : PointType) : Point3D;
         VAR point : Point3D;
@@ -31,7 +31,7 @@ MODULE Test;
         point.y := y;
         point.z := z;
         RETURN point;
-       END CreatePoint3D;
+    END CreatePoint3D;
 
     PROCEDURE (this : Point2D) Add* (that : Point2D) : Point2D;
         VAR sum : Point2D;
@@ -71,20 +71,12 @@ MODULE Test;
         RETURN dif;
     END Sub;
 BEGIN
-    FOR i := 1 TO 512 BY 256.2 DO
-        a := CreatePoint2D(i, 2);
-    END;
-
     a := CreatePoint2D(5.2, 8.4);
-    b := CreatePoint2D(-4, 3)(Point3D);               (* Invalid *)
 
     a := CreatePoint3D(6, 2, -1);
     b := CreatePoint3D(3.824, 3.1D2, 12);
 
     a := a.Add(b);
-    a := b.Sub(a);                           (* Invalid *)
-    b := a.Add(b);                           (* Invalid *)
-    b := b.Sub(a);                           (* Invalid *)
 
     b := CreatePoint2D(-4, 3)(Point3D);
     a := b.Sub(a(Point3D));
