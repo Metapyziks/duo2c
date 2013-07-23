@@ -146,7 +146,7 @@ namespace DUO2C.Nodes.Oberon2
     }
 
     [SubstituteToken("CaseLabels")]
-    public class NCaseLabel : SubstituteNode
+    public class NCaseLabel : SubstituteNode, ITypeErrorSource
     {
         public NConstExpr Min
         {
@@ -163,10 +163,23 @@ namespace DUO2C.Nodes.Oberon2
         {
             Children = Children.Where(x => x is NConstExpr);
         }
+
+        public IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        {
+            foreach (var e in Min.FindTypeErrors(scope)) {
+                yield return e;
+            }
+
+            if (Max != Min) {
+                foreach (var e in Max.FindTypeErrors(scope)) {
+                    yield return e;
+                }
+            }
+        }
     }
 
     [SubstituteToken("Case")]
-    public class NCase : SubstituteNode
+    public class NCase : SubstituteNode, IDeclarationSource, ITypeErrorSource
     {
         public IEnumerable<NCaseLabel> Labels
         {
@@ -183,10 +196,20 @@ namespace DUO2C.Nodes.Oberon2
         {
             Children = Children.Where(x => x is NCaseLabel || x is NStatementSeq);
         }
+
+        public void FindDeclarations(Scope scope)
+        {
+            Statements.FindDeclarations(scope);
+        }
+
+        public IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        {
+            return Labels.SelectMany(x => x.FindTypeErrors(scope)).Union(Statements.FindTypeErrors(scope));
+        }
     }
 
     [SubstituteToken("SwitchCase")]
-    public class NSwitchCase : Statement
+    public class NSwitchCase : Statement, IDeclarationSource
     {
         public NExpr Expression
         {
@@ -203,6 +226,13 @@ namespace DUO2C.Nodes.Oberon2
             get { return Children.Last() as NStatementSeq; }
         }
 
+        public void FindDeclarations(Scope scope)
+        {
+            foreach (var c in Cases) {
+                c.FindDeclarations(scope);
+            }
+        }
+
         public NSwitchCase(ParseNode original)
             : base(original)
         {
@@ -211,7 +241,7 @@ namespace DUO2C.Nodes.Oberon2
     }
 
     [SubstituteToken("WhileLoop")]
-    public class NWhileLoop : Statement
+    public class NWhileLoop : Statement, IDeclarationSource
     {
         public NExpr Condition 
         {
@@ -227,6 +257,11 @@ namespace DUO2C.Nodes.Oberon2
             : base(original)
         {
             Children = Children.Where(x => x is NExpr || x is NStatementSeq);
+        }
+
+        public void FindDeclarations(Scope scope)
+        {
+            Body.FindDeclarations(scope);
         }
 
         public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
@@ -251,7 +286,7 @@ namespace DUO2C.Nodes.Oberon2
     }
 
     [SubstituteToken("RepeatUntil")]
-    public class NRepeatUntil : Statement
+    public class NRepeatUntil : Statement, IDeclarationSource
     {
         public NStatementSeq Body
         {
@@ -267,6 +302,11 @@ namespace DUO2C.Nodes.Oberon2
             : base(original)
         {
             Children = Children.Where(x => x is NExpr || x is NStatementSeq);
+        }
+
+        public void FindDeclarations(Scope scope)
+        {
+            Body.FindDeclarations(scope);
         }
 
         public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
@@ -384,7 +424,7 @@ namespace DUO2C.Nodes.Oberon2
     }
 
     [SubstituteToken("UncondLoop")]
-    public class NUncondLoop : Statement
+    public class NUncondLoop : Statement, IDeclarationSource
     {
         public NStatementSeq Body
         {
@@ -396,11 +436,18 @@ namespace DUO2C.Nodes.Oberon2
         {
             Children = Children.Where(x => x is NStatementSeq);
         }
+
+        public void FindDeclarations(Scope scope)
+        {
+            Body.FindDeclarations(scope);
+        }
     }
 
     [SubstituteToken("WithCase")]
-    public class NWithCase : SubstituteNode
+    public class NWithCase : SubstituteNode, IDeclarationSource
     {
+        private Scope _scope;
+
         public NQualIdent Identifier
         {
             get { return (NQualIdent) Children.First(); }
@@ -421,10 +468,15 @@ namespace DUO2C.Nodes.Oberon2
         {
             Children = Children.Where(x => x is NQualIdent || x is NNamedType || x is NStatementSeq);
         }
+
+        public void FindDeclarations(Scope scope)
+        {
+            Body.FindDeclarations(scope);
+        }
     }
 
     [SubstituteToken("WithDo")]
-    public class NWithDo : Statement
+    public class NWithDo : Statement, IDeclarationSource
     {
         public IEnumerable<NWithCase> Cases
         {
@@ -440,6 +492,17 @@ namespace DUO2C.Nodes.Oberon2
             : base(original)
         {
             Children = Children.Where(x => x is NWithCase || x is NStatementSeq);
+        }
+
+        public void FindDeclarations(Scope scope)
+        {
+            foreach (var c in Cases) {
+                c.FindDeclarations(scope);
+            }
+
+            if (Else != null) {
+                Else.FindDeclarations(scope);
+            }
         }
     }
 

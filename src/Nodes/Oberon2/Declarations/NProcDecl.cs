@@ -203,9 +203,32 @@ namespace DUO2C.Nodes.Oberon2
 
         public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
-            return base.FindTypeErrors(scope).Union(Children.SelectMany(x => (x is ITypeErrorSource)
+            foreach (var e in base.FindTypeErrors(scope).Union(Children.SelectMany(x => (x is ITypeErrorSource)
                 ? ((ITypeErrorSource) x).FindTypeErrors(_scope)
-                : new ParserException[0]));
+                : new ParserException[0]))) {
+                yield return e;   
+            }
+
+            if (ReturnType == null || ReturnType.Inner.FindTypeErrors(scope).Count() == 0) {
+                var retType = ReturnType != null ? ReturnType.Type.Resolve(scope) : null;
+                foreach (var stmnt in Statements.Statements) {
+                    if (stmnt.Inner is NReturn) {
+                        var ret = (NReturn) stmnt.Inner;
+                        if (ret.Expression == null && retType != null) {
+                            yield return new ParserException(ParserError.Semantics,
+                                "Expected return expression", ret.EndIndex, 0);
+                        } else if (ret.Expression != null && retType == null) {
+                            yield return new ParserException(ParserError.Semantics,
+                                "Unexpected return expression", ret.Expression.StartIndex, ret.Expression.Length);
+                        } else if (ret.Expression.FindTypeErrors(scope).Count() == 0) {
+                            var t = ret.Expression.GetFinalType(scope);
+                            if (!retType.CanTestEquality(t)) {
+                                yield return new TypeMismatchException(retType, t, ret.Expression);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
