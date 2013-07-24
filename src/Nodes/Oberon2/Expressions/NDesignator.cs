@@ -44,7 +44,7 @@ namespace DUO2C.Nodes.Oberon2
         {
             if (IsRoot) {
                 var ident = (NQualIdent) Element;
-                return scope[ident.Identifier, ident.Module];
+                return scope.GetSymbol(ident.Identifier, ident.Module);
             } else {
                 var prev = (NDesignator) Element;
                 var type = prev.GetFinalType(scope);
@@ -59,7 +59,7 @@ namespace DUO2C.Nodes.Oberon2
                     var op = (NMemberAccess) Operation;
                     if (type.IsModule) {
                         var mdl = type.As<ModuleType>();
-                        return mdl.Scope[op.Identifier].Resolve(scope);
+                        return mdl.Scope.GetSymbol(op.Identifier).Resolve(scope);
                     } else if (type.IsRecord) {
                         var rec = type.As<RecordType>();
                         return rec.GetFieldType(op.Identifier).Resolve(scope);
@@ -76,7 +76,7 @@ namespace DUO2C.Nodes.Oberon2
                         var arg = op.Args.Expressions.First();
                         var fact = arg.SimpleExpr.Term.Factor.Inner as NDesignator;
                         var ident = (NQualIdent) fact.Element;
-                        return scope[ident.Identifier, ident.Module];
+                        return scope.GetType(ident.Identifier, ident.Module);
                     }
                 }
 
@@ -86,7 +86,12 @@ namespace DUO2C.Nodes.Oberon2
 
         public override bool IsConstant(Scope scope)
         {
-            return false;
+            if (IsRoot) {
+                var ident = (NQualIdent) Element;
+                return scope.IsSymbolConstant(ident.Identifier, ident.Module);
+            } else {
+                return false;
+            }
         }
 
         public NDesignator(ParseNode original)
@@ -135,7 +140,7 @@ namespace DUO2C.Nodes.Oberon2
                         var op = (NMemberAccess) Operation;
                         if (type.IsModule) {
                             var mdl = type.As<ModuleType>();
-                            if (!mdl.Scope.IsDeclared(op.Identifier)) {
+                            if (!mdl.Scope.IsSymbolDeclared(op.Identifier)) {
                                 yield return new MemberNotFoundException(type, this);
                             }
                         } else if (type.IsRecord) {
@@ -178,7 +183,7 @@ namespace DUO2C.Nodes.Oberon2
                                     if (fact != null && fact.IsRoot) {
                                         badProc = false;
                                         var ident = (NQualIdent) fact.Element;
-                                        var newType = scope[ident.Identifier, ident.Module];
+                                        var newType = scope.GetType(ident.Identifier, ident.Module);
                                         if (newType == null) {
                                             yield return new UndeclaredIdentifierException(ident);
                                         } else if (!OberonType.CanTestEquality(type, newType)) {

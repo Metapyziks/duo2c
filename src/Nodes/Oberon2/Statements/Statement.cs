@@ -371,7 +371,7 @@ namespace DUO2C.Nodes.Oberon2
             _scope = new Scope(scope);
 
             if (Initial.FindTypeErrors(scope).Count() == 0 && Final.FindTypeErrors(scope).Count() == 0) {
-                _scope.Declare(IteratorName, NumericType.Largest(Initial.GetFinalType(scope).As<NumericType>(),
+                _scope.DeclareSymbol(IteratorName, NumericType.Largest(Initial.GetFinalType(scope).As<NumericType>(),
                     Final.GetFinalType(scope).As<NumericType>()));
             }
 
@@ -381,8 +381,8 @@ namespace DUO2C.Nodes.Oberon2
         public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
             NumericType iteratorType = null;
-            if (_scope.IsDeclared(IteratorName)) {
-                iteratorType = _scope[IteratorName].As<NumericType>();
+            if (_scope.IsSymbolDeclared(IteratorName)) {
+                iteratorType = _scope.GetSymbol(IteratorName).As<NumericType>();
             }
 
             bool found = false;

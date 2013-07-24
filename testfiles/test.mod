@@ -64,12 +64,12 @@ MODULE Test;
     BEGIN
         NEW(dif);
         dif.x := this.x - that.x;
-        dif.y := this.y - that.y;
+        dif.y := this - that.y;
         dif.z := this.z - that.z;
         RETURN dif;
     END Sub;
 BEGIN
-    a.Create(5.2, -6, 8.4);
+    a.Create(5.2, -6);
     b.Create(3.824, 3.1D2, 12);
 
     c := a.Add(b);

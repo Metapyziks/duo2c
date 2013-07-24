@@ -171,7 +171,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
-            if (scope[Identifier.Identifier, Identifier.Module] == null) {
+            if (!scope.IsTypeDeclared(Identifier.Identifier, Identifier.Module)) {
                 yield return new UndeclaredIdentifierException(this);
             }
         }

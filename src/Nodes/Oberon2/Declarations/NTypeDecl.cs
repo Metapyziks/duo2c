@@ -25,7 +25,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override void FindDeclarations(Scope scope)
         {
-            scope.Declare(Identifier, Type.Type);
+            scope.DeclareType(Identifier, Type.Type);
         }
 
         public override void GenerateCode(GenerationContext ctx)

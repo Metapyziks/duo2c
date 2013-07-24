@@ -56,7 +56,7 @@ namespace DUO2C.Nodes
         {
             Type = new ModuleType(Identifier, scope);
 
-            Type.Scope.Declare("NEW", new ProcedureType(null, new[] {
+            Type.Scope.DeclareSymbol("NEW", new ProcedureType(null, new[] {
                 new Parameter(true, "_", new PointerType(RecordType.Base))
             }));
 

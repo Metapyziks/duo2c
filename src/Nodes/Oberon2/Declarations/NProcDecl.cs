@@ -32,7 +32,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public void FindDeclarations(Scope scope)
         {
-            scope.Declare(Identifier, new UnresolvedType(TypeName));
+            scope.DeclareSymbol(Identifier, new UnresolvedType(TypeName));
         }
     }
 
@@ -63,7 +63,7 @@ namespace DUO2C.Nodes.Oberon2
         public void FindDeclarations(Scope scope)
         {
             foreach (var ident in Identifiers) {
-                scope.Declare(ident, Type.Type);
+                scope.DeclareSymbol(ident, Type.Type);
             }
         }
     }
@@ -143,9 +143,9 @@ namespace DUO2C.Nodes.Oberon2
         public override void FindDeclarations(Scope scope)
         {
             if (Receiver == null) {
-                scope.Declare(Identifier, new ProcedureType(FormalParams));
+                scope.DeclareSymbol(Identifier, new ProcedureType(FormalParams));
             } else {
-                var type = scope[Receiver.TypeName];
+                var type = scope.GetType(Receiver.TypeName);
 
                 while (type != null && type.IsPointer) {
                     type = type.As<PointerType>().ResolvedType;
@@ -161,7 +161,7 @@ namespace DUO2C.Nodes.Oberon2
         public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
             if (Receiver != null) {
-                var type = scope[Receiver.TypeName];
+                var type = scope.GetType(Receiver.TypeName);
 
                 while (type != null && type.IsPointer) {
                     type = type.As<PointerType>().ResolvedType;

@@ -170,7 +170,7 @@ namespace DUO2C.Semantics
 
         protected override void OnResolve(Scope scope)
         {
-            ReferencedType = scope[Identifier, Module];
+            ReferencedType = scope.GetType(Identifier, Module);
         }
 
         public override bool CanCompare(OberonType other)
@@ -307,7 +307,7 @@ namespace DUO2C.Semantics
         protected override void OnResolve(Scope scope)
         {
             if (_superRecordIdent != null) {
-                SuperRecord = scope[_superRecordIdent.Identifier, _superRecordIdent.Module].As<RecordType>();
+                SuperRecord = scope.GetType(_superRecordIdent.Identifier, _superRecordIdent.Module).As<RecordType>();
             } else if (this != Base) {
                 SuperRecord = Base;
             }
