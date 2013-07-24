@@ -31,7 +31,7 @@ namespace DUO2C.CodeGen
             get { return _builder.ToString(); }
         }
 
-        public GenerationContext(int indentCols = 2)
+        public GenerationContext(int indentCols = 4)
         {
             _indentCols = indentCols;
 

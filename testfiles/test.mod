@@ -3,33 +3,37 @@ MODULE Test;
         PointType  = LongReal;
         Point2D*   = POINTER TO Point2DRec;
         Point2DRec = RECORD
-            x : PointType;
-            y : PointType;
+            x- : PointType;
+            y- : PointType;
         END;
         Point3D*   = POINTER TO Point3DRec;
         Point3DRec = RECORD (Point2DRec)
-            z : PointType;
+            z- : PointType;
         END;
-        TestArray = ARRAY 12, 8 OF Integer;
+        TestArray* = ARRAY 12, 8 OF Integer;
     VAR
         a : Point3D;
         b : Point3D;
         c : Point3D;
 
-    PROCEDURE (VAR this : Point2D) Create* (x : PointType; y : PointType);
+    PROCEDURE Point2D* (x : PointType; y : PointType) : Point2D;
+        VAR val : Point2D;
     BEGIN
-        NEW(this);
-        this.x := x;
-        this.y := y;
-    END Create;
+        NEW(val);
+        val.x := x;
+        val.y := y;
+        RETURN val;
+    END Point2D;
 
-    PROCEDURE (VAR this : Point3D) Create* (x : PointType; y : PointType; z : PointType);
+    PROCEDURE Point3D* (x : PointType; y : PointType; z : PointType) : Point3D;
+        VAR val : Point3D;
     BEGIN
-        NEW(this);
-        this.x := x;
-        this.y := y;
-        this.z := z;
-    END Create;
+        NEW(val);
+        val.x := x;
+        val.y := y;
+        val.z := z;
+        RETURN val;
+    END Point3D;
 
     PROCEDURE (this : Point2D) Add* (that : Point2D) : Point2D;
         VAR sum : Point2D;
@@ -64,13 +68,13 @@ MODULE Test;
     BEGIN
         NEW(dif);
         dif.x := this.x - that.x;
-        dif.y := this - that.y;
+        dif.y := this.y - that.y;
         dif.z := this.z - that.z;
         RETURN dif;
     END Sub;
 BEGIN
-    a.Create(5.2, -6);
-    b.Create(3.824, 3.1D2, 12);
+    a := Point3D(5.2, -6, 12.4E-1);
+    b := Point3D(3.824, 3.1D2, 12);
 
     c := a.Add(b);
 END Test.

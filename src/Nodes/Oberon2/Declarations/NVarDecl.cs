@@ -42,7 +42,7 @@ namespace DUO2C.Nodes.Oberon2
         public override void FindDeclarations(Scope scope)
         {
             foreach (var ident in IdentList.IdentDefs) {
-                scope.DeclareSymbol(ident.Identifier, Type.Type);
+                scope.DeclareSymbol(ident.Identifier, Type.Type, ident.Visibility, false);
             }
         }
     }

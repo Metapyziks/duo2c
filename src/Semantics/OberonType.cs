@@ -240,37 +240,47 @@ namespace DUO2C.Semantics
         Public = 2
     }
 
+    public class Field
+    {
+        public String Identifier { get; private set; }
+        public AccessModifier Visibility { get; private set; }
+        public OberonType Type { get; private set; }
+
+        public Field(String identifier, AccessModifier visibility, OberonType type)
+        {
+            Identifier = identifier;
+            Visibility = visibility;
+            Type = type;
+        }
+
+        public override string ToString()
+        {
+            return String.Format("{0} : {1}", Identifier, Type);
+        }
+    }
+
     public class RecordType : OberonType
     {
         public static readonly RecordType Base = new RecordType();
 
-        private class Field
-        {
-            public String Identifier { get; private set; }
-            public AccessModifier Visibility { get; private set; }
-            public OberonType Type { get; private set; }
-
-            public Field(String identifier, AccessModifier visibility, OberonType type)
-            {
-                Identifier = identifier;
-                Visibility = visibility;
-                Type = type;
-            }
-
-            public override string ToString()
-            {
-                return String.Format("{0} : {1}", Identifier, Type);
-            }
-        }
-
         private NQualIdent _superRecordIdent;
         private Dictionary<String, Field> _fields;
+
+        public String SuperRecordName
+        {
+            get { return _superRecordIdent != null ? _superRecordIdent.String : null; }
+        }
 
         public RecordType SuperRecord { get; private set; }
 
         public override bool IsRecord
         {
             get { return true; }
+        }
+
+        public IEnumerable<Field> Fields
+        {
+            get { return _fields.Values; }
         }
 
         private RecordType()
@@ -416,7 +426,7 @@ namespace DUO2C.Semantics
 
         public override string ToString()
         {
-            String paramStr = String.Join(", ", Params.Select(x => x.Identifier + " : " + x.Type));
+            String paramStr = String.Join("; ", Params.Select(x => x.Identifier + " : " + x.Type));
             if (ReturnType != null) {
                 return String.Format("PROCEDURE ({0}) : {1}", paramStr, ReturnType);
             } else {

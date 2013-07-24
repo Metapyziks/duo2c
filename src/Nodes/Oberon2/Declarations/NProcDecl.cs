@@ -32,7 +32,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public void FindDeclarations(Scope scope)
         {
-            scope.DeclareSymbol(Identifier, new UnresolvedType(TypeName));
+            scope.DeclareSymbol(Identifier, new UnresolvedType(TypeName), AccessModifier.Private, false);
         }
     }
 
@@ -63,7 +63,7 @@ namespace DUO2C.Nodes.Oberon2
         public void FindDeclarations(Scope scope)
         {
             foreach (var ident in Identifiers) {
-                scope.DeclareSymbol(ident, Type.Type);
+                scope.DeclareSymbol(ident, Type.Type, AccessModifier.Private, false);
             }
         }
     }
@@ -143,7 +143,7 @@ namespace DUO2C.Nodes.Oberon2
         public override void FindDeclarations(Scope scope)
         {
             if (Receiver == null) {
-                scope.DeclareSymbol(Identifier, new ProcedureType(FormalParams));
+                scope.DeclareSymbol(Identifier, new ProcedureType(FormalParams), Visibility, false);
             } else {
                 var type = scope.GetType(Receiver.TypeName);
 

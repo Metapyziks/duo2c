@@ -162,13 +162,14 @@ namespace DUO2C.Nodes.Oberon2
                         }
                     } else if (Operation is NInvocation) {
                         var op = (NInvocation) Operation;
-                        if (op.Args != null) {
-                            foreach (var e in op.Args.Expressions.SelectMany(x => x.FindTypeErrors(scope))) {
-                                yield return e;
-                            }
-                        }
 
                         if (type.IsProcedure) {
+                            if (op.Args != null) {
+                                foreach (var e in op.Args.Expressions.SelectMany(x => x.FindTypeErrors(scope))) {
+                                    yield return e;
+                                }
+                            }
+
                             var proc = type.As<ProcedureType>();
                             foreach (var e in proc.MatchParameters(op, scope)) {
                                 yield return e;

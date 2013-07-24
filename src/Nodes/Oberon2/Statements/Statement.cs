@@ -372,7 +372,7 @@ namespace DUO2C.Nodes.Oberon2
 
             if (Initial.FindTypeErrors(scope).Count() == 0 && Final.FindTypeErrors(scope).Count() == 0) {
                 _scope.DeclareSymbol(IteratorName, NumericType.Largest(Initial.GetFinalType(scope).As<NumericType>(),
-                    Final.GetFinalType(scope).As<NumericType>()));
+                    Final.GetFinalType(scope).As<NumericType>()), AccessModifier.Private, false);
             }
 
             Body.FindDeclarations(_scope);

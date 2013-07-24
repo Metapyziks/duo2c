@@ -2,6 +2,11 @@ MODULE PointerBirds;
     IMPORT Out;
 
     TYPE
+        OutModule = RECORD
+            Ln : PROCEDURE ();
+            String : PROCEDURE (str : ARRAY OF Char);
+        END;
+
         BirdRec*   = RECORD
             sound* : ARRAY 10 OF Char;
         END;
@@ -13,9 +18,10 @@ MODULE PointerBirds;
         Duck   = POINTER TO DuckRec;
 
    VAR
-       pb : Bird;
-       pc : Cuckoo;
-       pd : Duck;
+        Out : OutModule;
+        pb : Bird;
+        pc : Cuckoo;
+        pd : Duck;
 
     PROCEDURE SetDuckSound* (bird : Duck);
     BEGIN

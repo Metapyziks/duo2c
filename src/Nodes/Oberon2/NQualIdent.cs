@@ -23,7 +23,7 @@ namespace DUO2C.Nodes.Oberon2
         public override string String
         {
             get {
-                return Identifier;
+                return Module == null ? Identifier : String.Format("{0}.{1}", Module, Identifier);
             }
         }
 

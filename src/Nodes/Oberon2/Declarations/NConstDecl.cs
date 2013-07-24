@@ -24,7 +24,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override void FindDeclarations(Scope scope)
         {
-            scope.DeclareSymbol(Identifier, ConstExpr.GetFinalType(scope), true);
+            scope.DeclareSymbol(Identifier, ConstExpr.GetFinalType(scope), Visibility, true);
         }
     }
 }

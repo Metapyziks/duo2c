@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
+using DUO2C.CodeGen;
 using DUO2C.Nodes;
 using DUO2C.Semantics;
 
@@ -69,9 +70,16 @@ namespace DUO2C
                         var outpath = Path.GetDirectoryName(args[0])
                             + Path.DirectorySeparatorChar
                             + Path.GetFileNameWithoutExtension(args[0])
+                            + ".sym";
+
+                        File.WriteAllText(outpath, SymbolFileGenerator.Generate(module.Type));
+
+                        outpath = Path.GetDirectoryName(args[0])
+                            + Path.DirectorySeparatorChar
+                            + Path.GetFileNameWithoutExtension(args[0])
                             + ".ll";
 
-                        var ctx = new CodeGen.GenerationContext();
+                        var ctx = new GenerationContext();
                         module.GenerateCode(ctx);
                         File.WriteAllText(outpath, ctx.GeneratedCode);
                     }

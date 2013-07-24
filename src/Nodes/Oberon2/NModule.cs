@@ -58,7 +58,7 @@ namespace DUO2C.Nodes
 
             Type.Scope.DeclareSymbol("NEW", new ProcedureType(null, new[] {
                 new Parameter(true, "_", new PointerType(RecordType.Base))
-            }));
+            }), AccessModifier.Private, false);
 
             Declarations.FindDeclarations(Type.Scope);
 

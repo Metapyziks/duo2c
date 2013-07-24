@@ -37,7 +37,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public NConstExpr LengthExpr
         {
-            get { return (NConstExpr) Children.First(); }
+            get { return Children.First() as NConstExpr; }
         }
 
         public NType ElementDefinition
@@ -55,8 +55,11 @@ namespace DUO2C.Nodes.Oberon2
         {
             Children = Children.Where(x => x is NConstExpr || x is NType);
 
-            // Temporary
-            ArrayLength = int.Parse(LengthExpr.String);
+            if (LengthExpr != null) {
+                ArrayLength = int.Parse(LengthExpr.String);
+            } else {
+                ArrayLength = -1;
+            }
 
             if (Children.Count() > 2) {
                 Children = new ParseNode[] {
