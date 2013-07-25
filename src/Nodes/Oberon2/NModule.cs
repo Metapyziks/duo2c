@@ -76,13 +76,13 @@ namespace DUO2C.Nodes
 
         public override void GenerateCode(GenerationContext ctx)
         {
-            ctx = ctx + "; Module " + Identifier;
+            ctx.Write("; Module ").Write(Identifier);
             ctx.NewLine().Enter();
 
             base.GenerateCode(ctx);
 
             ctx.NewLine().NewLine().Leave();
-            ctx = ctx + "; End " + Identifier;
+            ctx.Write("; End ").Write(Identifier);
         }
     }
 }

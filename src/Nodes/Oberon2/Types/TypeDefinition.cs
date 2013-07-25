@@ -80,7 +80,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override void GenerateCode(GenerationContext ctx)
         {
-            ctx = ctx + "[" + ArrayLength.ToString() + " x " + ElementDefinition + "]";
+            ctx.Write("{i32, ").Write(ElementDefinition).Write("*}");
         }
     }
 
@@ -156,7 +156,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override void GenerateCode(GenerationContext ctx)
         {
-            ctx = ctx + (NType) Children.First() + "*";
+            ctx.Write((NType) Children.First()).Write("*");
         }
     }
 
@@ -196,7 +196,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override void GenerateCode(GenerationContext ctx)
         {
-            ctx = ctx + "%" + Identifier.Identifier;
+            ctx.Write("%").Write(Identifier.Identifier);
         }
     }
 
@@ -234,7 +234,7 @@ namespace DUO2C.Nodes.Oberon2
         public override void GenerateCode(GenerationContext ctx)
         {
             foreach (var ident in Identifiers.IdentDefs) {
-                ctx += Type;
+                ctx.Write(Type);
             }
         }
     }
@@ -275,16 +275,16 @@ namespace DUO2C.Nodes.Oberon2
 
         public override void GenerateCode(GenerationContext ctx)
         {
-            ctx += "{";
+            ctx.Write("{");
             if (SuperRecord != null) {
-                ctx += SuperRecord;
-                if (FieldLists.Count() > 0) ctx += ", ";
+                ctx.Write(SuperRecord);
+                if (FieldLists.Count() > 0) ctx.Write(", ");
             }
             foreach (var fl in FieldLists) {
-                if (fl != FieldLists.First()) ctx += ", ";
-                ctx += fl;
+                if (fl != FieldLists.First()) ctx.Write(", ");
+                ctx.Write(fl);
             }
-            ctx += "}";
+            ctx.Write("}");
         }
     }
 

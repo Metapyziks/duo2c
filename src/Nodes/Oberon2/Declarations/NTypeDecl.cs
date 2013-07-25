@@ -31,9 +31,9 @@ namespace DUO2C.Nodes.Oberon2
         public override void GenerateCode(GenerationContext ctx)
         {
             ctx.NewLine();
-            ctx = ctx + "; " + Identifier + " = " + Type.String;
+            ctx.Write("; ").Write(Identifier).Write(" = ").Write(Type.String);
             ctx.NewLine();
-            ctx = ctx + "%" + Identifier + " = type " + Type;
+            ctx.Write("%").Write(Identifier).Write(" = type ").Write(Type);
             ctx.NewLine();
         }
 
