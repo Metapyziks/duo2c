@@ -30,9 +30,21 @@ namespace DUO2C
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(" " + error.Message);
+
             String snippet = error.LineSnippet.TrimStart();
-            Console.WriteLine("   " + snippet);
-            for (int i = (error.LineSnippet.Length - snippet.Length) - 2; i < error.Column; ++i) Console.Write(" ");
+            int trimmed = error.LineSnippet.Length - snippet.Length;
+            snippet = snippet.TrimEnd();
+            Console.WriteLine();
+            int start = error.Column - 1 - trimmed;
+            int end = start + error.SourceLength;
+            Console.ResetColor();
+            Console.Write("   " + snippet.Substring(0, start));
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write(snippet.Substring(start, end - start));
+            Console.ResetColor();
+            Console.WriteLine(snippet.Substring(end, snippet.Length - end));
+            Console.ForegroundColor = ConsoleColor.Red;
+            for (int i = trimmed - 2; i < error.Column; ++i) Console.Write(" ");
             for (int i = 0; i < Math.Max(1, error.SourceLength); ++i) Console.Write("~");
             Console.WriteLine();
             Console.WriteLine();

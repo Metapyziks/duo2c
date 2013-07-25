@@ -1,16 +1,16 @@
 MODULE Test;
     TYPE
-        PointType  = LongReal;
-        Point2D*   = POINTER TO Point2DRec;
-        Point2DRec = RECORD
-            x- : PointType;
-            y- : PointType;
+        PointType*  = LongReal;
+        Point2D*    = POINTER TO Point2DRec;
+        Point2DRec* = RECORD
+            x* : PointType;
+            y* : PointType;
         END;
-        Point3D*   = POINTER TO Point3DRec;
+        Point3D*    = POINTER TO Point3DRec;
         Point3DRec* = RECORD (Point2DRec)
-            z- : PointType;
+            z* : PointType;
         END;
-        TestArray* = ARRAY 12, 8 OF Integer;
+        TestArray*  = ARRAY 12, 8 OF Integer;
     VAR
         a : Point3D;
         b : Point3D;
