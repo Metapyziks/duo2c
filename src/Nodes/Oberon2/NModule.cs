@@ -21,7 +21,7 @@ namespace DUO2C.Nodes
         public IEnumerable<String> Imports
         {
             get {
-                var imports = Children.ElementAt(1) as NImportList;
+                var imports = Children.First() as NImportList;
                 if (imports != null) {
                     return imports.Modules;
                 } else {

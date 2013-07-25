@@ -35,13 +35,13 @@ namespace DUO2C.CodeGen
 
             ctx.Write("TYPE").NewLine().Enter();
             foreach (var kv in module.Scope.GetTypes()) {
-                ctx.WriteTypeDecl(kv.Key, kv.Value.Type, kv.Value.Visibility);
+                ctx.WriteTypeDecl(module, kv.Key, kv.Value.Type, kv.Value.Visibility);
             }
             ctx.Leave();
 
             ctx.Write("VAR").NewLine().Enter();
             foreach (var kv in module.Scope.GetSymbols().Where(x => x.Value.Visibility != AccessModifier.Private)) {
-                ctx.WriteVarDecl(kv.Key, kv.Value.Type, kv.Value.Visibility);
+                ctx.WriteVarDecl(module, kv.Key, kv.Value.Type, kv.Value.Visibility);
             }
             ctx.Leave();
 
@@ -53,19 +53,22 @@ namespace DUO2C.CodeGen
             return ctx.Write(visibility == AccessModifier.Public ? "*" : visibility == AccessModifier.ReadOnly ? "-" : "");
         }
 
-        static GenerationContext WriteTypeDecl(this GenerationContext ctx, String identifier, OberonType type, AccessModifier visibility)
+        static GenerationContext WriteTypeDecl(this GenerationContext ctx, ModuleType module, String identifier, OberonType type, AccessModifier visibility)
         {
-            return ctx.Write(identifier).WriteAccessModifier(visibility).Write(" = ").WriteType(type).Write(";").NewLine();
+            return ctx.Write(identifier).WriteAccessModifier(visibility).Write(" = ").WriteType(module, type).Write(";").NewLine();
         }
 
-        static GenerationContext WriteVarDecl(this GenerationContext ctx, String identifier, OberonType type, AccessModifier visibility)
+        static GenerationContext WriteVarDecl(this GenerationContext ctx, ModuleType module, String identifier, OberonType type, AccessModifier visibility)
         {
-            return ctx.Write(identifier).WriteAccessModifier(visibility).Write(" : ").WriteType(type).Write(";").NewLine();
+            return ctx.Write(identifier).WriteAccessModifier(visibility).Write(" : ").WriteType(module, type).Write(";").NewLine();
         }
 
-        static GenerationContext WriteType(this GenerationContext ctx, OberonType type)
+        static GenerationContext WriteType(this GenerationContext ctx, ModuleType module, OberonType type)
         {
-            if (type is RecordType) {
+            if (type is UnresolvedType) {
+                var ut = (UnresolvedType) type;
+                return ctx.Write("{0}.{1}", ut.Module ?? module.Identifier, ut.Identifier);
+            } else if (type is RecordType) {
                 var rec = (RecordType) type;
                 ctx.Write("RECORD");
                 if (rec.SuperRecordName != null) {
@@ -74,10 +77,29 @@ namespace DUO2C.CodeGen
                 ctx.NewLine().Enter();
 
                 foreach (var field in rec.Fields.Where(x => x.Visibility != AccessModifier.Private)) {
-                    ctx.WriteVarDecl(field.Identifier, field.Type, field.Visibility);
+                    ctx.WriteVarDecl(module, field.Identifier, field.Type, field.Visibility);
                 }
 
                 return ctx.Leave().Write("END");
+            } else if (type is ProcedureType) {
+                var proc = (ProcedureType) type;
+                ctx.Write("PROCEDURE");
+
+                if (proc.ReturnType != null || proc.Params.Length > 0) {
+                    ctx.Write(" (");
+                    foreach (var para in proc.Params) {
+                        ctx.Write("{0} : ", para.Identifier).WriteType(module, para.Type);
+                        if (para != proc.Params.Last()) {
+                            ctx.Write("; ");
+                        }
+                    }
+                    ctx.Write(")");
+
+                    if (proc.ReturnType != null) {
+                        ctx.Write(" : ").WriteType(module, proc.ReturnType);
+                    }
+                }
+                return ctx;
             } else {
                 return ctx.Write(type.ToString());
             }

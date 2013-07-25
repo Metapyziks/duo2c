@@ -37,7 +37,7 @@ namespace DUO2C.Nodes.Oberon2
     }
 
     [SubstituteToken("FPSection")]
-    public class NFPSection : SubstituteNode, IDeclarationSource, IAccessibilityErrorSource
+    public class NFPSection : SubstituteNode, IDeclarationSource, ITypeErrorSource, IAccessibilityErrorSource
     {
         [Serialize("byref")]
         public bool ByReference { get; private set; }
@@ -67,6 +67,11 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
+        public IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        {
+            return Type.FindTypeErrors(scope);
+        }
+
         public IEnumerable<ParserException> FindAccessibilityErrors(Scope scope)
         {
             return Type.FindAccessibilityErrors(scope);
@@ -74,7 +79,7 @@ namespace DUO2C.Nodes.Oberon2
     }
 
     [SubstituteToken("FormalPars")]
-    public class NFormalPars : SubstituteNode, IDeclarationSource, IAccessibilityErrorSource
+    public class NFormalPars : SubstituteNode, IDeclarationSource, ITypeErrorSource, IAccessibilityErrorSource
     {
         public IEnumerable<NFPSection> FPSections
         {
@@ -96,6 +101,21 @@ namespace DUO2C.Nodes.Oberon2
         {
             foreach (var section in FPSections) {
                 section.FindDeclarations(scope);
+            }
+        }
+
+        public IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        {
+            if (ReturnType != null) {
+                foreach (var e in ReturnType.FindTypeErrors(scope)) {
+                    yield return e;
+                }
+            }
+
+            foreach (var sec in FPSections) {
+                foreach (var e in sec.FindTypeErrors(scope)) {
+                    yield return e;
+                }
             }
         }
 
@@ -200,6 +220,12 @@ namespace DUO2C.Nodes.Oberon2
 
             if (exported && FormalParams != null) {
                 foreach (var e in FormalParams.FindAccessibilityErrors(scope)) {
+                    yield return e;
+                }
+            }
+
+            if (FormalParams != null) {
+                foreach (var e in FormalParams.FindTypeErrors(scope)) {
                     yield return e;
                 }
             }

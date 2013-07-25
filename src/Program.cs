@@ -71,6 +71,15 @@ namespace DUO2C
                     var root = new RootScope();
                     // Includes would be here
 
+                    foreach (var import in module.Imports) {
+                        String path = Path.GetDirectoryName(args[0]) + Path.DirectorySeparatorChar
+                            + import.ToLower() + ".sym";
+                        if (File.Exists(path)) {
+                            var mdl = (NModule) ruleset.ParseFile(path);
+                            mdl.FindDeclarations(root);
+                        }
+                    }
+
                     module.FindDeclarations(root);
 
                     var errors = module.FindTypeErrors(root);

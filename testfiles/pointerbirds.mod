@@ -2,23 +2,17 @@ MODULE PointerBirds;
     IMPORT Out;
 
     TYPE
-        OutModule = RECORD
-            Ln : PROCEDURE ();
-            String : PROCEDURE (str : ARRAY OF Char);
-        END;
-
         BirdRec*   = RECORD
             sound* : ARRAY 10 OF Char;
         END;
         DuckRec*   = RECORD (BirdRec) END;
         CuckooRec* = RECORD (BirdRec) END;
 
-        Bird   = POINTER TO BirdRec;
-        Cuckoo = POINTER TO CuckooRec;
-        Duck   = POINTER TO DuckRec;
+        Bird*   = POINTER TO BirdRec;
+        Cuckoo* = POINTER TO CuckooRec;
+        Duck*   = POINTER TO DuckRec;
 
    VAR
-        Out : OutModule;
         pb : Bird;
         pc : Cuckoo;
         pd : Duck;

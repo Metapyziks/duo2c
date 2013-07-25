@@ -188,7 +188,8 @@ namespace DUO2C.Nodes.Oberon2
 
         public override IEnumerable<ParserException> FindAccessibilityErrors(Scope scope)
         {
-            if (scope.GetTypeDecl(Identifier.Identifier, Identifier.Module).Visibility == AccessModifier.Private) {
+            if (scope.IsTypeDeclared(Identifier.Identifier, Identifier.Module)
+                && scope.GetTypeDecl(Identifier.Identifier, Identifier.Module).Visibility == AccessModifier.Private) {
                 yield return new AccessibilityException(Identifier);
             }
         }
