@@ -9,7 +9,7 @@ using DUO2C.Semantics;
 namespace DUO2C.Nodes.Oberon2
 {
     [SubstituteToken("VarDecl")]
-    public class NVarDecl : Declaration
+    public class NVarDecl : DeclarationStatement
     {
         public override NIdentDef IdentDef
         {

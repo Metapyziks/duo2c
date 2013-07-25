@@ -9,7 +9,7 @@ using DUO2C.Semantics;
 namespace DUO2C.Nodes.Oberon2
 {
     [SubstituteToken("Type")]
-    public class NType : TypeDefinition, ITypeErrorSource
+    public class NType : TypeDefinition, ITypeErrorSource, IAccessibilityErrorSource
     {
         public TypeDefinition Inner
         {
@@ -32,6 +32,11 @@ namespace DUO2C.Nodes.Oberon2
             } else {
                 return new ParserException[0];
             }
+        }
+
+        public IEnumerable<ParserException> FindAccessibilityErrors(Scope scope)
+        {
+            return Inner.FindAccessibilityErrors(scope);
         }
     }
 }

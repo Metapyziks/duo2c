@@ -9,7 +9,7 @@ using DUO2C.Semantics;
 
 namespace DUO2C.Nodes.Oberon2
 {
-    public abstract class TypeDefinition : SubstituteNode, ITypeErrorSource
+    public abstract class TypeDefinition : SubstituteNode, ITypeErrorSource, IAccessibilityErrorSource
     {
         public abstract OberonType Type { get; }
 
@@ -26,6 +26,13 @@ namespace DUO2C.Nodes.Oberon2
             return Children.SelectMany(x => (x is ITypeErrorSource)
                    ? ((ITypeErrorSource) x).FindTypeErrors(scope)
                    : new ParserException[0]);
+        }
+
+        public virtual IEnumerable<ParserException> FindAccessibilityErrors(Scope scope)
+        {
+            return Children.SelectMany(x => (x is IAccessibilityErrorSource)
+                ? ((IAccessibilityErrorSource) x).FindAccessibilityErrors(scope)
+                : new ParserException[0]);
         }
     }
 
@@ -179,6 +186,13 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
+        public override IEnumerable<ParserException> FindAccessibilityErrors(Scope scope)
+        {
+            if (scope.GetTypeDecl(Identifier.Identifier, Identifier.Module).Visibility == AccessModifier.Private) {
+                yield return new AccessibilityException(Identifier);
+            }
+        }
+
         public override void GenerateCode(GenerationContext ctx)
         {
             ctx = ctx + "%" + Identifier.Identifier;
@@ -186,7 +200,7 @@ namespace DUO2C.Nodes.Oberon2
     }
 
     [SubstituteToken("FieldList")]
-    public class NFieldList : SubstituteNode, ITypeErrorSource
+    public class NFieldList : SubstituteNode, ITypeErrorSource, IAccessibilityErrorSource
     {
         public NIdentList Identifiers
         {
@@ -209,6 +223,11 @@ namespace DUO2C.Nodes.Oberon2
             return Children.SelectMany(x => (x is ITypeErrorSource)
                    ? ((ITypeErrorSource) x).FindTypeErrors(scope)
                    : new ParserException[0]);
+        }
+
+        public IEnumerable<ParserException> FindAccessibilityErrors(Scope scope)
+        {
+            return Type.FindAccessibilityErrors(scope);
         }
 
         public override void GenerateCode(GenerationContext ctx)

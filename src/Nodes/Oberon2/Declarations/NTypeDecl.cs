@@ -10,7 +10,7 @@ using DUO2C.Semantics;
 namespace DUO2C.Nodes.Oberon2
 {
     [SubstituteToken("TypeDecl")]
-    public class NTypeDecl : Declaration
+    public class NTypeDecl : DeclarationStatement
     {
         public NType Type
         {
@@ -35,6 +35,21 @@ namespace DUO2C.Nodes.Oberon2
             ctx.NewLine();
             ctx = ctx + "%" + Identifier + " = type " + Type;
             ctx.NewLine();
+        }
+
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        {
+            bool found = false;
+            foreach (var e in base.FindTypeErrors(scope)) {
+                found = true;
+                yield return e;
+            }
+
+            if (!found && Visibility != AccessModifier.Private) {
+                foreach (var e in Type.FindAccessibilityErrors(scope)) {
+                    yield return e;
+                }
+            }
         }
     }
 }

@@ -8,7 +8,7 @@ using DUO2C.Semantics;
 
 namespace DUO2C.Nodes.Oberon2
 {
-    public abstract class Declaration : SubstituteNode, ITypeErrorSource, IDeclarationSource
+    public abstract class DeclarationStatement : SubstituteNode, ITypeErrorSource, IDeclarationSource
     {
         public virtual NIdentDef IdentDef
         {
@@ -25,7 +25,7 @@ namespace DUO2C.Nodes.Oberon2
             get { return IdentDef.Visibility; }
         }
 
-        public Declaration(ParseNode original)
+        public DeclarationStatement(ParseNode original)
             : base(original, false) { }
 
         public virtual IEnumerable<ParserException> FindTypeErrors(Scope scope)

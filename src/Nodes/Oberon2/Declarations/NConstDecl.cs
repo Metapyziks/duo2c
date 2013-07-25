@@ -9,7 +9,7 @@ using DUO2C.Semantics;
 namespace DUO2C.Nodes.Oberon2
 {
     [SubstituteToken("ConstDecl")]
-    public class NConstDecl : Declaration
+    public class NConstDecl : DeclarationStatement
     {
         public NConstExpr ConstExpr
         {

@@ -96,7 +96,7 @@ namespace DUO2C.Nodes.Oberon2
     }
 
     [SubstituteToken("ForwardDecl")]
-    public class NForwardDecl : Declaration
+    public class NForwardDecl : DeclarationStatement
     {
         public NReceiver Receiver
         {
