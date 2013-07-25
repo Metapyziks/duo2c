@@ -50,17 +50,17 @@ namespace DUO2C.CodeGen
 
         static GenerationContext WriteAccessModifier(this GenerationContext ctx, AccessModifier visibility)
         {
-            return ctx.Write(visibility == AccessModifier.Public ? "*" : visibility == AccessModifier.ReadOnly ? "-" : "");
+            return ctx.Write(" ").Anchor().Write(visibility == AccessModifier.Public ? "*" : visibility == AccessModifier.ReadOnly ? "-" : "");
         }
 
         static GenerationContext WriteTypeDecl(this GenerationContext ctx, ModuleType module, String identifier, OberonType type, AccessModifier visibility)
         {
-            return ctx.Write(identifier).WriteAccessModifier(visibility).Write(" = ").WriteType(module, type).Write(";").NewLine();
+            return ctx.Write(identifier).WriteAccessModifier(visibility).Anchor().Write(" = ").WriteType(module, type).Write(";").NewLine();
         }
 
         static GenerationContext WriteVarDecl(this GenerationContext ctx, ModuleType module, String identifier, OberonType type, AccessModifier visibility)
         {
-            return ctx.Write(identifier).WriteAccessModifier(visibility).Write(" : ").WriteType(module, type).Write(";").NewLine();
+            return ctx.Write(identifier).WriteAccessModifier(visibility).Anchor().Write(" : ").WriteType(module, type).Write(";").NewLine();
         }
 
         static GenerationContext WriteType(this GenerationContext ctx, ModuleType module, OberonType type)

@@ -167,9 +167,10 @@ namespace DUO2C.CodeGen
             return this;
         }
 
-        public void Anchor()
+        public GenerationContext Anchor()
         {
             _curGroup.Anchor();
+            return this;
         }
 
         public GenerationContext Enter(int indent = 4)
