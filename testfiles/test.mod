@@ -7,7 +7,7 @@ MODULE Test;
             y- : PointType;
         END;
         Point3D*   = POINTER TO Point3DRec;
-        Point3DRec = RECORD (Point2DRec)
+        Point3DRec* = RECORD (Point2DRec)
             z- : PointType;
         END;
         TestArray* = ARRAY 12, 8 OF Integer;

@@ -44,18 +44,21 @@ namespace DUO2C
         /// <param name="index">Index of the symbol to find the location of</param>
         /// <param name="line">Outputted line number</param>
         /// <param name="column">Outputted column number</param>
-        static void FindSymbolLocation(String str, int index, out int line, out int column)
+        static void FindSymbolLocation(String str, int index, out int line, out int column, out String snippet)
         {
             if (index < 0 || index >= str.Length) {
                 // Just in case...
                 line = column = 0;
+                snippet = "";
                 return;
             }
 
+            int linestart = 0;
             line = column = 1;
             for (int i = 0; i < index; ++i) {
                 switch (str[i]) {
                     case '\n':
+                        linestart = i + 1;
                         ++line; column = 1;
                         break;
                     case '\r':
@@ -70,6 +73,14 @@ namespace DUO2C
                         ++column;
                         break;
                 }
+            }
+
+            if (linestart < str.Length) {
+                int end = str.IndexOf('\n', linestart);
+                if (end == -1) end = str.Length;
+                snippet = str.Substring(linestart, end - linestart);
+            } else {
+                snippet = "";
             }
         }
 
@@ -107,6 +118,11 @@ namespace DUO2C
         public int Column { get; private set; }
 
         /// <summary>
+        /// The source text of the line in which the exception was found.
+        /// </summary>
+        public String LineSnippet { get; private set; }
+
+        /// <summary>
         /// Gets a message that describes the current ParseException.
         /// </summary>
         public String MessageNoLocation
@@ -123,9 +139,8 @@ namespace DUO2C
         public override String Message
         {
             get {
-                return String.Format("{0} ({1},{2}) : {3}{4}", SourcePath ?? "",
-                    Line, Column, MessageNoLocation,
-                    SourceString != null ? String.Format(" ({0})", SourceString) : "");
+                return String.Format("{0} ({1},{2}) : {3}", SourcePath ?? "",
+                    Line, Column, MessageNoLocation);
             }
         }
 
@@ -162,10 +177,12 @@ namespace DUO2C
         internal void FindLocationInfo(String srcString)
         {
             int line, column;
-            FindSymbolLocation(srcString, SourceIndex, out line, out column);
+            String snippet;
+            FindSymbolLocation(srcString, SourceIndex, out line, out column, out snippet);
 
             Line = line;
             Column = column;
+            LineSnippet = snippet;
 
             if (SourceLength > 0) {
                 SourceString = srcString.Substring(SourceIndex, SourceLength);
