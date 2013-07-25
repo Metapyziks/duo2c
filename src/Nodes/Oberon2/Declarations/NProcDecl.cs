@@ -37,7 +37,7 @@ namespace DUO2C.Nodes.Oberon2
     }
 
     [SubstituteToken("FPSection")]
-    public class NFPSection : SubstituteNode, IDeclarationSource
+    public class NFPSection : SubstituteNode, IDeclarationSource, IAccessibilityErrorSource
     {
         [Serialize("byref")]
         public bool ByReference { get; private set; }
@@ -66,10 +66,15 @@ namespace DUO2C.Nodes.Oberon2
                 scope.DeclareSymbol(ident, Type.Type, AccessModifier.Private, false);
             }
         }
+
+        public IEnumerable<ParserException> FindAccessibilityErrors(Scope scope)
+        {
+            return Type.FindAccessibilityErrors(scope);
+        }
     }
 
     [SubstituteToken("FormalPars")]
-    public class NFormalPars : SubstituteNode, IDeclarationSource
+    public class NFormalPars : SubstituteNode, IDeclarationSource, IAccessibilityErrorSource
     {
         public IEnumerable<NFPSection> FPSections
         {
@@ -91,6 +96,21 @@ namespace DUO2C.Nodes.Oberon2
         {
             foreach (var section in FPSections) {
                 section.FindDeclarations(scope);
+            }
+        }
+
+        public IEnumerable<ParserException> FindAccessibilityErrors(Scope scope)
+        {
+            if (ReturnType != null) {
+                foreach (var e in ReturnType.FindAccessibilityErrors(scope)) {
+                    yield return e;
+                }
+            }
+
+            foreach (var sec in FPSections) {
+                foreach (var e in sec.FindAccessibilityErrors(scope)) {
+                    yield return e;
+                }
             }
         }
     }
@@ -160,6 +180,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
+            bool exported = Visibility != AccessModifier.Private;
             if (Receiver != null) {
                 var type = scope.GetType(Receiver.TypeName);
 
@@ -172,6 +193,14 @@ namespace DUO2C.Nodes.Oberon2
                     yield return new UndeclaredIdentifierException(Receiver.Children.Last());
                 } else if (!type.IsRecord) {
                     yield return new TypeMismatchException(RecordType.Base, type, Receiver);
+                } else {
+                    exported &= scope.GetTypeDecl(Receiver.TypeName, null).Visibility != AccessModifier.Private;
+                }
+            }
+
+            if (exported && FormalParams != null) {
+                foreach (var e in FormalParams.FindAccessibilityErrors(scope)) {
+                    yield return e;
                 }
             }
         }
