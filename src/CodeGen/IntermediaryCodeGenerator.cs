@@ -235,7 +235,7 @@ namespace DUO2C.CodeGen
 
         static GenerationContext WriteConversion(this GenerationContext ctx, Value dest, OberonType from, OberonType to, ref Value src)
         {
-            if (from.Equals(to)) return ctx;
+            if (from.Equals(to) || src is NumberLiteral) return ctx;
 
             var tsrc = src;
             src = dest;
@@ -279,15 +279,17 @@ namespace DUO2C.CodeGen
         {
             if (node.Inner is NExpr) {
                 return ctx.WriteExpr((NExpr) node.Inner, ref dest, type);
-            } else if (node.Inner is NNumber) {
-                dest = new NumberLiteral((NNumber) node.Inner);
-                return ctx;
-            } else if (node.Inner is NDesignator && ((NDesignator) node.Inner).IsRoot) {
-                dest = new QualIdent((NQualIdent) ((NDesignator) node.Inner).Element);
-                return ctx;
-            } else {
-                return ctx.WriteAssignLeft(dest).WriteNode(node.Inner).NewLine();
+            } else if (dest is TempIdent) {
+                if (node.Inner is NNumber) {
+                    dest = new NumberLiteral((NNumber) node.Inner);
+                    return ctx;
+                } else if (node.Inner is NDesignator && ((NDesignator) node.Inner).IsRoot) {
+                    dest = new QualIdent((NQualIdent) ((NDesignator) node.Inner).Element);
+                    return ctx;
+                }
             }
+
+            return ctx.WriteAssignLeft(dest).WriteNode(node.Inner).NewLine();
         }
 
         static GenerationContext WriteTerm(this GenerationContext ctx, NTerm node, ref Value dest, OberonType type)
@@ -308,19 +310,17 @@ namespace DUO2C.CodeGen
                     Value left = tleft;
                     Value right = tright;
 
-                    ctx.WriteSimpleExpr(node.Prev, ref left, type);
-                    ctx.WriteTerm(node.Term, ref right, type);
+                    ctx.WriteSimpleExpr(node.Prev, ref left, node.Prev.GetFinalType(_scope));
+                    ctx.WriteTerm(node.Term, ref right, node.Term.GetFinalType(_scope));
 
-                    var ntype = node.GetFinalType(_scope);
-
-                    ctx.WriteConversion(tleft, node.Prev.GetFinalType(_scope), ntype, ref left);
-                    ctx.WriteConversion(tright, node.Term.GetFinalType(_scope), ntype, ref right);
+                    ctx.WriteConversion(tleft, node.Prev.GetFinalType(_scope), type, ref left);
+                    ctx.WriteConversion(tright, node.Term.GetFinalType(_scope), type, ref right);
 
                     switch (node.Operator) {
                         case SimpleExprOperator.Add:
-                            return ctx.WriteOperation(dest, "add", ntype, left, right);
+                            return ctx.WriteOperation(dest, "add", type, left, right);
                         case SimpleExprOperator.Subtract:
-                            return ctx.WriteOperation(dest, "sub", ntype, left, right);
+                            return ctx.WriteOperation(dest, "sub", type, left, right);
                         default:
                             throw new NotImplementedException();
                     }
