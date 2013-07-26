@@ -14,6 +14,17 @@ namespace DUO2C.Nodes.Oberon2
             get { return (ExpressionElement) Children.First(); }
         }
 
+        public override string String
+        {
+            get {
+                if (Inner is NExpr) {
+                    return String.Format("({0})", Inner.String);
+                } else {
+                    return Inner.String;
+                }
+            }
+        }
+
         public override OberonType GetFinalType(Scope scope)
         {
             return Inner.GetFinalType(scope);
