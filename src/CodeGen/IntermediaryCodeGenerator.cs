@@ -13,12 +13,24 @@ namespace DUO2C.CodeGen
 {
     public static class IntermediaryCodeGenerator
     {
-        abstract class Ident
-        {
+        abstract class Value { }
 
+        class NumberLiteral : Value
+        {
+            NNumber _num;
+
+            public NumberLiteral(NNumber num)
+            {
+                _num = num;
+            }
+
+            public override string ToString()
+            {
+                return _num.Inner.String;
+            }
         }
 
-        class QualIdent : Ident
+        class QualIdent : Value
         {
             NQualIdent _ident;
 
@@ -33,7 +45,7 @@ namespace DUO2C.CodeGen
             }
         }
 
-        class TempIdent : Ident, IDisposable
+        class TempIdent : Value, IDisposable
         {
             static SortedSet<int> _sUsed = new SortedSet<int>();
 
@@ -199,17 +211,17 @@ namespace DUO2C.CodeGen
             return ctx.Leave().Write("; End statements").NewLine().NewLine();
         }
 
-        static GenerationContext WriteAssignLeft(this GenerationContext ctx, Ident ident)
+        static GenerationContext WriteAssignLeft(this GenerationContext ctx, Value ident)
         {
             return ctx.Write(ident.ToString()).Anchor().Write(" = ").Anchor();
         }
 
-        static GenerationContext WriteConversion(this GenerationContext ctx, Ident dest, String op, OberonType from, Ident src, OberonType to)
+        static GenerationContext WriteConversion(this GenerationContext ctx, Value dest, String op, OberonType from, Value src, OberonType to)
         {
             return ctx.WriteAssignLeft(dest).Write("{0} ", op).Anchor().WriteType(from).Write(" ").Anchor().Write("{0} ", src).Anchor().Write("to ").WriteType(to).NewLine();
         }
 
-        static GenerationContext WriteOperation(this GenerationContext ctx, Ident dest, String op, OberonType type, params Ident[] args)
+        static GenerationContext WriteOperation(this GenerationContext ctx, Value dest, String op, OberonType type, params Value[] args)
         {
             ctx.WriteAssignLeft(dest).Write("{0} ", op).Anchor().WriteType(type).Write(" ").Anchor();
             foreach (var arg in args) {
@@ -221,20 +233,21 @@ namespace DUO2C.CodeGen
             return ctx.NewLine();
         }
 
-        static GenerationContext WriteConversion(this GenerationContext ctx, OberonType from, OberonType to, Ident ident)
+        static GenerationContext WriteConversion(this GenerationContext ctx, Value dest, OberonType from, OberonType to, ref Value src)
         {
+            if (from.Equals(to)) return ctx;
+
+            var tsrc = src;
+            src = dest;
+
             if (from is IntegerType && to is IntegerType) {
                 IntegerType fi = (IntegerType) from, ti = (IntegerType) to;
-                if (fi.Range == ti.Range) {
-                    return ctx;
-                } else if (fi.Range < ti.Range) {
-                    return ctx.WriteConversion(ident, "zext", from, ident, to);
-                } else {
-                    return ctx.WriteConversion(ident, "trunc", from, ident, to);
+                if (fi.Range < ti.Range) {
+                    return ctx.WriteConversion(dest, "zext", from, tsrc, to);
                 }
-            } else {
-                throw new InvalidOperationException("No conversion between " + from.ToString() + " to " + to.ToString() + "defined");
             }
+            
+            throw new InvalidOperationException("No conversion between " + from.ToString() + " to " + to.ToString() + "defined");
         }
 
         static GenerationContext WriteNode(this GenerationContext ctx, SubstituteNode node)
@@ -262,43 +275,52 @@ namespace DUO2C.CodeGen
             return ctx.Write(ident.ToString());
         }
 
-        static GenerationContext WriteFactor(this GenerationContext ctx, NFactor node, Ident dest)
+        static GenerationContext WriteFactor(this GenerationContext ctx, NFactor node, ref Value dest, OberonType type)
         {
             if (node.Inner is NExpr) {
-                return ctx.WriteExpr((NExpr) node.Inner, dest);
+                return ctx.WriteExpr((NExpr) node.Inner, ref dest, type);
+            } else if (node.Inner is NNumber) {
+                dest = new NumberLiteral((NNumber) node.Inner);
+                return ctx;
+            } else if (node.Inner is NDesignator && ((NDesignator) node.Inner).IsRoot) {
+                dest = new QualIdent((NQualIdent) ((NDesignator) node.Inner).Element);
+                return ctx;
             } else {
                 return ctx.WriteAssignLeft(dest).WriteNode(node.Inner).NewLine();
             }
         }
 
-        static GenerationContext WriteTerm(this GenerationContext ctx, NTerm node, Ident dest)
+        static GenerationContext WriteTerm(this GenerationContext ctx, NTerm node, ref Value dest, OberonType type)
         {
             if (node.Operator == TermOperator.None) {
-                return ctx.WriteFactor(node.Factor, dest);
+                return ctx.WriteFactor(node.Factor, ref dest, type);
             } else {
                 throw new NotImplementedException();
             }
         }
 
-        static GenerationContext WriteSimpleExpr(this GenerationContext ctx, NSimpleExpr node, Ident dest)
+        static GenerationContext WriteSimpleExpr(this GenerationContext ctx, NSimpleExpr node, ref Value dest, OberonType type)
         {
             if (node.Operator == SimpleExprOperator.None) {
-                return ctx.WriteTerm(node.Term, dest);
+                return ctx.WriteTerm(node.Term, ref dest, type);
             } else {
-                using (TempIdent left = TempIdent.Create(), right = TempIdent.Create()) {
-                    ctx.WriteSimpleExpr(node.Prev, left);
-                    ctx.WriteTerm(node.Term, right);
+                using (TempIdent tleft = TempIdent.Create(), tright = TempIdent.Create()) {
+                    Value left = tleft;
+                    Value right = tright;
 
-                    var type = node.GetFinalType(_scope);
+                    ctx.WriteSimpleExpr(node.Prev, ref left, type);
+                    ctx.WriteTerm(node.Term, ref right, type);
 
-                    ctx.WriteConversion(node.Prev.GetFinalType(_scope), type, left);
-                    ctx.WriteConversion(node.Term.GetFinalType(_scope), type, right);
+                    var ntype = node.GetFinalType(_scope);
+
+                    ctx.WriteConversion(tleft, node.Prev.GetFinalType(_scope), ntype, ref left);
+                    ctx.WriteConversion(tright, node.Term.GetFinalType(_scope), ntype, ref right);
 
                     switch (node.Operator) {
                         case SimpleExprOperator.Add:
-                            return ctx.WriteOperation(dest, "add", type, left, right);
+                            return ctx.WriteOperation(dest, "add", ntype, left, right);
                         case SimpleExprOperator.Subtract:
-                            return ctx.WriteOperation(dest, "sub", type, left, right);
+                            return ctx.WriteOperation(dest, "sub", ntype, left, right);
                         default:
                             throw new NotImplementedException();
                     }
@@ -306,16 +328,16 @@ namespace DUO2C.CodeGen
             }
         }
 
-        static GenerationContext WriteExpr(this GenerationContext ctx, NExpr node, Ident dest)
+        static GenerationContext WriteExpr(this GenerationContext ctx, NExpr node, ref Value dest, OberonType type)
         {
             if (node.Operator == ExprOperator.None) {
-                return ctx.WriteSimpleExpr(node.SimpleExpr, dest);
+                return ctx.WriteSimpleExpr(node.SimpleExpr, ref dest, type);
             } else {
                 throw new NotImplementedException();
             }
         }
 
-        static Ident GetDesignation(this GenerationContext ctx, NDesignator node)
+        static Value GetDesignation(this GenerationContext ctx, NDesignator node)
         {
             if (node.IsRoot) {
                 return new QualIdent((NQualIdent) node.Element);
@@ -326,7 +348,8 @@ namespace DUO2C.CodeGen
 
         static GenerationContext WriteNode(this GenerationContext ctx, NAssignment node)
         {
-            return ctx.WriteExpr(node.Expression, ctx.GetDesignation(node.Assignee));
+            var dest = ctx.GetDesignation(node.Assignee);
+            return ctx.WriteExpr(node.Expression, ref dest, node.Assignee.GetFinalType(_scope));
         }
     }
 }

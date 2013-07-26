@@ -62,6 +62,11 @@ namespace DUO2C.Semantics
 
         public abstract bool CanTestEquality(OberonType other);
         public abstract bool CanCompare(OberonType other);
+        
+        public override bool Equals(object obj)
+        {
+            return obj is OberonType && CanTestEquality((OberonType) obj) && ((OberonType) obj).CanTestEquality(this);
+        }
     }
 
     public class ModuleType : OberonType
