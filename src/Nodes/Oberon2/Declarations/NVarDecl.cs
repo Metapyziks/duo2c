@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using DUO2C.CodeGen;
 using DUO2C.Semantics;
 
 namespace DUO2C.Nodes.Oberon2

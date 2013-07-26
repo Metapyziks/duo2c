@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\CodeGen\GenerationContext.cs" />
+    <Compile Include="src\CodeGen\IntermediaryCodeGenerator.cs" />
     <Compile Include="src\Nodes\BranchNode.cs" />
     <Compile Include="src\Nodes\Interfaces.cs" />
     <Compile Include="src\Nodes\LeafNode.cs" />
@@ -111,7 +112,7 @@
     <Compile Include="src\Semantics\PointerExpectedException.cs" />
     <Compile Include="src\Semantics\ProcedureExpectedException.cs" />
     <Compile Include="src\Semantics\Scope.cs" />
-    <Compile Include="src\CodeGen\SymbolFileGenerator.cs" />
+    <Compile Include="src\CodeGen\SymbolCodeGenerator.cs" />
     <Compile Include="src\Semantics\TypeMismatchException.cs" />
     <Compile Include="src\Semantics\UndeclaredIdentifierException.cs" />
     <Compile Include="src\Tools.cs" />

@@ -11,7 +11,7 @@ using DUO2C.Semantics;
 
 namespace DUO2C.CodeGen
 {
-    public static class SymbolFileGenerator
+    public static class SymbolCodeGenerator
     {
         public static String Generate(ModuleType module)
         {

@@ -99,16 +99,14 @@ namespace DUO2C
                             + Path.GetFileNameWithoutExtension(args[0])
                             + ".sym";
 
-                        File.WriteAllText(outpath, SymbolFileGenerator.Generate(module.Type));
+                        File.WriteAllText(outpath, SymbolCodeGenerator.Generate(module.Type));
 
                         outpath = Path.GetDirectoryName(args[0])
                             + Path.DirectorySeparatorChar
                             + Path.GetFileNameWithoutExtension(args[0])
                             + ".ll";
 
-                        var ctx = new GenerationContext();
-                        module.GenerateCode(ctx);
-                        File.WriteAllText(outpath, ctx.GeneratedCode);
+                        File.WriteAllText(outpath, IntermediaryCodeGenerator.Generate(module.Type));
                     }
                 } catch (ParserException e) {
                     WriteErrorHeader("Encountered 1 error while parsing:");

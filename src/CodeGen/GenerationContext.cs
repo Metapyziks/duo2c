@@ -155,12 +155,6 @@ namespace DUO2C.CodeGen
             return this;
         }
 
-        public GenerationContext Write(SubstituteNode node)
-        {
-            node.GenerateCode(this);
-            return this;
-        }
-
         public GenerationContext Write(String format, params Object[] args)
         {
             _curGroup.Write(format, args);

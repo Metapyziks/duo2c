@@ -131,14 +131,5 @@ namespace DUO2C.Nodes
                         .Replace("\n", "\n  ") + nl + String.Format("</{0}>", Token);
             }
         }
-
-        public virtual void GenerateCode(GenerationContext ctx)
-        {
-            foreach (var child in Children) {
-                if (child is SubstituteNode) {
-                    ((SubstituteNode) child).GenerateCode(ctx);
-                }
-            }
-        }
     }
 }

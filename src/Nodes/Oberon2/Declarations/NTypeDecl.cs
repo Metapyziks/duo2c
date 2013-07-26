@@ -28,15 +28,6 @@ namespace DUO2C.Nodes.Oberon2
             scope.DeclareType(Identifier, Type.Type, Visibility);
         }
 
-        public override void GenerateCode(GenerationContext ctx)
-        {
-            ctx.NewLine();
-            ctx.Write("; ").Write(Identifier).Write(" = ").Write(Type.String);
-            ctx.NewLine();
-            ctx.Write("%").Write(Identifier).Write(" = type ").Write(Type);
-            ctx.NewLine();
-        }
-
         public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
             bool found = false;

@@ -73,16 +73,5 @@ namespace DUO2C.Nodes
                 ? ((ITypeErrorSource) x).FindTypeErrors(Type.Scope)
                 : new ParserException[0]);
         }
-
-        public override void GenerateCode(GenerationContext ctx)
-        {
-            ctx.Write("; Module ").Write(Identifier);
-            ctx.NewLine().Enter();
-
-            base.GenerateCode(ctx);
-
-            ctx.NewLine().NewLine().Leave();
-            ctx.Write("; End ").Write(Identifier);
-        }
     }
 }
