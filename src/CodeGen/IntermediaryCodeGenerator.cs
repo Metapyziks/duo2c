@@ -41,7 +41,11 @@ namespace DUO2C.CodeGen
 
             public override string ToString()
             {
-                return String.Format("%{0}", _ident.Identifier);
+                if (_ident.Module != null || _scope.GetSymbolDecl(_ident.Identifier, null).Visibility != AccessModifier.Private) {
+                    return String.Format("%{0}.{1}", _ident.Module ?? _module.Identifier, _ident.Identifier);
+                } else {
+                    return String.Format("%{0}", _ident.Identifier);
+                }
             }
         }
 
@@ -75,7 +79,7 @@ namespace DUO2C.CodeGen
             public override string ToString()
             {
                 if (_id > -1) {
-                    return String.Format("%_temp{0}", _id);
+                    return String.Format("%{0}", _id);
                 } else {
                     throw new ObjectDisposedException("TempIdent");
                 }
@@ -89,6 +93,7 @@ namespace DUO2C.CodeGen
         }
 
         static Dictionary<Type, MethodInfo> _nodeGens;
+        static NModule _module;
         static Scope _scope;
 
         public static String Generate(NModule module, Guid uniqueID)
@@ -127,6 +132,7 @@ namespace DUO2C.CodeGen
             ctx.WriteTypeDecl("CHAR", IntegerType.ShortInt);
             ctx.WriteTypeDecl("SET", IntegerType.LongInt);
 
+            _module = module;
             _scope = module.Type.Scope;
 
             foreach (var kv in _scope.GetTypes().Where(x => !(x.Value.Type is ProcedureType))) {
@@ -134,9 +140,11 @@ namespace DUO2C.CodeGen
             }
             ctx.Leave().Write("; End type aliases").NewLine().NewLine();
 
+            ctx.Write("define void @").Write(module.Identifier).Write("_main() {").Enter().NewLine().NewLine();
             if (module.Body != null) {
                 ctx.WriteStatements(module.Body.Statements.Select(x => x.Inner));
             }
+            ctx.Write("ret void").NewLine().Leave().Write("}").NewLine();
 
             return ctx.Write("; Module end").NewLine();
         }
@@ -200,15 +208,12 @@ namespace DUO2C.CodeGen
 
         static GenerationContext WriteStatements(this GenerationContext ctx, IEnumerable<Statement> statements)
         {
-            ctx.Write("; Begin statements").NewLine().Enter(2).NewLine();
-
             foreach (var stmnt in statements) {
                 ctx.Write("; {0}", stmnt.String).NewLine();
                 ctx.WriteNode(stmnt);
                 ctx.NewLine();
             }
-
-            return ctx.Leave().Write("; End statements").NewLine().NewLine();
+            return ctx;
         }
 
         static GenerationContext WriteAssignLeft(this GenerationContext ctx, Value ident)
@@ -228,6 +233,22 @@ namespace DUO2C.CodeGen
                 ctx.Write(arg.ToString());
                 if (arg != args.Last()) {
                     ctx.Write(", ").Anchor();
+                }
+            }
+            return ctx.NewLine();
+        }
+
+        static GenerationContext WriteOperation(this GenerationContext ctx, Value dest, String op, params Object[] args)
+        {
+            ctx.WriteAssignLeft(dest).Write("{0} ", op).Anchor();
+            foreach (var arg in args) {
+                if (arg is OberonType) {
+                    ctx.WriteType((OberonType) arg).Write(" ").Anchor();
+                } else {
+                    ctx.Write(arg.ToString());
+                    if (arg != args.Last()) {
+                        ctx.Write(", ").Anchor();
+                    }
                 }
             }
             return ctx.NewLine();
@@ -287,9 +308,13 @@ namespace DUO2C.CodeGen
                     dest = new QualIdent((NQualIdent) ((NDesignator) node.Inner).Element);
                     return ctx;
                 }
-            }
+            } else if (node.Inner is NNumber) {
+                return ctx.WriteOperation(dest, "select", BooleanType.Default, "true", type, new NumberLiteral((NNumber) node.Inner), type, "undef");
+            } else if (node.Inner is NDesignator && ((NDesignator) node.Inner).IsRoot) {
+                return ctx.WriteOperation(dest, "select", BooleanType.Default, "true", type, new QualIdent((NQualIdent) ((NDesignator) node.Inner).Element), type, "undef");
+            } 
 
-            return ctx.WriteAssignLeft(dest).WriteNode(node.Inner).NewLine();
+            throw new NotImplementedException("No rule to generate factor of type " + node.Inner.GetType());
         }
 
         static GenerationContext WriteTerm(this GenerationContext ctx, NTerm node, ref Value dest, OberonType type)
