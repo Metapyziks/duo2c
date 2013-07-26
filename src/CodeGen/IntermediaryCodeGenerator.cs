@@ -199,6 +199,44 @@ namespace DUO2C.CodeGen
             return ctx.Leave().Write("; End statements").NewLine().NewLine();
         }
 
+        static GenerationContext WriteAssignLeft(this GenerationContext ctx, Ident ident)
+        {
+            return ctx.Write(ident.ToString()).Anchor().Write(" = ").Anchor();
+        }
+
+        static GenerationContext WriteConversion(this GenerationContext ctx, Ident dest, String op, OberonType from, Ident src, OberonType to)
+        {
+            return ctx.WriteAssignLeft(dest).Write("{0} ", op).Anchor().WriteType(from).Write(" ").Anchor().Write("{0} ", src).Anchor().Write("to ").WriteType(to).NewLine();
+        }
+
+        static GenerationContext WriteOperation(this GenerationContext ctx, Ident dest, String op, OberonType type, params Ident[] args)
+        {
+            ctx.WriteAssignLeft(dest).Write("{0} ", op).Anchor().WriteType(type).Write(" ").Anchor();
+            foreach (var arg in args) {
+                ctx.Write(arg.ToString());
+                if (arg != args.Last()) {
+                    ctx.Write(", ").Anchor();
+                }
+            }
+            return ctx.NewLine();
+        }
+
+        static GenerationContext WriteConversion(this GenerationContext ctx, OberonType from, OberonType to, Ident ident)
+        {
+            if (from is IntegerType && to is IntegerType) {
+                IntegerType fi = (IntegerType) from, ti = (IntegerType) to;
+                if (fi.Range == ti.Range) {
+                    return ctx;
+                } else if (fi.Range < ti.Range) {
+                    return ctx.WriteConversion(ident, "zext", from, ident, to);
+                } else {
+                    return ctx.WriteConversion(ident, "trunc", from, ident, to);
+                }
+            } else {
+                throw new InvalidOperationException("No conversion between " + from.ToString() + " to " + to.ToString() + "defined");
+            }
+        }
+
         static GenerationContext WriteNode(this GenerationContext ctx, SubstituteNode node)
         {
             if (_nodeGens.ContainsKey(node.GetType())) {
@@ -229,7 +267,7 @@ namespace DUO2C.CodeGen
             if (node.Inner is NExpr) {
                 return ctx.WriteExpr((NExpr) node.Inner, dest);
             } else {
-                return ctx.Write("{0} = ", dest).WriteNode(node.Inner).NewLine();
+                return ctx.WriteAssignLeft(dest).WriteNode(node.Inner).NewLine();
             }
         }
 
@@ -250,12 +288,17 @@ namespace DUO2C.CodeGen
                 using (TempIdent left = TempIdent.Create(), right = TempIdent.Create()) {
                     ctx.WriteSimpleExpr(node.Prev, left);
                     ctx.WriteTerm(node.Term, right);
-                                
+
+                    var type = node.GetFinalType(_scope);
+
+                    ctx.WriteConversion(node.Prev.GetFinalType(_scope), type, left);
+                    ctx.WriteConversion(node.Term.GetFinalType(_scope), type, right);
+
                     switch (node.Operator) {
                         case SimpleExprOperator.Add:
-                            return ctx.Write("{0} = add ", dest).WriteType(node.GetFinalType(_scope)).Write(" {0}, {1}", left, right).NewLine();
+                            return ctx.WriteOperation(dest, "add", type, left, right);
                         case SimpleExprOperator.Subtract:
-                            return ctx.Write("{0} = sub ", dest).WriteType(node.GetFinalType(_scope)).Write(" {0}, {1}", left, right).NewLine();
+                            return ctx.WriteOperation(dest, "sub", type, left, right);
                         default:
                             throw new NotImplementedException();
                     }
