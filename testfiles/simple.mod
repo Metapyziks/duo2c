@@ -1,10 +1,10 @@
 MODULE Simple;
     VAR
-        x  : Integer;
-        y  : Integer;
+        x  : Byte;
+        y  : ShortInt;
         z- : Integer;
 BEGIN
     x := 5;
-    y := 8;
-    z := x + y;
+    y := 8 + x;
+    z := y + 2 - (3 - x + 2) + (y + x - 6);
 END Simple.

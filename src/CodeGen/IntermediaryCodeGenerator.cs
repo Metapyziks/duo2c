@@ -63,7 +63,7 @@ namespace DUO2C.CodeGen
             public override string ToString()
             {
                 if (_id > -1) {
-                    return String.Format("%_{0}", _id);
+                    return String.Format("%_temp{0}", _id);
                 } else {
                     throw new ObjectDisposedException("TempIdent");
                 }
@@ -129,11 +129,16 @@ namespace DUO2C.CodeGen
             return ctx.Write("; Module end").NewLine();
         }
 
+        static GenerationContext WriteTypeIdent(this GenerationContext ctx, String identifier)
+        {
+            return ctx.Write("%_type{0}", identifier);
+        }
+
         static GenerationContext WriteTypeDecl(this GenerationContext ctx, String identifier, OberonType type)
         {
             ctx.Write("; {0} = ", identifier).Write(type.ToString());
             ctx.NewLine();
-            ctx.Write("%t_{0}", identifier).Anchor().Write(" = type ").WriteType(type);
+            ctx.WriteTypeIdent(identifier).Anchor().Write(" = type ").WriteType(type);
             return ctx.NewLine().NewLine();
         }
         
@@ -143,7 +148,7 @@ namespace DUO2C.CodeGen
                 var rec = (RecordType) type;
                 ctx.Write("{");
                 if (rec.SuperRecordName != null) {
-                    ctx.Write("%t_{0}", rec.SuperRecordName);
+                    ctx.WriteTypeIdent(rec.SuperRecordName);
                     if (rec.Fields.Count() > 0) ctx.Write(", ");
                 }
                 foreach (var fl in rec.Fields.Where(x => !(x.Type is ProcedureType))) {
@@ -168,14 +173,14 @@ namespace DUO2C.CodeGen
                     return ctx.Write("double");
                 }
             } else if (type is SetType) {
-                return ctx.Write("%t_SET");
+                return ctx.WriteTypeIdent("SET");
             } else if (type is BooleanType) {
                 return ctx.Write("i1");
             } else if (type is CharType) {
-                return ctx.Write("%t_CHAR");
+                return ctx.WriteTypeIdent("CHAR");
             } else if (type is UnresolvedType) {
                 var ut = (UnresolvedType) type;
-                return ctx.Write("%t_{0}", ut.Identifier);
+                return ctx.WriteTypeIdent(ut.Identifier);
             } else {
                 throw new NotImplementedException("No rule to generate LLVMIR for type " + type.GetType().FullName);
             }
@@ -221,7 +226,11 @@ namespace DUO2C.CodeGen
 
         static GenerationContext WriteFactor(this GenerationContext ctx, NFactor node, Ident dest)
         {
-            return ctx.Write("{0} = ", dest).WriteNode(node.Inner).NewLine();
+            if (node.Inner is NExpr) {
+                return ctx.WriteExpr((NExpr) node.Inner, dest);
+            } else {
+                return ctx.Write("{0} = ", dest).WriteNode(node.Inner).NewLine();
+            }
         }
 
         static GenerationContext WriteTerm(this GenerationContext ctx, NTerm node, Ident dest)
@@ -245,6 +254,8 @@ namespace DUO2C.CodeGen
                     switch (node.Operator) {
                         case SimpleExprOperator.Add:
                             return ctx.Write("{0} = add ", dest).WriteType(node.GetFinalType(_scope)).Write(" {0}, {1}", left, right).NewLine();
+                        case SimpleExprOperator.Subtract:
+                            return ctx.Write("{0} = sub ", dest).WriteType(node.GetFinalType(_scope)).Write(" {0}, {1}", left, right).NewLine();
                         default:
                             throw new NotImplementedException();
                     }
