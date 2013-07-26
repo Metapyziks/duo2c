@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 
 using DUO2C.CodeGen;
-using DUO2C.Nodes;
+using DUO2C.Nodes.Oberon2;
 using DUO2C.Semantics;
 
 namespace DUO2C
@@ -94,19 +94,21 @@ namespace DUO2C
                         }
                         Console.WriteLine();
                     } else {
+                        var guid = Guid.NewGuid();
+                        
                         var outpath = Path.GetDirectoryName(args[0])
                             + Path.DirectorySeparatorChar
                             + Path.GetFileNameWithoutExtension(args[0])
                             + ".sym";
 
-                        File.WriteAllText(outpath, SymbolCodeGenerator.Generate(module.Type));
+                        File.WriteAllText(outpath, SymbolCodeGenerator.Generate(module.Type, guid));
 
                         outpath = Path.GetDirectoryName(args[0])
                             + Path.DirectorySeparatorChar
                             + Path.GetFileNameWithoutExtension(args[0])
                             + ".ll";
 
-                        File.WriteAllText(outpath, IntermediaryCodeGenerator.Generate(module.Type));
+                        File.WriteAllText(outpath, IntermediaryCodeGenerator.Generate(module, guid));
                     }
                 } catch (ParserException e) {
                     WriteErrorHeader("Encountered 1 error while parsing:");

@@ -19,6 +19,14 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("Term")]
     public class NTerm : ExpressionElement
     {
+        static readonly Dictionary<String, TermOperator> _sOpMap = new Dictionary<string,TermOperator>() {
+            { "*", TermOperator.Multiply },
+            { "/", TermOperator.Divide },
+            { "DIV", TermOperator.IntDivide },
+            { "MOD", TermOperator.Modulo },
+            { "&", TermOperator.And }
+        };
+
         String _opString;
 
         [Serialize("operator", TermOperator.None)]
@@ -32,6 +40,13 @@ namespace DUO2C.Nodes.Oberon2
         public NFactor Factor
         {
             get { return (NFactor) Children.Last(); }
+        }
+
+        public override string String
+        {
+            get {
+                return Prev != null ? String.Format("{0} {1} {2}", Prev.String, _opString, Factor.String) : Factor.String;
+            }
         }
 
         public override OberonType GetFinalType(Scope scope)
@@ -64,20 +79,7 @@ namespace DUO2C.Nodes.Oberon2
                 Operator = TermOperator.None;
             } else {
                 _opString = Children.ElementAt(Children.Count() - 2).String;
-                switch (_opString) {
-                    case "*":
-                        Operator = TermOperator.Multiply; break;
-                    case "/":
-                        Operator = TermOperator.Divide; break;
-                    case "DIV":
-                        Operator = TermOperator.IntDivide; break;
-                    case "MOD":
-                        Operator = TermOperator.Modulo; break;
-                    case "&":
-                        Operator = TermOperator.And; break;
-                    default:
-                        Operator = TermOperator.None; break;
-                }
+                Operator = _sOpMap[_opString];
 
                 Children = new ParseNode[] {
                     new NTerm(new BranchNode(Children.Take(Children.Count() - 2), Token)),

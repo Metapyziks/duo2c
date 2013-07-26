@@ -1,8 +1,8 @@
 MODULE Simple;
     VAR
-        x : Integer;
-        y : Integer;
-        z : Integer;
+        x  : Integer;
+        y  : Integer;
+        z- : Integer;
 BEGIN
     x := 5;
     y := 8;

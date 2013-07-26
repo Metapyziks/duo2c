@@ -37,7 +37,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override string String
         {
-            get { return String.Format("{0}{1}", Element.String, Operation.String); }
+            get {return IsRoot ? Element.String : String.Format("{0}{1}", Element.String, Operation.String); }
         }
 
         public override OberonType GetFinalType(Scope scope)

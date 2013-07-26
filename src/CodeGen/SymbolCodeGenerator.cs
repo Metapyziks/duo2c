@@ -13,18 +13,18 @@ namespace DUO2C.CodeGen
 {
     public static class SymbolCodeGenerator
     {
-        public static String Generate(ModuleType module)
+        public static String Generate(ModuleType module, Guid uniqueID)
         {
             var ctx = new GenerationContext();
-            ctx.WriteModule(module);
+            ctx.WriteModule(module, uniqueID);
             return ctx.GeneratedCode;
         }
 
-        static GenerationContext WriteModule(this GenerationContext ctx, ModuleType module)
+        static GenerationContext WriteModule(this GenerationContext ctx, ModuleType module, Guid uniqueID)
         {
             ctx.Write("(**").NewLine();
             ctx.Write(" *  Generated {0}", DateTime.Now.ToString()).NewLine();
-            ctx.Write(" *  GlobalUID {0}", Guid.NewGuid().ToString()).NewLine();
+            ctx.Write(" *  GlobalUID {0}", uniqueID.ToString()).NewLine();
             ctx.Write(" *").NewLine();
             ctx.Write(" *  Exported symbol file for module \"{0}\"", module.Identifier).NewLine();
             ctx.Write(" *").NewLine();

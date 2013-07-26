@@ -17,6 +17,12 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("SimpleExpr")]
     public class NSimpleExpr : ExpressionElement
     {
+        static readonly Dictionary<String, SimpleExprOperator> _sOpMap = new Dictionary<string,SimpleExprOperator>() {
+            { "+", SimpleExprOperator.Add },
+            { "-", SimpleExprOperator.Subtract },
+            { "OR", SimpleExprOperator.Or }
+        };
+
         private String _opString;
 
         [Serialize("operator", SimpleExprOperator.None)]
@@ -30,6 +36,13 @@ namespace DUO2C.Nodes.Oberon2
         public NTerm Term
         {
             get { return (NTerm) Children.Last(); }
+        }
+
+        public override string String
+        {
+            get {
+                return Prev != null ? String.Format("{0} {1} {2}", Prev.String, _opString, Term.String) : Term.String;
+            }
         }
 
         public override OberonType GetFinalType(Scope scope)
@@ -59,17 +72,7 @@ namespace DUO2C.Nodes.Oberon2
                 Operator = SimpleExprOperator.None;
             } else {
                 _opString = Children.ElementAt(Children.Count() - 2).String;
-
-                switch (_opString) {
-                    case "+":
-                        Operator = SimpleExprOperator.Add; break;
-                    case "-":
-                        Operator = SimpleExprOperator.Subtract; break;
-                    case "OR":
-                        Operator = SimpleExprOperator.Or; break;
-                    default:
-                        Operator = SimpleExprOperator.None; break;
-                }
+                Operator = _sOpMap[_opString];
 
                 Children = new ParseNode[] {
                     new NSimpleExpr(new BranchNode(Children.Take(Children.Count() - 2), Token)),

@@ -5,10 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 using DUO2C.CodeGen;
-using DUO2C.Nodes.Oberon2;
 using DUO2C.Semantics;
 
-namespace DUO2C.Nodes
+namespace DUO2C.Nodes.Oberon2
 {
     [SubstituteToken("Module")]
     public class NModule : SubstituteNode

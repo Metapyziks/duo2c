@@ -37,6 +37,13 @@ namespace DUO2C.Nodes.Oberon2
             get { return (NExpr) Children.Last(); }
         }
 
+        public override string String
+        {
+            get {
+                return String.Format("{0} := {1}", Assignee.String, Expression.String);
+            }
+        }
+
         public NAssignment(ParseNode original)
             : base(original)
         {

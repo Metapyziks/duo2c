@@ -22,6 +22,17 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("Expr")]
     public class NExpr : ExpressionElement
     {
+        static readonly Dictionary<String, ExprOperator> _sOpMap = new Dictionary<string,ExprOperator>() {
+            { "=", ExprOperator.Equals },
+            { "#", ExprOperator.NotEquals },
+            { "<", ExprOperator.LessThan },
+            { "<=", ExprOperator.LessThanOrEqual },
+            { ">", ExprOperator.GreaterThan },
+            { ">=", ExprOperator.GreaterThanOrEqual },
+            { "IN", ExprOperator.InSet },
+            { "IS", ExprOperator.IsType }
+        };
+
         String _opString;
 
         [Serialize("operator", ExprOperator.None)]
@@ -35,6 +46,13 @@ namespace DUO2C.Nodes.Oberon2
         public NSimpleExpr SimpleExpr
         {
             get { return (NSimpleExpr) Children.Last(); }
+        }
+
+        public override string String
+        {
+            get {
+                return Prev != null ? String.Format("{0} {1} {2}", Prev, _opString, SimpleExpr.String) : SimpleExpr.String;
+            }
         }
 
         public override OberonType GetFinalType(Scope scope)
@@ -54,26 +72,7 @@ namespace DUO2C.Nodes.Oberon2
                 Operator = ExprOperator.None;
             } else {
                 _opString = Children.ElementAt(1).String;
-                switch (_opString) {
-                    case "=":
-                        Operator = ExprOperator.Equals; break;
-                    case "#":
-                        Operator = ExprOperator.NotEquals; break;
-                    case "<":
-                        Operator = ExprOperator.LessThan; break;
-                    case "<=":
-                        Operator = ExprOperator.LessThanOrEqual; break;
-                    case ">":
-                        Operator = ExprOperator.GreaterThan; break;
-                    case ">=":
-                        Operator = ExprOperator.GreaterThanOrEqual; break;
-                    case "IN":
-                        Operator = ExprOperator.InSet; break;
-                    case "IS":
-                        Operator = ExprOperator.IsType; break;
-                    default:
-                        Operator = ExprOperator.None; break;
-                }
+                Operator = _sOpMap[_opString];
 
                 Children = new ParseNode[] {
                     new NExpr(new BranchNode(Children.Take(Children.Count() - 2), Token)),
