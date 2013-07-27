@@ -91,7 +91,7 @@ namespace DUO2C.Nodes.Oberon2
         public NOberonType(ParseNode original)
             : base(original, true)
         {
-            switch (original.String.ToUpper()) {
+            switch (original.String) {
                 case "LONGINT":
                     _type = IntegerType.LongInt; break;
                 case "INTEGER":

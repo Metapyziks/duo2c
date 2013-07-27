@@ -116,7 +116,8 @@ namespace DUO2C.Nodes.Oberon2
                     yield return e;
                 }
             } else {
-                if (GetFinalType(scope) == null) {
+                var type = GetFinalType(scope);
+                if (type == null || (type is UnresolvedType && type.As<OberonType>() == null)) {
                     yield return new UndeclaredIdentifierException(this);
                 }
             }
@@ -142,6 +143,9 @@ namespace DUO2C.Nodes.Oberon2
                             var mdl = type.As<ModuleType>();
                             if (!mdl.Scope.IsSymbolDeclared(op.Identifier)) {
                                 yield return new MemberNotFoundException(type, this);
+                            } else {
+                                var arr = (ParseNode[]) Children;
+                                Children = new ParseNode[] { new NQualIdent(op.Identifier, mdl.Identifier, this) };
                             }
                         } else if (type.IsRecord) {
                             var rec = type.As<RecordType>();

@@ -42,7 +42,7 @@ namespace DUO2C.CodeGen
             public override string ToString()
             {
                 if (_ident.Module != null || _scope.GetSymbolDecl(_ident.Identifier, null).Visibility != AccessModifier.Private) {
-                    return String.Format("%{0}_{1}", _ident.Module ?? _module.Identifier, _ident.Identifier);
+                    return String.Format("%{0}.{1}", _ident.Module ?? _module.Identifier, _ident.Identifier);
                 } else {
                     return String.Format("%{0}", _ident.Identifier);
                 }
@@ -51,11 +51,11 @@ namespace DUO2C.CodeGen
 
         class TempIdent : Value, IDisposable
         {
-            static SortedSet<int> _sUsed = new SortedSet<int>();
+            static int _sLast = 0;
 
             public static void Reset()
             {
-                _sUsed.Clear();
+                _sLast = 0;
             }
 
             int _id;
@@ -65,15 +65,6 @@ namespace DUO2C.CodeGen
                 _id = 0;
             }
 
-            void AssignID()
-            {
-                if (_id == 0) {
-                    while (_sUsed.Contains(++_id));
-
-                    _sUsed.Add(_id);
-                }
-            }
-
             public override string ToString()
             {
                 if (_id == -1) {
@@ -81,7 +72,7 @@ namespace DUO2C.CodeGen
                 }
 
                 if (_id == 0) {
-                    AssignID();
+                    _id = ++_sLast;
                 }
                 
                 return String.Format("%{0}", _id);
@@ -89,8 +80,6 @@ namespace DUO2C.CodeGen
         
             public void Dispose()
             {
-                //_sUsed.Remove(_id);
-
                 _id = -1;
             }
         }
@@ -133,12 +122,12 @@ namespace DUO2C.CodeGen
 
             ctx.Write("target datalayout = \"e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-f80:128:128-v64:64:64-v128:128:128-a0:0:64-f80:32:32-n8:16:32-S32\"").NewLine().NewLine();
 
-            ctx.Write("@.str = private unnamed_addr constant [3 x i8] c\"%i\\00\", align 1").NewLine().NewLine();
+            ctx.Write("@.str = private unnamed_addr constant [4 x i8] c\"%i\\0A\\00\", align 1").NewLine().NewLine();
 
             ctx.Write("declare i32 @printf(i8*, ...) nounwind").NewLine().NewLine();
 
             ctx.Write("; Begin type aliases").NewLine().Enter(2).NewLine();
-            ctx.WriteTypeDecl("CHAR", IntegerType.ShortInt);
+            ctx.WriteTypeDecl("CHAR", IntegerType.Byte);
             ctx.WriteTypeDecl("SET", IntegerType.LongInt);
 
             _module = module;
@@ -384,6 +373,21 @@ namespace DUO2C.CodeGen
         {
             var dest = ctx.GetDesignation(node.Assignee);
             return ctx.WriteExpr(node.Expression, ref dest, node.Assignee.GetFinalType(_scope));
+        }
+
+        static GenerationContext WriteNode(this GenerationContext ctx, NInvocStmnt node)
+        {
+            var tmp = new TempIdent();
+
+            if (node.Invocation.Element.String == "Out.Integer") {
+                var arg = ((NInvocation) node.Invocation.Operation).Args.Expressions.First();
+                var src = (Value) new TempIdent();
+                var type = arg.GetFinalType(_scope);
+                ctx.WriteExpr(arg, ref src, type);
+                return ctx.WriteAssignLeft(tmp).Write("call ").WriteType(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str, i32 0, i32 0), ").WriteType(type).Write(" {0}) nounwind", src).NewLine();
+            } else {
+                throw new NotImplementedException("Invocation statements not yet implented");
+            }
         }
     }
 }

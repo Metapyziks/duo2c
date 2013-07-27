@@ -10,15 +10,8 @@ FormalPars    = ["(" [FPSection {";" FPSection}] ")"] [":" Type].
 FPSection     = [VAR] ident {"," ident} ":" Type.
 Receiver      = "(" [VAR] ident ":" ident ")".
 Type          = OberonType | NamedType | ArrayType | RecordType | PtrType | ProcType.
-OberonType    = "LONGINT"   | "LongInt"
-              | "INTEGER"   | "Integer"
-              | "SHORTINT"  | "ShortInt"
-              | "BYTE"      | "Byte"
-              | "LONGREAL"  | "LongReal"
-              | "REAL"      | "Real"
-              | "BOOLEAN"   | "Boolean"
-              | "SET"       | "Set"
-              | "CHAR"      | "Char".
+OberonType    = "LONGINT" | "INTEGER" | "SHORTINT" | "BYTE" | "LONGREAL" | "REAL" 
+              | "BOOLEAN" | "SET" | "CHAR".
 NamedType     = QualIdent.
 ArrayType     = ARRAY [ConstExpr {"," ConstExpr}] OF Type.
 RecordType    = RECORD ["("NamedType")"] [FieldList] {";" [FieldList]} END.

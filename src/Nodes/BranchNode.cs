@@ -74,6 +74,12 @@ namespace DUO2C.Nodes
             Children = new ParseNode[0];
         }
 
+        public BranchNode(int index, int length, String token = null)
+            : base(index, length, token)
+        {
+            Children = new ParseNode[0];
+        }
+
         public override String SerializeXML()
         {
             var nl = Environment.NewLine;
