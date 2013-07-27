@@ -111,3 +111,4 @@ UpgradeLog*.XML
 testfiles/*.ll
 testfiles/*.sym
 testfiles/*.bc
+testfiles/*.asm
