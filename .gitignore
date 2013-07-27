@@ -110,3 +110,4 @@ UpgradeLog*.XML
 *.syntax
 testfiles/*.ll
 testfiles/*.sym
+testfiles/*.bc

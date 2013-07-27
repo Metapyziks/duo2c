@@ -131,6 +131,12 @@ namespace DUO2C.CodeGen
             ctx.Write("; WARNING: This file is automatically").NewLine();
             ctx.Write("; generated and should not be edited").NewLine().NewLine();
 
+            ctx.Write("target datalayout = \"e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-f80:128:128-v64:64:64-v128:128:128-a0:0:64-f80:32:32-n8:16:32-S32\"").NewLine().NewLine();
+
+            ctx.Write("@.str = private unnamed_addr constant [3 x i8] c\"%i\\00\", align 1").NewLine().NewLine();
+
+            ctx.Write("declare i32 @printf(i8*, ...) nounwind").NewLine().NewLine();
+
             ctx.Write("; Begin type aliases").NewLine().Enter(2).NewLine();
             ctx.WriteTypeDecl("CHAR", IntegerType.ShortInt);
             ctx.WriteTypeDecl("SET", IntegerType.LongInt);
@@ -143,11 +149,11 @@ namespace DUO2C.CodeGen
             }
             ctx.Leave().Write("; End type aliases").NewLine().NewLine();
 
-            ctx.Write("define i32 @").Write(module.Identifier).Write("_main() {").Enter().NewLine().NewLine();
+            ctx.Write("define i32 @").Write("main() {").Enter().NewLine().NewLine();
             if (module.Body != null) {
                 ctx.WriteStatements(module.Body.Statements.Select(x => x.Inner));
             }
-            ctx.Write("ret i32 %Simple_z").NewLine().Leave().Write("}").NewLine();
+            ctx.Write("ret i32 0").NewLine().Leave().Write("}").NewLine();
 
             return ctx.Write("; Module end").NewLine();
         }

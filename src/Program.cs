@@ -119,6 +119,7 @@ namespace DUO2C
                         string ir = IntermediaryCodeGenerator.Generate(module, guid);
                         File.WriteAllText(outpath, ir);
 
+#if RELEASE
                         try {
                             var ps = new ProcessStartInfo("C:\\llvm\\bin\\llc.exe", "-O0");
                             ps.UseShellExecute = false;
@@ -155,6 +156,7 @@ namespace DUO2C
                         } catch (Exception e) {
                             WriteErrorHeader("Unable to start the LLVM static compiler");
                         }
+#endif
                     }
                 } catch (ParserException e) {
                     WriteErrorHeader("Encountered 1 error while parsing:");
