@@ -42,7 +42,7 @@ namespace DUO2C.CodeGen
             public override string ToString()
             {
                 if (_ident.Module != null || _scope.GetSymbolDecl(_ident.Identifier, null).Visibility != AccessModifier.Private) {
-                    return String.Format("%{0}.{1}", _ident.Module ?? _module.Identifier, _ident.Identifier);
+                    return String.Format("%{0}_{1}", _ident.Module ?? _module.Identifier, _ident.Identifier);
                 } else {
                     return String.Format("%{0}", _ident.Identifier);
                 }
@@ -58,37 +58,40 @@ namespace DUO2C.CodeGen
                 _sUsed.Clear();
             }
 
-            public static TempIdent Create()
-            {
-                int id = 0;
-                foreach (int used in _sUsed) {
-                    if (id == used) ++id;
-                }
-
-                _sUsed.Add(id);
-                return new TempIdent(id);
-            }
-
             int _id;
 
-            private TempIdent(int id)
+            public TempIdent()
             {
-                _id = id;
+                _id = 0;
+            }
+
+            void AssignID()
+            {
+                if (_id == 0) {
+                    while (_sUsed.Contains(++_id));
+
+                    _sUsed.Add(_id);
+                }
             }
 
             public override string ToString()
             {
-                if (_id > -1) {
-                    return String.Format("%{0}", _id);
-                } else {
-                    throw new ObjectDisposedException("TempIdent");
+                if (_id == -1) {
+                    throw new InvalidOperationException("TempIdent has been disposed");
                 }
+
+                if (_id == 0) {
+                    AssignID();
+                }
+                
+                return String.Format("%{0}", _id);
             }
         
             public void Dispose()
             {
-                _sUsed.Remove(_id);
- 	            _id = -1;
+                //_sUsed.Remove(_id);
+
+                _id = -1;
             }
         }
 
@@ -140,11 +143,11 @@ namespace DUO2C.CodeGen
             }
             ctx.Leave().Write("; End type aliases").NewLine().NewLine();
 
-            ctx.Write("define void @").Write(module.Identifier).Write("_main() {").Enter().NewLine().NewLine();
+            ctx.Write("define i32 @").Write(module.Identifier).Write("_main() {").Enter().NewLine().NewLine();
             if (module.Body != null) {
                 ctx.WriteStatements(module.Body.Statements.Select(x => x.Inner));
             }
-            ctx.Write("ret void").NewLine().Leave().Write("}").NewLine();
+            ctx.Write("ret i32 %Simple_z").NewLine().Leave().Write("}").NewLine();
 
             return ctx.Write("; Module end").NewLine();
         }
@@ -209,9 +212,9 @@ namespace DUO2C.CodeGen
         static GenerationContext WriteStatements(this GenerationContext ctx, IEnumerable<Statement> statements)
         {
             foreach (var stmnt in statements) {
-                ctx.Write("; {0}", stmnt.String).NewLine();
+                ctx.Write("; {0}", stmnt.String).Enter(0).NewLine();
                 ctx.WriteNode(stmnt);
-                ctx.NewLine();
+                ctx.NewLine().Leave();
             }
             return ctx;
         }
@@ -259,7 +262,7 @@ namespace DUO2C.CodeGen
             if (from.Equals(to) || src is NumberLiteral) return ctx;
 
             var tsrc = src;
-            src = dest;
+            src = dest = new TempIdent();
 
             if (from is IntegerType && to is IntegerType) {
                 IntegerType fi = (IntegerType) from, ti = (IntegerType) to;
@@ -331,7 +334,7 @@ namespace DUO2C.CodeGen
             if (node.Operator == SimpleExprOperator.None) {
                 return ctx.WriteTerm(node.Term, ref dest, type);
             } else {
-                using (TempIdent tleft = TempIdent.Create(), tright = TempIdent.Create()) {
+                using (TempIdent tleft = new TempIdent(), tright = new TempIdent()) {
                     Value left = tleft;
                     Value right = tright;
 

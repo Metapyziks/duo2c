@@ -25,6 +25,13 @@ namespace DUO2C
             for (int i = Console.BufferWidth; i > 0; --i) Console.Write("▀");
             Console.ResetColor();
         }
+        
+        static void WriteError(String error)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(error);
+            Console.ResetColor();
+        }
 
         static void WriteError(ParserException error)
         {
@@ -101,14 +108,53 @@ namespace DUO2C
                             + Path.GetFileNameWithoutExtension(args[0])
                             + ".sym";
 
-                        File.WriteAllText(outpath, SymbolCodeGenerator.Generate(module.Type, guid));
+                        string sym = SymbolCodeGenerator.Generate(module.Type, guid);
+                        File.WriteAllText(outpath, sym);
 
                         outpath = Path.GetDirectoryName(args[0])
                             + Path.DirectorySeparatorChar
                             + Path.GetFileNameWithoutExtension(args[0])
                             + ".ll";
 
-                        File.WriteAllText(outpath, IntermediaryCodeGenerator.Generate(module, guid));
+                        string ir = IntermediaryCodeGenerator.Generate(module, guid);
+                        File.WriteAllText(outpath, ir);
+
+                        try {
+                            var ps = new ProcessStartInfo("C:\\llvm\\bin\\llc.exe", "-O0");
+                            ps.UseShellExecute = false;
+                            ps.RedirectStandardInput = true;
+                            ps.RedirectStandardOutput = true;
+                            ps.RedirectStandardError = true;
+                            var llc = Process.Start(ps);
+
+                            llc.StandardInput.Write(ir);
+                            llc.StandardInput.Flush();
+                            llc.StandardInput.Close();
+
+                            outpath = Path.GetDirectoryName(args[0])
+                            + Path.DirectorySeparatorChar
+                            + Path.GetFileNameWithoutExtension(args[0])
+                            + ".asm";
+
+                            var file = File.Create(outpath);
+                            var writer = new StreamWriter(file);
+
+                            while (!llc.HasExited) {
+                                while (!llc.StandardError.EndOfStream) {
+                                    WriteError(llc.StandardError.ReadToEnd());
+                                }
+
+                                while (!llc.StandardOutput.EndOfStream) {
+                                    writer.Write(llc.StandardOutput.ReadToEnd());
+                                }
+                            }
+
+                            writer.Flush();
+                            writer.Close();
+                            file.Close();
+                        } catch (Exception e) {
+                            WriteErrorHeader("Unable to start the LLVM static compiler");
+                        }
                     }
                 } catch (ParserException e) {
                     WriteErrorHeader("Encountered 1 error while parsing:");
