@@ -1,7 +1,8 @@
 MODULE Simple;
     IMPORT Out;
-    VAR x : Integer;
+    VAR x : INTEGER;
 BEGIN
     x := 4;
-    Out.Integer(5 * x);
+    Out.Integer(x + x * (x + x));
+    x := x + 1;
 END Simple.

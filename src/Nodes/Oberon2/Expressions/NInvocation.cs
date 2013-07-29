@@ -12,6 +12,14 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("Invocation")]
     public class NInvocation : Selector
     {
+        public override string String
+        {
+            get
+            {
+                return "(" + base.String + ")";
+            }
+        }
+
         public NExprList Args
         {
             get { return (NExprList) Children.FirstOrDefault(); }

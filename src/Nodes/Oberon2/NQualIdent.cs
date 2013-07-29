@@ -52,5 +52,12 @@ namespace DUO2C.Nodes.Oberon2
             Identifier = ident;
             Module = module;
         }
+
+        public NQualIdent(String ident, String module)
+            : base(new BranchNode(-1, "QualIdent"), true)
+        {
+            Identifier = ident;
+            Module = module;
+        }
     }
 }

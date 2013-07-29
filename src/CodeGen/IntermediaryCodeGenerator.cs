@@ -13,7 +13,22 @@ namespace DUO2C.CodeGen
 {
     public static class IntermediaryCodeGenerator
     {
-        abstract class Value { }
+        abstract class Value
+        {
+            public override bool Equals(object obj)
+            {
+                if (this is TempIdent || obj is TempIdent) {
+                    return this == obj;
+                } else {
+                    return GetType() == obj.GetType() && ToString().Equals(obj.ToString());
+                }
+            }
+
+            public override int GetHashCode()
+            {
+                return GetType().GetHashCode() ^ ToString().GetHashCode();
+            }
+        }
 
         class NumberLiteral : Value
         {
@@ -34,6 +49,11 @@ namespace DUO2C.CodeGen
         {
             NQualIdent _ident;
 
+            public QualIdent(String ident)
+            {
+                _ident = new NQualIdent(ident, null);
+            }
+
             public QualIdent(NQualIdent ident)
             {
                 _ident = ident;
@@ -42,9 +62,9 @@ namespace DUO2C.CodeGen
             public override string ToString()
             {
                 if (_ident.Module != null || _scope.GetSymbolDecl(_ident.Identifier, null).Visibility != AccessModifier.Private) {
-                    return String.Format("%{0}.{1}", _ident.Module ?? _module.Identifier, _ident.Identifier);
+                    return String.Format("@{0}.{1}", _ident.Module ?? _module.Identifier, _ident.Identifier);
                 } else {
-                    return String.Format("%{0}", _ident.Identifier);
+                    return String.Format("@{0}", _ident.Identifier);
                 }
             }
         }
@@ -129,6 +149,16 @@ namespace DUO2C.CodeGen
             }
             ctx.Leave().Write("; End type aliases").NewLine().NewLine();
 
+            foreach (var v in _scope.GetSymbols()) {
+                if (v.Key != "NEW") {
+                    ctx.WriteGlobalDecl(new QualIdent(v.Key), v.Value.Type);
+                }
+            }
+
+            if (_scope.GetSymbols().Count() > 0) {
+                ctx.NewLine();
+            }
+
             ctx.Write("define i32 @").Write("main() {").Enter().NewLine().NewLine();
             if (module.Body != null) {
                 ctx.WriteStatements(module.Body.Statements.Select(x => x.Inner));
@@ -141,6 +171,15 @@ namespace DUO2C.CodeGen
         static GenerationContext WriteTypeIdent(this GenerationContext ctx, String identifier)
         {
             return ctx.Write("%_type{0}", identifier);
+        }
+
+        static GenerationContext WriteGlobalDecl(this GenerationContext ctx, QualIdent ident, OberonType type)
+        {
+            if (type is NumericType) {
+                return ctx.WriteOperation(ident, "global", type, "0");
+            } else {
+                throw new NotImplementedException();
+            }
         }
 
         static GenerationContext WriteTypeDecl(this GenerationContext ctx, String identifier, OberonType type)
@@ -229,7 +268,12 @@ namespace DUO2C.CodeGen
 
         static GenerationContext WriteOperation(this GenerationContext ctx, Value dest, String op, params Object[] args)
         {
-            ctx.WriteAssignLeft(dest).Write("{0} ", op).Anchor();
+            return ctx.WriteAssignLeft(dest).WriteOperation(op, args);
+        }
+
+        static GenerationContext WriteOperation(this GenerationContext ctx, String op, params Object[] args)
+        {
+            ctx.Write("{0} ", op).Anchor();
             foreach (var arg in args) {
                 if (arg is OberonType) {
                     ctx.WriteType((OberonType) arg).Write(" ").Anchor();
@@ -285,8 +329,17 @@ namespace DUO2C.CodeGen
             return ctx.Write(ident.ToString());
         }
 
+        static GenerationContext WriteAssignHack(this GenerationContext ctx, Value dest, OberonType type, Value val)
+        {
+            return ctx.WriteOperation(dest, "select", BooleanType.Default, "true", type, val, type, "undef");
+        }
+
         static GenerationContext WriteFactor(this GenerationContext ctx, NFactor node, ref Value dest, OberonType type)
         {
+            if (node.Inner is NDesignator && ((NDesignator) node.Inner).IsRoot) {
+                return ctx.WriteOperation(dest, "load", new PointerType(type), new QualIdent((NQualIdent) ((NDesignator) node.Inner).Element));
+            }
+
             if (node.Inner is NExpr) {
                 return ctx.WriteExpr((NExpr) node.Inner, ref dest, type);
             } else if (dest is TempIdent) {
@@ -298,15 +351,13 @@ namespace DUO2C.CodeGen
                     return ctx;
                 }
             } else if (node.Inner is NNumber) {
-                return ctx.WriteOperation(dest, "select", BooleanType.Default, "true", type, new NumberLiteral((NNumber) node.Inner), type, "undef");
-            } else if (node.Inner is NDesignator && ((NDesignator) node.Inner).IsRoot) {
-                return ctx.WriteOperation(dest, "select", BooleanType.Default, "true", type, new QualIdent((NQualIdent) ((NDesignator) node.Inner).Element), type, "undef");
+                return ctx.WriteAssignHack(dest, type, new NumberLiteral((NNumber) node.Inner));
             } 
 
             throw new NotImplementedException("No rule to generate factor of type " + node.Inner.GetType());
         }
 
-        static Value PrepareOperand(this GenerationContext ctx, ExpressionElement node, OberonType type)
+        static Value PrepareOperand(this GenerationContext ctx, ExpressionElement node, OberonType type, Value dest)
         {
             var temp = new TempIdent();
             var val = (Value) temp;
@@ -321,6 +372,10 @@ namespace DUO2C.CodeGen
                 ctx.WriteExpr((NExpr) node, ref val, ntype);
             }
             ctx.WriteConversion(temp, ntype, type, ref val);
+            if (val.Equals(dest)) {
+                ctx.WriteAssignHack(temp, type, val);
+                return temp;
+            }
             return val;
         }
 
@@ -329,7 +384,7 @@ namespace DUO2C.CodeGen
             if (node.Operator == TermOperator.None) {
                 return ctx.WriteFactor(node.Factor, ref dest, type);
             } else {
-                Value l = ctx.PrepareOperand(node.Prev, type), r = ctx.PrepareOperand(node.Factor, type);
+                Value l = ctx.PrepareOperand(node.Prev, type, dest), r = ctx.PrepareOperand(node.Factor, type, dest);
                 switch (node.Operator) {
                     case TermOperator.Multiply:
                         return ctx.WriteOperation(dest, (type.IsReal ? "fmul" : "mul"), type, l, r);
@@ -344,7 +399,7 @@ namespace DUO2C.CodeGen
             if (node.Operator == SimpleExprOperator.None) {
                 return ctx.WriteTerm(node.Term, ref dest, type);
             } else {
-                Value l = ctx.PrepareOperand(node.Prev, type), r = ctx.PrepareOperand(node.Term, type);
+                Value l = ctx.PrepareOperand(node.Prev, type, dest), r = ctx.PrepareOperand(node.Term, type, dest);
                 switch (node.Operator) {
                     case SimpleExprOperator.Add:
                         return ctx.WriteOperation(dest, (type.IsReal ? "fadd" : "add"), type, l, r);
@@ -377,7 +432,10 @@ namespace DUO2C.CodeGen
         static GenerationContext WriteNode(this GenerationContext ctx, NAssignment node)
         {
             var dest = ctx.GetDesignation(node.Assignee);
-            return ctx.WriteExpr(node.Expression, ref dest, node.Assignee.GetFinalType(_scope));
+            var temp = (Value) new TempIdent();
+            var type = node.Assignee.GetFinalType(_scope);
+            ctx.WriteExpr(node.Expression, ref temp, type);
+            return ctx.WriteOperation("store", type, temp, new PointerType(type), dest);
         }
 
         static GenerationContext WriteNode(this GenerationContext ctx, NInvocStmnt node)
@@ -389,6 +447,7 @@ namespace DUO2C.CodeGen
                 var src = (Value) new TempIdent();
                 var type = arg.GetFinalType(_scope);
                 ctx.WriteExpr(arg, ref src, type);
+                // Temporary print hack
                 return ctx.WriteAssignLeft(tmp).Write("call ").WriteType(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str, i32 0, i32 0), ").WriteType(type).Write(" {0}) nounwind", src).NewLine();
             } else {
                 throw new NotImplementedException("Invocation statements not yet implented");
