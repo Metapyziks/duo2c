@@ -1,0 +1,14 @@
+(**
+ *  Generated 29/07/2013 19:43:14
+ *  GlobalUID 9573c0cb-367b-4616-9723-f4c54bd7ff6b
+ *
+ *  Exported symbol file for module "Simple"
+ *
+ *  WARNING: This file is automatically
+ *  generated and should not be edited
+**)
+
+MODULE Simple;
+    TYPE
+    VAR
+END Simple.

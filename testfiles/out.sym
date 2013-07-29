@@ -1,0 +1,19 @@
+(**
+ *  Generated 29/07/2013 19:41:10
+ *  GlobalUID 7b47b124-30cc-415b-abc6-4a83a862f062
+ *
+ *  Exported symbol file for module "Out"
+ *
+ *  WARNING: This file is automatically
+ *  generated and should not be edited
+**)
+
+MODULE Out;
+    TYPE
+        String * = ARRAY OF CHAR;
+    VAR
+        Ln      * : PROCEDURE;
+        String  * : PROCEDURE (val : Out.String);
+        Integer * : PROCEDURE (val : LONGINT);
+        Real    * : PROCEDURE (val : LONGREAL);
+END Out.

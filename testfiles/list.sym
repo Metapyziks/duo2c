@@ -1,0 +1,20 @@
+(**
+ *  Generated 24/07/2013 23:24:03
+ *  GlobalUID 8d09122f-a760-4a06-b7af-c29603124327
+ *
+ *  Exported symbol file for module "Lists"
+ *
+ *  WARNING: This file is automatically
+ *  generated and should not be edited
+**)
+
+MODULE Lists;
+    TYPE
+        Int32 = INTEGER;
+        List* = POINTER TO ListNode;
+        ListNode = RECORD
+            Add* : PROCEDURE (v : Int32);
+            Get* : PROCEDURE () : Int32;
+        END;
+    VAR
+END Lists.
