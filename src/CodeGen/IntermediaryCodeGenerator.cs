@@ -49,7 +49,7 @@ namespace DUO2C.CodeGen
             }
         }
 
-        class TempIdent : Value, IDisposable
+        class TempIdent : Value
         {
             static int _sLast = 0;
 
@@ -67,20 +67,11 @@ namespace DUO2C.CodeGen
 
             public override string ToString()
             {
-                if (_id == -1) {
-                    throw new InvalidOperationException("TempIdent has been disposed");
-                }
-
                 if (_id == 0) {
                     _id = ++_sLast;
                 }
                 
                 return String.Format("%{0}", _id);
-            }
-        
-            public void Dispose()
-            {
-                _id = -1;
             }
         }
 
@@ -315,12 +306,36 @@ namespace DUO2C.CodeGen
             throw new NotImplementedException("No rule to generate factor of type " + node.Inner.GetType());
         }
 
+        static Value PrepareOperand(this GenerationContext ctx, ExpressionElement node, OberonType type)
+        {
+            var temp = new TempIdent();
+            var val = (Value) temp;
+            var ntype = node.GetFinalType(_scope);
+            if (node is NFactor) {
+                ctx.WriteFactor((NFactor) node, ref val, ntype);
+            } else if (node is NTerm) {
+                ctx.WriteTerm((NTerm) node, ref val, ntype);
+            } else if (node is NSimpleExpr) {
+                ctx.WriteSimpleExpr((NSimpleExpr) node, ref val, ntype);
+            } else if (node is NSimpleExpr) {
+                ctx.WriteExpr((NExpr) node, ref val, ntype);
+            }
+            ctx.WriteConversion(temp, ntype, type, ref val);
+            return val;
+        }
+
         static GenerationContext WriteTerm(this GenerationContext ctx, NTerm node, ref Value dest, OberonType type)
         {
             if (node.Operator == TermOperator.None) {
                 return ctx.WriteFactor(node.Factor, ref dest, type);
             } else {
-                throw new NotImplementedException();
+                Value l = ctx.PrepareOperand(node.Prev, type), r = ctx.PrepareOperand(node.Factor, type);
+                switch (node.Operator) {
+                    case TermOperator.Multiply:
+                        return ctx.WriteOperation(dest, (type.IsReal ? "fmul" : "mul"), type, l, r);
+                    default:
+                        throw new NotImplementedException();
+                }
             }
         }
 
@@ -329,24 +344,14 @@ namespace DUO2C.CodeGen
             if (node.Operator == SimpleExprOperator.None) {
                 return ctx.WriteTerm(node.Term, ref dest, type);
             } else {
-                using (TempIdent tleft = new TempIdent(), tright = new TempIdent()) {
-                    Value left = tleft;
-                    Value right = tright;
-
-                    ctx.WriteSimpleExpr(node.Prev, ref left, node.Prev.GetFinalType(_scope));
-                    ctx.WriteTerm(node.Term, ref right, node.Term.GetFinalType(_scope));
-
-                    ctx.WriteConversion(tleft, node.Prev.GetFinalType(_scope), type, ref left);
-                    ctx.WriteConversion(tright, node.Term.GetFinalType(_scope), type, ref right);
-
-                    switch (node.Operator) {
-                        case SimpleExprOperator.Add:
-                            return ctx.WriteOperation(dest, "add", type, left, right);
-                        case SimpleExprOperator.Subtract:
-                            return ctx.WriteOperation(dest, "sub", type, left, right);
-                        default:
-                            throw new NotImplementedException();
-                    }
+                Value l = ctx.PrepareOperand(node.Prev, type), r = ctx.PrepareOperand(node.Term, type);
+                switch (node.Operator) {
+                    case SimpleExprOperator.Add:
+                        return ctx.WriteOperation(dest, (type.IsReal ? "fadd" : "add"), type, l, r);
+                    case SimpleExprOperator.Subtract:
+                        return ctx.WriteOperation(dest, (type.IsReal ? "fsub" : "sub"), type, l, r);
+                    default:
+                        throw new NotImplementedException();
                 }
             }
         }

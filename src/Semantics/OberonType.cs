@@ -410,10 +410,12 @@ namespace DUO2C.Semantics
                     var param = Params[i];
                     var arg = args[i];
 
-                    var argType = arg.GetFinalType(scope);
+                    if (arg.FindTypeErrors(scope).Count() == 0) { 
+                        var argType = arg.GetFinalType(scope);
 
-                    if (!param.Type.Resolve(scope).CanTestEquality(argType)) {
-                        yield return new TypeMismatchException(param.Type, argType, arg);
+                        if (!param.Type.Resolve(scope).CanTestEquality(argType)) {
+                            yield return new TypeMismatchException(param.Type, argType, arg);
+                        }
                     }
                 }
             }

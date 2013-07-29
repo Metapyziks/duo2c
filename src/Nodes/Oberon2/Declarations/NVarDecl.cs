@@ -40,10 +40,17 @@ namespace DUO2C.Nodes.Oberon2
             Children = Children.Where(x => x is NIdentList || x is NType);
         }
 
+        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        {
+            return base.FindTypeErrors(scope);
+        }
+
         public override void FindDeclarations(Scope scope)
         {
-            foreach (var ident in IdentList.IdentDefs) {
-                scope.DeclareSymbol(ident.Identifier, Type.Type, ident.Visibility, false);
+            if (FindTypeErrors(scope).Count() == 0) {
+                foreach (var ident in IdentList.IdentDefs) {
+                    scope.DeclareSymbol(ident.Identifier, Type.Type, ident.Visibility, false);
+                }
             }
         }
     }
