@@ -1,5 +1,5 @@
-; Generated 29/07/2013 23:30:26
-; GlobalUID 9ee201fd-4909-4ba6-b1b8-bb104ead8c67
+; Generated 30/07/2013 00:32:44
+; GlobalUID 8c6ee504-afb1-4eab-a9cd-6f4cb9246ffb
 ;
 ; LLVM IR file for module "Simple"
 ;
@@ -26,46 +26,42 @@ declare i32 @printf(i8*, ...) nounwind
 
 ; End type aliases
 
-@x = global i32 0
-@y = global i32 0
+@i = global i32 0
 
 define i32 @main() {
 
-    ; x := 5
-    store i32 5, i32* @x
+    ; i := 1
+    store i32 1, i32* @i
 
-    ; y := 7
-    store i32 7, i32* @y
+    ; i <= 10Out.Integer(i)Out.Ln()i := i + 1
+    br label %1
 
-    ; x > yOut.Integer(6)Out.Ln()Out.Integer(12)Out.Ln()
-    %1 = load     i32* @x
-    %2 = load     i32* @y
-    %3 = icmp sgt i32  %1, %2
-    br i1 %3, label %4, label %8
+; <label>:1
 
-; <label>:4 ; preds = %0
+    %2 = load     i32* @i
+    %3 = sext     i8   10  to i32
+    %4 = icmp sle i32  %2, %3
+    br i1 %4, label %5, label %13
 
-    ; Out.Integer(6)
-    %5 = sext i8 6 to i64
-    %6 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.printistr, i32 0, i32 0), i64 %5) nounwind
+; <label>:5
 
-    ; Out.Ln()
-    %7 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @.printnstr, i32 0, i32 0)) nounwind
-
-    br label %12
-
-; <label>:8 ; preds = %0
-
-    ; Out.Integer(12)
-    %9  = sext i8 12 to i64
-    %10 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.printistr, i32 0, i32 0), i64 %9) nounwind
+    ; Out.Integer(i)
+    %6 = load i32* @i
+    %7 = sext i32  %6 to i64
+    %8 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.printistr, i32 0, i32 0), i64 %7) nounwind
 
     ; Out.Ln()
-    %11 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @.printnstr, i32 0, i32 0)) nounwind
+    %9 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @.printnstr, i32 0, i32 0)) nounwind
 
-    br label %12
+    ; i := i + 1
+    %10   = load i32* @i
+    %11   = sext i8   1    to i32
+    %12   = add  i32  %10, %11
+    store i32    %12, i32* @i
 
-; <label>:12 ; preds = %4, %8
+    br label %1
+
+; <label>:13
 
     ret i32 0
 }

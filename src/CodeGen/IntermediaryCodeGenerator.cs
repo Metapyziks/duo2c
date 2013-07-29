@@ -554,21 +554,43 @@ namespace DUO2C.CodeGen
             ctx.Write("br ").WriteType(BooleanType.Default).Write(" {0}, label ", cond).Write(() => iftrue.ToString());
             ctx.Write(", label ").Write(() => node.ElseBody != null ? iffalse.ToString() : ifend.ToString()).NewLine();
 
-            ctx.NewLine().Write("\r; <label>:{0} ; preds = %0", iftrue.ID).NewLine().NewLine();
+            ctx.NewLine().Write("\r; <label>:{0}", iftrue.ID).NewLine().NewLine();
 
             ctx.WriteStatements(node.ThenBody.Statements.Select(x => x.Inner));
             ctx.Write("br label ").Write(() => ifend.ToString()).NewLine();
 
             if (node.ElseBody != null) {
-                ctx.NewLine().Write("\r; <label>:{0} ; preds = %0", iffalse.ID, iftrue).NewLine().NewLine();
+                ctx.NewLine().Write("\r; <label>:{0}", iffalse.ID).NewLine().NewLine();
                 ctx.WriteStatements(node.ElseBody.Statements.Select(x => x.Inner));
                 ctx.Write("br label ").Write(() => ifend.ToString()).NewLine();
 
-                return ctx.NewLine().Write("\r; <label>:{0} ; preds = {1}, {2}", ifend.ID, iftrue, iffalse).NewLine();
+                return ctx.NewLine().Write("\r; <label>:{0}", ifend.ID).NewLine();
             } else {
-                return ctx.NewLine().Write("\r; <label>:{0} ; preds = {1}, %0", ifend.ID, iftrue).NewLine();
+                return ctx.NewLine().Write("\r; <label>:{0}", ifend.ID).NewLine();
             }
+        }
 
+        static GenerationContext WriteNode(this GenerationContext ctx, NWhileLoop node)
+        {
+            var cond = (Value) new TempIdent();
+            var condstart = new TempIdent();
+            var bodystart = new TempIdent();
+            var bodyend = new TempIdent();
+
+            ctx.Write("br label ").Write(() => condstart.ToString()).NewLine();
+
+            ctx.NewLine().Write("\r; <label>:{0}", condstart.ID).NewLine().NewLine();
+
+            ctx.WriteExpr(node.Condition, ref cond, BooleanType.Default);
+            ctx.Write("br ").WriteType(BooleanType.Default).Write(" {0}, label ", cond).Write(() => bodystart.ToString());
+            ctx.Write(", label ").Write(() => bodyend.ToString()).NewLine();
+
+            ctx.NewLine().Write("\r; <label>:{0}", bodystart.ID).NewLine().NewLine();
+
+            ctx.WriteStatements(node.Body.Statements.Select(x => x.Inner));
+            ctx.Write("br label ").Write(() => condstart.ToString()).NewLine();
+
+            return ctx.NewLine().Write("\r; <label>:{0}", bodyend.ID).NewLine();
         }
 
         static GenerationContext WriteNode(this GenerationContext ctx, NInvocStmnt node)

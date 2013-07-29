@@ -3,9 +3,9 @@
 int j = 5;
 
 int main() {
-    int i = 16;
+    int i;
 
-    if (i > 0) {
+    for (i = 0; i < 5; ++i) {
         printf("%i\n", i);
     }
     return 0;

@@ -94,6 +94,14 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("IfThenElse")]
     public class NIfThenElse : Statement
     {
+        public override string String
+        {
+            get
+            {
+                return String.Format("IF {0} THEN", Condition.String);
+            }
+        }
+
         public NExpr Condition
         {
             get { return (NExpr) Children.First(); }

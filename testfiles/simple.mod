@@ -1,17 +1,13 @@
 MODULE Simple;
     IMPORT Out;
 
-    VAR x : INTEGER;
-    VAR y : INTEGER;
+    VAR
+        i : INTEGER;
 
 BEGIN
-    x := 5;
-    y := 7;
-
-    IF x > y THEN
-        Out.Integer(6); Out.Ln;
-    ELSE
-        Out.Integer(12); Out.Ln;
+    i := 1;
+    WHILE i <= 10 DO
+        Out.Integer(i); Out.Ln;
+        i := i + 1;
     END;
-
 END Simple.
