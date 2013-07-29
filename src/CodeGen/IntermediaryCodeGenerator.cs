@@ -32,23 +32,23 @@ namespace DUO2C.CodeGen
             }
         }
 
-        class NumberLiteral : Value
+        class Literal : Value
         {
-            String _num;
+            String _str;
 
-            public NumberLiteral(String num)
+            public Literal(String str)
             {
-                _num = num;
+                _str = str;
             }
 
-            public NumberLiteral(NNumber num)
+            public Literal(NNumber num)
             {
-                _num = num.Inner.String;
+                _str = num.Inner.String;
             }
 
             public override string ToString()
             {
-                return _num;
+                return _str;
             }
         }
 
@@ -140,9 +140,11 @@ namespace DUO2C.CodeGen
 
             ctx.Write("target datalayout = \"e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-f80:128:128-v64:64:64-v128:128:128-a0:0:64-f80:32:32-n8:16:32-S32\"").NewLine().NewLine();
 
-            ctx.Write("@.printistr = private unnamed_addr constant [3 x i8] c\"%i\\00\", align 1").NewLine();
-            ctx.Write("@.printfstr = private unnamed_addr constant [3 x i8] c\"%f\\00\", align 1").NewLine();
-            ctx.Write("@.printnstr = private unnamed_addr constant [2 x i8] c\"\\0A\\00\", align 1").NewLine().NewLine();
+            ctx.Write("@.printistr = private constant [3 x i8] c\"%i\\00\", align 1").NewLine();
+            ctx.Write("@.printfstr = private constant [3 x i8] c\"%f\\00\", align 1").NewLine();
+            ctx.Write("@.printnstr = private constant [2 x i8] c\"\\0A\\00\", align 1").NewLine();
+            ctx.Write("@.truestr = private constant [5 x i8] c\"TRUE\\00\", align 1").NewLine();
+            ctx.Write("@.falsestr = private constant [6 x i8] c\"FALSE\\00\", align 1").NewLine().NewLine();
 
             ctx.Write("declare i32 @printf(i8*, ...) nounwind").NewLine().NewLine();
 
@@ -184,7 +186,9 @@ namespace DUO2C.CodeGen
 
         static GenerationContext WriteGlobalDecl(this GenerationContext ctx, QualIdent ident, OberonType type)
         {
-            if (type.IsInteger) {
+            if (type.IsBool) {
+                return ctx.WriteOperation(ident, "global", type, "false");
+            } else if (type.IsInteger) {
                 return ctx.WriteOperation(ident, "global", type, "0");
             } else if (type.IsReal) {
                 return ctx.WriteOperation(ident, "global", type, "0.0");
@@ -302,8 +306,8 @@ namespace DUO2C.CodeGen
         {
             if (from.Equals(to)) return ctx;
 
-            if (src is NumberLiteral && from.IsInteger && to.IsReal) {
-                src = new NumberLiteral(src.ToString() + ".0");
+            if (src is Literal && from.IsInteger && to.IsReal) {
+                src = new Literal(src.ToString() + ".0");
                 return ctx;
             }
 
@@ -367,15 +371,20 @@ namespace DUO2C.CodeGen
                 return ctx.WriteExpr((NExpr) node.Inner, ref dest, type);
             } else if (dest is TempIdent) {
                 if (node.Inner is NNumber) {
-                    dest = new NumberLiteral((NNumber) node.Inner);
+                    dest = new Literal((NNumber) node.Inner);
+                    return ctx;
+                } else if (node.Inner is NBool) {
+                    dest = new Literal(node.Inner.String.ToLower());
                     return ctx;
                 } else if (node.Inner is NDesignator && ((NDesignator) node.Inner).IsRoot) {
                     dest = new QualIdent((NQualIdent) ((NDesignator) node.Inner).Element);
                     return ctx;
                 }
             } else if (node.Inner is NNumber) {
-                return ctx.WriteAssignHack(dest, type, new NumberLiteral((NNumber) node.Inner));
-            } 
+                return ctx.WriteAssignHack(dest, type, new Literal((NNumber) node.Inner));
+            } else if (node.Inner is NBool) {
+                return ctx.WriteAssignHack(dest, type, new Literal("0"));
+            }
 
             throw new NotImplementedException("No rule to generate factor of type " + node.Inner.GetType());
         }
@@ -488,6 +497,10 @@ namespace DUO2C.CodeGen
                     src = ctx.PrepareOperand(arg, type, null);
                 }
                 switch (elem.Identifier) {
+                    case "Boolean":
+                        var temp = new TempIdent();
+                        ctx.WriteOperation(temp, "select", type, src, "i8* getelementptr inbounds ([5 x i8]* @.truestr, i32 0, i32 0)", "i8* getelementptr inbounds ([6 x i8]* @.falsestr, i32 0, i32 0)");
+                        return ctx.WriteAssignLeft(tmp).Write("call ").WriteType(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* {0}) nounwind", temp).NewLine();
                     case "Byte":
                     case "ShortInt":
                     case "Integer":

@@ -1,6 +1,6 @@
 (**
- *  Generated 29/07/2013 19:41:10
- *  GlobalUID 7b47b124-30cc-415b-abc6-4a83a862f062
+ *  Generated 29/07/2013 20:23:13
+ *  GlobalUID ac0e58f8-86e7-4542-b287-8035ff877648
  *
  *  Exported symbol file for module "Out"
  *
@@ -16,4 +16,5 @@ MODULE Out;
         String  * : PROCEDURE (val : Out.String);
         Integer * : PROCEDURE (val : LONGINT);
         Real    * : PROCEDURE (val : LONGREAL);
+        Boolean * : PROCEDURE (val : BOOLEAN);
 END Out.

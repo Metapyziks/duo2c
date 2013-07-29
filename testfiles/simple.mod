@@ -1,17 +1,13 @@
 MODULE Simple;
     IMPORT Out;
 
-    VAR x : INTEGER;
-    VAR y : SHORTINT;
-    VAR z : INTEGER;
-    VAR n : REAL;
-    
-BEGIN
-    x := 1;
-    y := 1 - 2;
-    z := 3;
-    Out.Integer(x + y * (z + 1)); Out.Ln;
+    VAR x : BOOLEAN;
+    VAR y : BOOLEAN;
 
-    n := z / 2;
-    Out.Real(n); Out.Ln;
+BEGIN
+    x := TRUE;
+    y := FALSE;
+
+    Out.Boolean(x); Out.Ln;
+    Out.Boolean(y); Out.Ln;
 END Simple.

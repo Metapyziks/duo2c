@@ -6,4 +6,5 @@ MODULE Out;
     PROCEDURE ^ String*(val : String);
     PROCEDURE ^ Integer*(val : LONGINT);
     PROCEDURE ^ Real*(val : LONGREAL);
+    PROCEDURE ^ Boolean*(val : BOOLEAN);
 END Out.

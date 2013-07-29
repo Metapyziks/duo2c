@@ -12,8 +12,19 @@ define i32 @main() nounwind {
   store i32 0, i32* %1
   store i32 16, i32* %i, align 4
   %2 = load i32* %i, align 4
-  %3 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str, i32 0, i32 0), i32 %2) nounwind
-  %4 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str1, i32 0, i32 0), double 5.500000e+00) nounwind
+  %3 = icmp sgt i32 %2, 0
+  br i1 %3, label %4, label %7
+
+; <label>:4                                       ; preds = %0
+  %5 = load i32* %i, align 4
+  %6 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str, i32 0, i32 0), i32 %5) nounwind
+  br label %9
+
+; <label>:7                                       ; preds = %0
+  %8 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str1, i32 0, i32 0), double 5.500000e+00) nounwind
+  br label %9
+
+; <label>:9                                       ; preds = %7, %4
   ret i32 0
 }
 
