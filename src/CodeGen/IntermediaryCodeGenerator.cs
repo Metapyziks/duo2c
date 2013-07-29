@@ -458,7 +458,31 @@ namespace DUO2C.CodeGen
             if (node.Operator == ExprOperator.None) {
                 return ctx.WriteSimpleExpr(node.SimpleExpr, ref dest, type);
             } else {
-                throw new NotImplementedException();
+                var lt = node.Prev.GetFinalType(_scope);
+                var rt = node.SimpleExpr.GetFinalType(_scope);
+                OberonType ntype = lt;
+
+                if (lt.IsNumeric && rt.IsNumeric) {
+                    ntype = NumericType.Largest((NumericType) lt, (NumericType) rt);
+                }
+
+                Value l = ctx.PrepareOperand(node.Prev, ntype, dest), r = ctx.PrepareOperand(node.SimpleExpr, ntype, dest);
+                switch (node.Operator) {
+                    case ExprOperator.Equals:
+                        return ctx.WriteOperation(dest, (ntype.IsReal ? "fcmp oeq" : "icmp eq"), ntype, l, r);
+                    case ExprOperator.NotEquals:
+                        return ctx.WriteOperation(dest, (ntype.IsReal ? "fcmp one" : "icmp ne"), ntype, l, r);
+                    case ExprOperator.GreaterThan:
+                        return ctx.WriteOperation(dest, (ntype.IsReal ? "fcmp ogt" : "icmp sgt"), ntype, l, r);
+                    case ExprOperator.GreaterThanOrEqual:
+                        return ctx.WriteOperation(dest, (ntype.IsReal ? "fcmp oge" : "icmp sge"), ntype, l, r);
+                    case ExprOperator.LessThan:
+                        return ctx.WriteOperation(dest, (ntype.IsReal ? "fcmp olt" : "icmp slt"), ntype, l, r);
+                    case ExprOperator.LessThanOrEqual:
+                        return ctx.WriteOperation(dest, (ntype.IsReal ? "fcmp ole" : "icmp sle"), ntype, l, r);
+                    default:
+                        throw new NotImplementedException();
+                }
             }
         }
 

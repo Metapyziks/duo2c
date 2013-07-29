@@ -1,13 +1,13 @@
 MODULE Simple;
     IMPORT Out;
 
-    VAR x : BOOLEAN;
-    VAR y : BOOLEAN;
+    VAR x : INTEGER;
+    VAR y : INTEGER;
 
 BEGIN
-    x := TRUE;
-    y := FALSE;
+    x := 5;
+    y := 6;
 
-    Out.Boolean(x); Out.Ln;
-    Out.Boolean(y); Out.Ln;
+    Out.Boolean(x < y); Out.Ln;
+    Out.Boolean(x > y); Out.Ln;
 END Simple.

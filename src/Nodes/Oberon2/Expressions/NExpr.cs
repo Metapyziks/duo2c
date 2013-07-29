@@ -51,7 +51,7 @@ namespace DUO2C.Nodes.Oberon2
         public override string String
         {
             get {
-                return Prev != null ? String.Format("{0} {1} {2}", Prev, _opString, SimpleExpr.String) : SimpleExpr.String;
+                return Prev != null ? String.Format("{0} {1} {2}", Prev.String, _opString, SimpleExpr.String) : SimpleExpr.String;
             }
         }
 

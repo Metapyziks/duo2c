@@ -1,5 +1,5 @@
-; Generated 29/07/2013 20:41:44
-; GlobalUID 07487b89-afcd-4c2b-b6af-75abe0c77873
+; Generated 29/07/2013 21:35:44
+; GlobalUID decf6762-7cf9-4ddd-a9cd-2617fdbce72a
 ;
 ; LLVM IR file for module "Simple"
 ;
@@ -26,32 +26,36 @@ declare i32 @printf(i8*, ...) nounwind
   
 ; End type aliases
 
-@x = global i1 false
-@y = global i1 false
+@x = global i32 0
+@y = global i32 0
 
 define i32 @main() {    
     
-    ; x := TRUE
-    store i1 true, i1* @x
+    ; x := 5
+    store i32 5, i32* @x
     
-    ; y := FALSE
-    store i1 false, i1* @y
+    ; y := 6
+    store i32 6, i32* @y
     
-    ; Out.Boolean(x)
-    %1 = load   i1* @x
-    %2 = select i1  %1, i8* getelementptr inbounds ([5 x i8]* @.truestr, i32 0, i32 0), i8* getelementptr inbounds ([6 x i8]* @.falsestr, i32 0, i32 0)
-    %3 = call i32 (i8*, ...)* @printf(i8* %2) nounwind
-    
-    ; Out.Ln()
-    %4 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @.printnstr, i32 0, i32 0)) nounwind
-    
-    ; Out.Boolean(y)
-    %5 = load   i1* @y
-    %6 = select i1  %5, i8* getelementptr inbounds ([5 x i8]* @.truestr, i32 0, i32 0), i8* getelementptr inbounds ([6 x i8]* @.falsestr, i32 0, i32 0)
-    %7 = call i32 (i8*, ...)* @printf(i8* %6) nounwind
+    ; Out.Boolean(x < y)
+    %1 = load     i32* @x
+    %2 = load     i32* @y
+    %3 = icmp slt i32  %1, %2
+    %4 = select   i1   %3, i8* getelementptr inbounds ([5 x i8]* @.truestr, i32 0, i32 0), i8* getelementptr inbounds ([6 x i8]* @.falsestr, i32 0, i32 0)
+    %5 = call i32 (i8*, ...)* @printf(i8* %4) nounwind
     
     ; Out.Ln()
-    %8 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @.printnstr, i32 0, i32 0)) nounwind
+    %6 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @.printnstr, i32 0, i32 0)) nounwind
+    
+    ; Out.Boolean(x > y)
+    %7  = load     i32* @x
+    %8  = load     i32* @y
+    %9  = icmp sgt i32  %7, %8
+    %10 = select   i1   %9, i8* getelementptr inbounds ([5 x i8]* @.truestr, i32 0, i32 0), i8* getelementptr inbounds ([6 x i8]* @.falsestr, i32 0, i32 0)
+    %11 = call i32 (i8*, ...)* @printf(i8* %10) nounwind
+    
+    ; Out.Ln()
+    %12 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @.printnstr, i32 0, i32 0)) nounwind
     
     ret i32 0
 }
