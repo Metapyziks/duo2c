@@ -6,8 +6,12 @@ MODULE Simple;
 
 BEGIN
     x := 5;
-    y := 6;
+    y := 7;
 
-    Out.Boolean(x < y); Out.Ln;
-    Out.Boolean(x > y); Out.Ln;
+    IF x > y THEN
+        Out.Integer(6); Out.Ln;
+    ELSE
+        Out.Integer(12); Out.Ln;
+    END;
+
 END Simple.

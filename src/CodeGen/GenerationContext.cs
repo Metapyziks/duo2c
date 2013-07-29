@@ -8,35 +8,89 @@ using DUO2C.Nodes;
 
 namespace DUO2C.CodeGen
 {
+    public delegate String LazyString();
+
     public class GenerationContext
     {
+        private abstract class Column
+        {
+            public abstract void Write(String format, params Object[] args);
+        }
+
+        private class BuilderColumn : Column
+        {
+            private StringBuilder _str;
+
+            public BuilderColumn()
+            {
+                _str = new StringBuilder();
+            }
+
+            public override void Write(string format, params object[] args)
+            {
+                if (args.Length == 0) {
+                    _str.Append(format);
+                } else {
+                    _str.AppendFormat(format, args);
+                }
+            }
+
+            public override string ToString()
+            {
+                return _str.ToString();
+            }
+        }
+
+        private class LazyColumn : Column
+        {
+            private LazyString _func;
+
+            public LazyColumn(LazyString func)
+            {
+                _func = func;
+            }
+
+            public override void Write(string format, params object[] args)
+            {
+                var old = _func;
+                _func = () => old() + String.Format(format, args);
+            }
+
+            public override string ToString()
+            {
+                return _func();
+            }
+        }
+
         private class Line
         {
-            private List<StringBuilder> _columns;
+            private List<Column> _columns;
 
             public bool IsEmpty
             {
-                get { return _columns.Count == 1 && _columns.First().Length == 0; }
+                get { return _columns.Count == 1 && _columns.First().ToString().Length == 0; }
             }
 
             public Line()
             {
-                _columns = new List<StringBuilder>();
-                _columns.Add(new StringBuilder());
+                _columns = new List<Column>();
+                _columns.Add(new BuilderColumn());
             }
 
             public void Write(String format, params object[] args)
             {
-                if (args.Length == 0) {
-                    _columns.Last().Append(format);
-                } else {
-                    _columns.Last().AppendFormat(format, args);
-                }
+                _columns.Last().Write(format, args);
+            }
+
+            public void Write(LazyString func)
+            {
+                var old = _columns.Last();
+                _columns[_columns.Count - 1] = new LazyColumn(() => old + func());
             }
 
             public void Anchor()
             {
-                _columns.Add(new StringBuilder());
+                _columns.Add(new BuilderColumn());
             }
 
             public int GetColumnCount()
@@ -46,15 +100,15 @@ namespace DUO2C.CodeGen
 
             public int GetColumnWidth(int col)
             {
-                return _columns.Count > col + 1 ? _columns[col].Length : 0;
+                return _columns.Count > col + 1 ? _columns[col].ToString().Length : 0;
             }
 
             public void PadColumn(int col, int width)
             {
                 if (_columns.Count > col + 1) {
-                    var column = _columns[col];
-                    while (column.Length < width) {
-                        column.Append(" ");
+                    var column = _columns[col] as BuilderColumn;
+                    while (column != null && column.ToString().Length < width) {
+                        column.Write(" ");
                     }
                 }
             }
@@ -93,6 +147,12 @@ namespace DUO2C.CodeGen
                 return this;
             }
 
+            public Group Write(LazyString func)
+            {
+                _lines.Last().Write(func);
+                return this;
+            }
+
             public Group Anchor()
             {
                 _lines.Last().Anchor();
@@ -110,7 +170,7 @@ namespace DUO2C.CodeGen
                 return new Group(this, indent);
             }
 
-            private void Finalize()
+            private void AlignColumns()
             {
                 var columns = _lines.Max(x => x.GetColumnCount());
                 for (int i = 0; i < columns; ++i) {
@@ -121,19 +181,27 @@ namespace DUO2C.CodeGen
 
             public Group Leave()
             {
-                Finalize();
+                AlignColumns();
                 foreach (var line in _lines) {
                     if (line == _lines.Last() && line.IsEmpty) break;
-                    for (int i = 0; i < _indent; ++i) _parent.Write(" ");
-                    _parent.Write(line.ToString()).NewLine();
+                    var str = line.ToString();
+                    if (str.Length == 0) {
+                        _parent.NewLine();
+                    } else {
+                        if (str[0] != '\r') {
+                            for (int i = 0; i < _indent; ++i) _parent.Write(" ");
+                        }
+                        
+                        _parent.Write(str).NewLine();
+                    }
                 }
                 return _parent;
             }
 
             public override string ToString()
             {
-                Finalize();
-                return String.Join(Environment.NewLine, _lines);
+                AlignColumns();
+                return String.Join(Environment.NewLine, _lines).Replace("\n\r", "\n");
             }
         }
 
@@ -158,6 +226,12 @@ namespace DUO2C.CodeGen
         public GenerationContext Write(String format, params Object[] args)
         {
             _curGroup.Write(format, args);
+            return this;
+        }
+
+        public GenerationContext Write(LazyString func)
+        {
+            _curGroup.Write(func);
             return this;
         }
 

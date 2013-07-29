@@ -106,7 +106,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public NStatementSeq ElseBody
         {
-            get { return (NStatementSeq) Children.LastOrDefault(x => x is NStatementSeq); }
+            get { return (NStatementSeq) Children.LastOrDefault(x => x is NStatementSeq && x != ThenBody); }
         }
 
         public NIfThenElse(ParseNode original)

@@ -7,8 +7,6 @@ int main() {
 
     if (i > 0) {
         printf("%i\n", i);
-    } else {
-        printf("%f\n", 5.5f);
     }
     return 0;
 }

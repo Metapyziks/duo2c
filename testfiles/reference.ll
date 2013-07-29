@@ -4,7 +4,6 @@ target triple = "i686-w64-mingw32"
 
 @j = global i32 5, align 4
 @.str = private unnamed_addr constant [4 x i8] c"%i\0A\00", align 1
-@.str1 = private unnamed_addr constant [4 x i8] c"%f\0A\00", align 1
 
 define i32 @main() nounwind {
   %1 = alloca i32, align 4
@@ -18,13 +17,9 @@ define i32 @main() nounwind {
 ; <label>:4                                       ; preds = %0
   %5 = load i32* %i, align 4
   %6 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str, i32 0, i32 0), i32 %5) nounwind
-  br label %9
+  br label %7
 
-; <label>:7                                       ; preds = %0
-  %8 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str1, i32 0, i32 0), double 5.500000e+00) nounwind
-  br label %9
-
-; <label>:9                                       ; preds = %7, %4
+; <label>:7                                       ; preds = %4, %0
   ret i32 0
 }
 

@@ -1,5 +1,5 @@
-; Generated 29/07/2013 21:35:44
-; GlobalUID decf6762-7cf9-4ddd-a9cd-2617fdbce72a
+; Generated 29/07/2013 23:30:26
+; GlobalUID 9ee201fd-4909-4ba6-b1b8-bb104ead8c67
 ;
 ; LLVM IR file for module "Simple"
 ;
@@ -17,46 +17,56 @@ target datalayout = "e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f3
 declare i32 @printf(i8*, ...) nounwind
 
 ; Begin type aliases
-  
+
   ; CHAR = BYTE
   %_typeCHAR = type i8
-  
+
   ; SET = LONGINT
   %_typeSET  = type i64
-  
+
 ; End type aliases
 
 @x = global i32 0
 @y = global i32 0
 
-define i32 @main() {    
-    
+define i32 @main() {
+
     ; x := 5
     store i32 5, i32* @x
-    
-    ; y := 6
-    store i32 6, i32* @y
-    
-    ; Out.Boolean(x < y)
+
+    ; y := 7
+    store i32 7, i32* @y
+
+    ; x > yOut.Integer(6)Out.Ln()Out.Integer(12)Out.Ln()
     %1 = load     i32* @x
     %2 = load     i32* @y
-    %3 = icmp slt i32  %1, %2
-    %4 = select   i1   %3, i8* getelementptr inbounds ([5 x i8]* @.truestr, i32 0, i32 0), i8* getelementptr inbounds ([6 x i8]* @.falsestr, i32 0, i32 0)
-    %5 = call i32 (i8*, ...)* @printf(i8* %4) nounwind
-    
+    %3 = icmp sgt i32  %1, %2
+    br i1 %3, label %4, label %8
+
+; <label>:4 ; preds = %0
+
+    ; Out.Integer(6)
+    %5 = sext i8 6 to i64
+    %6 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.printistr, i32 0, i32 0), i64 %5) nounwind
+
     ; Out.Ln()
-    %6 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @.printnstr, i32 0, i32 0)) nounwind
-    
-    ; Out.Boolean(x > y)
-    %7  = load     i32* @x
-    %8  = load     i32* @y
-    %9  = icmp sgt i32  %7, %8
-    %10 = select   i1   %9, i8* getelementptr inbounds ([5 x i8]* @.truestr, i32 0, i32 0), i8* getelementptr inbounds ([6 x i8]* @.falsestr, i32 0, i32 0)
-    %11 = call i32 (i8*, ...)* @printf(i8* %10) nounwind
-    
+    %7 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @.printnstr, i32 0, i32 0)) nounwind
+
+    br label %12
+
+; <label>:8 ; preds = %0
+
+    ; Out.Integer(12)
+    %9  = sext i8 12 to i64
+    %10 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.printistr, i32 0, i32 0), i64 %9) nounwind
+
     ; Out.Ln()
-    %12 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @.printnstr, i32 0, i32 0)) nounwind
-    
+    %11 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @.printnstr, i32 0, i32 0)) nounwind
+
+    br label %12
+
+; <label>:12 ; preds = %4, %8
+
     ret i32 0
 }
 ; Module end

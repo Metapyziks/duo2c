@@ -87,18 +87,57 @@ namespace DUO2C.CodeGen
 
             int _id;
 
+            public int ID
+            {
+                get {
+                    if (_id == 0) {
+                        _id = ++_sLast;
+                    }
+                    return _id;
+                }
+            }
+
             public TempIdent()
             {
                 _id = 0;
             }
 
             public override string ToString()
+            {                
+                return String.Format("%{0}", ID);
+            }
+        }
+
+        class TempLabel : Value
+        {
+            static int _sLast = 0;
+
+            public static void Reset()
             {
-                if (_id == 0) {
-                    _id = ++_sLast;
+                _sLast = 0;
+            }
+
+            int _id;
+
+            public string ID
+            {
+                get
+                {
+                    if (_id == 0) {
+                        _id = ++_sLast;
+                    }
+                    return "." + _id;
                 }
-                
-                return String.Format("%{0}", _id);
+            }
+
+            public TempLabel()
+            {
+                _id = 0;
+            }
+
+            public override string ToString()
+            {
+                return String.Format("%{0}", ID);
             }
         }
 
@@ -502,6 +541,34 @@ namespace DUO2C.CodeGen
             var type = node.Assignee.GetFinalType(_scope);
             ctx.WriteExpr(node.Expression, ref temp, type);
             return ctx.WriteOperation("store", type, temp, new PointerType(type), dest);
+        }
+
+        static GenerationContext WriteNode(this GenerationContext ctx, NIfThenElse node)
+        {
+            var cond = (Value) new TempIdent();
+            var iftrue = new TempIdent();
+            var iffalse = new TempIdent();
+            var ifend = new TempIdent();            
+
+            ctx.WriteExpr(node.Condition, ref cond, BooleanType.Default);
+            ctx.Write("br ").WriteType(BooleanType.Default).Write(" {0}, label ", cond).Write(() => iftrue.ToString());
+            ctx.Write(", label ").Write(() => node.ElseBody != null ? iffalse.ToString() : ifend.ToString()).NewLine();
+
+            ctx.NewLine().Write("\r; <label>:{0} ; preds = %0", iftrue.ID).NewLine().NewLine();
+
+            ctx.WriteStatements(node.ThenBody.Statements.Select(x => x.Inner));
+            ctx.Write("br label ").Write(() => ifend.ToString()).NewLine();
+
+            if (node.ElseBody != null) {
+                ctx.NewLine().Write("\r; <label>:{0} ; preds = %0", iffalse.ID, iftrue).NewLine().NewLine();
+                ctx.WriteStatements(node.ElseBody.Statements.Select(x => x.Inner));
+                ctx.Write("br label ").Write(() => ifend.ToString()).NewLine();
+
+                return ctx.NewLine().Write("\r; <label>:{0} ; preds = {1}, {2}", ifend.ID, iftrue, iffalse).NewLine();
+            } else {
+                return ctx.NewLine().Write("\r; <label>:{0} ; preds = {1}, %0", ifend.ID, iftrue).NewLine();
+            }
+
         }
 
         static GenerationContext WriteNode(this GenerationContext ctx, NInvocStmnt node)
