@@ -1,14 +1,16 @@
-; Generated 30/07/2013 18:02:56
-; GlobalUID 21e03b5a-64e0-4c6a-8bca-6fcf37a92515
-;
+; Generated 30/07/2013 18:53:31
+; GlobalUID 2e64cfc5-9352-46bd-b05f-306a7ad33431
+; 
 ; LLVM IR file for module "Simple"
-;
+; 
 ; WARNING: This file is automatically
 ; generated and should not be edited
 
 target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-a0:0:64-n8:16:32-S32"
-@.str0 = private constant [3 x i8] c"\25\66\00"
-@.str1 = private constant [2 x i8] c"\0A\00"
+
+@.str0 = private constant [3   x i8] c"\25\66\00"
+@.str1 = private constant [2   x i8] c"\0A\00"
+@.str2 = private constant [104 x i8] c"\54\65\73\74\20\C3\84\C3\A4\C3\9C\C3\BC\C3\9F\20\D0\AF\D0\91\D0\93\D0\94\D0\96\D0\99\20\C5\81\C4\84\C5\BB\C4\98\C4\86\C5\83\C5\9A\C5\B9\20\EF\BD\B1\EF\BD\B2\EF\BD\B3\EF\BD\B4\EF\BD\B5\EF\BD\B6\EF\BD\B7\EF\BD\B8\EF\BD\B9\EF\BD\BA\EF\BD\BB\EF\BD\BC\EF\BD\BD\EF\BD\BE\EF\BD\BF\EF\BE\80\EF\BE\81\EF\BE\82\EF\BE\83\00"
 
 declare i32 @printf(i8*, ...) nounwind
 

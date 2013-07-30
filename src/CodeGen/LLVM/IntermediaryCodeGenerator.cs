@@ -55,15 +55,16 @@ namespace DUO2C.CodeGen.LLVM
         {
             _module = module;
             _scope = module.Type.Scope;
-            _stringConsts = new Dictionary<string, GlobalStringIdent>();
+            _stringConsts = new Dictionary<string, GlobalStringIdent> {
+                { "Test ÄäÜüß ЯБГДЖЙ ŁĄŻĘĆŃŚŹ ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃ", new GlobalStringIdent() }
+            };
 
             GlobalStringIdent.Reset();
             TempIdent.Reset();
 
             ctxt.Header(uniqueID);
 
-            ctxt.Enter(0)
-                .DataLayoutStart(false)
+            ctxt.DataLayoutStart(false)
                 .PointerAlign(0, 32)
                 .IntegerAlign(1, 8, 8)
                 .IntegerAlign(8)
@@ -75,8 +76,7 @@ namespace DUO2C.CodeGen.LLVM
                 .AgregateAlign(64)
                 .NativeAlign(8, 16, 32)
                 .StackAlign(32)
-                .DataLayoutEnd()
-                .Leave().NewLine();
+                .DataLayoutEnd().NewLine();
 
             var printIntStr = new GlobalStringIdent();
             var printFloatStr = new GlobalStringIdent();
@@ -85,7 +85,7 @@ namespace DUO2C.CodeGen.LLVM
             var printFalseStr = new GlobalStringIdent();
 
             ctxt.Lazy(x => {
-                foreach (var kv in _stringConsts) {
+                foreach (var kv in _stringConsts.OrderBy(y => y.Value.ID)) {
                     x.StringConstant(kv.Key, kv.Value);
                 }
             });

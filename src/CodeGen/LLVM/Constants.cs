@@ -10,23 +10,12 @@ namespace DUO2C.CodeGen.LLVM
     {
         public static GenerationContext StringConstant(this GenerationContext ctxt, String str, GlobalStringIdent ident)
         {
-            int length = 0;
-            ctxt.Write(ident.ToString() + " ").Anchor()
-                .Write("= ").Anchor().Write("private ").Anchor().Write("constant ").Anchor()
-                .Write("[").Write(() => length.ToString()).Write(" ").Anchor().Write("x i8] ").Anchor()
-                .Write("c\"");
+            var bytes = UTF8Encoding.UTF8.GetBytes(str);
+            var length = bytes.Length + 1;
 
-            for (int i = 0; i < str.Length + 1; ++i) {
-                uint c = i < str.Length ? str[i] : '\0';
-                do {
-                    var hex = (c & 0xff).ToString("X2");
-                    ctxt.Write("\\{0}", hex);
-                    ++length;
-                    c >>= 8;
-                } while (c > 0);
-            }
-
-            return ctxt.Write("\"").NewLine();
+            ctxt.Write("{0} \t= \tprivate \tconstant \t[", ident).Write(length.ToString()).Write(" \tx i8] \tc\"");
+            ctxt.Write(bytes.Aggregate(String.Empty, (s, x) => String.Format("{0}\\{1}", s, x.ToString("X2"))));
+            return ctxt.Write("\\00\"").NewLine();
         }
     }
 }

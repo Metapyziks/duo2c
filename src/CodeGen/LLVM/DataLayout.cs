@@ -10,12 +10,12 @@ namespace DUO2C.CodeGen.LLVM
     {
         public static GenerationContext DataLayoutStart(this GenerationContext ctx, bool bigEndian)
         {
-            return ctx.Write("target datalayout = \"{0}", bigEndian ? "E" : "e");
+            return ctx.Enter(0).Write("target datalayout = \"{0}", bigEndian ? "E" : "e");
         }
 
         public static GenerationContext DataLayoutEnd(this GenerationContext ctx)
         {
-            return ctx.Write("\"").NewLine();
+            return ctx.Write("\"").Leave().NewLine();
         }
 
         static GenerationContext Seperator(this GenerationContext ctx)
