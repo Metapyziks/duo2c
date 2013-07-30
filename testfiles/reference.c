@@ -1,12 +1,15 @@
 #include <stdio.h>
 
-int j = 5;
+int i; double pi;
 
 int main() {
-    int i;
+    i = 1;
+    pi = 4;
 
-    for (i = 0; i < 5; ++i) {
-        printf("%i\n", i);
+    while (i < 1000000) {
+        pi = pi - 4.0 / (i * 4 - 1) + 4.0 / (i * 4 + 1);
+        i = i + 1;
     }
+    printf("%f", pi); printf("\n");
     return 0;
 }

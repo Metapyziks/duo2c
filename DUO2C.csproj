@@ -44,8 +44,11 @@
     <Compile Include="src\CodeGen\LLVM\AutoHeader.cs" />
     <Compile Include="src\CodeGen\GenerationContext.cs" />
     <Compile Include="src\CodeGen\LLVM\Constants.cs" />
+    <Compile Include="src\CodeGen\LLVM\Expressions.cs" />
     <Compile Include="src\CodeGen\LLVM\IntermediaryCodeGenerator.cs" />
     <Compile Include="src\CodeGen\LLVM\DataLayout.cs" />
+    <Compile Include="src\CodeGen\LLVM\Statements.cs" />
+    <Compile Include="src\CodeGen\LLVM\Types.cs" />
     <Compile Include="src\CodeGen\LLVM\Value.cs" />
     <Compile Include="src\Nodes\BranchNode.cs" />
     <Compile Include="src\Nodes\Interfaces.cs" />

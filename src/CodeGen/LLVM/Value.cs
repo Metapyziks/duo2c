@@ -136,7 +136,7 @@ namespace DUO2C.CodeGen.LLVM
 
             public override string ToString()
             {
-                return String.Format("@.str{0}", ID);
+                return String.Format("@const.string.{0}", ID);
             }
         }
 
