@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 
 using DUO2C.CodeGen;
+using DUO2C.CodeGen.LLVM;
 using DUO2C.Nodes.Oberon2;
 using DUO2C.Semantics;
 

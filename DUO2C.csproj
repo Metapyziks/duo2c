@@ -41,8 +41,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\CodeGen\LLVM\AutoHeader.cs" />
     <Compile Include="src\CodeGen\GenerationContext.cs" />
-    <Compile Include="src\CodeGen\IntermediaryCodeGenerator.cs" />
+    <Compile Include="src\CodeGen\LLVM\Constants.cs" />
+    <Compile Include="src\CodeGen\LLVM\IntermediaryCodeGenerator.cs" />
+    <Compile Include="src\CodeGen\LLVM\DataLayout.cs" />
+    <Compile Include="src\CodeGen\LLVM\Value.cs" />
     <Compile Include="src\Nodes\BranchNode.cs" />
     <Compile Include="src\Nodes\Interfaces.cs" />
     <Compile Include="src\Nodes\LeafNode.cs" />

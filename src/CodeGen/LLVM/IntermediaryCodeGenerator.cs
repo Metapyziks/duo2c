@@ -9,138 +9,10 @@ using DUO2C.Nodes;
 using DUO2C.Nodes.Oberon2;
 using DUO2C.Semantics;
 
-namespace DUO2C.CodeGen
+namespace DUO2C.CodeGen.LLVM
 {
-    public static class IntermediaryCodeGenerator
+    public static partial class IntermediaryCodeGenerator
     {
-        abstract class Value
-        {
-            public override bool Equals(object obj)
-            {
-                if (obj == null) return false;
-
-                if (this is TempIdent || obj is TempIdent) {
-                    return this == obj;
-                } else {
-                    return GetType() == obj.GetType() && ToString().Equals(obj.ToString());
-                }
-            }
-
-            public override int GetHashCode()
-            {
-                return GetType().GetHashCode() ^ ToString().GetHashCode();
-            }
-        }
-
-        class Literal : Value
-        {
-            String _str;
-
-            public Literal(String str)
-            {
-                _str = str;
-            }
-
-            public Literal(NNumber num)
-            {
-                _str = num.Inner.String;
-            }
-
-            public override string ToString()
-            {
-                return _str;
-            }
-        }
-
-        class QualIdent : Value
-        {
-            NQualIdent _ident;
-
-            public QualIdent(String ident)
-            {
-                _ident = new NQualIdent(ident, null);
-            }
-
-            public QualIdent(NQualIdent ident)
-            {
-                _ident = ident;
-            }
-
-            public override string ToString()
-            {
-                if (_ident.Module != null || _scope.GetSymbolDecl(_ident.Identifier, null).Visibility != AccessModifier.Private) {
-                    return String.Format("@{0}.{1}", _ident.Module ?? _module.Identifier, _ident.Identifier);
-                } else {
-                    return String.Format("@{0}", _ident.Identifier);
-                }
-            }
-        }
-
-        class TempIdent : Value
-        {
-            static int _sLast = 0;
-
-            public static void Reset()
-            {
-                _sLast = 0;
-            }
-
-            int _id;
-
-            public int ID
-            {
-                get {
-                    if (_id == 0) {
-                        _id = ++_sLast;
-                    }
-                    return _id;
-                }
-            }
-
-            public TempIdent()
-            {
-                _id = 0;
-            }
-
-            public override string ToString()
-            {                
-                return String.Format("%{0}", ID);
-            }
-        }
-
-        class TempLabel : Value
-        {
-            static int _sLast = 0;
-
-            public static void Reset()
-            {
-                _sLast = 0;
-            }
-
-            int _id;
-
-            public string ID
-            {
-                get
-                {
-                    if (_id == 0) {
-                        _id = ++_sLast;
-                    }
-                    return "." + _id;
-                }
-            }
-
-            public TempLabel()
-            {
-                _id = 0;
-            }
-
-            public override string ToString()
-            {
-                return String.Format("%{0}", ID);
-            }
-        }
-
         static Dictionary<Type, MethodInfo> _nodeGens;
         static NModule _module;
         static Scope _scope;
@@ -167,55 +39,75 @@ namespace DUO2C.CodeGen
             return ctx.GeneratedCode;
         }
 
-        static GenerationContext WriteModule(this GenerationContext ctx, NModule module, Guid uniqueID)
+        static GenerationContext WriteModule(this GenerationContext ctxt, NModule module, Guid uniqueID)
         {
-            ctx.Write("; Generated {0}", DateTime.Now.ToString()).NewLine();
-            ctx.Write("; GlobalUID {0}", uniqueID.ToString()).NewLine();
-            ctx.Write(";").NewLine();
-            ctx.Write("; LLVM IR file for module \"{0}\"", module.Identifier).NewLine();
-            ctx.Write(";").NewLine();
-            ctx.Write("; WARNING: This file is automatically").NewLine();
-            ctx.Write("; generated and should not be edited").NewLine().NewLine();
-
-            ctx.Write("target datalayout = \"e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-f80:128:128-v64:64:64-v128:128:128-a0:0:64-f80:32:32-n8:16:32-S32\"").NewLine().NewLine();
-
-            ctx.Write("@.printistr = private constant [3 x i8] c\"%i\\00\", align 1").NewLine();
-            ctx.Write("@.printfstr = private constant [3 x i8] c\"%f\\00\", align 1").NewLine();
-            ctx.Write("@.printnstr = private constant [2 x i8] c\"\\0A\\00\", align 1").NewLine();
-            ctx.Write("@.truestr = private constant [5 x i8] c\"TRUE\\00\", align 1").NewLine();
-            ctx.Write("@.falsestr = private constant [6 x i8] c\"FALSE\\00\", align 1").NewLine().NewLine();
-
-            ctx.Write("declare i32 @printf(i8*, ...) nounwind").NewLine().NewLine();
-
-            ctx.Write("; Begin type aliases").NewLine().Enter(2).NewLine();
-            ctx.WriteTypeDecl("CHAR", IntegerType.Byte);
-            ctx.WriteTypeDecl("SET", IntegerType.LongInt);
-
             _module = module;
             _scope = module.Type.Scope;
 
+            GlobalStringIdent.Reset();
+            TempIdent.Reset();
+
+            ctxt.Header(uniqueID);
+
+            ctxt.Enter(0)
+                .DataLayoutStart(false)
+                .PointerAlign(0, 32)
+                .IntegerAlign(1, 8, 8)
+                .IntegerAlign(8)
+                .IntegerAlign(16)
+                .IntegerAlign(32)
+                .IntegerAlign(64)
+                .FloatAlign(32)
+                .FloatAlign(64)
+                .AgregateAlign(64)
+                .NativeAlign(8, 16, 32)
+                .StackAlign(32)
+                .DataLayoutEnd();
+            ctxt.Leave().NewLine();
+
+            var printIntStr = new GlobalStringIdent();
+            var printFloatStr = new GlobalStringIdent();
+            var printLineStr = new GlobalStringIdent();
+            var printTrueStr = new GlobalStringIdent();
+            var printFalseStr = new GlobalStringIdent();
+
+            ctxt.Enter(0)
+                .StringConstant("%i", printIntStr)
+                .StringConstant("%f", printFloatStr)
+                .StringConstant("\n", printLineStr)
+                .StringConstant("TRUE", printTrueStr)
+                .StringConstant("FALSE", printFalseStr);
+            ctxt.Leave().NewLine();
+
+            ctxt.Write("declare i32 @printf(i8*, ...) nounwind").NewLine().NewLine();
+
+            ctxt.Write("; Begin type aliases").NewLine().Enter(2).NewLine();
+            ctxt.WriteTypeDecl("CHAR", IntegerType.Byte);
+            ctxt.WriteTypeDecl("SET", IntegerType.LongInt);
+
+
             foreach (var kv in _scope.GetTypes().Where(x => !(x.Value.Type is ProcedureType))) {
-                ctx.WriteTypeDecl(kv.Key, kv.Value.Type);
+                ctxt.WriteTypeDecl(kv.Key, kv.Value.Type);
             }
-            ctx.Leave().Write("; End type aliases").NewLine().NewLine();
+            ctxt.Leave().Write("; End type aliases").NewLine().NewLine();
 
             foreach (var v in _scope.GetSymbols()) {
                 if (!v.Value.Type.IsProcedure) {
-                    ctx.WriteGlobalDecl(new QualIdent(v.Key), v.Value.Type);
+                    ctxt.WriteGlobalDecl(new QualIdent(v.Key), v.Value.Type);
                 }
             }
 
             if (_scope.GetSymbols().Count() > 0) {
-                ctx.NewLine();
+                ctxt.NewLine();
             }
 
-            ctx.Write("define i32 @").Write("main() {").Enter().NewLine().NewLine();
+            ctxt.Write("define i32 @").Write("main() {").Enter().NewLine().NewLine();
             if (module.Body != null) {
-                ctx.WriteStatements(module.Body.Statements.Select(x => x.Inner));
+                ctxt.WriteStatements(module.Body.Statements.Select(x => x.Inner));
             }
-            ctx.Write("ret i32 0").NewLine().Leave().Write("}").NewLine();
+            ctxt.Write("ret i32 0").NewLine().Leave().Write("}").NewLine();
 
-            return ctx.Write("; Module end").NewLine();
+            return ctxt.Write("; Module end").NewLine();
         }
 
         static GenerationContext WriteTypeIdent(this GenerationContext ctx, String identifier)

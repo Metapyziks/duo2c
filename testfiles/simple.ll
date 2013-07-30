@@ -1,18 +1,18 @@
-; Generated 30/07/2013 01:06:36
-; GlobalUID 5995941a-194c-4856-9162-6ee3021afb3f
+; Generated 30/07/2013 15:32:09
+; GlobalUID 136932ac-44fa-46a0-a94a-c03604f76d7b
 ;
 ; LLVM IR file for module "Simple"
 ;
 ; WARNING: This file is automatically
 ; generated and should not be edited
 
-target datalayout = "e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-f80:128:128-v64:64:64-v128:128:128-a0:0:64-f80:32:32-n8:16:32-S32"
+target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-a0:0:64-n8:16:32-S32"
 
-@.printistr = private constant [3 x i8] c"%i\00", align 1
-@.printfstr = private constant [3 x i8] c"%f\00", align 1
-@.printnstr = private constant [2 x i8] c"\0A\00", align 1
-@.truestr = private constant [5 x i8] c"TRUE\00", align 1
-@.falsestr = private constant [6 x i8] c"FALSE\00", align 1
+@.str0 = private constant [3 x i8] c"\25\69\00"
+@.str1 = private constant [3 x i8] c"\25\66\00"
+@.str2 = private constant [2 x i8] c"\0A\00"
+@.str3 = private constant [5 x i8] c"\54\52\55\45\00"
+@.str4 = private constant [6 x i8] c"\46\41\4C\53\45\00"
 
 declare i32 @printf(i8*, ...) nounwind
 
@@ -38,7 +38,7 @@ define i32 @main() {
     %1    = sext i8  1    to i32
     store i32    %1, i32* @i
 
-    ; i < 1000000PI := PI - 4.000000e+000 / (i * 4 - 1) + 4.000000e+000 / (i * 4 + 1)i := i + 1
+    ; WHILE i < 1000000 DO
     br label %2
 
 ; <label>:2

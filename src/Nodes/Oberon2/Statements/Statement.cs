@@ -96,8 +96,7 @@ namespace DUO2C.Nodes.Oberon2
     {
         public override string String
         {
-            get
-            {
+            get {
                 return String.Format("IF {0} THEN", Condition.String);
             }
         }
@@ -258,6 +257,13 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("WhileLoop")]
     public class NWhileLoop : Statement, IDeclarationSource
     {
+        public override string String
+        {
+            get {
+                return String.Format("WHILE {0} DO", Condition.String);
+            }
+        }
+
         public NExpr Condition 
         {
             get { return (NExpr) Children.First(); }
