@@ -1,6 +1,6 @@
 (**
- *  Generated 30/07/2013 00:32:44
- *  GlobalUID 8c6ee504-afb1-4eab-a9cd-6f4cb9246ffb
+ *  Generated 30/07/2013 01:06:36
+ *  GlobalUID 5995941a-194c-4856-9162-6ee3021afb3f
  *
  *  Exported symbol file for module "Simple"
  *
@@ -11,4 +11,5 @@
 MODULE Simple;
     TYPE
     VAR
+        PI * : LONGREAL;
 END Simple.

@@ -345,7 +345,7 @@ namespace DUO2C.CodeGen
         {
             if (from.Equals(to)) return ctx;
 
-            if (src is Literal && from.IsInteger && to.IsReal) {
+            if (src is Literal && to.IsReal && from.IsInteger) {
                 src = new Literal(src.ToString() + ".0");
                 return ctx;
             }
@@ -539,7 +539,7 @@ namespace DUO2C.CodeGen
             var dest = ctx.GetDesignation(node.Assignee);
             var temp = (Value) new TempIdent();
             var type = node.Assignee.GetFinalType(_scope);
-            ctx.WriteExpr(node.Expression, ref temp, type);
+            temp = ctx.PrepareOperand(node.Expression, type, temp);
             return ctx.WriteOperation("store", type, temp, new PointerType(type), dest);
         }
 

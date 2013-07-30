@@ -19,7 +19,7 @@ namespace DUO2C.Nodes.Oberon2
         public override string String
         {
             get {
-                return Value.ToString();
+                return Value.ToString("e");
             }
         }
 
