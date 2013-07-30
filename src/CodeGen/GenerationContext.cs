@@ -27,10 +27,14 @@ namespace DUO2C.CodeGen
             private Func<String> _func;
             private String _str;
 
+            public bool IsEmpty { get; private set; }
+
             public Line()
             {
                 _func = () => String.Empty;
                 _str = null;
+
+                IsEmpty = true;
             }
 
             public void Write(String format, params Object[] args)
@@ -41,21 +45,29 @@ namespace DUO2C.CodeGen
                 } else {
                     _func = () => old() + String.Format(format, args);
                 }
+
                 _str = null;
+                IsEmpty = false;
             }
 
             public void Write(Func<String> lazy)
             {
                 var old = _func;
                 _func = () => old() + lazy();
+
                 _str = null;
+                IsEmpty = false;
             }
 
             public override void Build(String prefix, StringBuilder sb)
             {
                 if (_str == null) _str = _func();
-                
-                sb.AppendLine(prefix + _str);
+
+                if (_str.Length > 0 && _str[0] == '\r') {
+                    sb.AppendLine(_str.Substring(1));
+                } else {
+                    sb.AppendLine(prefix + _str);
+                }
             }
 
             public void AlignColumns(IEnumerable<int> widths)
@@ -140,17 +152,29 @@ namespace DUO2C.CodeGen
 
         public GenerationContext Enter(String linePrefix)
         {
+            if (CanWrite && ((Line) _units.Last()).IsEmpty) {
+                _units.RemoveAt(_units.Count - 1);
+            }
+
             return new GenerationContext(this, linePrefix);
         }
 
         public GenerationContext Lazy(Action<GenerationContext> action)
         {
+            if (CanWrite && ((Line) _units.Last()).IsEmpty) {
+                _units.RemoveAt(_units.Count - 1);
+            }
+
             _units.Add(new LazyContext(action));
             return this;
         }
 
         public GenerationContext Leave()
         {
+            if (CanWrite && ((Line) _units.Last()).IsEmpty) {
+                _units.RemoveAt(_units.Count - 1);
+            }
+
             _parent.AppendUnit(this);
             return _parent;
         }

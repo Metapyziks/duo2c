@@ -16,6 +16,7 @@ namespace DUO2C.CodeGen.LLVM
         static Dictionary<Type, MethodInfo> _nodeGens;
         static NModule _module;
         static Scope _scope;
+        static Dictionary<String, GlobalStringIdent> _stringConsts;
 
         public static String Generate(NModule module, Guid uniqueID)
         {
@@ -39,10 +40,22 @@ namespace DUO2C.CodeGen.LLVM
             return ctx.ToString();
         }
 
+        static GlobalStringIdent GetStringIdent(String str)
+        {
+            if (_stringConsts.ContainsKey(str)) {
+                return _stringConsts[str];
+            } else {
+                var ident = new GlobalStringIdent();
+                _stringConsts.Add(str, ident);
+                return ident;
+            }
+        }
+
         static GenerationContext WriteModule(this GenerationContext ctxt, NModule module, Guid uniqueID)
         {
             _module = module;
             _scope = module.Type.Scope;
+            _stringConsts = new Dictionary<string, GlobalStringIdent>();
 
             GlobalStringIdent.Reset();
             TempIdent.Reset();
@@ -71,13 +84,11 @@ namespace DUO2C.CodeGen.LLVM
             var printTrueStr = new GlobalStringIdent();
             var printFalseStr = new GlobalStringIdent();
 
-            ctxt.Enter(0)
-                .StringConstant("%i", printIntStr)
-                .StringConstant("%f", printFloatStr)
-                .StringConstant("\n", printLineStr)
-                .StringConstant("TRUE", printTrueStr)
-                .StringConstant("FALSE", printFalseStr)
-                .Leave().NewLine();
+            ctxt.Lazy(x => {
+                foreach (var kv in _stringConsts) {
+                    x.StringConstant(kv.Key, kv.Value);
+                }
+            });
 
             ctxt.Write("declare i32 @printf(i8*, ...) nounwind").NewLine().NewLine();
 
@@ -501,18 +512,23 @@ namespace DUO2C.CodeGen.LLVM
                 switch (elem.Identifier) {
                     case "Boolean":
                         var temp = new TempIdent();
-                        ctx.WriteOperation(temp, "select", type, src, "i8* getelementptr inbounds ([5 x i8]* @.truestr, i32 0, i32 0)", "i8* getelementptr inbounds ([6 x i8]* @.falsestr, i32 0, i32 0)");
+                        var trueStr = GetStringIdent("TRUE");
+                        var falseStr = GetStringIdent("FALSE");
+                        ctx.WriteOperation(temp, "select", type, src, "i8* getelementptr inbounds ([5 x i8]* " + trueStr + ", i32 0, i32 0)", "i8* getelementptr inbounds ([6 x i8]* " + falseStr + ", i32 0, i32 0)");
                         return ctx.WriteAssignLeft(tmp).Write("call ").WriteType(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* {0}) nounwind", temp).NewLine();
                     case "Byte":
                     case "ShortInt":
                     case "Integer":
                     case "LongInt":
-                        return ctx.WriteAssignLeft(tmp).Write("call ").WriteType(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.printistr, i32 0, i32 0), ").WriteType(type).Write(" {0}) nounwind", src).NewLine();
+                        var intStr = GetStringIdent("%i");
+                        return ctx.WriteAssignLeft(tmp).Write("call ").WriteType(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* " + intStr + ", i32 0, i32 0), ").WriteType(type).Write(" {0}) nounwind", src).NewLine();
                     case "Real":
                     case "LongReal":
-                        return ctx.WriteAssignLeft(tmp).Write("call ").WriteType(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.printfstr, i32 0, i32 0), ").WriteType(type).Write(" {0}) nounwind", src).NewLine();
+                        var floatStr = GetStringIdent("%f");
+                        return ctx.WriteAssignLeft(tmp).Write("call ").WriteType(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* " + floatStr + ", i32 0, i32 0), ").WriteType(type).Write(" {0}) nounwind", src).NewLine();
                     case "Ln":
-                        return ctx.WriteAssignLeft(tmp).Write("call ").WriteType(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @.printnstr, i32 0, i32 0)) nounwind").NewLine();
+                        var nlStr = GetStringIdent("\n");
+                        return ctx.WriteAssignLeft(tmp).Write("call ").WriteType(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* " + nlStr + ", i32 0, i32 0)) nounwind").NewLine();
                 }
             }
 
