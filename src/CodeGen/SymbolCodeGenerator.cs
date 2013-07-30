@@ -17,7 +17,7 @@ namespace DUO2C.CodeGen
         {
             var ctx = new GenerationContext();
             ctx.WriteModule(module, uniqueID);
-            return ctx.GeneratedCode;
+            return ctx.ToString();
         }
 
         static GenerationContext WriteModule(this GenerationContext ctx, ModuleType module, Guid uniqueID)
@@ -31,19 +31,19 @@ namespace DUO2C.CodeGen
             ctx.Write(" *  WARNING: This file is automatically").NewLine();
             ctx.Write(" *  generated and should not be edited").NewLine();
             ctx.Write("**)").NewLine().NewLine();
-            ctx.Write("MODULE {0};", module.Identifier).NewLine().Enter();
+            ctx = ctx.Write("MODULE {0};", module.Identifier).NewLine().Enter();
 
-            ctx.Write("TYPE").NewLine().Enter();
+            ctx = ctx.Write("TYPE").NewLine().Enter();
             foreach (var kv in module.Scope.GetTypes()) {
                 ctx.WriteTypeDecl(module, kv.Key, kv.Value.Type, kv.Value.Visibility);
             }
-            ctx.Leave();
+            ctx = ctx.Leave();
 
-            ctx.Write("VAR").NewLine().Enter();
+            ctx = ctx.Write("VAR").NewLine().Enter();
             foreach (var kv in module.Scope.GetSymbols().Where(x => x.Value.Visibility != AccessModifier.Private)) {
                 ctx.WriteVarDecl(module, kv.Key, kv.Value.Type, kv.Value.Visibility);
             }
-            ctx.Leave();
+            ctx = ctx.Leave();
 
             return ctx.Leave().Write("END {0}.", module.Identifier).NewLine();
         }
@@ -74,7 +74,7 @@ namespace DUO2C.CodeGen
                 if (rec.SuperRecordName != null) {
                     ctx.Write(" ({0})", rec.SuperRecordName);
                 }
-                ctx.NewLine().Enter();
+                ctx = ctx.NewLine().Enter();
 
                 foreach (var field in rec.Fields.Where(x => x.Visibility != AccessModifier.Private)) {
                     ctx.WriteVarDecl(module, field.Identifier, field.Type, field.Visibility);

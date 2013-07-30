@@ -36,7 +36,7 @@ namespace DUO2C.CodeGen.LLVM
 
             var ctx = new GenerationContext();
             ctx.WriteModule(module, uniqueID);
-            return ctx.GeneratedCode;
+            return ctx.ToString();
         }
 
         static GenerationContext WriteModule(this GenerationContext ctxt, NModule module, Guid uniqueID)
@@ -62,8 +62,8 @@ namespace DUO2C.CodeGen.LLVM
                 .AgregateAlign(64)
                 .NativeAlign(8, 16, 32)
                 .StackAlign(32)
-                .DataLayoutEnd();
-            ctxt.Leave().NewLine();
+                .DataLayoutEnd()
+                .Leave().NewLine();
 
             var printIntStr = new GlobalStringIdent();
             var printFloatStr = new GlobalStringIdent();
@@ -76,20 +76,19 @@ namespace DUO2C.CodeGen.LLVM
                 .StringConstant("%f", printFloatStr)
                 .StringConstant("\n", printLineStr)
                 .StringConstant("TRUE", printTrueStr)
-                .StringConstant("FALSE", printFalseStr);
-            ctxt.Leave().NewLine();
+                .StringConstant("FALSE", printFalseStr)
+                .Leave().NewLine();
 
             ctxt.Write("declare i32 @printf(i8*, ...) nounwind").NewLine().NewLine();
 
-            ctxt.Write("; Begin type aliases").NewLine().Enter(2).NewLine();
+            ctxt = ctxt.Write("; Begin type aliases").NewLine().Enter(2).NewLine();
             ctxt.WriteTypeDecl("CHAR", IntegerType.Byte);
             ctxt.WriteTypeDecl("SET", IntegerType.LongInt);
-
 
             foreach (var kv in _scope.GetTypes().Where(x => !(x.Value.Type is ProcedureType))) {
                 ctxt.WriteTypeDecl(kv.Key, kv.Value.Type);
             }
-            ctxt.Leave().Write("; End type aliases").NewLine().NewLine();
+            ctxt = ctxt.Leave().Write("; End type aliases").NewLine().NewLine();
 
             foreach (var v in _scope.GetSymbols()) {
                 if (!v.Value.Type.IsProcedure) {
@@ -101,11 +100,11 @@ namespace DUO2C.CodeGen.LLVM
                 ctxt.NewLine();
             }
 
-            ctxt.Write("define i32 @").Write("main() {").Enter().NewLine().NewLine();
+            ctxt = ctxt.Write("define i32 @").Write("main() {").Enter().NewLine().NewLine();
             if (module.Body != null) {
                 ctxt.WriteStatements(module.Body.Statements.Select(x => x.Inner));
             }
-            ctxt.Write("ret i32 0").NewLine().Leave().Write("}").NewLine();
+            ctxt = ctxt.Write("ret i32 0").NewLine().Leave().Write("}").NewLine();
 
             return ctxt.Write("; Module end").NewLine();
         }
@@ -183,9 +182,7 @@ namespace DUO2C.CodeGen.LLVM
         static GenerationContext WriteStatements(this GenerationContext ctx, IEnumerable<Statement> statements)
         {
             foreach (var stmnt in statements) {
-                ctx.Write("; {0}", stmnt.String).Enter(0).NewLine();
-                ctx.WriteNode(stmnt);
-                ctx.NewLine().Leave();
+                ctx.Write("; {0}", stmnt.String).Enter(0).NewLine().WriteNode(stmnt).NewLine().Leave();
             }
             return ctx;
         }

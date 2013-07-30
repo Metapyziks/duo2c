@@ -8,249 +8,203 @@ using DUO2C.Nodes;
 
 namespace DUO2C.CodeGen
 {
-    public delegate String LazyString();
-
-    public class GenerationContext
+    public abstract class GenerationUnit
     {
-        private abstract class Column
+        public abstract void Build(String prefix, StringBuilder sb);
+
+        public override string ToString()
         {
-            public abstract void Write(String format, params Object[] args);
+            var sb = new StringBuilder();
+            Build(String.Empty, sb);
+            return sb.ToString();
         }
+    }
 
-        private class BuilderColumn : Column
+    public class GenerationContext : GenerationUnit
+    {
+        private class Line : GenerationUnit
         {
-            private StringBuilder _str;
-
-            public BuilderColumn()
-            {
-                _str = new StringBuilder();
-            }
-
-            public override void Write(string format, params object[] args)
-            {
-                if (args.Length == 0) {
-                    _str.Append(format);
-                } else {
-                    _str.AppendFormat(format, args);
-                }
-            }
-
-            public override string ToString()
-            {
-                return _str.ToString();
-            }
-        }
-
-        private class LazyColumn : Column
-        {
-            private LazyString _func;
-
-            public LazyColumn(LazyString func)
-            {
-                _func = func;
-            }
-
-            public override void Write(string format, params object[] args)
-            {
-                var old = _func;
-                _func = () => old() + String.Format(format, args);
-            }
-
-            public override string ToString()
-            {
-                return _func();
-            }
-        }
-
-        private class Line
-        {
-            private List<Column> _columns;
-
-            public bool IsEmpty
-            {
-                get { return _columns.Count == 1 && _columns.First().ToString().Length == 0; }
-            }
+            private Func<String> _func;
+            private String _str;
 
             public Line()
             {
-                _columns = new List<Column>();
-                _columns.Add(new BuilderColumn());
+                _func = () => String.Empty;
+                _str = null;
             }
 
-            public void Write(String format, params object[] args)
+            public void Write(String format, params Object[] args)
             {
-                _columns.Last().Write(format, args);
-            }
-
-            public void Write(LazyString func)
-            {
-                var old = _columns.Last();
-                _columns[_columns.Count - 1] = new LazyColumn(() => old + func());
-            }
-
-            public void Anchor()
-            {
-                _columns.Add(new BuilderColumn());
-            }
-
-            public int GetColumnCount()
-            {
-                return _columns.Count - 1;
-            }
-
-            public int GetColumnWidth(int col)
-            {
-                return _columns.Count > col + 1 ? _columns[col].ToString().Length : 0;
-            }
-
-            public void PadColumn(int col, int width)
-            {
-                if (_columns.Count > col + 1) {
-                    var column = _columns[col] as BuilderColumn;
-                    while (column != null && column.ToString().Length < width) {
-                        column.Write(" ");
-                    }
+                var old = _func;
+                if (args.Length == 0) {
+                    _func = () => old() + format;
+                } else {
+                    _func = () => old() + String.Format(format, args);
                 }
+                _str = null;
             }
 
-            public override string ToString()
+            public void Write(Func<String> lazy)
             {
-                return String.Join("", _columns);
-            }
-        }
-
-        private class Group
-        {
-            private int _indent;
-            private Group _parent;
-            private List<Line> _lines;
-
-            public Group()
-            {
-                _parent = null;
-                _indent = 0;
-                _lines = new List<Line>();
-                _lines.Add(new Line());
+                var old = _func;
+                _func = () => old() + lazy();
+                _str = null;
             }
 
-            public Group(Group parent, int indent)
+            public override void Build(String prefix, StringBuilder sb)
             {
-                _parent = parent;
-                _indent = indent;
-                _lines = new List<Line>();
-                _lines.Add(new Line());
+                if (_str == null) _str = _func();
+                
+                sb.AppendLine(prefix + _str);
             }
 
-            public Group Write(String format, params object[] args)
+            public void AlignColumns(IEnumerable<int> widths)
             {
-                _lines.Last().Write(format, args);
-                return this;
-            }
+                if (_str == null) _str = _func();
 
-            public Group Write(LazyString func)
-            {
-                _lines.Last().Write(func);
-                return this;
-            }
-
-            public Group Anchor()
-            {
-                _lines.Last().Anchor();
-                return this;
-            }
-
-            public Group NewLine()
-            {
-                _lines.Add(new Line());
-                return this;
-            }
-
-            public Group Enter(int indent)
-            {
-                return new Group(this, indent);
-            }
-
-            private void AlignColumns()
-            {
-                var columns = _lines.Max(x => x.GetColumnCount());
-                for (int i = 0; i < columns; ++i) {
-                    var width = _lines.Max(x => x.GetColumnWidth(i));
-                    foreach (var line in _lines) line.PadColumn(i, width);
-                }
-            }
-
-            public Group Leave()
-            {
-                AlignColumns();
-                foreach (var line in _lines) {
-                    if (line == _lines.Last() && line.IsEmpty) break;
-                    var str = line.ToString();
-                    if (str.Length == 0) {
-                        _parent.NewLine();
+                var sb = new StringBuilder();
+                for (int i = 0, c = 0, n = 0; i < _str.Length; ++i) {
+                    if (_str[i] == '\t') {
+                        int width = widths.ElementAtOrDefault(n++);
+                        while (c++ < width) sb.Append(" ");
+                        c = 0;
                     } else {
-                        if (str[0] != '\r') {
-                            for (int i = 0; i < _indent; ++i) _parent.Write(" ");
-                        }
-                        
-                        _parent.Write(str).NewLine();
+                        ++c;
+                        sb.Append(_str[i]);
                     }
                 }
-                return _parent;
+                _str = sb.ToString();
             }
 
-            public override string ToString()
+            public IEnumerable<int> GetColumns()
             {
-                AlignColumns();
-                return String.Join(Environment.NewLine, _lines).Replace("\n\r", "\n");
+                if (_str == null) _str = _func();
+
+                for (int i = 0, c = 0; i < _str.Length; ++i) {
+                    if (_str[i] == '\t') {
+                        yield return c;
+                        c = 0;
+                    } else {
+                        ++c;
+                    }
+                }
             }
         }
 
-        private Group _curGroup;
-
-        public String GeneratedCode
+        private class LazyContext : GenerationContext
         {
-            get { return _curGroup.ToString(); }
+            private Action<GenerationContext> _action;
+
+            public LazyContext(Action<GenerationContext> action)
+            {
+                _action = action;
+            }
+
+            public override void Build(String prefix, StringBuilder sb)
+            {
+                _action(this);
+                base.Build(prefix, sb);
+            }
+        }
+
+        private GenerationContext _parent;
+        private String _linePrefix;
+
+        private List<GenerationUnit> _units;
+
+        protected bool CanWrite
+        {
+            get { return _units.Count > 0 && _units.Last() is Line; }
         }
 
         public GenerationContext()
+            : this(null, String.Empty) { }
+
+        private GenerationContext(GenerationContext parent, String linePrefix)
         {
-            _curGroup = new Group();
+            _parent = parent;
+            _linePrefix = linePrefix;
+
+            _units = new List<GenerationUnit>();
         }
 
-        public GenerationContext NewLine()
+        private void AppendUnit(GenerationUnit unit)
         {
-            _curGroup.NewLine();
-            return this;
-        }
-
-        public GenerationContext Write(String format, params Object[] args)
-        {
-            _curGroup.Write(format, args);
-            return this;
-        }
-
-        public GenerationContext Write(LazyString func)
-        {
-            _curGroup.Write(func);
-            return this;
-        }
-
-        public GenerationContext Anchor()
-        {
-            _curGroup.Anchor();
-            return this;
+            _units.Add(unit);
         }
 
         public GenerationContext Enter(int indent = 4)
         {
-            _curGroup = _curGroup.Enter(indent);
+            return Enter(Enumerable.Range(0, indent).Aggregate("", (s, x) => s + " "));
+        }
+
+        public GenerationContext Enter(String linePrefix)
+        {
+            return new GenerationContext(this, linePrefix);
+        }
+
+        public GenerationContext Lazy(Action<GenerationContext> action)
+        {
+            _units.Add(new LazyContext(action));
             return this;
         }
 
         public GenerationContext Leave()
         {
-            _curGroup = _curGroup.Leave();
+            _parent.AppendUnit(this);
+            return _parent;
+        }
+
+        public GenerationContext Write(String format, params Object[] args)
+        {
+            if (!CanWrite) AppendUnit(new Line());
+
+            var line = (Line) _units.Last();
+            line.Write(format, args);
+
             return this;
+        }
+
+        public GenerationContext Write(Func<String> lazy)
+        {
+            if (!CanWrite) AppendUnit(new Line());
+
+            var line = (Line) _units.Last();
+            line.Write(lazy);
+
+            return this;
+        }
+
+        public GenerationContext Anchor()
+        {
+            return Write("\t");
+        }
+
+        public GenerationContext NewLine()
+        {
+            AppendUnit(new Line());
+            return this;
+        }
+
+        public override void Build(String prefix, StringBuilder sb)
+        {
+            prefix += _linePrefix;
+            
+            var cols = new List<int>();
+
+            foreach (var line in from x in _units where x is Line select (Line) x) {
+                int c = 0;
+                foreach (var col in line.GetColumns()) {
+                    if (cols.Count <= c) cols.Add(col);
+                    else cols[c] = Math.Max(cols[c], col);
+                    ++c;
+                }
+            }
+
+            foreach (var unit in _units) {
+                if (unit is Line) ((Line) unit).AlignColumns(cols);
+                unit.Build(prefix, sb);
+            }
         }
     }
 }
