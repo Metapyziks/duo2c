@@ -96,7 +96,7 @@ namespace DUO2C.CodeGen.LLVM
 
             ctx = ctx.Write("define i32 @").Write("main() {").Enter().NewLine().NewLine();
             if (module.Body != null) {
-                ctx.Statements(module.Body.Statements);
+                ctx.Statements(module.Body);
             }
             ctx = ctx.Write("ret i32 0").EndOperation().Leave().Write("}").NewLine();
 
@@ -119,9 +119,15 @@ namespace DUO2C.CodeGen.LLVM
             return ctx.Type(new UnresolvedType(identifier)).Write(" \t=").Keyword("type").Type(type).EndOperation();
         }
 
-        static GenerationContext Statements(this GenerationContext ctx, IEnumerable<NStatement> statements)
+        static bool EndsInBranch(this NStatementSeq block)
         {
-            foreach (var stmnt in statements.Select(x => x.Inner)) {
+            var stmnts = block.Statements;
+            return stmnts.Count() > 0 && (stmnts.Last().Inner is NExit || stmnts.Last().Inner is NReturn);
+        }
+
+        static GenerationContext Statements(this GenerationContext ctx, NStatementSeq block)
+        {
+            foreach (var stmnt in block.Statements.Select(x => x.Inner)) {
 #if DEBUG
                 ctx.Write("; {0}", stmnt.String);
 #endif

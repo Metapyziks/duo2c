@@ -1,5 +1,5 @@
-; Generated 31/07/2013 22:18:39
-; GlobalUID 36f97463-e0ac-46d6-8611-346a4593c0ea
+; Generated 31/07/2013 22:41:47
+; GlobalUID 23e56994-3bd0-41ef-92de-eadac1261e91
 ; 
 ; LLVM IR file for module "Simple"
 ; 
@@ -27,8 +27,8 @@ define i32 @main() {
     ; i := 1
     store i32 1, i32* @Simple.i
     
-    ; REPEAT UNTIL i >= 1000000
-    br  label  %1
+    ; LOOP
+    br label %1
     
 ; <label>:1
     
@@ -53,21 +53,28 @@ define i32 @main() {
     %16   = add  i32  %15, 1
     store i32    %16, i32* @Simple.i
     
-    br  label  %17
+    ; IF i >= 1000000 THEN
+    %17 = load i32* @Simple.i
+    %18 = icmp sge  i32   %17, 1000000
+    br  i1     %18, label %19, label %20
     
-; <label>:17
-    %18 = load i32* @Simple.i
-    %19 = icmp sge  i32   %18, 1000000
-    br  i1     %19, label %20, label %1
+; <label>:19
+    
+    ; EXIT
+    br label %21
     
 ; <label>:20
     
+    br label %1
+    
+; <label>:21
+    
     ; Out.Real(PI)
-    %21 = load double* @Simple.PI
-    %22 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @const.string.0, i32 0, i32 0), double %21) nounwind
+    %22 = load double* @Simple.PI
+    %23 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @const.string.0, i32 0, i32 0), double %22) nounwind
     
     ; Out.Ln()
-    %23 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @const.string.1, i32 0, i32 0)) nounwind
+    %24 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @const.string.1, i32 0, i32 0)) nounwind
     
     ret i32 0
 }

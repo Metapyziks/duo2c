@@ -542,6 +542,11 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("Exit")]
     public class NExit : Statement
     {
+        public override string String
+        {
+            get { return "EXIT"; }
+        }
+
         public NExit(ParseNode original)
             : base(original)
         {

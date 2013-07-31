@@ -158,38 +158,5 @@ namespace DUO2C.CodeGen.LLVM
                 return String.Format("@const.string.{0}", ID);
             }
         }
-
-        public class TempLabel : Value
-        {
-            static int _sLast = 0;
-
-            public static void Reset()
-            {
-                _sLast = 0;
-            }
-
-            int _id;
-
-            public string ID
-            {
-                get
-                {
-                    if (_id == 0) {
-                        _id = ++_sLast;
-                    }
-                    return "." + _id;
-                }
-            }
-
-            public TempLabel()
-            {
-                _id = 0;
-            }
-
-            public override string ToString()
-            {
-                return String.Format("%{0}", ID);
-            }
-        }
     }
 }

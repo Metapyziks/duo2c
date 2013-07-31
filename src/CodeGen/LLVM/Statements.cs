@@ -11,6 +11,29 @@ namespace DUO2C.CodeGen.LLVM
 {
     public static partial class IntermediaryCodeGenerator
     {
+        static Stack<Value> _exitLabels = new Stack<Value>();
+        static GenerationContext PushExitLabel(this GenerationContext ctx, Value label)
+        {
+            _exitLabels.Push(label);
+            return ctx;
+        }
+
+        static Value ExitLabel
+        {
+            get { return _exitLabels.Count > 0 ? _exitLabels.Peek() : null; }
+        }
+
+        static GenerationContext PopExitLabel(this GenerationContext ctx)
+        {
+            _exitLabels.Pop();
+            return ctx;
+        }
+
+        static GenerationContext Node(this GenerationContext ctx, NExit node)
+        {
+            return ctx.Branch(ExitLabel);
+        }
+
         static GenerationContext Node(this GenerationContext ctx, NAssignment node)
         {
             var dest = ctx.GetDesignation(node.Assignee);
@@ -31,13 +54,13 @@ namespace DUO2C.CodeGen.LLVM
             ctx.Branch(cond, iftrue, iffalse ?? ifend);
 
             ctx.LabelMarker(iftrue).NewLine();
-            ctx.Statements(node.ThenBody.Statements);
-            ctx.Branch(ifend);
+            ctx.Statements(node.ThenBody);
+            if (!node.ThenBody.EndsInBranch()) ctx.Branch(ifend);
 
             if (node.ElseBody != null) {
                 ctx.LabelMarker(iffalse).NewLine();
-                ctx.Statements(node.ElseBody.Statements);
-                ctx.Branch(ifend);
+                ctx.Statements(node.ElseBody);
+                if (!node.ElseBody.EndsInBranch()) ctx.Branch(ifend);
             }
 
             return ctx.LabelMarker(ifend);
@@ -51,7 +74,7 @@ namespace DUO2C.CodeGen.LLVM
             ctx.Branch(start);
 
             ctx.LabelMarker(start).NewLine();
-            ctx.Statements(node.Body.Statements);
+            ctx.PushExitLabel(end).Statements(node.Body).PopExitLabel();
             ctx.Branch(start);
 
             return ctx.LabelMarker(end);
@@ -71,7 +94,7 @@ namespace DUO2C.CodeGen.LLVM
             ctx.Branch(cond, bodystart, bodyend);
 
             ctx.LabelMarker(bodystart).NewLine();
-            ctx.Statements(node.Body.Statements);
+            ctx.PushExitLabel(bodyend).Statements(node.Body).PopExitLabel();
             ctx.Branch(condstart);
 
             return ctx.LabelMarker(bodyend);
@@ -87,10 +110,10 @@ namespace DUO2C.CodeGen.LLVM
             ctx.Branch(bodystart);
 
             ctx.LabelMarker(bodystart).NewLine();
-            ctx.Statements(node.Body.Statements);
+            ctx.PushExitLabel(condend).Statements(node.Body).PopExitLabel();
             ctx.Branch(condstart);
 
-            ctx.LabelMarker(condstart);
+            ctx.LabelMarker(condstart).NewLine();
             ctx.Expr(node.Condition, ref cond, BooleanType.Default);
             ctx.Branch(cond, condend, bodystart);
 
