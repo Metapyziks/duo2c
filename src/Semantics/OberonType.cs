@@ -67,6 +67,11 @@ namespace DUO2C.Semantics
         {
             return obj is OberonType && CanTestEquality((OberonType) obj) && ((OberonType) obj).CanTestEquality(this);
         }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 
     public class ModuleType : OberonType

@@ -37,7 +37,6 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("Terminator")]
     public class NTerminator : NStatement
     {
-        public NTerminator(ParseNode original)
-            : base(original) { }
+        public NTerminator(ParseNode original) : base(original) { }
     }
 }

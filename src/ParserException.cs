@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace DUO2C
 {
@@ -125,7 +127,7 @@ namespace DUO2C
         /// <summary>
         /// Gets a message that describes the current ParseException.
         /// </summary>
-        public String MessageNoLocation
+        public virtual String MessageNoLocation
         {
             get { return base.Message; }
         }
@@ -147,7 +149,7 @@ namespace DUO2C
         /// <summary>
         /// The usefulness of this parser exception.
         /// </summary>
-        public int Utility
+        public virtual int Utility
         {
             get {
                 var attrib = GetType().GetCustomAttributes(typeof(ExceptionUtilityAttribute), true)[0];
@@ -192,6 +194,32 @@ namespace DUO2C
         internal void SetSourcePath(String srcPath)
         {
             SourcePath = srcPath;
+        }
+    }
+
+    public class CombinedException : ParserException
+    {
+        private IEnumerable<ParserException> _exceptions;
+
+        public override int Utility
+        {
+            get {
+                return _exceptions.Max(x => x.Utility);
+            }
+        }
+
+        public override string MessageNoLocation
+        {
+            get {
+                return String.Join(" or ",  _exceptions.Select(x => x.MessageNoLocation).Distinct());
+            }
+        }
+
+        public CombinedException(params ParserException[] exceptions)
+            : base(exceptions.First().ErrorType, null, exceptions.First().SourceIndex, 0)
+        {
+            _exceptions = exceptions.SelectMany(x => x is CombinedException
+                ? ((CombinedException) x)._exceptions : new ParserException[] { x });
         }
     }
 }

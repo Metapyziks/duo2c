@@ -31,11 +31,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public IEnumerable<ParserException> FindTypeErrors(Scope scope)
         {
-            var found = false;
-            foreach (var e in Statements.SelectMany(x => x.FindTypeErrors(scope))) {
-                found = true;
-                yield return e;
-            }
+            return Statements.SelectMany(x => x.FindTypeErrors(scope));
         }
     }
 }

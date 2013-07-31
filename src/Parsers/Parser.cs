@@ -36,10 +36,12 @@ namespace DUO2C.Parsers
                 return a;
             } else if (b.SourceIndex > a.SourceIndex) {
                 return b;
-            } else if (a.Utility >= b.Utility) {
+            } else if (a.Utility > b.Utility) {
                 return a;
-            } else {
+            } else if (b.Utility > a.Utility) {
                 return b;
+            } else {
+                return new CombinedException(a, b);
             }
         }
 

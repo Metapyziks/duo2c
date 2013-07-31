@@ -34,7 +34,7 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public IEnumerable<ParserException> FindAccessibilityErrors(Scope scope)
+        public override IEnumerable<ParserException> FindAccessibilityErrors(Scope scope)
         {
             return Inner.FindAccessibilityErrors(scope);
         }

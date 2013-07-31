@@ -479,8 +479,6 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("WithCase")]
     public class NWithCase : SubstituteNode, IDeclarationSource
     {
-        private Scope _scope;
-
         public NQualIdent Identifier
         {
             get { return (NQualIdent) Children.First(); }
