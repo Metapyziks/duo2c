@@ -32,6 +32,14 @@ namespace DUO2C.CodeGen.LLVM
 
         public class Literal : Value
         {
+            public static Literal GetDefault(OberonType type)
+            {
+                if (type.IsBool) return new Literal("false");
+                if (type.IsInteger) return new Literal(0.ToString());
+                if (type.IsReal) return new Literal(0.ToString("e"));
+                throw new NotImplementedException(String.Format("No default literal for type '{0}' found", type));
+            }
+
             String _str;
 
             public Literal(String str)
@@ -54,6 +62,16 @@ namespace DUO2C.CodeGen.LLVM
         {
             NQualIdent _ident;
 
+            public String Identifier
+            {
+                get { return _ident.Identifier; }
+            }
+
+            public String Module
+            {
+                get { return _ident.Module ?? _module.Identifier; }
+            }
+
             public QualIdent(String ident)
             {
                 _ident = new NQualIdent(ident, null);
@@ -66,11 +84,7 @@ namespace DUO2C.CodeGen.LLVM
 
             public override string ToString()
             {
-                if (_ident.Module != null || _scope.GetSymbolDecl(_ident.Identifier, null).Visibility != AccessModifier.Private) {
-                    return String.Format("@{0}.{1}", _ident.Module ?? _module.Identifier, _ident.Identifier);
-                } else {
-                    return String.Format("@{0}", _ident.Identifier);
-                }
+                return String.Format("@{0}.{1}", Module, Identifier);
             }
         }
 

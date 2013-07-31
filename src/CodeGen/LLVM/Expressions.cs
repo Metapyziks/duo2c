@@ -43,14 +43,14 @@ namespace DUO2C.CodeGen.LLVM
             if (from is IntegerType && to is IntegerType) {
                 IntegerType fi = (IntegerType) from, ti = (IntegerType) to;
                 if (fi.Range < ti.Range) {
-                    return ctx.WriteConversion(dest, "sext", from, tsrc, to);
+                    return ctx.Conversion(dest, "sext", from, tsrc, to);
                 }
             } else if (from is IntegerType && to is RealType) {
-                return ctx.WriteConversion(dest, "sitofp", from, tsrc, to);
+                return ctx.Conversion(dest, "sitofp", from, tsrc, to);
             } else if (from is RealType && to is RealType) {
                 RealType fr = (RealType) from, tf = (RealType) to;
                 if (fr.Range < tf.Range) {
-                    return ctx.WriteConversion(dest, "fpext", from, tsrc, to);
+                    return ctx.Conversion(dest, "fpext", from, tsrc, to);
                 }
             }
 
@@ -60,7 +60,7 @@ namespace DUO2C.CodeGen.LLVM
         static GenerationContext Factor(this GenerationContext ctx, NFactor node, ref Value dest, OberonType type)
         {
             if (node.Inner is NDesignator && ((NDesignator) node.Inner).IsRoot) {
-                return ctx.WriteOperation(dest, "load", new PointerType(type), new QualIdent((NQualIdent) ((NDesignator) node.Inner).Element));
+                return ctx.Load(dest, type, ctx.GetDesignation((NDesignator) node.Inner));
             }
 
             if (node.Inner is NExpr) {
@@ -104,18 +104,18 @@ namespace DUO2C.CodeGen.LLVM
             if (node.Operator == TermOperator.None) {
                 return ctx.Factor(node.Factor, ref dest, type);
             } else {
-                Value l = ctx.PrepareOperand(node.Prev, type, dest), r = ctx.PrepareOperand(node.Factor, type, dest);
+                Value a = ctx.PrepareOperand(node.Prev, type, dest), b = ctx.PrepareOperand(node.Factor, type, dest);
                 switch (node.Operator) {
                     case TermOperator.Multiply:
-                        return ctx.WriteOperation(dest, (type.IsReal ? "fmul" : "mul"), type, l, r);
+                        return ctx.BinaryOp(dest, "mul", "fmul", type, a, b);
                     case TermOperator.Divide:
-                        return ctx.WriteOperation(dest, "fdiv", type, l, r);
+                        return ctx.BinaryOp(dest, "sdiv", "fdiv", type, a, b);
                     case TermOperator.IntDivide:
-                        return ctx.WriteOperation(dest, "sdiv", type, l, r);
+                        return ctx.BinaryOp(dest, "sdiv", type, a, b);
                     case TermOperator.Modulo:
-                        return ctx.WriteOperation(dest, "srem", type, l, r);
+                        return ctx.BinaryOp(dest, "srem", type, a, b);
                     case TermOperator.And:
-                        return ctx.WriteOperation(dest, "and", type, l, r);
+                        return ctx.BinaryOp(dest, "and", type, a, b);
                     default:
                         throw new NotImplementedException();
                 }
@@ -127,14 +127,14 @@ namespace DUO2C.CodeGen.LLVM
             if (node.Operator == SimpleExprOperator.None) {
                 return ctx.Term(node.Term, ref dest, type);
             } else {
-                Value l = ctx.PrepareOperand(node.Prev, type, dest), r = ctx.PrepareOperand(node.Term, type, dest);
+                Value a = ctx.PrepareOperand(node.Prev, type, dest), b = ctx.PrepareOperand(node.Term, type, dest);
                 switch (node.Operator) {
                     case SimpleExprOperator.Add:
-                        return ctx.WriteOperation(dest, (type.IsReal ? "fadd" : "add"), type, l, r);
+                        return ctx.BinaryOp(dest, "add", "fadd", type, a, b);
                     case SimpleExprOperator.Subtract:
-                        return ctx.WriteOperation(dest, (type.IsReal ? "fsub" : "sub"), type, l, r);
+                        return ctx.BinaryOp(dest, "sub", "fsub", type, a, b);
                     case SimpleExprOperator.Or:
-                        return ctx.WriteOperation(dest, "or", type, l, r);
+                        return ctx.BinaryOp(dest, "or", type, a, b);
                     default:
                         throw new NotImplementedException();
                 }
@@ -154,20 +154,20 @@ namespace DUO2C.CodeGen.LLVM
                     ntype = NumericType.Largest((NumericType) lt, (NumericType) rt);
                 }
 
-                Value l = ctx.PrepareOperand(node.Prev, ntype, dest), r = ctx.PrepareOperand(node.SimpleExpr, ntype, dest);
+                Value a = ctx.PrepareOperand(node.Prev, ntype, dest), b = ctx.PrepareOperand(node.SimpleExpr, ntype, dest);
                 switch (node.Operator) {
                     case ExprOperator.Equals:
-                        return ctx.WriteOperation(dest, (ntype.IsReal ? "fcmp oeq" : "icmp eq"), ntype, l, r);
+                        return ctx.BinaryComp(dest, "eq", "oeq", ntype, a, b);
                     case ExprOperator.NotEquals:
-                        return ctx.WriteOperation(dest, (ntype.IsReal ? "fcmp one" : "icmp ne"), ntype, l, r);
+                        return ctx.BinaryComp(dest, "ne", "one", ntype, a, b);
                     case ExprOperator.GreaterThan:
-                        return ctx.WriteOperation(dest, (ntype.IsReal ? "fcmp ogt" : "icmp sgt"), ntype, l, r);
+                        return ctx.BinaryComp(dest, "sgt", "ogt", ntype, a, b);
                     case ExprOperator.GreaterThanOrEqual:
-                        return ctx.WriteOperation(dest, (ntype.IsReal ? "fcmp oge" : "icmp sge"), ntype, l, r);
+                        return ctx.BinaryComp(dest, "sge", "oge", ntype, a, b);
                     case ExprOperator.LessThan:
-                        return ctx.WriteOperation(dest, (ntype.IsReal ? "fcmp olt" : "icmp slt"), ntype, l, r);
+                        return ctx.BinaryComp(dest, "slt", "olt", ntype, a, b);
                     case ExprOperator.LessThanOrEqual:
-                        return ctx.WriteOperation(dest, (ntype.IsReal ? "fcmp ole" : "icmp sle"), ntype, l, r);
+                        return ctx.BinaryComp(dest, "sle", "ole", ntype, a, b);
                     default:
                         throw new NotImplementedException();
                 }

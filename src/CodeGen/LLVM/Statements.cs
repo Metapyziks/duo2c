@@ -91,21 +91,21 @@ namespace DUO2C.CodeGen.LLVM
                         var temp = new TempIdent();
                         var trueStr = GetStringIdent("TRUE");
                         var falseStr = GetStringIdent("FALSE");
-                        ctx.WriteOperation(temp, "select", type, src, "i8* getelementptr inbounds ([5 x i8]* " + trueStr + ", i32 0, i32 0)", "i8* getelementptr inbounds ([6 x i8]* " + falseStr + ", i32 0, i32 0)");
-                        return ctx.WriteAssignLeft(tmp).Write("call ").Type(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* {0}) nounwind", temp).NewLine();
+                        ctx.Assign(temp).Keyword("select").Argument(type, src).Keyword("i8* getelementptr inbounds ([5 x i8]* " + trueStr + ", i32 0, i32 0),", "i8* getelementptr inbounds ([6 x i8]* " + falseStr + ", i32 0, i32 0)");
+                        return ctx.Assign(tmp).Keyword("call").Type(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* {0}) nounwind", temp).NewLine();
                     case "Byte":
                     case "ShortInt":
                     case "Integer":
                     case "LongInt":
                         var intStr = GetStringIdent("%i");
-                        return ctx.WriteAssignLeft(tmp).Write("call ").Type(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* " + intStr + ", i32 0, i32 0), ").Type(type).Write(" {0}) nounwind", src).NewLine();
+                        return ctx.Assign(tmp).Keyword("call").Type(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* " + intStr + ", i32 0, i32 0), ").Type(type).Write(" {0}) nounwind", src).NewLine();
                     case "Real":
                     case "LongReal":
                         var floatStr = GetStringIdent("%f");
-                        return ctx.WriteAssignLeft(tmp).Write("call ").Type(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* " + floatStr + ", i32 0, i32 0), ").Type(type).Write(" {0}) nounwind", src).NewLine();
+                        return ctx.Assign(tmp).Keyword("call").Type(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* " + floatStr + ", i32 0, i32 0), ").Type(type).Write(" {0}) nounwind", src).NewLine();
                     case "Ln":
                         var nlStr = GetStringIdent("\n");
-                        return ctx.WriteAssignLeft(tmp).Write("call ").Type(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* " + nlStr + ", i32 0, i32 0)) nounwind").NewLine();
+                        return ctx.Assign(tmp).Keyword("call").Type(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* " + nlStr + ", i32 0, i32 0)) nounwind").NewLine();
                 }
             }
 

@@ -74,12 +74,15 @@ namespace DUO2C.CodeGen.LLVM
 
             ctx.Write("declare i32 @printf(i8*, ...) nounwind").NewLine().NewLine();
 
-            ctx.WriteTypeDecl("CHAR", IntegerType.Byte);
-            ctx.WriteTypeDecl("SET", IntegerType.LongInt);
+            ctx.Lazy(x => {
+                x.WriteTypeDecl("CHAR", IntegerType.Byte);
+                x.WriteTypeDecl("SET", IntegerType.LongInt);
 
-            foreach (var kv in _scope.GetTypes().Where(x => !(x.Value.Type is ProcedureType))) {
-                ctx.WriteTypeDecl(kv.Key, kv.Value.Type);
-            }
+                foreach (var kv in _scope.GetTypes().Where(y => !(y.Value.Type is ProcedureType))) {
+                    x.WriteTypeDecl(kv.Key, kv.Value.Type);
+                }
+            });
+
 
             foreach (var v in _scope.GetSymbols()) {
                 if (!v.Value.Type.IsProcedure) {
@@ -97,63 +100,35 @@ namespace DUO2C.CodeGen.LLVM
             }
             ctx = ctx.Write("ret i32 0").NewLine().Leave().Write("}").NewLine();
 
-            return ctx.Write("; Module end").NewLine();
+            return ctx;
+        }
+
+        static GenerationContext Write(this GenerationContext ctx, Value val)
+        {
+            return ctx.Write(val.ToString());
         }
 
         static GenerationContext WriteGlobalDecl(this GenerationContext ctx, QualIdent ident, OberonType type)
         {
-            if (type.IsBool) {
-                return ctx.WriteOperation(ident, "global", type, "false");
-            } else if (type.IsInteger) {
-                return ctx.WriteOperation(ident, "global", type, "0");
-            } else if (type.IsReal) {
-                return ctx.WriteOperation(ident, "global", type, "0.0");
-            } else {
-                throw new NotImplementedException();
-            }
+            bool isPublic = _scope.GetSymbolDecl(ident.Identifier, ident.Module).Visibility != AccessModifier.Private;
+            return ctx.Global(ident, type, isPublic);
         }
 
         static GenerationContext WriteTypeDecl(this GenerationContext ctx, String identifier, OberonType type)
         {
-            ctx.Write("; {0} = ", identifier).Write(type.ToString());
-            ctx.NewLine();
             ctx.Type(new UnresolvedType(identifier)).Write(" ").Anchor().Write("= type ").Type(type);
-            return ctx.NewLine().NewLine();
+            return ctx.NewLine();
         }
 
         static GenerationContext WriteStatements(this GenerationContext ctx, IEnumerable<Statement> statements)
         {
             foreach (var stmnt in statements) {
-                ctx.Write("; {0}", stmnt.String).Enter(0).NewLine().Node(stmnt).NewLine().Leave();
+#if DEBUG
+                ctx.Write("; {0}", stmnt.String);
+#endif
+                ctx.Enter(0).NewLine().Node(stmnt).NewLine().Leave();
             }
             return ctx;
-        }
-
-        static GenerationContext WriteAssignLeft(this GenerationContext ctx, Value ident)
-        {
-            return ctx.Write(ident.ToString()).Write(" ").Anchor().Write("= ");
-        }
-
-        static GenerationContext WriteConversion(this GenerationContext ctx, Value dest, String op, OberonType from, Value src, OberonType to)
-        {
-            return ctx.WriteAssignLeft(dest).Write("{0} ", op).Anchor().Type(from).Write(" ").Anchor().Write("{0} ", src).Anchor().Write("to ").Type(to).NewLine();
-        }
-
-        static GenerationContext WriteOperation(this GenerationContext ctx, Value dest, String op, OberonType type, params Value[] args)
-        {
-            ctx.WriteAssignLeft(dest).Write("{0} ", op).Anchor().Type(type).Write(" ").Anchor();
-            foreach (var arg in args) {
-                ctx.Write(arg.ToString());
-                if (arg != args.Last()) {
-                    ctx.Write(", ").Anchor();
-                }
-            }
-            return ctx.NewLine();
-        }
-
-        static GenerationContext WriteOperation(this GenerationContext ctx, Value dest, String op, params Object[] args)
-        {
-            return ctx.WriteAssignLeft(dest).WriteOperation(op, args);
         }
 
         static GenerationContext WriteOperation(this GenerationContext ctx, String op, params Object[] args)
