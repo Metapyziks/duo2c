@@ -96,7 +96,7 @@ namespace DUO2C.CodeGen.LLVM
 
             ctx = ctx.Write("define i32 @").Write("main() {").Enter().NewLine().NewLine();
             if (module.Body != null) {
-                ctx.WriteStatements(module.Body.Statements.Select(x => x.Inner));
+                ctx.Statements(module.Body.Statements);
             }
             ctx = ctx.Write("ret i32 0").NewLine().Leave().Write("}").NewLine();
 
@@ -120,9 +120,9 @@ namespace DUO2C.CodeGen.LLVM
             return ctx.NewLine();
         }
 
-        static GenerationContext WriteStatements(this GenerationContext ctx, IEnumerable<Statement> statements)
+        static GenerationContext Statements(this GenerationContext ctx, IEnumerable<NStatement> statements)
         {
-            foreach (var stmnt in statements) {
+            foreach (var stmnt in statements.Select(x => x.Inner)) {
 #if DEBUG
                 ctx.Write("; {0}", stmnt.String);
 #endif

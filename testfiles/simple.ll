@@ -1,5 +1,5 @@
-; Generated 31/07/2013 16:22:04
-; GlobalUID 2fb5e842-cdc2-4886-ba24-c4fbb4c36a3d
+; Generated 31/07/2013 16:30:48
+; GlobalUID edbd37b5-9b1f-49c0-9e2d-27e49e4d8805
 ; 
 ; LLVM IR file for module "Simple"
 ; 
@@ -31,11 +31,13 @@ define i32 @main() {
     br label %1
     
 ; <label>:1
+    
     %2 =     load i32*  @Simple.i
     %3 =     icmp slt   i32 %2,   1000000
     br i1    %3,  label %4, label %20
     
 ; <label>:4
+    
     ; PI := PI - 4.000000e+000 / (i * 4 - 1) + 4.000000e+000 / (i * 4 + 1)
     %5    =      load   double* @Simple.PI
     %6    =      load   i32*    @Simple.i
@@ -57,7 +59,7 @@ define i32 @main() {
     %19   =   add  i32  %18, 1
     store i32 %19, i32* @Simple.i
     
-    br label %20
+    br label %1
     
 ; <label>:20
     

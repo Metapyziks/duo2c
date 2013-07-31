@@ -31,13 +31,12 @@ namespace DUO2C.CodeGen.LLVM
             ctx.Branch(cond, iftrue, iffalse ?? ifend);
 
             ctx.LabelMarker(iftrue).NewLine();
-
-            ctx.WriteStatements(node.ThenBody.Statements.Select(x => x.Inner));
+            ctx.Statements(node.ThenBody.Statements);
             ctx.Branch(ifend);
 
             if (node.ElseBody != null) {
                 ctx.LabelMarker(iffalse).NewLine();
-                ctx.WriteStatements(node.ElseBody.Statements.Select(x => x.Inner));
+                ctx.Statements(node.ElseBody.Statements);
                 ctx.Branch(ifend);
             }
 
@@ -53,13 +52,13 @@ namespace DUO2C.CodeGen.LLVM
 
             ctx.Branch(condstart);
 
-            ctx.LabelMarker(condstart);
+            ctx.LabelMarker(condstart).NewLine();
             ctx.Expr(node.Condition, ref cond, BooleanType.Default);
             ctx.Branch(cond, bodystart, bodyend);
 
-            ctx.LabelMarker(bodystart);
-            ctx.WriteStatements(node.Body.Statements.Select(x => x.Inner));
-            ctx.Branch(bodyend);
+            ctx.LabelMarker(bodystart).NewLine();
+            ctx.Statements(node.Body.Statements);
+            ctx.Branch(condstart);
 
             return ctx.LabelMarker(bodyend);
         }
