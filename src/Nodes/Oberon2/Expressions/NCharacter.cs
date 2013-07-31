@@ -43,7 +43,7 @@ namespace DUO2C.Nodes.Oberon2
             Value = (char) ushort.Parse(base.String.Substring(0, base.String.Length - 1), NumberStyles.HexNumber);
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             return EmptyExceptionArray;
         }

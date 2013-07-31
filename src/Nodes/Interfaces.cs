@@ -10,12 +10,12 @@ namespace DUO2C.Nodes
 {
     public interface ITypeErrorSource
     {
-        IEnumerable<ParserException> FindTypeErrors(Scope scope);
+        IEnumerable<CompilerException> FindTypeErrors(Scope scope);
     }
 
     public interface IAccessibilityErrorSource
     {
-        IEnumerable<ParserException> FindAccessibilityErrors(Scope scope);
+        IEnumerable<CompilerException> FindAccessibilityErrors(Scope scope);
     }
 
     public interface IDeclarationSource

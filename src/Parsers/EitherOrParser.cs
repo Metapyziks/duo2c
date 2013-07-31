@@ -31,9 +31,9 @@ namespace DUO2C.Parsers
             i = init; return false;
         }
 
-        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out ParserException exception)
+        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out CompilerException exception)
         {
-            ParserException right;
+            CompilerException right;
             var nodes = Left.Parse(str, i, whitespace, out exception)
                 .Union(Right.Parse(str, i, whitespace, out right));
             exception = ChooseParserException(exception, right);

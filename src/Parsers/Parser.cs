@@ -24,7 +24,7 @@ namespace DUO2C.Parsers
         /// <param name="a">First exception</param>
         /// <param name="b">Second exception</param>
         /// <returns>The most useful exception</returns>
-        protected static ParserException ChooseParserException(ParserException a, ParserException b)
+        protected static CompilerException ChooseParserException(CompilerException a, CompilerException b)
         {
             if (a == null && b == null) {
                 return null;
@@ -128,7 +128,7 @@ namespace DUO2C.Parsers
         /// <param name="whitespace">Specifies if whitespace should be ignored</param>
         /// <param name="exception">Outputted exception</param>
         /// <returns>Enumeration of all possible valid nodes parsed</returns>
-        public abstract IEnumerable<ParseNode> Parse(String str, int i, bool whitespace, out ParserException exception);
+        public abstract IEnumerable<ParseNode> Parse(String str, int i, bool whitespace, out CompilerException exception);
 
         /// <summary>
         /// Literally does nothing, used for aesthetics.

@@ -106,7 +106,7 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             bool foundInner = false;
             if (!IsRoot) {
@@ -192,7 +192,7 @@ namespace DUO2C.Nodes.Oberon2
                                         if (newType == null) {
                                             yield return new UndeclaredIdentifierException(ident);
                                         } else if (!OberonType.CanTestEquality(type, newType)) {
-                                            yield return new ParserException(ParserError.Semantics,
+                                            yield return new CompilerException(ParserError.Semantics,
                                                 String.Format("Cannot convert from {0} to {1}", type, newType),
                                                 StartIndex, Length);
                                         }

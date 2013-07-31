@@ -8,7 +8,7 @@ using DUO2C.Nodes;
 
 namespace DUO2C.Semantics
 {
-    public class OperandTypeException : ParserException
+    public class OperandTypeException : CompilerException
     {
         public OberonType Left { get; private set; }
         public OberonType Right { get; private set; }

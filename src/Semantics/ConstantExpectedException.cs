@@ -8,7 +8,7 @@ using DUO2C.Nodes.Oberon2;
 
 namespace DUO2C.Semantics
 {
-    public class ConstantExpectedException : ParserException
+    public class ConstantExpectedException : CompilerException
     {
         public ExpressionElement Element { get; private set; }
 

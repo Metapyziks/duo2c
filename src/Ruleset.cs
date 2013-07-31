@@ -265,7 +265,7 @@ namespace DUO2C
         public ParseNode ParseString(String str)
         {
             str = str.TrimEnd();
-            ParserException error;
+            CompilerException error;
             var trees = _root.Parse(str, 0, true, out error).Where(x => x.EndIndex >= str.Length).ToArray();
             var tree = trees.LastOrDefault();
             if (tree == null || tree.EndIndex < str.TrimEnd().Length) {
@@ -285,7 +285,7 @@ namespace DUO2C
             String src = File.ReadAllText(filepath);
             try {
                 return ParseString(src);
-            } catch (ParserException e) {
+            } catch (CompilerException e) {
                 e.SetSourcePath(filepath);
                 throw e;
             }

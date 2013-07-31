@@ -67,12 +67,12 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             return Type.FindTypeErrors(scope);
         }
 
-        public IEnumerable<ParserException> FindAccessibilityErrors(Scope scope)
+        public IEnumerable<CompilerException> FindAccessibilityErrors(Scope scope)
         {
             return Type.FindAccessibilityErrors(scope);
         }
@@ -104,7 +104,7 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             if (ReturnType != null) {
                 foreach (var e in ReturnType.FindTypeErrors(scope)) {
@@ -119,7 +119,7 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public IEnumerable<ParserException> FindAccessibilityErrors(Scope scope)
+        public IEnumerable<CompilerException> FindAccessibilityErrors(Scope scope)
         {
             if (ReturnType != null) {
                 foreach (var e in ReturnType.FindAccessibilityErrors(scope)) {
@@ -198,7 +198,7 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             bool exported = Visibility != AccessModifier.Private;
             if (Receiver != null) {
@@ -256,11 +256,11 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             foreach (var e in base.FindTypeErrors(scope).Union(Children.SelectMany(x => (x is ITypeErrorSource)
                 ? ((ITypeErrorSource) x).FindTypeErrors(_scope)
-                : new ParserException[0]))) {
+                : new CompilerException[0]))) {
                 yield return e;   
             }
 
@@ -270,10 +270,10 @@ namespace DUO2C.Nodes.Oberon2
                     if (stmnt.Inner is NReturn) {
                         var ret = (NReturn) stmnt.Inner;
                         if (ret.Expression == null && retType != null) {
-                            yield return new ParserException(ParserError.Semantics,
+                            yield return new CompilerException(ParserError.Semantics,
                                 "Expected return expression", ret.EndIndex, 0);
                         } else if (ret.Expression != null && retType == null) {
-                            yield return new ParserException(ParserError.Semantics,
+                            yield return new CompilerException(ParserError.Semantics,
                                 "Unexpected return expression", ret.Expression.StartIndex, ret.Expression.Length);
                         } else if (ret.Expression.FindTypeErrors(scope).Count() == 0) {
                             var t = ret.Expression.GetFinalType(scope);

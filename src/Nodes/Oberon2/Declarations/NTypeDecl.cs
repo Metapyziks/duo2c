@@ -28,7 +28,7 @@ namespace DUO2C.Nodes.Oberon2
             scope.DeclareType(Identifier, Type.Type, Visibility);
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             bool found = false;
             foreach (var e in base.FindTypeErrors(scope)) {

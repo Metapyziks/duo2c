@@ -41,7 +41,7 @@ namespace DUO2C.Nodes.Oberon2
             _string = base.String.Substring(1, base.String.Length - 2);
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             return EmptyExceptionArray;
         }

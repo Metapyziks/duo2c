@@ -40,7 +40,7 @@ namespace DUO2C.Nodes.Oberon2
             Children = Children.Where(x => x is NIdentList || x is NType);
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             return base.FindTypeErrors(scope);
         }

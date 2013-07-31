@@ -8,7 +8,7 @@ using DUO2C.Nodes;
 
 namespace DUO2C.Semantics
 {
-    public class ProcedureExpectedException : ParserException
+    public class ProcedureExpectedException : CompilerException
     {
         public ProcedureExpectedException(OberonType type, ParseNode node)
             : base(ParserError.Semantics, String.Format("Procedure expected, found {0}",

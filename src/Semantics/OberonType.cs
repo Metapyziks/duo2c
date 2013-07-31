@@ -404,11 +404,11 @@ namespace DUO2C.Semantics
             Params = args;
         }
 
-        public IEnumerable<ParserException> MatchParameters(NInvocation invoc, Scope scope)
+        public IEnumerable<CompilerException> MatchParameters(NInvocation invoc, Scope scope)
         {
             var args = invoc.Args != null ? invoc.Args.Expressions.ToArray() : new NExpr[0];
             if (args.Length != Params.Length) {
-                yield return new ParserException(ParserError.Semantics, String.Format("Argument count mismatch, "
+                yield return new CompilerException(ParserError.Semantics, String.Format("Argument count mismatch, "
                     + "expected {0}, received {1}", Params.Length, args.Count()), invoc.StartIndex, 0);
             } else {
                 for (int i = 0; i < Params.Length; ++i) {

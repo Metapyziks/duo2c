@@ -9,7 +9,7 @@ namespace DUO2C.Parsers
     /// Exception thrown when a letter is expected but not found.
     /// </summary>
     [ExceptionUtility(10)]
-    public class LetterExpectedException : ParserException
+    public class LetterExpectedException : CompilerException
     {
         /// <summary>
         /// Constructor to create a new letter expected exception, containing
@@ -43,7 +43,7 @@ namespace DUO2C.Parsers
             i = init; return false;
         }
 
-        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out ParserException exception)
+        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out CompilerException exception)
         {
             int j = i;
             if (IsMatch(str, ref j, whitespace)) {

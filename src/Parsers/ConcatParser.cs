@@ -26,11 +26,11 @@ namespace DUO2C.Parsers
             i = init; return false;
         }
 
-        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out ParserException exception)
+        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out CompilerException exception)
         {
             SortedSet<ParseNode> nodes = new SortedSet<ParseNode>(NodeComparer);
             foreach (var left in Left.Parse(str, i, whitespace, out exception)) {
-                ParserException innerError;
+                CompilerException innerError;
                 foreach (var right in Right.Parse(str, left.EndIndex, whitespace, out innerError)) {
                     // If either side is null, don't bother concatenating
                     if (left.IsNull) {

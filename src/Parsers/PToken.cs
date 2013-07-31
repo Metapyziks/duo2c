@@ -11,7 +11,7 @@ namespace DUO2C.Parsers
     /// Exception thrown when a specific token is expected but not found.
     /// </summary>
     [ExceptionUtility(100)]
-    public class TokenExpectedException : ParserException
+    public class TokenExpectedException : CompilerException
     {
         /// <summary>
         /// The token that was expected.
@@ -107,7 +107,7 @@ namespace DUO2C.Parsers
             i = init; return false;
         }
 
-        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out ParserException exception)
+        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out CompilerException exception)
         {
             if (IgnoreWhitespace) SkipWhitespace(str, ref i);
             var nodes = Parser.Parse(str, i, IgnoreWhitespace, out exception);
@@ -130,7 +130,7 @@ namespace DUO2C.Parsers
 
                 try {
                     return Ruleset.GetSubstitution(node);
-                } catch (ParserException e) {
+                } catch (CompilerException e) {
                     except = ChooseParserException(except, e);
                     return null;
                 }

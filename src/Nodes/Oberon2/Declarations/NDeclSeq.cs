@@ -45,11 +45,11 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             return Children.SelectMany(x => x is ITypeErrorSource
                 ? ((ITypeErrorSource) x).FindTypeErrors(scope)
-                : new ParserException[0]);
+                : new CompilerException[0]);
         }
     }
 }

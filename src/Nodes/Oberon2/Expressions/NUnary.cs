@@ -49,7 +49,7 @@ namespace DUO2C.Nodes.Oberon2
             Children = new ParseNode[] { Children.Last() };
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             bool foundInner = false;
             foreach (var e in Factor.FindTypeErrors(scope)) {

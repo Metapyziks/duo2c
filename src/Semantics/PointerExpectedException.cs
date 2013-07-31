@@ -7,7 +7,7 @@ using DUO2C.Nodes;
 
 namespace DUO2C.Semantics
 {
-    public class PointerExpectedException : ParserException
+    public class PointerExpectedException : CompilerException
     {
         public PointerExpectedException(OberonType type, ParseNode node)
             : base(ParserError.Semantics, String.Format("Pointer expected, found '{0}'",

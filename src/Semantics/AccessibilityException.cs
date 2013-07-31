@@ -8,7 +8,7 @@ using DUO2C.Nodes.Oberon2;
 
 namespace DUO2C.Semantics
 {
-    public class AccessibilityException : ParserException
+    public class AccessibilityException : CompilerException
     {
         public AccessibilityException(NQualIdent ident)
             : base(ParserError.Semantics, String.Format("Type '{0}' is less accessible than the "

@@ -28,7 +28,7 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             return Inner.FindTypeErrors(scope);
         }

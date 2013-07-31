@@ -9,7 +9,7 @@ namespace DUO2C.Parsers
     /// Exception thrown when a string literal is expected but not found.
     /// </summary>
     [ExceptionUtility(50)]
-    public class StringExpectedException : ParserException
+    public class StringExpectedException : CompilerException
     {
         /// <summary>
         /// Constructor to create a new digit expected exception, containing
@@ -54,14 +54,14 @@ namespace DUO2C.Parsers
         }
 
         // TODO: Add proper support for escape characters
-        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out ParserException exception)
+        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out CompilerException exception)
         {
             int j = i;
             if (IsMatch(str, ref i, whitespace)) {
                 exception = null;
                 try {
                     return new ParseNode[] { Ruleset.GetSubstitution(new LeafNode(j, i - j, str.Substring(j, i - j), "string")) };
-                } catch (ParserException e) {
+                } catch (CompilerException e) {
                     exception = e;
                     return EmptyNodeArray;
                 }

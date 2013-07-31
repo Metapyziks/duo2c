@@ -24,7 +24,7 @@ namespace DUO2C.Nodes.Oberon2
         public NBool(ParseNode original)
             : base(original, true) { }
 
-        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             return EmptyExceptionArray;
         }

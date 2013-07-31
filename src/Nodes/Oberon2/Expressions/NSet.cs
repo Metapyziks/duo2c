@@ -32,9 +32,9 @@ namespace DUO2C.Nodes.Oberon2
             Children = Children.Where(x => x is NExpr);
         }
 
-        public IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
-            var errors = new List<ParserException>();
+            var errors = new List<CompilerException>();
             errors.AddRange(Min.FindTypeErrors(scope));
             if (!SingleExpression) {
                 errors.AddRange(Max.FindTypeErrors(scope));
@@ -76,7 +76,7 @@ namespace DUO2C.Nodes.Oberon2
             Children = Children.Where(x => x is NElement);
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             return Elements.SelectMany(x => x.FindTypeErrors(scope));
         }

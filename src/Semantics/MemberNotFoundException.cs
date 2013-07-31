@@ -9,7 +9,7 @@ using DUO2C.Nodes.Oberon2;
 
 namespace DUO2C.Semantics
 {
-    public class MemberNotFoundException : ParserException
+    public class MemberNotFoundException : CompilerException
     {
         public OberonType ElementType { get; private set; }
         public NDesignator MemberAccess { get; private set; }

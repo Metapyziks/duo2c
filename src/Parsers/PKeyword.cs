@@ -9,7 +9,7 @@ namespace DUO2C.Parsers
     /// Exception thrown when a keyword is expected but not found.
     /// </summary>
     [ExceptionUtility(20)]
-    public class KeywordExpectedException : ParserException
+    public class KeywordExpectedException : CompilerException
     {
         /// <summary>
         /// The keyword that was expected.
@@ -68,7 +68,7 @@ namespace DUO2C.Parsers
             return true;
         }
 
-        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out ParserException exception)
+        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out CompilerException exception)
         {
             if (IsMatch(str, ref i, whitespace)) {
                 exception = null;

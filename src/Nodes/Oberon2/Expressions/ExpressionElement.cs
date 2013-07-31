@@ -10,7 +10,7 @@ namespace DUO2C.Nodes.Oberon2
 {
     public abstract class ExpressionElement : SubstituteNode, ITypeErrorSource
     {
-        protected static readonly IEnumerable<ParserException> EmptyExceptionArray = new ParserException[0];
+        protected static readonly IEnumerable<CompilerException> EmptyExceptionArray = new CompilerException[0];
 
         public ExpressionElement(ParseNode original, bool leaf, bool hasPayload = true)
             : base(original, leaf, hasPayload) { }
@@ -19,6 +19,6 @@ namespace DUO2C.Nodes.Oberon2
 
         public abstract bool IsConstant(Scope scope);
 
-        public abstract IEnumerable<ParserException> FindTypeErrors(Scope scope);
+        public abstract IEnumerable<CompilerException> FindTypeErrors(Scope scope);
     }
 }

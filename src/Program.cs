@@ -34,7 +34,7 @@ namespace DUO2C
             Console.ResetColor();
         }
 
-        static void WriteError(ParserException error)
+        static void WriteError(CompilerException error)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(" " + error.Message);
@@ -159,7 +159,7 @@ namespace DUO2C
                         }
 #endif
                     }
-                } catch (ParserException e) {
+                } catch (CompilerException e) {
                     WriteErrorHeader("Encountered 1 error while parsing:");
                     WriteError(e);
                     Console.WriteLine();

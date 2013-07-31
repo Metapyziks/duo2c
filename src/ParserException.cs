@@ -33,10 +33,10 @@ namespace DUO2C
     }
 
     /// <summary>
-    /// Base class for exceptions thrown by the parsing process.
+    /// Base class for exceptions thrown by the compiling process.
     /// </summary>
     [ExceptionUtility(0)]
-    public class ParserException : Exception
+    public class CompilerException : Exception
     {
         /// <summary>
         /// Utility function that finds the line and column number of a 
@@ -163,7 +163,7 @@ namespace DUO2C
         /// </summary>
         /// <param name="message">The message that describes the error</param>
         /// <param name="index">Start index in the source string of the exception</param>
-        public ParserException(ParserError type, String message, int index, int length = 0)
+        public CompilerException(ParserError type, String message, int index, int length = 0)
             : base(message)
         {
             ErrorType = type;
@@ -197,9 +197,9 @@ namespace DUO2C
         }
     }
 
-    public class CombinedException : ParserException
+    public class CombinedException : CompilerException
     {
-        private IEnumerable<ParserException> _exceptions;
+        private IEnumerable<CompilerException> _exceptions;
 
         public override int Utility
         {
@@ -215,11 +215,11 @@ namespace DUO2C
             }
         }
 
-        public CombinedException(params ParserException[] exceptions)
+        public CombinedException(params CompilerException[] exceptions)
             : base(exceptions.First().ErrorType, null, exceptions.First().SourceIndex, 0)
         {
             _exceptions = exceptions.SelectMany(x => x is CombinedException
-                ? ((CombinedException) x)._exceptions : new ParserException[] { x });
+                ? ((CombinedException) x)._exceptions : new CompilerException[] { x });
         }
     }
 }

@@ -21,18 +21,18 @@ namespace DUO2C.Nodes.Oberon2
         public TypeDefinition(ParseNode original, bool leaf, bool hasPayload = true)
             : base(original, leaf, hasPayload) { }
 
-        public virtual IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public virtual IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             return Children.SelectMany(x => (x is ITypeErrorSource)
                    ? ((ITypeErrorSource) x).FindTypeErrors(scope)
-                   : new ParserException[0]);
+                   : new CompilerException[0]);
         }
 
-        public virtual IEnumerable<ParserException> FindAccessibilityErrors(Scope scope)
+        public virtual IEnumerable<CompilerException> FindAccessibilityErrors(Scope scope)
         {
             return Children.SelectMany(x => (x is IAccessibilityErrorSource)
                 ? ((IAccessibilityErrorSource) x).FindAccessibilityErrors(scope)
-                : new ParserException[0]);
+                : new CompilerException[0]);
         }
     }
 
@@ -148,14 +148,14 @@ namespace DUO2C.Nodes.Oberon2
             Children = Children.Where(x => x is NQualIdent);
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             if (!scope.IsTypeDeclared(Identifier.Identifier, Identifier.Module)) {
                 yield return new UndeclaredIdentifierException(this);
             }
         }
 
-        public override IEnumerable<ParserException> FindAccessibilityErrors(Scope scope)
+        public override IEnumerable<CompilerException> FindAccessibilityErrors(Scope scope)
         {
             if (scope.IsTypeDeclared(Identifier.Identifier, Identifier.Module)
                 && scope.GetTypeDecl(Identifier.Identifier, Identifier.Module).Visibility == AccessModifier.Private) {
@@ -183,14 +183,14 @@ namespace DUO2C.Nodes.Oberon2
             Children = Children.Where(x => x is NIdentList || x is NType);
         }
 
-        public IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             return Children.SelectMany(x => (x is ITypeErrorSource)
                    ? ((ITypeErrorSource) x).FindTypeErrors(scope)
-                   : new ParserException[0]);
+                   : new CompilerException[0]);
         }
 
-        public IEnumerable<ParserException> FindAccessibilityErrors(Scope scope)
+        public IEnumerable<CompilerException> FindAccessibilityErrors(Scope scope)
         {
             return Type.FindAccessibilityErrors(scope);
         }

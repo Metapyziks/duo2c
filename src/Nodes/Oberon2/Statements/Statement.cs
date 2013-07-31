@@ -16,11 +16,11 @@ namespace DUO2C.Nodes.Oberon2
 
         }
 
-        public virtual IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public virtual IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             return Children.SelectMany(x => (x is ITypeErrorSource)
                 ? ((ITypeErrorSource) x).FindTypeErrors(scope)
-                : new ParserException[0]);
+                : new CompilerException[0]);
         }
     }
 
@@ -50,7 +50,7 @@ namespace DUO2C.Nodes.Oberon2
             Children = Children.Where(x => x is NDesignator || x is NExpr);
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             var found = false;
             foreach (var e in base.FindTypeErrors(scope)) {
@@ -132,7 +132,7 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             bool condErrorFound = false;
             foreach (var e in Condition.FindTypeErrors(scope)) {
@@ -178,7 +178,7 @@ namespace DUO2C.Nodes.Oberon2
             Children = Children.Where(x => x is NConstExpr);
         }
 
-        public IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             foreach (var e in Min.FindTypeErrors(scope)) {
                 yield return e;
@@ -216,7 +216,7 @@ namespace DUO2C.Nodes.Oberon2
             Statements.FindDeclarations(scope);
         }
 
-        public IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             return Labels.SelectMany(x => x.FindTypeErrors(scope)).Union(Statements.FindTypeErrors(scope));
         }
@@ -285,7 +285,7 @@ namespace DUO2C.Nodes.Oberon2
             Body.FindDeclarations(scope);
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             bool condErrorFound = false;
             foreach (var e in Condition.FindTypeErrors(scope)) {
@@ -337,7 +337,7 @@ namespace DUO2C.Nodes.Oberon2
             Body.FindDeclarations(scope);
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             bool condErrorFound = false;
             foreach (var e in Condition.FindTypeErrors(scope)) {
@@ -406,7 +406,7 @@ namespace DUO2C.Nodes.Oberon2
             Body.FindDeclarations(_scope);
         }
 
-        public override IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             NumericType iteratorType = null;
             if (_scope.IsSymbolDeclared(IteratorName)) {

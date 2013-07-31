@@ -9,7 +9,7 @@ namespace DUO2C.Parsers
     /// Exception thrown when an identifier is expected but not found.
     /// </summary>
     [ExceptionUtility(30)]
-    public class IdentifierExpectedException : ParserException
+    public class IdentifierExpectedException : CompilerException
     {
         /// <summary>
         /// Constructor to create a new digit expected exception, containing
@@ -45,14 +45,14 @@ namespace DUO2C.Parsers
             i = init; return false;
         }
 
-        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out ParserException exception)
+        public override IEnumerable<ParseNode> Parse(string str, int i, bool whitespace, out CompilerException exception)
         {
             int j = i;
             if (IsMatch(str, ref i, whitespace)) {
                 exception = null;
                 try {
                     return new ParseNode[] { Ruleset.GetSubstitution(new LeafNode(j, i - j, str.Substring(j, i - j), "ident")) };
-                } catch (ParserException e) {
+                } catch (CompilerException e) {
                     exception = e;
                     return EmptyNodeArray;
                 }

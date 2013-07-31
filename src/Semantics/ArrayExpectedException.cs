@@ -8,7 +8,7 @@ using DUO2C.Nodes;
 
 namespace DUO2C.Semantics
 {
-    public class ArrayExpectedException : ParserException
+    public class ArrayExpectedException : CompilerException
     {
         public ArrayExpectedException(OberonType type, ParseNode node)
             : base(ParserError.Semantics, String.Format("Array expected, found '{0}'",

@@ -28,11 +28,11 @@ namespace DUO2C.Nodes.Oberon2
         public DeclarationStatement(ParseNode original)
             : base(original, false) { }
 
-        public virtual IEnumerable<ParserException> FindTypeErrors(Scope scope)
+        public virtual IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             return Children.SelectMany(x => (x is ITypeErrorSource)
                 ? ((ITypeErrorSource) x).FindTypeErrors(scope)
-                : new ParserException[0]);
+                : new CompilerException[0]);
         }
 
         public abstract void FindDeclarations(Scope scope);    
