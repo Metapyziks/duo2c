@@ -4,38 +4,15 @@ using System.Collections.Generic;
 
 namespace DUO2C
 {
-    /// <summary>
-    /// Attribute used to compare the usefulness of syntax
-    /// parsing errors.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
-    public class ExceptionUtilityAttribute : Attribute
-    {
-        /// <summary>
-        /// The usefulness of this parser exception.
-        /// </summary>
-        public int Utility { get; private set; }
-
-        /// <summary>
-        /// Creates a new ExceptionUtility attribute.
-        /// </summary>
-        /// <param name="utility">The usefulness of this parser exception</param>
-        public ExceptionUtilityAttribute(int utility)
-        {
-            Utility = utility;
-        }
-    }
-
     public enum ParserError
     {
-        Syntax,
+        ExpectedSymbol,
         Semantics
     }
 
     /// <summary>
     /// Base class for exceptions thrown by the compiling process.
     /// </summary>
-    [ExceptionUtility(0)]
     public class CompilerException : Exception
     {
         /// <summary>
@@ -134,6 +111,11 @@ namespace DUO2C
 
         public ParserError ErrorType { get; private set; }
 
+        public String Location
+        {
+            get { return String.Format("{0} ({1},{2})", SourcePath ?? "", Line, Column); }
+        }
+
         /// <summary>
         /// Gets a message that describes the current ParseException, along with
         /// the location it occurred.
@@ -141,21 +123,14 @@ namespace DUO2C
         public override String Message
         {
             get {
-                return String.Format("{0} ({1},{2}) : {3}", SourcePath ?? "",
-                    Line, Column, MessageNoLocation);
+                return String.Format("{0} : {1}", Location, MessageNoLocation);
             }
         }
 
         /// <summary>
         /// The usefulness of this parser exception.
         /// </summary>
-        public virtual int Utility
-        {
-            get {
-                var attrib = GetType().GetCustomAttributes(typeof(ExceptionUtilityAttribute), true)[0];
-                return ((ExceptionUtilityAttribute) attrib).Utility;
-            }
-        }
+        public int Utility { get; protected set; }
 
         /// <summary>
         /// Constructor to create a new parser exception, containing information
@@ -197,21 +172,32 @@ namespace DUO2C
         }
     }
 
+    public class SymbolExpectedException : CompilerException
+    {
+        public String Symbol { get; private set; }
+
+        public SymbolExpectedException(String symbol, int index, int utility = 0)
+            : base(ParserError.ExpectedSymbol, String.Format("{0} expected", symbol), index)
+        {
+            Symbol = symbol;
+            Utility = utility;
+        }
+    }
+
     public class CombinedException : CompilerException
     {
         private IEnumerable<CompilerException> _exceptions;
 
-        public override int Utility
-        {
-            get {
-                return _exceptions.Max(x => x.Utility);
-            }
-        }
-
         public override string MessageNoLocation
         {
             get {
-                return String.Join(" or ",  _exceptions.Select(x => x.MessageNoLocation).Distinct());
+                if (_exceptions.All(x => x is SymbolExpectedException)) {
+                    var es = _exceptions.Select(x => ((SymbolExpectedException) x).Symbol).Distinct().OrderBy(x => x);
+                    return String.Join(", ", es.Where(x => x != es.Last()))
+                        + (es.Count() > 0 ? " or " + es.Last() : "") + " expected";
+                }
+                return String.Join(" or ",  _exceptions.Select(x => x is SymbolExpectedException
+                    ? ((SymbolExpectedException) x).Symbol : x.MessageNoLocation).Distinct());
             }
         }
 
@@ -220,6 +206,8 @@ namespace DUO2C
         {
             _exceptions = exceptions.SelectMany(x => x is CombinedException
                 ? ((CombinedException) x)._exceptions : new CompilerException[] { x });
+
+            Utility = _exceptions.Max(x => x.Utility);
         }
     }
 }

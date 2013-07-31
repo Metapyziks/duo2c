@@ -101,7 +101,7 @@
     <Compile Include="src\Parsers\OptionalParser.cs" />
     <Compile Include="src\Parsers\OptionalRepeatParser.cs" />
     <Compile Include="src\Parsers\Parser.cs" />
-    <Compile Include="src\ParserException.cs" />
+    <Compile Include="src\CompilerException.cs" />
     <Compile Include="src\Parsers\PDigit.cs" />
     <Compile Include="src\Parsers\PIdent.cs" />
     <Compile Include="src\Parsers\PKeyword.cs" />

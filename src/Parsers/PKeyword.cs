@@ -6,31 +6,6 @@ using DUO2C.Nodes;
 namespace DUO2C.Parsers
 {
     /// <summary>
-    /// Exception thrown when a keyword is expected but not found.
-    /// </summary>
-    [ExceptionUtility(20)]
-    public class KeywordExpectedException : CompilerException
-    {
-        /// <summary>
-        /// The keyword that was expected.
-        /// </summary>
-        public String Keyword { get; private set; }
-
-        /// <summary>
-        /// Constructor to create a new keyword expected exception, containing
-        /// information about the location in the source string that the exception
-        /// occurred, and the keyword that was expected.
-        /// </summary>
-        /// <param name="keyword">The keyword that was expected</param>
-        /// <param name="index">Start index in the source string of the exception</param>
-        public KeywordExpectedException(String keyword, int index)
-            : base(ParserError.Syntax, String.Format("Expected the symbol '{0}'", keyword), index)
-        {
-            Keyword = keyword;
-        }
-    }
-
-    /// <summary>
     /// Atomic parser that parses a specified keyword.
     /// </summary>
     public class PKeyword : Parser
@@ -74,7 +49,7 @@ namespace DUO2C.Parsers
                 exception = null;
                 return new ParseNode[] { new LeafNode(i - Keyword.Length, Keyword.Length, Keyword, "keyword") };
             } else {
-                exception = new KeywordExpectedException(Keyword, i);
+                exception = new SymbolExpectedException(String.Format("'{0}'", Keyword), i, 1);
                 return EmptyNodeArray;
             }
         }

@@ -6,22 +6,6 @@ using DUO2C.Nodes;
 namespace DUO2C.Parsers
 {
     /// <summary>
-    /// Exception thrown when a string literal is expected but not found.
-    /// </summary>
-    [ExceptionUtility(50)]
-    public class StringExpectedException : CompilerException
-    {
-        /// <summary>
-        /// Constructor to create a new digit expected exception, containing
-        /// information about the location in the source string that the exception
-        /// occurred.
-        /// </summary>
-        /// <param name="index">Start index in the source string of the exception</param>
-        public StringExpectedException(int index)
-            : base(ParserError.Syntax, "String literal expected", index) { }
-    }
-
-    /// <summary>
     /// Atomic parser that parses a string literal surrounded by either
     /// single or double quotes.
     /// </summary>
@@ -66,7 +50,7 @@ namespace DUO2C.Parsers
                     return EmptyNodeArray;
                 }
             } else {
-                exception = new StringExpectedException(i);
+                exception = new SymbolExpectedException("StringLiteral", i, 1);
                 return EmptyNodeArray;
             }
         }

@@ -6,22 +6,6 @@ using DUO2C.Nodes;
 namespace DUO2C.Parsers
 {
     /// <summary>
-    /// Exception thrown when a digit is expected but not found.
-    /// </summary>
-    [ExceptionUtility(10)]
-    public class DigitExpectedException : CompilerException
-    {
-        /// <summary>
-        /// Constructor to create a new digit expected exception, containing
-        /// information about the location in the source string that the exception
-        /// occurred.
-        /// </summary>
-        /// <param name="index">Start index in the source string of the exception</param>
-        public DigitExpectedException(int index)
-            : base(ParserError.Syntax, "Digit expected", index) { }
-    }
-
-    /// <summary>
     /// Atomic parser that parses a single digit.
     /// </summary>
     public class PDigit : Parser
@@ -50,7 +34,7 @@ namespace DUO2C.Parsers
                 exception = null;
                 return new ParseNode[] { new LeafNode(i, 1, str[i].ToString(), "digit") };
             } else {
-                exception = new DigitExpectedException(i);
+                exception = new SymbolExpectedException("Digit", i, 1);
                 return EmptyNodeArray;
             }
         }

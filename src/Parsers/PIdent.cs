@@ -6,22 +6,6 @@ using DUO2C.Nodes;
 namespace DUO2C.Parsers
 {
     /// <summary>
-    /// Exception thrown when an identifier is expected but not found.
-    /// </summary>
-    [ExceptionUtility(30)]
-    public class IdentifierExpectedException : CompilerException
-    {
-        /// <summary>
-        /// Constructor to create a new digit expected exception, containing
-        /// information about the location in the source string that the exception
-        /// occurred.
-        /// </summary>
-        /// <param name="index">Start index in the source string of the exception</param>
-        public IdentifierExpectedException(int index)
-            : base(ParserError.Syntax, "Identifier expected", index) { }
-    }
-
-    /// <summary>
     /// Atomic parser that parses an identifier.
     /// </summary>
     public class PIdent : Parser
@@ -57,7 +41,7 @@ namespace DUO2C.Parsers
                     return EmptyNodeArray;
                 }
             } else {
-                exception = new IdentifierExpectedException(i);
+                exception = new SymbolExpectedException("Identifier", i, 1);
                 return EmptyNodeArray;
             }
         }

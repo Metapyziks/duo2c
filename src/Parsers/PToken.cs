@@ -8,30 +8,6 @@ using DUO2C.Nodes;
 namespace DUO2C.Parsers
 {
     /// <summary>
-    /// Exception thrown when a specific token is expected but not found.
-    /// </summary>
-    [ExceptionUtility(100)]
-    public class TokenExpectedException : CompilerException
-    {
-        /// <summary>
-        /// The token that was expected.
-        /// </summary>
-        public String Token { get; private set; }
-
-        /// <summary>
-        /// Constructor to create a new digit expected exception, containing
-        /// information about the location in the source string that the exception
-        /// occurred.
-        /// </summary>
-        /// <param name="index">Start index in the source string of the exception</param>
-        public TokenExpectedException(String token, int index)
-            : base(ParserError.Syntax, String.Format("{0} expected", token), index)
-        {
-            Token = token;
-        }
-    }
-
-    /// <summary>
     /// Parser that references a token that has one or more
     /// production rules assigned to it.
     /// </summary>
@@ -112,7 +88,7 @@ namespace DUO2C.Parsers
             if (IgnoreWhitespace) SkipWhitespace(str, ref i);
             var nodes = Parser.Parse(str, i, IgnoreWhitespace, out exception);
             if (nodes.Count() == 0) {
-                exception = ChooseParserException(exception, new TokenExpectedException(Token, i));
+                exception = ChooseParserException(exception, new SymbolExpectedException(Token, i, 2));
             }
             var except = exception;
             nodes = nodes.Select(node => {

@@ -6,22 +6,6 @@ using DUO2C.Nodes;
 namespace DUO2C.Parsers
 {
     /// <summary>
-    /// Exception thrown when a letter is expected but not found.
-    /// </summary>
-    [ExceptionUtility(10)]
-    public class LetterExpectedException : CompilerException
-    {
-        /// <summary>
-        /// Constructor to create a new letter expected exception, containing
-        /// information about the location in the source string that the exception
-        /// occurred.
-        /// </summary>
-        /// <param name="index">Start index in the source string of the exception</param>
-        public LetterExpectedException(int index)
-            : base(ParserError.Syntax, "Letter expected", index) { }
-    }
-
-    /// <summary>
     /// Atomic parser that parses a single letter.
     /// </summary>
     public class PLetter : Parser
@@ -50,7 +34,7 @@ namespace DUO2C.Parsers
                 exception = null;
                 return new ParseNode[] { new LeafNode(i, 1, str[i].ToString(), "letter") };
             } else {
-                exception = new LetterExpectedException(i);
+                exception = new SymbolExpectedException("Letter", i, 1);
                 return EmptyNodeArray;
             }
         }

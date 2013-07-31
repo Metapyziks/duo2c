@@ -12,6 +12,24 @@ namespace DUO2C
 {
     class Program
     {
+        static void WriteTextWrapped(String text)
+        {
+            int margin = Console.CursorLeft;
+            var segs = text.Split(' ');
+            for (int i = 0; i < segs.Length; ++i) {
+                var seg = segs[i];
+                if (Console.CursorLeft != margin && Console.CursorLeft + seg.Length + 1 >= Console.WindowWidth) {
+                    Console.WriteLine();
+                    Console.CursorLeft = margin;
+                }
+                Console.Write("{0} ", seg);
+                if (Console.CursorLeft == 0) {
+                    Console.CursorLeft = margin;
+                }
+            }
+            Console.WriteLine();
+        }
+
         static void WriteErrorHeader(String format, params object[] args)
         {
             Console.ForegroundColor = ConsoleColor.Red;
@@ -26,18 +44,12 @@ namespace DUO2C
             for (int i = Console.BufferWidth; i > 0; --i) Console.Write("▀");
             Console.ResetColor();
         }
-        
-        static void WriteError(String error)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(error);
-            Console.ResetColor();
-        }
 
         static void WriteError(CompilerException error)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(" " + error.Message);
+            Console.Write(" {0} : ", error.Location);
+            WriteTextWrapped(error.MessageNoLocation);
 
             String snippet = error.LineSnippet.TrimStart();
             int trimmed = error.LineSnippet.Length - snippet.Length;
