@@ -14,6 +14,7 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Assign(this GenerationContext ctx, Value dest)
         {
+            _lastWasArg = false;
             if (dest is TempIdent) ((TempIdent) dest).ResolveID();
             return ctx.Write("{0} \t= ", dest);
         }
@@ -46,26 +47,32 @@ namespace DUO2C.CodeGen.LLVM
             return ctx.Argument().Type(type).Write(" \t").Write(val);
         }
 
+        static GenerationContext EndOperation(this GenerationContext ctx)
+        {
+            _lastWasArg = false;
+            return ctx.NewLine();
+        }
+
         static GenerationContext Global(this GenerationContext ctx, Value dest, OberonType type, bool isPublic)
         {
             ctx.Assign(dest);
             if (!isPublic) ctx.Keyword("private");
-            return ctx.Keyword("global").Argument(type, Literal.GetDefault(type)).NewLine();
+            return ctx.Keyword("global").Argument(type, Literal.GetDefault(type)).EndOperation();
         }
 
         static GenerationContext Load(this GenerationContext ctx, Value dest, OberonType type, Value src)
         {
-            return ctx.Assign(dest).Keyword("load").Argument(new PointerType(type), src).NewLine();
+            return ctx.Assign(dest).Keyword("load").Argument(new PointerType(type), src).EndOperation();
         }
 
         static GenerationContext Conversion(this GenerationContext ctx, Value dest, String conv, OberonType from, Value src, OberonType to)
         {
-            return ctx.Assign(dest).Keyword(conv).Argument(from, src).Keyword("to").Argument(to).NewLine();
+            return ctx.Assign(dest).Keyword(conv).Argument(from, src).Keyword(" \tto").Argument(to).EndOperation();
         }
 
         static GenerationContext BinaryOp(this GenerationContext ctx, Value dest, String op, OberonType type, Value a, Value b)
         {
-            return ctx.Assign(dest).Keyword(op).Argument(type, a).Argument(b).NewLine();
+            return ctx.Assign(dest).Keyword(op).Argument(type, a).Argument(b).EndOperation();
         }
 
         static GenerationContext BinaryOp(this GenerationContext ctx, Value dest, String intOp, String floatOp, OberonType type, Value a, Value b)
@@ -76,7 +83,7 @@ namespace DUO2C.CodeGen.LLVM
         static GenerationContext BinaryComp(this GenerationContext ctx, Value dest, String intComp, String floatComp, OberonType type, Value a, Value b)
         {
             return ctx.Assign(dest).Keyword(type.IsReal ? "fcmp" : "icmp").Keyword(type.IsReal ? floatComp : intComp)
-                .Argument(type, a).Argument(b).NewLine();
+                .Argument(type, a).Argument(b).EndOperation();
         }
 
         static GenerationContext Label(this GenerationContext ctx, Value label)
@@ -91,12 +98,12 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Branch(this GenerationContext ctx, Value dest)
         {
-            return ctx.Keyword("br").Label(dest).NewLine();
+            return ctx.Keyword("br").Label(dest).EndOperation();
         }
 
         static GenerationContext Branch(this GenerationContext ctx, Value cond, Value ifTrue, Value ifFalse)
         {
-            return ctx.Keyword("br").Argument(BooleanType.Default, cond).Label(ifTrue).Label(ifFalse).NewLine();
+            return ctx.Keyword("br").Argument(BooleanType.Default, cond).Label(ifTrue).Label(ifFalse).EndOperation();
         }
     }
 }

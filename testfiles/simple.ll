@@ -1,5 +1,5 @@
-; Generated 31/07/2013 17:02:27
-; GlobalUID 642568c5-0b47-45fe-a4b4-2fafcaea1c0a
+; Generated 31/07/2013 20:53:05
+; GlobalUID 275f89a6-d5ec-4119-ae34-a68eca4b571f
 ; 
 ; LLVM IR file for module "Simple"
 ; 
@@ -13,8 +13,8 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
 
 declare i32 @printf(i8*, ...) nounwind
 
-%type.Simple.CHAR = type i8
-%type.Simple.SET  = type i64
+%type.Simple.CHAR =type i8
+%type.Simple.SET  =type i64
 
 @Simple.i  = private global i32 0
 @Simple.PI = global  double 0.000000e+000
@@ -43,13 +43,13 @@ define i32 @main() {
     %6    = load   i32*    @Simple.i
     %7    = mul    i32     %6,            4
     %8    = sub    i32     %7,            1
-    %9    = sitofp i32     %8to           double
+    %9    = sitofp i32     %8             to double
     %10   = fdiv   double  4.000000e+000, %9
     %11   = fsub   double  %5,            %10
     %12   = load   i32*    @Simple.i
     %13   = mul    i32     %12,           4
     %14   = add    i32     %13,           1
-    %15   = sitofp i32     %14to          double
+    %15   = sitofp i32     %14            to double
     %16   = fdiv   double  4.000000e+000, %15
     %17   = fadd   double  %11,           %16
     store double   %17,    double*        @Simple.PI
