@@ -14,9 +14,9 @@ namespace DUO2C.CodeGen.LLVM
         static GenerationContext Node(this GenerationContext ctx, NAssignment node)
         {
             var dest = ctx.GetDesignation(node.Assignee);
-            var temp = (Value) new TempIdent();
             var type = node.Assignee.GetFinalType(_scope);
-            temp = ctx.PrepareOperand(node.Expression, type, temp);
+            var temp = ctx.PrepareOperand(node.Expression, type, new TempIdent());
+
             return ctx.Keyword("store").Argument(type, temp).Argument(new PointerType(type), dest).NewLine();
         }
 
@@ -41,6 +41,20 @@ namespace DUO2C.CodeGen.LLVM
             }
 
             return ctx.LabelMarker(ifend);
+        }
+
+        static GenerationContext Node(this GenerationContext ctx, NUncondLoop node)
+        {
+            var start = new TempIdent();
+            var end = new TempIdent();
+
+            ctx.Branch(start);
+
+            ctx.LabelMarker(start).NewLine();
+            ctx.Statements(node.Body.Statements);
+            ctx.Branch(start);
+
+            return ctx.LabelMarker(end);
         }
 
         static GenerationContext Node(this GenerationContext ctx, NWhileLoop node)

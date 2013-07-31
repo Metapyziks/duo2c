@@ -15,7 +15,7 @@ namespace DUO2C.CodeGen.LLVM
         static GenerationContext Assign(this GenerationContext ctx, Value dest)
         {
             if (dest is TempIdent) ((TempIdent) dest).ResolveID();
-            return ctx.Write("{0} \t= \t", dest);
+            return ctx.Write("{0} \t= ", dest);
         }
 
         static GenerationContext Keyword(this GenerationContext ctx, params string[] keywords)

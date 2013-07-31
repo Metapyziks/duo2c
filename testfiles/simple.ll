@@ -1,5 +1,5 @@
-; Generated 31/07/2013 16:30:48
-; GlobalUID edbd37b5-9b1f-49c0-9e2d-27e49e4d8805
+; Generated 31/07/2013 17:02:27
+; GlobalUID 642568c5-0b47-45fe-a4b4-2fafcaea1c0a
 ; 
 ; LLVM IR file for module "Simple"
 ; 
@@ -28,38 +28,38 @@ define i32 @main() {
     store i32 1, i32* @Simple.i
     
     ; WHILE i < 1000000 DO
-    br label %1
+    br label  %1
     
 ; <label>:1
     
-    %2 =     load i32*  @Simple.i
-    %3 =     icmp slt   i32 %2,   1000000
-    br i1    %3,  label %4, label %20
+    %2 = load i32* @Simple.i
+    %3 = icmp slt  i32   %2, 1000000
+    br i1     %3,  label %4, label %20
     
 ; <label>:4
     
     ; PI := PI - 4.000000e+000 / (i * 4 - 1) + 4.000000e+000 / (i * 4 + 1)
-    %5    =      load   double* @Simple.PI
-    %6    =      load   i32*    @Simple.i
-    %7    =      mul    i32     %6,            4
-    %8    =      sub    i32     %7,            1
-    %9    =      sitofp i32     %8to           double
-    %10   =      fdiv   double  4.000000e+000, %9
-    %11   =      fsub   double  %5,            %10
-    %12   =      load   i32*    @Simple.i
-    %13   =      mul    i32     %12,           4
-    %14   =      add    i32     %13,           1
-    %15   =      sitofp i32     %14to          double
-    %16   =      fdiv   double  4.000000e+000, %15
-    %17   =      fadd   double  %11,           %16
-    store double %17,   double* @Simple.PI
+    %5    = load   double* @Simple.PI
+    %6    = load   i32*    @Simple.i
+    %7    = mul    i32     %6,            4
+    %8    = sub    i32     %7,            1
+    %9    = sitofp i32     %8to           double
+    %10   = fdiv   double  4.000000e+000, %9
+    %11   = fsub   double  %5,            %10
+    %12   = load   i32*    @Simple.i
+    %13   = mul    i32     %12,           4
+    %14   = add    i32     %13,           1
+    %15   = sitofp i32     %14to          double
+    %16   = fdiv   double  4.000000e+000, %15
+    %17   = fadd   double  %11,           %16
+    store double   %17,    double*        @Simple.PI
     
     ; i := i + 1
-    %18   =   load i32* @Simple.i
-    %19   =   add  i32  %18, 1
-    store i32 %19, i32* @Simple.i
+    %18   = load i32* @Simple.i
+    %19   = add  i32  %18, 1
+    store i32    %19, i32* @Simple.i
     
-    br label %1
+    br label  %1
     
 ; <label>:20
     
