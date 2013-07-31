@@ -15,7 +15,7 @@ namespace DUO2C.CodeGen.LLVM
 
             ctx.Write("{0} \t= \tprivate \tconstant \t[{1} \tx i8] \tc\"", ident, length.ToString());
             ctx.Write(bytes.Aggregate(String.Empty, (s, x) => String.Format("{0}\\{1}", s, x.ToString("X2"))));
-            return ctx.Write("\\00\"").NewLine();
+            return ctx.Write("\\00\"").EndOperation();
         }
     }
 }

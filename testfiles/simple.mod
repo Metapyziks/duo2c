@@ -9,10 +9,10 @@ BEGIN
     PI := 4;
     i := 1;
     
-    WHILE i < 1000000 DO
+    REPEAT
         PI := PI - 4.0D0 / (i * 4 - 1) + 4.0D0 / (i * 4 + 1);
         i := i + 1;
-    END;
+    UNTIL i >= 1000000;
 
     Out.Real(PI); Out.Ln;
 END Simple.

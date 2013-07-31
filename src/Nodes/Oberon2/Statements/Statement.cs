@@ -309,6 +309,13 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("RepeatUntil")]
     public class NRepeatUntil : Statement, IDeclarationSource
     {
+        public override string String
+        {
+            get {
+                return String.Format("REPEAT UNTIL {0}", Condition.String);
+            }
+        }
+
         public NStatementSeq Body
         {
             get { return (NStatementSeq) Children.First(); }
@@ -447,6 +454,11 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("UncondLoop")]
     public class NUncondLoop : Statement, IDeclarationSource
     {
+        public override string String
+        {
+            get { return "LOOP"; }
+        }
+
         public NStatementSeq Body
         {
             get { return (NStatementSeq) Children.First(); }

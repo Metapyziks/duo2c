@@ -1,5 +1,5 @@
-; Generated 31/07/2013 20:53:05
-; GlobalUID 275f89a6-d5ec-4119-ae34-a68eca4b571f
+; Generated 31/07/2013 22:18:39
+; GlobalUID 36f97463-e0ac-46d6-8611-346a4593c0ea
 ; 
 ; LLVM IR file for module "Simple"
 ; 
@@ -27,39 +27,38 @@ define i32 @main() {
     ; i := 1
     store i32 1, i32* @Simple.i
     
-    ; WHILE i < 1000000 DO
-    br label  %1
+    ; REPEAT UNTIL i >= 1000000
+    br  label  %1
     
 ; <label>:1
     
-    %2 = load i32* @Simple.i
-    %3 = icmp slt  i32   %2, 1000000
-    br i1     %3,  label %4, label %20
-    
-; <label>:4
-    
     ; PI := PI - 4.000000e+000 / (i * 4 - 1) + 4.000000e+000 / (i * 4 + 1)
-    %5    = load   double* @Simple.PI
-    %6    = load   i32*    @Simple.i
-    %7    = mul    i32     %6,            4
-    %8    = sub    i32     %7,            1
-    %9    = sitofp i32     %8             to double
-    %10   = fdiv   double  4.000000e+000, %9
-    %11   = fsub   double  %5,            %10
-    %12   = load   i32*    @Simple.i
-    %13   = mul    i32     %12,           4
-    %14   = add    i32     %13,           1
-    %15   = sitofp i32     %14            to double
-    %16   = fdiv   double  4.000000e+000, %15
-    %17   = fadd   double  %11,           %16
-    store double   %17,    double*        @Simple.PI
+    %2    = load   double* @Simple.PI
+    %3    = load   i32*    @Simple.i
+    %4    = mul    i32     %3,            4
+    %5    = sub    i32     %4,            1
+    %6    = sitofp i32     %5             to double
+    %7    = fdiv   double  4.000000e+000, %6
+    %8    = fsub   double  %2,            %7
+    %9    = load   i32*    @Simple.i
+    %10   = mul    i32     %9,            4
+    %11   = add    i32     %10,           1
+    %12   = sitofp i32     %11            to double
+    %13   = fdiv   double  4.000000e+000, %12
+    %14   = fadd   double  %8,            %13
+    store double   %14,    double*        @Simple.PI
     
     ; i := i + 1
-    %18   = load i32* @Simple.i
-    %19   = add  i32  %18, 1
-    store i32    %19, i32* @Simple.i
+    %15   = load i32* @Simple.i
+    %16   = add  i32  %15, 1
+    store i32    %16, i32* @Simple.i
     
-    br label  %1
+    br  label  %17
+    
+; <label>:17
+    %18 = load i32* @Simple.i
+    %19 = icmp sge  i32   %18, 1000000
+    br  i1     %19, label %20, label %1
     
 ; <label>:20
     

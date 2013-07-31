@@ -77,6 +77,26 @@ namespace DUO2C.CodeGen.LLVM
             return ctx.LabelMarker(bodyend);
         }
 
+        static GenerationContext Node(this GenerationContext ctx, NRepeatUntil node)
+        {
+            var cond = (Value) new TempIdent();
+            var bodystart = new TempIdent();
+            var condstart = new TempIdent();
+            var condend = new TempIdent();
+
+            ctx.Branch(bodystart);
+
+            ctx.LabelMarker(bodystart).NewLine();
+            ctx.Statements(node.Body.Statements);
+            ctx.Branch(condstart);
+
+            ctx.LabelMarker(condstart);
+            ctx.Expr(node.Condition, ref cond, BooleanType.Default);
+            ctx.Branch(cond, condend, bodystart);
+
+            return ctx.LabelMarker(condend);
+        }
+
         static GenerationContext Node(this GenerationContext ctx, NInvocStmnt node)
         {
             var tmp = new TempIdent();

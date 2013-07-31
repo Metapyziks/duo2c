@@ -98,7 +98,7 @@ namespace DUO2C.CodeGen.LLVM
             if (module.Body != null) {
                 ctx.Statements(module.Body.Statements);
             }
-            ctx = ctx.Write("ret i32 0").NewLine().Leave().Write("}").NewLine();
+            ctx = ctx.Write("ret i32 0").EndOperation().Leave().Write("}").NewLine();
 
             return ctx;
         }
@@ -116,8 +116,7 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext WriteTypeDecl(this GenerationContext ctx, String identifier, OberonType type)
         {
-            ctx.Type(new UnresolvedType(identifier)).Write(" ").Anchor().Write("= type ").Type(type);
-            return ctx.NewLine();
+            return ctx.Type(new UnresolvedType(identifier)).Write(" \t=").Keyword("type").Type(type).EndOperation();
         }
 
         static GenerationContext Statements(this GenerationContext ctx, IEnumerable<NStatement> statements)
