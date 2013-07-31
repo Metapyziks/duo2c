@@ -103,9 +103,7 @@ namespace DUO2C.CodeGen.LLVM
             {
                 get
                 {
-                    if (_id == 0) {
-                        _id = ++_sLast;
-                    }
+                    ResolveID();
                     return _id;
                 }
             }
@@ -113,6 +111,13 @@ namespace DUO2C.CodeGen.LLVM
             public TempIdent()
             {
                 _id = 0;
+            }
+
+            public void ResolveID()
+            {
+                if (_id == 0) {
+                    _id = ++_sLast;
+                }
             }
 
             public override string ToString()

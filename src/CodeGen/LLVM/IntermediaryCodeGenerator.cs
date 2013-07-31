@@ -105,7 +105,7 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Write(this GenerationContext ctx, Value val)
         {
-            return ctx.Write(val.ToString());
+            return ctx.Write(() => val.ToString());
         }
 
         static GenerationContext WriteGlobalDecl(this GenerationContext ctx, QualIdent ident, OberonType type)
@@ -129,22 +129,6 @@ namespace DUO2C.CodeGen.LLVM
                 ctx.Enter(0).NewLine().Node(stmnt).NewLine().Leave();
             }
             return ctx;
-        }
-
-        static GenerationContext WriteOperation(this GenerationContext ctx, String op, params Object[] args)
-        {
-            ctx.Write("{0} ", op).Anchor();
-            foreach (var arg in args) {
-                if (arg is OberonType) {
-                    ctx.Type((OberonType) arg).Write(" ").Anchor();
-                } else {
-                    ctx.Write(arg.ToString());
-                    if (arg != args.Last()) {
-                        ctx.Write(", ").Anchor();
-                    }
-                }
-            }
-            return ctx.NewLine();
         }
 
         static Dictionary<Type, MethodInfo> _nodeMethods;

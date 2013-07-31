@@ -17,34 +17,31 @@ namespace DUO2C.CodeGen.LLVM
             var temp = (Value) new TempIdent();
             var type = node.Assignee.GetFinalType(_scope);
             temp = ctx.PrepareOperand(node.Expression, type, temp);
-            return ctx.WriteOperation("store", type, temp, new PointerType(type), dest);
+            return ctx.Keyword("store").Argument(type, temp).Argument(new PointerType(type), dest).NewLine();
         }
 
         static GenerationContext Node(this GenerationContext ctx, NIfThenElse node)
         {
             var cond = (Value) new TempIdent();
             var iftrue = new TempIdent();
-            var iffalse = new TempIdent();
+            var iffalse = node.ElseBody != null ? new TempIdent() : null;
             var ifend = new TempIdent();            
 
             ctx.Expr(node.Condition, ref cond, BooleanType.Default);
-            ctx.Write("br ").Type(BooleanType.Default).Write(" {0}, label ", cond).Write(() => iftrue.ToString());
-            ctx.Write(", label ").Write(() => node.ElseBody != null ? iffalse.ToString() : ifend.ToString()).NewLine();
+            ctx.Branch(cond, iftrue, iffalse ?? ifend);
 
-            ctx.NewLine().Write("\r; <label>:{0}", iftrue.ID).NewLine().NewLine();
+            ctx.LabelMarker(iftrue).NewLine();
 
             ctx.WriteStatements(node.ThenBody.Statements.Select(x => x.Inner));
-            ctx.Write("br label ").Write(() => ifend.ToString()).NewLine();
+            ctx.Branch(ifend);
 
             if (node.ElseBody != null) {
-                ctx.NewLine().Write("\r; <label>:{0}", iffalse.ID).NewLine().NewLine();
+                ctx.LabelMarker(iffalse).NewLine();
                 ctx.WriteStatements(node.ElseBody.Statements.Select(x => x.Inner));
-                ctx.Write("br label ").Write(() => ifend.ToString()).NewLine();
-
-                return ctx.NewLine().Write("\r; <label>:{0}", ifend.ID).NewLine();
-            } else {
-                return ctx.NewLine().Write("\r; <label>:{0}", ifend.ID).NewLine();
+                ctx.Branch(ifend);
             }
+
+            return ctx.LabelMarker(ifend);
         }
 
         static GenerationContext Node(this GenerationContext ctx, NWhileLoop node)
@@ -54,20 +51,17 @@ namespace DUO2C.CodeGen.LLVM
             var bodystart = new TempIdent();
             var bodyend = new TempIdent();
 
-            ctx.Write("br label ").Write(() => condstart.ToString()).NewLine();
+            ctx.Branch(condstart);
 
-            ctx.NewLine().Write("\r; <label>:{0}", condstart.ID).NewLine().NewLine();
-
+            ctx.LabelMarker(condstart);
             ctx.Expr(node.Condition, ref cond, BooleanType.Default);
-            ctx.Write("br ").Type(BooleanType.Default).Write(" {0}, label ", cond).Write(() => bodystart.ToString());
-            ctx.Write(", label ").Write(() => bodyend.ToString()).NewLine();
+            ctx.Branch(cond, bodystart, bodyend);
 
-            ctx.NewLine().Write("\r; <label>:{0}", bodystart.ID).NewLine().NewLine();
-
+            ctx.LabelMarker(bodystart);
             ctx.WriteStatements(node.Body.Statements.Select(x => x.Inner));
-            ctx.Write("br label ").Write(() => condstart.ToString()).NewLine();
+            ctx.Branch(bodyend);
 
-            return ctx.NewLine().Write("\r; <label>:{0}", bodyend.ID).NewLine();
+            return ctx.LabelMarker(bodyend);
         }
 
         static GenerationContext Node(this GenerationContext ctx, NInvocStmnt node)

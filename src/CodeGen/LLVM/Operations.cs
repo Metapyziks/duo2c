@@ -14,6 +14,7 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Assign(this GenerationContext ctx, Value dest)
         {
+            if (dest is TempIdent) ((TempIdent) dest).ResolveID();
             return ctx.Write("{0} \t= \t", dest);
         }
 
@@ -42,7 +43,7 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Argument(this GenerationContext ctx, OberonType type, Value val)
         {
-            return ctx.Argument().Type(type).Write(" \t{0}", val);
+            return ctx.Argument().Type(type).Write(" \t").Write(val);
         }
 
         static GenerationContext Global(this GenerationContext ctx, Value dest, OberonType type, bool isPublic)
@@ -76,6 +77,26 @@ namespace DUO2C.CodeGen.LLVM
         {
             return ctx.Assign(dest).Keyword(type.IsReal ? "fcmp" : "icmp").Keyword(type.IsReal ? floatComp : intComp)
                 .Argument(type, a).Argument(b).NewLine();
+        }
+
+        static GenerationContext Label(this GenerationContext ctx, Value label)
+        {
+            return ctx.Argument().Keyword("label").Argument(label);
+        }
+
+        static GenerationContext LabelMarker(this GenerationContext ctx, Value label)
+        {
+            return ctx.NewLine().Write("\r; <label>:{0}", label.ToString().Substring(1)).NewLine();
+        }
+
+        static GenerationContext Branch(this GenerationContext ctx, Value dest)
+        {
+            return ctx.Keyword("br").Label(dest).NewLine();
+        }
+
+        static GenerationContext Branch(this GenerationContext ctx, Value cond, Value ifTrue, Value ifFalse)
+        {
+            return ctx.Keyword("br").Argument(BooleanType.Default, cond).Label(ifTrue).Label(ifFalse).NewLine();
         }
     }
 }
