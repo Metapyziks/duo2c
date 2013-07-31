@@ -27,14 +27,8 @@ BEGIN
     b := <1, 7, -1, 12, 93, 0, 4, 2>;
 
     (* Copy 8 elements from an array starting at index 0,
-     * to be placed at indexes starting at 0 in a vector *)
+     * to be placed at indices starting at 0 in a vector *)
     VECLOAD(c, arr, 0, 8, 0);
-
-    (* Alternatively *)
-    c := <arr>;
-
-    (* or *)
-    c := VECTOR(arr);
 
     (* Perform standard numeric operations on vectors *)
     d := a + b * c;
@@ -43,10 +37,7 @@ BEGIN
     d := d MOD 8;
 
     (* Copy 4 elements from a vector starting at index 0,
-     * to be placed at indexes starting at 2 in an array *)
+     * to be placed at indices starting at 2 in an array *)
     VECSTORE(d, arr, 0, 4, 2);
-
-    (* Alternative *)
-    arr := ARRAY(d);
 
 END Vector.
