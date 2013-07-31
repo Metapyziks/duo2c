@@ -23,7 +23,6 @@ BEGIN
     VECSET(b, 1, 7, -1, 12, 93, 0, 4, 2);
 
     (* Alternatively *)
-
     b := <1, 7, -1, 12, 93, 0, 4, 2>;
 
     (* Copy 8 elements from an array starting at index 0,
