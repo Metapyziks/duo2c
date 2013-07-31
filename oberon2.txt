@@ -18,10 +18,10 @@ RecordType    = RECORD ["("NamedType")"] [FieldList] {";" [FieldList]} END.
 PtrType       = POINTER TO Type.
 ProcType      = PROCEDURE [FormalPars].
 FieldList     = IdentList ":" Type.
-StatementSeq  = Statement {";" Statement} [";"].
+StatementSeq  = (Terminator | Statement {";" Statement} [";" Terminator]) [";"].
 Statement     = Assignment | InvocStmnt | IfThenElse | SwitchCase
-              | WhileLoop | RepeatUntil | ForLoop | UncondLoop | WithDo
-              | Exit | Return.
+              | WhileLoop | RepeatUntil | ForLoop | UncondLoop | WithDo.
+Terminator    = Exit | Return.
 Assignment    = Designator ":=" Expr.
 InvocStmnt	  = Designator.
 IfThenElse    = IF Expr THEN StatementSeq {ELSIF Expr THEN StatementSeq} [ELSE StatementSeq] END.

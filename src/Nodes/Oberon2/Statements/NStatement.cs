@@ -33,4 +33,11 @@ namespace DUO2C.Nodes.Oberon2
             return Inner.FindTypeErrors(scope);
         }
     }
+
+    [SubstituteToken("Terminator")]
+    public class NTerminator : NStatement
+    {
+        public NTerminator(ParseNode original)
+            : base(original) { }
+    }
 }
