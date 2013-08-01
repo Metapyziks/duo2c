@@ -25,26 +25,26 @@ namespace DUO2C.CodeGen.LLVM
             return ctx.Write(String.Join(" \t", keywords)).Write(" \t");
         }
 
-        static GenerationContext Argument(this GenerationContext ctx)
+        static GenerationContext Argument(this GenerationContext ctx, bool align = true)
         {
-            if (_lastWasArg) ctx.Write(", \t");
+            if (_lastWasArg) ctx.Write(", {0}", align ? "\t" : "");
             _lastWasArg = true;
             return ctx;
         }
 
-        static GenerationContext Argument(this GenerationContext ctx, OberonType type)
+        static GenerationContext Argument(this GenerationContext ctx, OberonType type, bool align = true)
         {
-            return ctx.Argument().Type(type);
+            return ctx.Argument(align).Type(type);
         }
 
-        static GenerationContext Argument(this GenerationContext ctx, Value val)
+        static GenerationContext Argument(this GenerationContext ctx, Value val, bool align = true)
         {
-            return ctx.Argument().Write(val);
+            return ctx.Argument(align).Write(val);
         }
 
-        static GenerationContext Argument(this GenerationContext ctx, OberonType type, Value val)
+        static GenerationContext Argument(this GenerationContext ctx, OberonType type, Value val, bool align = true)
         {
-            return ctx.Argument().Type(type).Write(" \t").Write(val);
+            return ctx.Argument(align).Type(type).Write(" {0}", align ? "\t" : "").Write(val);
         }
 
         static GenerationContext EndArguments(this GenerationContext ctx)
@@ -133,11 +133,11 @@ namespace DUO2C.CodeGen.LLVM
                 ctx.Conversion(fromType, toType, ref arg);
             }
 
-            ctx.Assign(dest).Keyword("call").Type(new PointerType(procType)).Write(" \t").Write(proc).Write("\t(");
+            ctx.Assign(dest).Keyword("call").Type(new PointerType(procType)).Write(" ").Write(proc).Write("(");
             for (int i = 0; i < args.Length; ++i) {
-                ctx.Argument(argTypes[i], args[i]);
+                ctx.Argument(argTypes[i], args[i], false);
             }
-            return ctx.Write(") \tnounwind").EndOperation();
+            return ctx.Write(") nounwind").EndOperation();
         }
     }
 }

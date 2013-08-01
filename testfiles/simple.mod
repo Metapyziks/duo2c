@@ -12,7 +12,7 @@ MODULE Simple;
         PI := 4;
         i := 0;
         
-        WHILE i < 1000000 DO
+        WHILE i < iters DO
             PI := PI - 4.0D0 / (i * 4 - 1) + 4.0D0 / (i * 4 + 1);
             i := i + 1;
         END;

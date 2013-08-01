@@ -17,6 +17,32 @@ namespace DUO2C.CodeGen.LLVM
             return stmnts.Count() > 0 && (stmnts.Last().Inner is NExit || stmnts.Last().Inner is NReturn);
         }
 
+        static GenerationContext Procedure(this GenerationContext ctx, NProcDecl proc)
+        {
+            ctx.Keyword("define");
+
+            var type = _scope.GetSymbol(proc.Identifier).As<ProcedureType>();
+            var isPublic = _scope.GetSymbolDecl(proc.Identifier, null).Visibility != AccessModifier.Private;
+
+            if (type.ReturnType != null) {
+                ctx.Type(type.ReturnType);
+            } else {
+                ctx.Type(VoidType.Default);
+            }
+            
+            ctx.Write(" \t{0}\t(", new GlobalIdent(proc.Identifier, isPublic));
+            foreach (var t in type.Params.Select(x => x.Type)) {
+                ctx.Argument(t);
+            }
+            ctx.Write(") \t").Keyword("nounwind").Write("{");
+            ctx = ctx.Enter().NewLine().NewLine();
+            
+            TempIdent.Reset();
+            ctx.PushScope(proc.Scope).Statements(proc.Statements).PopScope();
+
+            return ctx.Leave().Write("}").NewLine();
+        }
+
         static GenerationContext Statements(this GenerationContext ctx, NStatementSeq block)
         {
             foreach (var stmnt in block.Statements.Select(x => x.Inner)) {

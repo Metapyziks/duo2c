@@ -235,7 +235,7 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("ProcDecl")]
     public class NProcDecl : NForwardDecl
     {
-        private Scope _scope;
+        public Scope Scope { get; private set; }
 
         public NStatementSeq Statements
         {
@@ -249,17 +249,17 @@ namespace DUO2C.Nodes.Oberon2
         {
             base.FindDeclarations(scope);
 
-            _scope = new Scope(scope);
+            Scope = new Scope(scope);
 
             foreach (var child in Children.Where(x => x is IDeclarationSource)) {
-                ((IDeclarationSource) child).FindDeclarations(_scope);
+                ((IDeclarationSource) child).FindDeclarations(Scope);
             }
         }
 
         public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             foreach (var e in base.FindTypeErrors(scope).Union(Children.SelectMany(x => (x is ITypeErrorSource)
-                ? ((ITypeErrorSource) x).FindTypeErrors(_scope)
+                ? ((ITypeErrorSource) x).FindTypeErrors(Scope)
                 : new CompilerException[0]))) {
                 yield return e;   
             }

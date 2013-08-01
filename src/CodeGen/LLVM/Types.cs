@@ -100,9 +100,9 @@ namespace DUO2C.CodeGen.LLVM
         {
             var returnType = type.ReturnType ?? VoidType.Default;
 
-            ctx.Type(returnType).Write(" \t(");
+            ctx.Type(returnType).Write(" (");
             foreach (var t in type.Params.Select(x => x.Type)) {
-                ctx.Argument(t);
+                ctx.Argument(t, false);
             }
             return ctx.EndArguments().Write(")");
         }

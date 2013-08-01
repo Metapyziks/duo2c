@@ -18,6 +18,14 @@ target triple = "i686-w64-mingw32"
 @.str6 = private unnamed_addr constant [24 x i8] c"Unable to init SDL: %s\0A\00", align 1
 @.str7 = private unnamed_addr constant [16 x i8] c"Great success!\0A\00", align 1
 
+define i32 @test(i32 %arg) nounwind {
+  %1 = alloca i32, align 4
+  store i32 %arg, i32* %1, align 4
+  %2 = load i32* %1, align 4
+  %3 = mul nsw i32 %2, 2
+  ret i32 %3
+}
+
 define void @cleanup() nounwind {
   %1 = load i32* @sdl_initialized, align 4
   %2 = icmp ne i32 %1, 0

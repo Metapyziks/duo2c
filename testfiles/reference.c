@@ -13,6 +13,10 @@ SDL_Quit_t SDL_Quit;
 
 int sdl_initialized = 0;
 
+int test(int arg) {
+    return arg * 2;
+}
+
 void cleanup() {
     if (sdl_initialized) {
         SDL_Quit();

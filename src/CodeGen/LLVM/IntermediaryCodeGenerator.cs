@@ -43,6 +43,18 @@ namespace DUO2C.CodeGen.LLVM
             return new PointerType(new ConstArrayType(CharType.Default, Encoding.UTF8.GetByteCount(str + "\0")));
         }
 
+        static GenerationContext PushScope(this GenerationContext ctx, Scope scope)
+        {
+            _scope = scope;
+            return ctx;
+        }
+
+        static GenerationContext PopScope(this GenerationContext ctx)
+        {
+            _scope = _scope.Parent;
+            return ctx;
+        }
+
         static GenerationContext WriteModule(this GenerationContext ctx, NModule module, Guid uniqueID)
         {
             _module = module;
@@ -78,15 +90,15 @@ namespace DUO2C.CodeGen.LLVM
             var printLineStr = new GlobalStringIdent();
             var printTrueStr = new GlobalStringIdent();
             var printFalseStr = new GlobalStringIdent();
+            
+            ctx = ctx.Enter(0);
+            ctx.TypeDecl(new TypeIdent(CharType.Default.ToString()), IntegerType.Byte);
+            ctx.TypeDecl(new TypeIdent(SetType.Default.ToString()), IntegerType.LongInt);
 
-            ctx.Lazy(x => {
-                x.TypeDecl(new TypeIdent(CharType.Default.ToString()), IntegerType.Byte);
-                x.TypeDecl(new TypeIdent(SetType.Default.ToString()), IntegerType.LongInt);
-
-                foreach (var kv in _scope.GetTypes()) {
-                    x.TypeDecl(new TypeIdent(kv.Key, module.Identifier), kv.Value.Type);
-                }
-            });
+            foreach (var kv in _scope.GetTypes()) {
+                ctx.TypeDecl(new TypeIdent(kv.Key, module.Identifier), kv.Value.Type);
+            }
+            ctx = ctx.Leave().NewLine().NewLine();
 
             ctx.Lazy(x => {
                 foreach (var kv in _stringConsts.OrderBy(y => y.Value.ID)) {
@@ -96,22 +108,30 @@ namespace DUO2C.CodeGen.LLVM
 
 
             ctx.Global(_printfProc, _printfProcType);
+            
+            ctx = ctx.Enter(0);
+            foreach (var v in _scope.GetSymbols().Where(y => y.Value.Type.IsProcedure)) {
+                if (v.Key == "NEW") continue;
 
-            ctx.Lazy(x => {
-                foreach (var v in _scope.GetSymbols().Where(y => y.Value.Type.IsProcedure)) {
-                    if (v.Key == "NEW") continue;
+                ctx.Global(new QualIdent(v.Key), v.Value.Type);
+            }
+            ctx = ctx.Leave().NewLine().NewLine();
+            
+            ctx = ctx.Enter(0);
+            foreach (var v in _scope.GetSymbols().Where(y => !y.Value.Type.IsProcedure)) {
+                ctx.Global(new QualIdent(v.Key), v.Value.Type);
+            }
+            ctx = ctx.Leave().NewLine().NewLine();
 
-                    x.Global(new QualIdent(v.Key), v.Value.Type);
-                }
-            }).NewLine().NewLine();
+            ctx = ctx.Enter(0);
+            foreach (var proc in _module.Declarations.Procedures.Where(y => y is NProcDecl).Cast<NProcDecl>()) {
+                ctx.Procedure(proc);
+            }
+            ctx = ctx.Leave().NewLine().NewLine();
 
-            ctx.Lazy(x => {
-                foreach (var v in _scope.GetSymbols().Where(y => !y.Value.Type.IsProcedure)) {
-                    x.Global(new QualIdent(v.Key), v.Value.Type);
-                }
-            }).NewLine();
+            TempIdent.Reset();
 
-            ctx = ctx.Write("define i32 @").Write("main() {").Enter().NewLine().NewLine();
+            ctx = ctx.Write("define i32 @main() {").Enter().NewLine().NewLine();
             if (module.Body != null) {
                 ctx.Statements(module.Body);
             }
