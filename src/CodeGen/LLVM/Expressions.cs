@@ -21,6 +21,14 @@ namespace DUO2C.CodeGen.LLVM
         {
             if (node.IsRoot) {
                 return new QualIdent((NQualIdent) node.Element);
+            } else if (node.Operation is NInvocation) {
+                var args = ((NInvocation) node.Operation).Args;
+                var proc = (NDesignator) node.Element;
+                var procPtr = ctx.GetDesignation(proc);
+                var procType = proc.GetFinalType(_scope).As<ProcedureType>();
+                var temp = new TempIdent();
+                ctx.Call(temp, procType, procPtr, args);
+                return temp;
             } else {
                 throw new NotImplementedException();
             }
@@ -59,8 +67,14 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Factor(this GenerationContext ctx, NFactor node, ref Value dest, OberonType type)
         {
-            if (node.Inner is NDesignator && ((NDesignator) node.Inner).IsRoot) {
-                return ctx.Load(dest, type, ctx.GetDesignation((NDesignator) node.Inner));
+            if (node.Inner is NDesignator) {
+                var val = ctx.GetDesignation((NDesignator) node.Inner);
+                if (val is QualIdent) {
+                    return ctx.Load(dest, type, val);
+                } else {
+                    dest = val;
+                    return ctx;
+                }
             }
 
             if (node.Inner is NExpr) {

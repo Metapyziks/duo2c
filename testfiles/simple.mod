@@ -19,7 +19,5 @@ MODULE Simple;
     END;
 
 BEGIN
-    Out.Integer(193); Out.Ln;
-    Out.Real(11.9); Out.Ln;
-    Out.Boolean(TRUE); Out.Ln;
+    Out.Real(FindPI(1000000)); Out.Ln;
 END Simple.

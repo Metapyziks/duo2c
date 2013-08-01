@@ -137,7 +137,7 @@ namespace DUO2C.CodeGen.LLVM
             for (int i = 0; i < args.Length; ++i) {
                 ctx.Argument(argTypes[i], args[i]);
             }
-            return ctx.Write("\t) \tnounwind").EndOperation();
+            return ctx.Write(") \tnounwind").EndOperation();
         }
     }
 }

@@ -182,7 +182,8 @@ namespace DUO2C.CodeGen.LLVM
                 }
             }
 
-            throw new NotImplementedException("Invocation statements not yet implented");
+            ctx.GetDesignation(node.Invocation);
+            return ctx;
         }
     }
 }

@@ -104,7 +104,7 @@ namespace DUO2C.CodeGen.LLVM
             foreach (var t in type.Params.Select(x => x.Type)) {
                 ctx.Argument(t);
             }
-            return ctx.EndArguments().Write("\t)");
+            return ctx.EndArguments().Write(")");
         }
 
         static GenerationContext Type(this GenerationContext ctx, RecordType type)
