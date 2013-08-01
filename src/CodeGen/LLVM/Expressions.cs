@@ -26,7 +26,7 @@ namespace DUO2C.CodeGen.LLVM
             }
         }
 
-        static GenerationContext Conversion(this GenerationContext ctx, Value dest, OberonType from, OberonType to, ref Value src)
+        static GenerationContext Conversion(this GenerationContext ctx, OberonType from, OberonType to, ref Value src)
         {
             if (from.Equals(to)) return ctx;
 
@@ -38,19 +38,19 @@ namespace DUO2C.CodeGen.LLVM
             }
 
             var tsrc = src;
-            src = dest = new TempIdent();
+            src = new TempIdent();
 
             if (from is IntegerType && to is IntegerType) {
                 IntegerType fi = (IntegerType) from, ti = (IntegerType) to;
                 if (fi.Range < ti.Range) {
-                    return ctx.Conversion(dest, "sext", from, tsrc, to);
+                    return ctx.Conversion(src, "sext", from, tsrc, to);
                 }
             } else if (from is IntegerType && to is RealType) {
-                return ctx.Conversion(dest, "sitofp", from, tsrc, to);
+                return ctx.Conversion(src, "sitofp", from, tsrc, to);
             } else if (from is RealType && to is RealType) {
                 RealType fr = (RealType) from, tf = (RealType) to;
                 if (fr.Range < tf.Range) {
-                    return ctx.Conversion(dest, "fpext", from, tsrc, to);
+                    return ctx.Conversion(src, "fpext", from, tsrc, to);
                 }
             }
 
@@ -95,7 +95,7 @@ namespace DUO2C.CodeGen.LLVM
             } else if (node is NExpr) {
                 ctx.Expr((NExpr) node, ref val, ntype);
             }
-            ctx.Conversion(temp, ntype, type, ref val);
+            ctx.Conversion(ntype, type, ref val);
             return val;
         }
 

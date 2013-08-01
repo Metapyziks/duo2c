@@ -43,7 +43,7 @@
   <ItemGroup>
     <Compile Include="src\CodeGen\LLVM\AutoHeader.cs" />
     <Compile Include="src\CodeGen\GenerationContext.cs" />
-    <Compile Include="src\CodeGen\LLVM\Constants.cs" />
+    <Compile Include="src\CodeGen\LLVM\Declarations.cs" />
     <Compile Include="src\CodeGen\LLVM\Expressions.cs" />
     <Compile Include="src\CodeGen\LLVM\IntermediaryCodeGenerator.cs" />
     <Compile Include="src\CodeGen\LLVM\DataLayout.cs" />

@@ -17,6 +17,9 @@ namespace DUO2C.CodeGen.LLVM
         static Scope _scope;
         static Dictionary<String, GlobalStringIdent> _stringConsts;
 
+        static GlobalIdent _printfProc;
+        static ProcedureType _printfProcType;
+
         public static String Generate(NModule module, Guid uniqueID)
         {
             var ctx = new GenerationContext();
@@ -35,11 +38,21 @@ namespace DUO2C.CodeGen.LLVM
             }
         }
 
+        static OberonType GetStringType(String str)
+        {
+            return new PointerType(new ConstArrayType(CharType.Default, Encoding.UTF8.GetByteCount(str + "\0")));
+        }
+
         static GenerationContext WriteModule(this GenerationContext ctx, NModule module, Guid uniqueID)
         {
             _module = module;
             _scope = module.Type.Scope;
             _stringConsts = new Dictionary<string, GlobalStringIdent>();
+
+            _printfProc = new GlobalIdent("printf", false);
+            _printfProcType = new ProcedureType(IntegerType.Integer,
+                new Parameter(false, "format", new PointerType(CharType.Default)),
+                new Parameter(false, "args", VarArgsType.Default));
 
             GlobalStringIdent.Reset();
             TempIdent.Reset();
@@ -67,32 +80,36 @@ namespace DUO2C.CodeGen.LLVM
             var printFalseStr = new GlobalStringIdent();
 
             ctx.Lazy(x => {
-                foreach (var kv in _stringConsts.OrderBy(y => y.Value.ID)) {
-                    x.StringConstant(kv.Key, kv.Value);
+                x.TypeDecl(new TypeIdent(CharType.Default.ToString()), IntegerType.Byte);
+                x.TypeDecl(new TypeIdent(SetType.Default.ToString()), IntegerType.LongInt);
+
+                foreach (var kv in _scope.GetTypes()) {
+                    x.TypeDecl(new TypeIdent(kv.Key, module.Identifier), kv.Value.Type);
                 }
             });
-
-            ctx.Write("declare i32 @printf(i8*, ...) nounwind").NewLine().NewLine();
 
             ctx.Lazy(x => {
-                x.WriteTypeDecl("CHAR", IntegerType.Byte);
-                x.WriteTypeDecl("SET", IntegerType.LongInt);
-
-                foreach (var kv in _scope.GetTypes().Where(y => !(y.Value.Type is ProcedureType))) {
-                    x.WriteTypeDecl(kv.Key, kv.Value.Type);
+                foreach (var kv in _stringConsts.OrderBy(y => y.Value.ID)) {
+                    x.StringConstant(kv.Value, kv.Key);
                 }
             });
 
 
-            foreach (var v in _scope.GetSymbols()) {
-                if (!v.Value.Type.IsProcedure) {
-                    ctx.WriteGlobalDecl(new QualIdent(v.Key), v.Value.Type);
-                }
-            }
+            ctx.Global(_printfProc, _printfProcType);
 
-            if (_scope.GetSymbols().Count() > 0) {
-                ctx.NewLine();
-            }
+            ctx.Lazy(x => {
+                foreach (var v in _scope.GetSymbols().Where(y => y.Value.Type.IsProcedure)) {
+                    if (v.Key == "NEW") continue;
+
+                    x.Global(new QualIdent(v.Key), v.Value.Type);
+                }
+            }).NewLine().NewLine();
+
+            ctx.Lazy(x => {
+                foreach (var v in _scope.GetSymbols().Where(y => !y.Value.Type.IsProcedure)) {
+                    x.Global(new QualIdent(v.Key), v.Value.Type);
+                }
+            }).NewLine();
 
             ctx = ctx.Write("define i32 @").Write("main() {").Enter().NewLine().NewLine();
             if (module.Body != null) {
@@ -103,41 +120,7 @@ namespace DUO2C.CodeGen.LLVM
             return ctx;
         }
 
-        static GenerationContext Write(this GenerationContext ctx, Value val)
-        {
-            return ctx.Write(() => val.ToString());
-        }
-
-        static GenerationContext WriteGlobalDecl(this GenerationContext ctx, QualIdent ident, OberonType type)
-        {
-            bool isPublic = _scope.GetSymbolDecl(ident.Identifier, ident.Module).Visibility != AccessModifier.Private;
-            return ctx.Global(ident, type, isPublic);
-        }
-
-        static GenerationContext WriteTypeDecl(this GenerationContext ctx, String identifier, OberonType type)
-        {
-            return ctx.Type(new UnresolvedType(identifier)).Write(" \t=").Keyword("type").Type(type).EndOperation();
-        }
-
-        static bool EndsInBranch(this NStatementSeq block)
-        {
-            var stmnts = block.Statements;
-            return stmnts.Count() > 0 && (stmnts.Last().Inner is NExit || stmnts.Last().Inner is NReturn);
-        }
-
-        static GenerationContext Statements(this GenerationContext ctx, NStatementSeq block)
-        {
-            foreach (var stmnt in block.Statements.Select(x => x.Inner)) {
-#if DEBUG
-                ctx.Write("; {0}", stmnt.String);
-#endif
-                ctx.Enter(0).NewLine().Node(stmnt).NewLine().Leave();
-            }
-            return ctx;
-        }
-
         static Dictionary<Type, MethodInfo> _nodeMethods;
-
         static GenerationContext Node(this GenerationContext ctx, SubstituteNode node)
         {
             if (_nodeMethods == null) {

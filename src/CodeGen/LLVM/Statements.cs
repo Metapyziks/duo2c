@@ -11,6 +11,23 @@ namespace DUO2C.CodeGen.LLVM
 {
     public static partial class IntermediaryCodeGenerator
     {
+        static bool EndsInBranch(this NStatementSeq block)
+        {
+            var stmnts = block.Statements;
+            return stmnts.Count() > 0 && (stmnts.Last().Inner is NExit || stmnts.Last().Inner is NReturn);
+        }
+
+        static GenerationContext Statements(this GenerationContext ctx, NStatementSeq block)
+        {
+            foreach (var stmnt in block.Statements.Select(x => x.Inner)) {
+#if DEBUG
+                ctx.Write("; {0}", stmnt.String);
+#endif
+                ctx.Enter(0).NewLine().Node(stmnt).NewLine().Leave();
+            }
+            return ctx;
+        }
+
         static Stack<Value> _exitLabels = new Stack<Value>();
         static GenerationContext PushExitLabel(this GenerationContext ctx, Value label)
         {
@@ -139,23 +156,29 @@ namespace DUO2C.CodeGen.LLVM
                 switch (elem.Identifier) {
                     case "Boolean":
                         var temp = new TempIdent();
-                        var trueStr = GetStringIdent("TRUE");
-                        var falseStr = GetStringIdent("FALSE");
-                        ctx.Assign(temp).Keyword("select").Argument(type, src).Keyword("i8* getelementptr inbounds ([5 x i8]* " + trueStr + ", i32 0, i32 0),", "i8* getelementptr inbounds ([6 x i8]* " + falseStr + ", i32 0, i32 0)");
-                        return ctx.Assign(tmp).Keyword("call").Type(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* {0}) nounwind", temp).NewLine();
+                        ctx.Select(temp, src, new PointerType(CharType.Default),
+                            new ElementPointer(true, GetStringType("TRUE"), GetStringIdent("TRUE"), 0, 0),
+                            new ElementPointer(true, GetStringType("FALSE"), GetStringIdent("FALSE"), 0, 0));
+                        return ctx.Call(new TempIdent(), _printfProcType, _printfProc,
+                            new PointerType(CharType.Default), temp);
                     case "Byte":
                     case "ShortInt":
                     case "Integer":
                     case "LongInt":
-                        var intStr = GetStringIdent("%i");
-                        return ctx.Assign(tmp).Keyword("call").Type(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* " + intStr + ", i32 0, i32 0), ").Type(type).Write(" {0}) nounwind", src).NewLine();
+                        return ctx.Call(new TempIdent(), _printfProcType, _printfProc,
+                            new PointerType(CharType.Default),
+                            new ElementPointer(true, GetStringType("%i"), GetStringIdent("%i"), 0, 0),
+                            IntegerType.LongInt, src);
                     case "Real":
                     case "LongReal":
-                        var floatStr = GetStringIdent("%f");
-                        return ctx.Assign(tmp).Keyword("call").Type(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* " + floatStr + ", i32 0, i32 0), ").Type(type).Write(" {0}) nounwind", src).NewLine();
+                        return ctx.Call(new TempIdent(), _printfProcType, _printfProc,
+                            new PointerType(CharType.Default),
+                            new ElementPointer(true, GetStringType("%f"), GetStringIdent("%f"), 0, 0),
+                            RealType.LongReal, src);
                     case "Ln":
-                        var nlStr = GetStringIdent("\n");
-                        return ctx.Assign(tmp).Keyword("call").Type(IntegerType.Integer).Write(" (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* " + nlStr + ", i32 0, i32 0)) nounwind").NewLine();
+                        return ctx.Call(new TempIdent(), _printfProcType, _printfProc,
+                            new PointerType(CharType.Default),
+                            new ElementPointer(true, GetStringType("\n"), GetStringIdent("\n"), 0, 0));
                 }
             }
 

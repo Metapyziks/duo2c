@@ -11,6 +11,58 @@ namespace DUO2C.CodeGen.LLVM
 {
     public static partial class IntermediaryCodeGenerator
     {
+        class VoidType : OberonType
+        {
+            public static readonly VoidType Default = new VoidType();
+
+            public override bool CanCompare(OberonType other)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override bool CanTestEquality(OberonType other)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        class VarArgsType : OberonType
+        {
+            public static readonly VarArgsType Default = new VarArgsType();
+
+            public override bool CanCompare(OberonType other)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override bool CanTestEquality(OberonType other)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        class ConstArrayType : OberonType
+        {
+            public OberonType ElementType { get; private set; }
+            public int Length { get; private set; }
+
+            public ConstArrayType(OberonType elementType, int length)
+            {
+                ElementType = elementType;
+                Length = length;
+            }
+
+            public override bool CanCompare(OberonType other)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override bool CanTestEquality(OberonType other)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         static Dictionary<Type, MethodInfo> _typeMethods;
 
         static GenerationContext Type(this GenerationContext ctx, OberonType type)
@@ -42,6 +94,17 @@ namespace DUO2C.CodeGen.LLVM
                 ctx.Type(type);
             }
             return ctx.Write("}");
+        }
+
+        static GenerationContext Type(this GenerationContext ctx, ProcedureType type)
+        {
+            var returnType = type.ReturnType ?? VoidType.Default;
+
+            ctx.Type(returnType).Write(" \t(");
+            foreach (var t in type.Params.Select(x => x.Type)) {
+                ctx.Argument(t);
+            }
+            return ctx.EndArguments().Write("\t)");
         }
 
         static GenerationContext Type(this GenerationContext ctx, RecordType type)
@@ -77,12 +140,12 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Type(this GenerationContext ctx, SetType type)
         {
-            return ctx.Type(new UnresolvedType("SET"));
+            return ctx.Write(new TypeIdent(SetType.Default.ToString()));
         }
 
         static GenerationContext Type(this GenerationContext ctx, CharType type)
         {
-            return ctx.Type(new UnresolvedType("CHAR"));
+            return ctx.Write(new TypeIdent(CharType.Default.ToString()));
         }
 
         static GenerationContext Type(this GenerationContext ctx, BooleanType type)
@@ -93,7 +156,22 @@ namespace DUO2C.CodeGen.LLVM
         static GenerationContext Type(this GenerationContext ctx, UnresolvedType type)
         {
             var module = type.Module ?? _module.Identifier;
-            return ctx.Write("%type.{0}.{1}", module, type.Identifier);
+            return ctx.Write(new QualIdent(type.Identifier, module));
+        }
+
+        static GenerationContext Type(this GenerationContext ctx, VoidType type)
+        {
+            return ctx.Write("void");
+        }
+
+        static GenerationContext Type(this GenerationContext ctx, VarArgsType type)
+        {
+            return ctx.Write("...");
+        }
+
+        static GenerationContext Type(this GenerationContext ctx, ConstArrayType type)
+        {
+            return ctx.Write("[{0} \tx \t", type.Length).Type(type.ElementType).Write("\t]");
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using DUO2C.Nodes.Oberon2;
 using DUO2C.Semantics;
 
 namespace DUO2C.CodeGen.LLVM
@@ -47,17 +47,16 @@ namespace DUO2C.CodeGen.LLVM
             return ctx.Argument().Type(type).Write(" \t").Write(val);
         }
 
+        static GenerationContext EndArguments(this GenerationContext ctx)
+        {
+            _lastWasArg = false;
+            return ctx;
+        }
+
         static GenerationContext EndOperation(this GenerationContext ctx)
         {
             _lastWasArg = false;
             return ctx.NewLine();
-        }
-
-        static GenerationContext Global(this GenerationContext ctx, Value dest, OberonType type, bool isPublic)
-        {
-            ctx.Assign(dest);
-            if (!isPublic) ctx.Keyword("private");
-            return ctx.Keyword("global").Argument(type, Literal.GetDefault(type)).EndOperation();
         }
 
         static GenerationContext Load(this GenerationContext ctx, Value dest, OberonType type, Value src)
@@ -104,6 +103,41 @@ namespace DUO2C.CodeGen.LLVM
         static GenerationContext Branch(this GenerationContext ctx, Value cond, Value ifTrue, Value ifFalse)
         {
             return ctx.Keyword("br").Argument(BooleanType.Default, cond).Label(ifTrue).Label(ifFalse).EndOperation();
+        }
+
+        static GenerationContext Select(this GenerationContext ctx, Value dest, Value cond, OberonType type, Value ifTrue, Value ifFalse)
+        {
+            return ctx.Assign(dest).Keyword("select").Argument(BooleanType.Default, cond).Argument(type, ifTrue).Argument(type, ifFalse).EndOperation();
+        }
+
+        static GenerationContext Call(this GenerationContext ctx, Value dest, ProcedureType procType, Value proc, params Object[] args)
+        {
+            return ctx.Call(dest, procType, proc, args.Where(x => x is OberonType).Cast<OberonType>().ToArray(),
+                args.Where(x => x is Value).Cast<Value>().ToArray());
+        }
+
+        static GenerationContext Call(this GenerationContext ctx, Value dest, ProcedureType procType, Value proc, NExprList args)
+        {
+            return ctx.Call(dest, procType, proc, args.Expressions.Select(x => x.GetFinalType(_scope)).ToArray(),
+                args.Expressions.Select(x => ctx.PrepareOperand(x, x.GetFinalType(_scope), new TempIdent())).ToArray());
+        }
+
+        static GenerationContext Call(this GenerationContext ctx, Value dest, ProcedureType procType, Value proc, OberonType[] argTypes, Value[] args)
+        {
+            for (int i = 0; i < args.Length; ++i) {
+                var arg = args[i];
+                var fromType = argTypes[i];
+                var toType = procType.Params.Select(x => x.Type).ElementAtOrDefault(i);
+                if (toType is VarArgsType || toType == null) toType = fromType;
+
+                ctx.Conversion(fromType, toType, ref arg);
+            }
+
+            ctx.Assign(dest).Keyword("call").Type(new PointerType(procType)).Write(" \t").Write(proc).Write("\t(");
+            for (int i = 0; i < args.Length; ++i) {
+                ctx.Argument(argTypes[i], args[i]);
+            }
+            return ctx.Write("\t) \tnounwind").EndOperation();
         }
     }
 }
