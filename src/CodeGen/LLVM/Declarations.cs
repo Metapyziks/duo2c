@@ -44,9 +44,14 @@ namespace DUO2C.CodeGen.LLVM
             }
         }
 
+        static GenerationContext Local(this GenerationContext ctx, Value dest, OberonType type)
+        {
+            return ctx.Assign(dest).Keyword("alloca").Argument(type).EndOperation();
+        }
+
         static GenerationContext TypeDecl(this GenerationContext ctx, TypeIdent ident, OberonType type)
         {
-            return ctx.Assign(ident).Keyword("type").Argument(type).NewLine();
+            return ctx.Assign(ident).Keyword("type").Argument(type).EndOperation();
         }
 
         static GenerationContext StringConstant(this GenerationContext ctx, GlobalStringIdent ident, String str)
@@ -57,7 +62,7 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Constant(this GenerationContext ctx, GlobalStringIdent ident, OberonType type, Value value)
         {
-            return ctx.Assign(ident).Keyword("private", "constant").Argument(type, value).NewLine();
+            return ctx.Assign(ident).Keyword("private", "constant").Argument(type, value).EndOperation();
         }
     }
 }

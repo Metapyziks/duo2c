@@ -1,5 +1,5 @@
-; Generated 02/08/2013 00:06:13
-; GlobalUID 92a4e95c-055c-4c66-8e7e-688e6cd15496
+; Generated 02/08/2013 01:00:53
+; GlobalUID 99636e85-1b0e-4741-aa31-334318d25129
 ; 
 ; LLVM IR file for module "Simple"
 ; 
@@ -16,54 +16,57 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
 @const.string.1 = private constant [2 x i8] c"\0A\00"
 
 declare i32 @printf(%CHAR*, ...) nounwind 
-declare double @Simple.FindPI(i32) nounwind 
 
-
-define double @FindPI(i32) nounwind {
+define double @Simple.FindPI(i32 %iters) nounwind {
     
-    ; PI := 4
-    store double 4.0, double* @Simple.PI
+    %i  = alloca i32
+    %pi = alloca double
     
-    ; i := 0
-    store i32 0, i32* @Simple.i
+    ; i := 1
+    store i32 1, i32* %i
+    
+    ; pi := 4
+    store double 4.000000e+000, double* %pi
     
     ; WHILE i < iters DO
     br label  %1
     
 ; <label>:1
     
-    %2 = load i32* @Simple.i
-    %3 = load i32* @Simple.iters
-    %4 = icmp slt  i32   %2, %3
-    br i1     %4,  label %5, label %21
+    %2 = load i32* %i
+    %3 = icmp slt  i32   %2, %iters
+    br i1     %3,  label %4, label %20
     
-; <label>:5
+; <label>:4
     
-    ; PI := PI - 4.000000e+000 / (i * 4 - 1) + 4.000000e+000 / (i * 4 + 1)
-    %6    = load   double* @Simple.PI
-    %7    = load   i32*    @Simple.i
-    %8    = mul    i32     %7,            4
-    %9    = sub    i32     %8,            1
-    %10   = sitofp i32     %9             to double
-    %11   = fdiv   double  4.000000e+000, %10
-    %12   = fsub   double  %6,            %11
-    %13   = load   i32*    @Simple.i
-    %14   = mul    i32     %13,           4
-    %15   = add    i32     %14,           1
-    %16   = sitofp i32     %15            to double
-    %17   = fdiv   double  4.000000e+000, %16
-    %18   = fadd   double  %12,           %17
-    store double   %18,    double*        @Simple.PI
+    ; pi := pi - 4.000000e+000 / (i * 4 - 1) + 4.000000e+000 / (i * 4 + 1)
+    %5    = load   double* %pi
+    %6    = load   i32*    %i
+    %7    = mul    i32     %6,            4
+    %8    = sub    i32     %7,            1
+    %9    = sitofp i32     %8             to double
+    %10   = fdiv   double  4.000000e+000, %9
+    %11   = fsub   double  %5,            %10
+    %12   = load   i32*    %i
+    %13   = mul    i32     %12,           4
+    %14   = add    i32     %13,           1
+    %15   = sitofp i32     %14            to double
+    %16   = fdiv   double  4.000000e+000, %15
+    %17   = fadd   double  %11,           %16
+    store double   %17,    double*        %pi
     
     ; i := i + 1
-    %19   = load i32* @Simple.i
-    %20   = add  i32  %19, 1
-    store i32    %20, i32* @Simple.i
+    %18   = load i32* %i
+    %19   = add  i32  %18, 1
+    store i32    %19, i32* %i
     
     br label  %1
     
-; <label>:21
+; <label>:20
     
+    ; RETURN pi
+    %21 = load double* %pi
+    ret double %21
 }
 
 define i32 @main() {

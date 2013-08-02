@@ -83,7 +83,7 @@ namespace DUO2C.CodeGen.LLVM
                 .AgregateAlign(64)
                 .NativeAlign(8, 16, 32)
                 .StackAlign(32)
-                .DataLayoutEnd().NewLine();
+                .DataLayoutEnd().Ln();
 
             var printIntStr = new GlobalStringIdent();
             var printFloatStr = new GlobalStringIdent();
@@ -98,7 +98,7 @@ namespace DUO2C.CodeGen.LLVM
             foreach (var kv in _scope.GetTypes()) {
                 ctx.TypeDecl(new TypeIdent(kv.Key, module.Identifier), kv.Value.Type);
             }
-            ctx = ctx.Leave().NewLine().NewLine();
+            ctx = ctx.Leave().Ln().Ln();
 
             ctx.Lazy(x => {
                 foreach (var kv in _stringConsts.OrderBy(y => y.Value.ID)) {
@@ -110,32 +110,24 @@ namespace DUO2C.CodeGen.LLVM
             ctx.Global(_printfProc, _printfProcType);
             
             ctx = ctx.Enter(0);
-            foreach (var v in _scope.GetSymbols().Where(y => y.Value.Type.IsProcedure)) {
-                if (v.Key == "NEW") continue;
-
-                ctx.Global(new QualIdent(v.Key), v.Value.Type);
-            }
-            ctx = ctx.Leave().NewLine().NewLine();
-            
-            ctx = ctx.Enter(0);
             foreach (var v in _scope.GetSymbols().Where(y => !y.Value.Type.IsProcedure)) {
                 ctx.Global(new QualIdent(v.Key), v.Value.Type);
             }
-            ctx = ctx.Leave().NewLine().NewLine();
+            ctx = ctx.Leave().Ln().Ln();
 
             ctx = ctx.Enter(0);
             foreach (var proc in _module.Declarations.Procedures.Where(y => y is NProcDecl).Cast<NProcDecl>()) {
                 ctx.Procedure(proc);
             }
-            ctx = ctx.Leave().NewLine().NewLine();
+            ctx = ctx.Leave().Ln().Ln();
 
             TempIdent.Reset();
 
-            ctx = ctx.Write("define i32 @main() {").Enter().NewLine().NewLine();
+            ctx = ctx.Write("define i32 @main() {").Enter().Ln().Ln();
             if (module.Body != null) {
                 ctx.Statements(module.Body);
             }
-            ctx = ctx.Write("ret i32 0").EndOperation().Leave().Write("}").NewLine();
+            ctx = ctx.Write("ret i32 0").EndOperation().Leave().Write("}").Ln();
 
             return ctx;
         }

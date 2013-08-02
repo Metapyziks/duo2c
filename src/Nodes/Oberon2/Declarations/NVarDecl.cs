@@ -49,7 +49,7 @@ namespace DUO2C.Nodes.Oberon2
         {
             if (FindTypeErrors(scope).Count() == 0) {
                 foreach (var ident in IdentList.IdentDefs) {
-                    scope.DeclareSymbol(ident.Identifier, Type.Type, ident.Visibility, false);
+                    scope.DeclareSymbol(ident.Identifier, Type.Type, ident.Visibility, DeclarationType.Local);
                 }
             }
         }

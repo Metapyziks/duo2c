@@ -243,13 +243,6 @@ namespace DUO2C.Semantics
         }
     }
 
-    public enum AccessModifier : byte
-    {
-        Private = 0,
-        ReadOnly = 1,
-        Public = 2
-    }
-
     public class Field
     {
         public String Identifier { get; private set; }

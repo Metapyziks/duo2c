@@ -15,7 +15,7 @@ namespace DUO2C.CodeGen.LLVM
 
         public static GenerationContext DataLayoutEnd(this GenerationContext ctx)
         {
-            return ctx.Write("\"").Leave().NewLine();
+            return ctx.Write("\"").Leave().Ln();
         }
 
         static GenerationContext Seperator(this GenerationContext ctx)

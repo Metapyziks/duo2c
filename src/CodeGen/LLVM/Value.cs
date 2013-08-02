@@ -110,6 +110,7 @@ namespace DUO2C.CodeGen.LLVM
         public class QualIdent : Value
         {
             NQualIdent _ident;
+            Scope _scopeAtDecl;
 
             public String Identifier
             {
@@ -118,22 +119,51 @@ namespace DUO2C.CodeGen.LLVM
 
             public String Module
             {
-                get { return _ident.Module ?? _module.Identifier; }
+                get {
+                    if (_ident.Module != null) return _ident.Module;
+                    if (Visibility != AccessModifier.Private) return _module.Identifier;
+                    return null;
+                }
+            }
+
+            public Declaration Declaration
+            {
+                get { return _scopeAtDecl.GetSymbolDecl(_ident.Identifier, _ident.Module); }
+            }
+
+            public AccessModifier Visibility
+            {
+                get {
+                    return Declaration.Visibility;
+                }
+            }
+
+            public DeclarationType DeclarationType
+            {
+                get {
+                    return Declaration.DeclarationType;
+                }
             }
 
             public QualIdent(String ident, String module = null)
-            {
-                _ident = new NQualIdent(ident, module);
-            }
+                : this(new NQualIdent(ident, module)) { }
 
             public QualIdent(NQualIdent ident)
             {
                 _ident = ident;
+                _scopeAtDecl = _scope;
             }
 
             public override string ToString()
             {
-                return String.Format("@{0}.{1}", Module, Identifier);
+                String module = Module;
+                String ident = module != null ? String.Format("{0}.{1}", module, Identifier) : Identifier;
+
+                if (Visibility != AccessModifier.Private) {
+                    return String.Format("@{0}", ident);
+                } else {
+                    return String.Format("%{0}", ident);
+                }
             }
         }
 

@@ -17,6 +17,7 @@ namespace DUO2C.CodeGen.LLVM
             return stmnts.Count() > 0 && (stmnts.Last().Inner is NExit || stmnts.Last().Inner is NReturn);
         }
 
+        static OberonType _returnType;
         static GenerationContext Procedure(this GenerationContext ctx, NProcDecl proc)
         {
             ctx.Keyword("define");
@@ -24,23 +25,38 @@ namespace DUO2C.CodeGen.LLVM
             var type = _scope.GetSymbol(proc.Identifier).As<ProcedureType>();
             var isPublic = _scope.GetSymbolDecl(proc.Identifier, null).Visibility != AccessModifier.Private;
 
+            _returnType = type.ReturnType ?? VoidType.Default;
+
             if (type.ReturnType != null) {
                 ctx.Type(type.ReturnType);
             } else {
                 ctx.Type(VoidType.Default);
             }
-            
-            ctx.Write(" \t{0}\t(", new GlobalIdent(proc.Identifier, isPublic));
-            foreach (var t in type.Params.Select(x => x.Type)) {
-                ctx.Argument(t);
+
+            ctx.Write(" \t{0}\t(", new QualIdent(proc.Identifier));
+            ctx.PushScope(proc.Scope);
+            foreach (var p in type.Params) {
+                ctx.Argument(p.Type, new QualIdent(p.Identifier));
             }
             ctx.Write(") \t").Keyword("nounwind").Write("{");
-            ctx = ctx.Enter().NewLine().NewLine();
+            ctx = ctx.Enter().Ln().Ln();
             
             TempIdent.Reset();
-            ctx.PushScope(proc.Scope).Statements(proc.Statements).PopScope();
 
-            return ctx.Leave().Write("}").NewLine();
+            ctx = ctx.Enter(0);
+            foreach (var decl in proc.Scope.GetSymbols()) {
+                if (type.Params.Any(x => x.Identifier == decl.Key)) continue;
+
+                ctx.Local(new QualIdent(decl.Key), decl.Value.Type);
+            }
+            ctx = ctx.Leave().Ln().Ln();
+            
+            ctx.Statements(proc.Statements);
+            ctx.PopScope();
+
+            _returnType = null;
+
+            return ctx.Leave().Write("}").Ln();
         }
 
         static GenerationContext Statements(this GenerationContext ctx, NStatementSeq block)
@@ -49,7 +65,7 @@ namespace DUO2C.CodeGen.LLVM
 #if DEBUG
                 ctx.Write("; {0}", stmnt.String);
 #endif
-                ctx.Enter(0).NewLine().Node(stmnt).NewLine().Leave();
+                ctx.Enter(0).Ln().Node(stmnt).Ln().Leave();
             }
             return ctx;
         }
@@ -77,13 +93,23 @@ namespace DUO2C.CodeGen.LLVM
             return ctx.Branch(ExitLabel);
         }
 
+        static GenerationContext Node(this GenerationContext ctx, NReturn node)
+        {
+            if (_returnType is VoidType) {
+                return ctx.Keyword("ret").Argument(_returnType).EndOperation();
+            } else {
+                var val = ctx.PrepareOperand(node.Expression, _returnType, new TempIdent());
+                return ctx.Keyword("ret").Argument(_returnType, val);
+            }
+        }
+
         static GenerationContext Node(this GenerationContext ctx, NAssignment node)
         {
             var dest = ctx.GetDesignation(node.Assignee);
             var type = node.Assignee.GetFinalType(_scope);
             var temp = ctx.PrepareOperand(node.Expression, type, new TempIdent());
 
-            return ctx.Keyword("store").Argument(type, temp).Argument(new PointerType(type), dest).NewLine();
+            return ctx.Keyword("store").Argument(type, temp).Argument(new PointerType(type), dest).Ln();
         }
 
         static GenerationContext Node(this GenerationContext ctx, NIfThenElse node)
@@ -96,12 +122,12 @@ namespace DUO2C.CodeGen.LLVM
             ctx.Expr(node.Condition, ref cond, BooleanType.Default);
             ctx.Branch(cond, iftrue, iffalse ?? ifend);
 
-            ctx.LabelMarker(iftrue).NewLine();
+            ctx.LabelMarker(iftrue).Ln();
             ctx.Statements(node.ThenBody);
             if (!node.ThenBody.EndsInBranch()) ctx.Branch(ifend);
 
             if (node.ElseBody != null) {
-                ctx.LabelMarker(iffalse).NewLine();
+                ctx.LabelMarker(iffalse).Ln();
                 ctx.Statements(node.ElseBody);
                 if (!node.ElseBody.EndsInBranch()) ctx.Branch(ifend);
             }
@@ -116,7 +142,7 @@ namespace DUO2C.CodeGen.LLVM
 
             ctx.Branch(start);
 
-            ctx.LabelMarker(start).NewLine();
+            ctx.LabelMarker(start).Ln();
             ctx.PushExitLabel(end).Statements(node.Body).PopExitLabel();
             ctx.Branch(start);
 
@@ -132,11 +158,11 @@ namespace DUO2C.CodeGen.LLVM
 
             ctx.Branch(condstart);
 
-            ctx.LabelMarker(condstart).NewLine();
+            ctx.LabelMarker(condstart).Ln();
             ctx.Expr(node.Condition, ref cond, BooleanType.Default);
             ctx.Branch(cond, bodystart, bodyend);
 
-            ctx.LabelMarker(bodystart).NewLine();
+            ctx.LabelMarker(bodystart).Ln();
             ctx.PushExitLabel(bodyend).Statements(node.Body).PopExitLabel();
             ctx.Branch(condstart);
 
@@ -152,11 +178,11 @@ namespace DUO2C.CodeGen.LLVM
 
             ctx.Branch(bodystart);
 
-            ctx.LabelMarker(bodystart).NewLine();
+            ctx.LabelMarker(bodystart).Ln();
             ctx.PushExitLabel(condend).Statements(node.Body).PopExitLabel();
             ctx.Branch(condstart);
 
-            ctx.LabelMarker(condstart).NewLine();
+            ctx.LabelMarker(condstart).Ln();
             ctx.Expr(node.Condition, ref cond, BooleanType.Default);
             ctx.Branch(cond, condend, bodystart);
 

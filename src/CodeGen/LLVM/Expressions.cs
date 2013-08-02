@@ -40,7 +40,7 @@ namespace DUO2C.CodeGen.LLVM
 
             if (src is Literal && to.IsNumeric && from.IsNumeric) {
                 if (to.IsReal && from.IsInteger) {
-                    src = new Literal(src.ToString() + ".0");
+                    src = new Literal(int.Parse(src.ToString()).ToString("e"));
                 }
                 return ctx;
             }
@@ -70,7 +70,13 @@ namespace DUO2C.CodeGen.LLVM
             if (node.Inner is NDesignator) {
                 var val = ctx.GetDesignation((NDesignator) node.Inner);
                 if (val is QualIdent) {
-                    return ctx.Load(dest, type, val);
+                    var ident = (QualIdent) val;
+                    if (ident.Declaration.IsVariable) {
+                        return ctx.Load(dest, type, val);
+                    } else {
+                        dest = ident;
+                        return ctx;
+                    }
                 } else {
                     dest = val;
                     return ctx;

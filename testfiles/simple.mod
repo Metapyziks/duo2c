@@ -7,15 +7,17 @@ MODULE Simple;
     PROCEDURE FindPI* (iters : INTEGER) : LONGREAL;
     VAR
         i : INTEGER;
-        PI : LONGREAL;
+        pi : LONGREAL;
     BEGIN
-        PI := 4;
-        i := 0;
+        i := 1;
+        pi := 4;
         
         WHILE i < iters DO
-            PI := PI - 4.0D0 / (i * 4 - 1) + 4.0D0 / (i * 4 + 1);
+            pi := pi - 4.0D0 / (i * 4 - 1) + 4.0D0 / (i * 4 + 1);
             i := i + 1;
         END;
+
+        RETURN pi;
     END;
 
 BEGIN

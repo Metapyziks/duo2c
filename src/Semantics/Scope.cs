@@ -6,17 +6,40 @@ using System.Threading.Tasks;
 
 namespace DUO2C.Semantics
 {
+    public enum AccessModifier : byte
+    {
+        Private = 0,
+        ReadOnly = 1,
+        Public = 2
+    }
+
+    public enum DeclarationType : byte
+    {
+        Constant = 0,
+        Global = 1,
+        Local = 2,
+        Parameter = 3,
+        Field = 4
+    }
+
     public class Declaration
     {
         public OberonType Type { get; private set; }
         public AccessModifier Visibility { get; private set; }
-        public bool IsConstant { get; private set; }
+        public DeclarationType DeclarationType { get; private set; }
+        
+        public bool IsConstant { get { return DeclarationType == DeclarationType.Constant; } }
+        public bool IsGlobal { get { return DeclarationType == DeclarationType.Global; } }
+        public bool IsLocal { get { return DeclarationType == DeclarationType.Local; } }
+        public bool IsVariable { get { return IsLocal || IsGlobal; } }
+        public bool IsParameter { get { return DeclarationType == DeclarationType.Parameter; } }
+        public bool IsField { get { return DeclarationType == DeclarationType.Field; } }
 
-        public Declaration(OberonType type, AccessModifier visibility, bool constant)
+        public Declaration(OberonType type, AccessModifier visibility, DeclarationType declType)
         {
             Type = type;
             Visibility = visibility;
-            IsConstant = constant;
+            DeclarationType = declType;
         }
     }
 
@@ -39,15 +62,15 @@ namespace DUO2C.Semantics
 
         public void DeclareType(String identifier, OberonType type, AccessModifier visibility)
         {
-            _types.Add(identifier, new Declaration(type, visibility, true));
+            _types.Add(identifier, new Declaration(type, visibility, DeclarationType.Global));
         }
 
-        public void DeclareSymbol(String identifier, OberonType type, AccessModifier visibility, bool constant)
+        public void DeclareSymbol(String identifier, OberonType type, AccessModifier visibility, DeclarationType declType)
         {
-            _symbols.Add(identifier, new Declaration(type, visibility, constant));
+            _symbols.Add(identifier, new Declaration(type, visibility, declType));
         }
 
-        public virtual Declaration GetTypeDecl(String identifier, String module)
+        public virtual Declaration GetTypeDecl(String identifier, String module = null)
         {
             if (module != null) {
                 return Parent != null ? Parent.GetTypeDecl(identifier, module) : null;
@@ -58,7 +81,7 @@ namespace DUO2C.Semantics
             }
         }
 
-        public virtual Declaration GetSymbolDecl(String identifier, String module)
+        public virtual Declaration GetSymbolDecl(String identifier, String module = null)
         {
             if (module != null) {
                 return Parent != null ? Parent.GetSymbolDecl(identifier, module) : null;
@@ -153,7 +176,7 @@ namespace DUO2C.Semantics
         {
             var scope = new Scope(this);
             _modules.Add(type.Identifier, scope);
-            DeclareSymbol(type.Identifier, type, AccessModifier.Public, false);
+            DeclareSymbol(type.Identifier, type, AccessModifier.Public, DeclarationType.Global);
             return scope;
         }
 

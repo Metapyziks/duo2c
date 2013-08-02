@@ -57,7 +57,7 @@ namespace DUO2C.Nodes.Oberon2
 
             Type.Scope.DeclareSymbol("NEW", new ProcedureType(null, new[] {
                 new Parameter(true, "_", new PointerType(RecordType.Base))
-            }), AccessModifier.Private, false);
+            }), AccessModifier.Private, DeclarationType.Global);
 
             Declarations.FindDeclarations(Type.Scope);
 

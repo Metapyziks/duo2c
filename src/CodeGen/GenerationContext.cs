@@ -204,7 +204,7 @@ namespace DUO2C.CodeGen
             return Write("\t");
         }
 
-        public GenerationContext NewLine()
+        public GenerationContext Ln()
         {
             AppendUnit(new Line());
             return this;
@@ -225,8 +225,23 @@ namespace DUO2C.CodeGen
                 }
             }
 
+            bool lastEmpty = false;
             foreach (var unit in _units) {
-                if (unit is Line) ((Line) unit).AlignColumns(cols);
+                if (unit is Line) {
+                    var line = (Line) unit;
+                    if (line.IsEmpty) {
+                        if (lastEmpty) {
+                            continue;
+                        } else {
+                            lastEmpty = true;
+                        }
+                    } else {
+                        ((Line) unit).AlignColumns(cols);
+                        lastEmpty = false;
+                    }
+                } else {
+                    lastEmpty = false;
+                }
                 unit.Build(prefix, sb);
             }
         }

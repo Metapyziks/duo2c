@@ -56,7 +56,7 @@ namespace DUO2C.CodeGen.LLVM
         static GenerationContext EndOperation(this GenerationContext ctx)
         {
             _lastWasArg = false;
-            return ctx.NewLine();
+            return ctx.Ln();
         }
 
         static GenerationContext Load(this GenerationContext ctx, Value dest, OberonType type, Value src)
@@ -92,7 +92,7 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext LabelMarker(this GenerationContext ctx, Value label)
         {
-            return ctx.NewLine().Write("\r; <label>:{0}", label.ToString().Substring(1)).NewLine();
+            return ctx.Ln().Write("\r; <label>:{0}", label.ToString().Substring(1)).Ln();
         }
 
         static GenerationContext Branch(this GenerationContext ctx, Value dest)
