@@ -107,9 +107,7 @@ namespace DUO2C.CodeGen.LLVM
         {
             var dest = ctx.GetDesignation(node.Assignee);
             var type = node.Assignee.GetFinalType(_scope);
-            var temp = ctx.PrepareOperand(node.Expression, type, new TempIdent());
-
-            return ctx.Keyword("store").Argument(type, temp).Argument(new PointerType(type), dest).Ln();
+            return ctx.Assign(dest, type, node.Expression);
         }
 
         static GenerationContext Node(this GenerationContext ctx, NIfThenElse node)
@@ -187,6 +185,37 @@ namespace DUO2C.CodeGen.LLVM
             ctx.Branch(cond, condend, bodystart);
 
             return ctx.LabelMarker(condend);
+        }
+
+        static GenerationContext Node(this GenerationContext ctx, NForLoop node)
+        {
+            var final = (Value) new TempIdent();
+            var cond = (Value) new TempIdent();
+            var incr = (Value) new TempIdent();
+            var condstart = new TempIdent();
+            var bodystart = new TempIdent();
+            var bodyend = new TempIdent();
+
+            var iter = new QualIdent(node.IteratorName);
+            ctx.Assign(iter, iter.Declaration.Type, node.Initial);
+            ctx.Branch(condstart);
+
+            ctx.LabelMarker(condstart);
+            ctx.Expr(node.Final, ref final, iter.Declaration.Type);
+            Value temp = new TempIdent();
+            ctx.ResolveValue(iter, ref temp, iter.Declaration.Type);
+            ctx.BinaryComp(cond, "sgt", "ogt", iter.Declaration.Type, temp, final);
+            ctx.Branch(cond, bodyend, bodystart);
+
+            ctx.LabelMarker(bodystart);
+            ctx.PushExitLabel(bodyend).Statements(node.Body).PopExitLabel();
+            temp = new TempIdent();
+            ctx.ResolveValue(iter, ref temp, iter.Declaration.Type);
+            ctx.BinaryOp(incr, "add", "fadd", iter.Declaration.Type, temp, new Literal(1.ToString()));
+            ctx.Assign(iter, iter.Declaration.Type, incr);
+            ctx.Branch(condstart);
+
+            return ctx.LabelMarker(bodyend);
         }
 
         static GenerationContext Node(this GenerationContext ctx, NInvocStmnt node)

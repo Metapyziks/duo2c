@@ -9,15 +9,13 @@ MODULE Simple;
         i : INTEGER;
         pi : LONGREAL;
     BEGIN
-        i := 1;
         pi := 4;
         
-        WHILE i < iters DO
+        FOR i := 1 TO iters DO
             pi := pi - 4.0D0 / (i * 4 - 1) + 4.0D0 / (i * 4 + 1);
-            i := i + 1;
         END;
 
-        RETURN pi;
+        RETURN ---+---++++---+---++--+--pi;
     END;
 
 BEGIN

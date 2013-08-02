@@ -361,7 +361,12 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("ForLoop")]
     public class NForLoop : Statement, IDeclarationSource
     {
-        private Scope _scope;
+        public override string String
+        {
+            get {
+                return String.Format("FOR {0} := {1} TO {2} DO", IteratorName, Initial.String, Final.String);
+            }
+        }
 
         public String IteratorName
         {
@@ -396,21 +401,17 @@ namespace DUO2C.Nodes.Oberon2
         
         public void FindDeclarations(Scope scope)
         {
-            _scope = new Scope(scope);
-
-            if (Initial.FindTypeErrors(scope).Count() == 0 && Final.FindTypeErrors(scope).Count() == 0) {
-                _scope.DeclareSymbol(IteratorName, NumericType.Largest(Initial.GetFinalType(scope).As<NumericType>(),
-                    Final.GetFinalType(scope).As<NumericType>()), AccessModifier.Private, DeclarationType.Local);
-            }
-
-            Body.FindDeclarations(_scope);
+            Body.FindDeclarations(scope);
         }
 
         public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
-            NumericType iteratorType = null;
-            if (_scope.IsSymbolDeclared(IteratorName)) {
-                iteratorType = _scope.GetSymbol(IteratorName).As<NumericType>();
+            var iterDecl = scope.GetSymbolDecl(IteratorName);
+            if (iterDecl == null) {
+                yield return new UndeclaredIdentifierException(Children.First());
+            } else if(!iterDecl.Type.IsNumeric) {
+                yield return new TypeMismatchException(NumericType.Default, iterDecl.Type, Children.First());
+                iterDecl = null;
             }
 
             bool found = false;
@@ -419,34 +420,34 @@ namespace DUO2C.Nodes.Oberon2
                 yield return e;
             }
 
-            if (!found && !Initial.GetFinalType(scope).IsNumeric) {
-                yield return new TypeMismatchException(NumericType.Default, Initial.GetFinalType(scope), Initial);
+            if (!found && iterDecl != null && !iterDecl.Type.CanTestEquality(Initial.GetFinalType(scope))) {
+                yield return new TypeMismatchException(iterDecl.Type, Initial.GetFinalType(scope), Initial);
             }
 
+            found = false;
             foreach (var e in Final.FindTypeErrors(scope)) {
                 found = true;
                 yield return e;
             }
 
-            if (!found && !Final.GetFinalType(scope).IsNumeric) {
-                yield return new TypeMismatchException(NumericType.Default, Final.GetFinalType(scope), Final);
+            if (!found && iterDecl != null && !iterDecl.Type.CanTestEquality(Final.GetFinalType(scope))) {
+                yield return new TypeMismatchException(iterDecl.Type, Final.GetFinalType(scope), Final);
             }
 
             if (Increment != null) {
-                foreach (var e in Increment.FindTypeErrors(_scope)) {
+                found = false;
+                foreach (var e in Increment.FindTypeErrors(scope)) {
                     found = true;
                     yield return e;
                 }
 
-                if (!found && !iteratorType.CanTestEquality(Increment.GetFinalType(_scope))) {
-                    yield return new TypeMismatchException(iteratorType, Increment.GetFinalType(_scope), Increment);
+                if (!found && iterDecl.Type != null && !iterDecl.Type.CanTestEquality(Increment.GetFinalType(scope))) {
+                    yield return new TypeMismatchException(iterDecl.Type, Increment.GetFinalType(scope), Increment);
                 }
             }
 
-            if (!found) {
-                foreach (var e in Body.FindTypeErrors(_scope)) {
-                    yield return e;
-                }
+            foreach (var e in Body.FindTypeErrors(scope)) {
+                yield return e;
             }
         }
     }

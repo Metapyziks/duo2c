@@ -1,5 +1,5 @@
-; Generated 02/08/2013 01:00:53
-; GlobalUID 99636e85-1b0e-4741-aa31-334318d25129
+; Generated 02/08/2013 19:00:25
+; GlobalUID 9dab19f6-56ad-411e-8f0a-0930d24b0a21
 ; 
 ; LLVM IR file for module "Simple"
 ; 
@@ -22,23 +22,19 @@ define double @Simple.FindPI(i32 %iters) nounwind {
     %i  = alloca i32
     %pi = alloca double
     
-    ; i := 1
-    store i32 1, i32* %i
-    
     ; pi := 4
     store double 4.000000e+000, double* %pi
     
-    ; WHILE i < iters DO
-    br label  %1
+    ; FOR i := 1 TO iters DO
+    store i32    1,   i32*  %i
+    br    label  %1
     
 ; <label>:1
-    
-    %2 = load i32* %i
-    %3 = icmp slt  i32   %2, %iters
-    br i1     %3,  label %4, label %20
+    %2    = load i32* %i
+    %3    = icmp sgt  i32   %2,  %iters
+    br    i1     %3,  label %20, label %4
     
 ; <label>:4
-    
     ; pi := pi - 4.000000e+000 / (i * 4 - 1) + 4.000000e+000 / (i * 4 + 1)
     %5    = load   double* %pi
     %6    = load   i32*    %i
@@ -55,18 +51,32 @@ define double @Simple.FindPI(i32 %iters) nounwind {
     %17   = fadd   double  %11,           %16
     store double   %17,    double*        %pi
     
-    ; i := i + 1
     %18   = load i32* %i
-    %19   = add  i32  %18, 1
-    store i32    %19, i32* %i
-    
-    br label  %1
+    %19   = add  i32  %18,  1
+    store i32    %19, i32*  %i
+    br    label  %1
     
 ; <label>:20
     
     ; RETURN pi
     %21 = load double* %pi
-    ret double %21
+    %22 = fsub double  0.000000e+000, %21
+    %23 = fsub double  0.000000e+000, %22
+    %24 = fsub double  0.000000e+000, %23
+    %25 = fsub double  0.000000e+000, %24
+    %26 = fsub double  0.000000e+000, %25
+    %27 = fsub double  0.000000e+000, %26
+    %28 = fsub double  0.000000e+000, %27
+    %29 = fsub double  0.000000e+000, %28
+    %30 = fsub double  0.000000e+000, %29
+    %31 = fsub double  0.000000e+000, %30
+    %32 = fsub double  0.000000e+000, %31
+    %33 = fsub double  0.000000e+000, %32
+    %34 = fsub double  0.000000e+000, %33
+    %35 = fsub double  0.000000e+000, %34
+    %36 = fsub double  0.000000e+000, %35
+    %37 = fsub double  0.000000e+000, %36
+    ret double %37
 }
 
 define i32 @main() {

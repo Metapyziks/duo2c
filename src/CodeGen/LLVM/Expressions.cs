@@ -65,27 +65,62 @@ namespace DUO2C.CodeGen.LLVM
             throw new InvalidOperationException("No conversion between " + from.ToString() + " to " + to.ToString() + "defined");
         }
 
+        static GenerationContext ResolveValue(this GenerationContext ctx, Value val, ref Value dest, OberonType type)
+        {
+            if (val is QualIdent) {
+                var ident = (QualIdent) val;
+                if (ident.Declaration.IsVariable) {
+                    return ctx.Load(dest, type, val);
+                } else {
+                    dest = ident;
+                    return ctx;
+                }
+            } else {
+                dest = val;
+                return ctx;
+            }
+        }
+
         static GenerationContext Factor(this GenerationContext ctx, NFactor node, ref Value dest, OberonType type)
         {
             if (node.Inner is NDesignator) {
                 var val = ctx.GetDesignation((NDesignator) node.Inner);
-                if (val is QualIdent) {
-                    var ident = (QualIdent) val;
-                    if (ident.Declaration.IsVariable) {
-                        return ctx.Load(dest, type, val);
-                    } else {
-                        dest = ident;
+                return ctx.ResolveValue(val, ref dest, type);
+            }
+
+            if (node.Inner is NUnary) {
+                var unary = (NUnary) node.Inner;
+                Value val = ctx.PrepareOperand(unary.Factor, type, new TempIdent());
+                Value zero = new Literal(0.ToString());
+                switch (unary.Operator) {
+                    case UnaryOperator.Identity:
+                        dest = val;
                         return ctx;
-                    }
-                } else {
-                    dest = val;
-                    return ctx;
+                    case UnaryOperator.Negation:
+                        if (type.IsNumeric && val is Literal) {
+                            var str = val.ToString();
+                            if (str.StartsWith("-")) {
+                                dest = new Literal(str.Substring(1));
+                            } else {
+                                dest = new Literal(String.Format("-{0}", str));
+                            }
+                            return ctx;
+                        }
+                        ctx.Conversion(IntegerType.Integer, type, ref zero);
+                        return ctx.BinaryOp(dest, "sub", "fsub", type, zero, val);
+                    case UnaryOperator.Not:
+                        ctx.Conversion(IntegerType.Integer, type, ref zero);
+                        return ctx.BinaryOp(dest, "xor", type, zero, val);
+                    default:
+                        throw new NotImplementedException();
                 }
             }
 
             if (node.Inner is NExpr) {
                 return ctx.Expr((NExpr) node.Inner, ref dest, type);
-            } else if (dest is TempIdent) {
+            }
+            
+            if (dest is TempIdent) {
                 if (node.Inner is NNumber) {
                     dest = new Literal((NNumber) node.Inner);
                     return ctx;

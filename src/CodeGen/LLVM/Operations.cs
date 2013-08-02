@@ -139,5 +139,19 @@ namespace DUO2C.CodeGen.LLVM
             }
             return ctx.Write(") nounwind").EndOperation();
         }
+
+        static GenerationContext Assign(this GenerationContext ctx, Value dest, OberonType type, NExpr expression)
+        {
+            return ctx.Assign(dest, type, ctx.PrepareOperand(expression, type, new TempIdent()));
+        }
+
+        static GenerationContext Assign(this GenerationContext ctx, Value dest, OberonType type, Value src)
+        {
+            if (dest is QualIdent && ((QualIdent) dest).Declaration.IsVariable) {
+                return ctx.Keyword("store").Argument(type, src).Argument(new PointerType(type), dest).EndOperation();
+            } else {
+                throw new NotImplementedException("Cannot assign to a non-variable");
+            }
+        }
     }
 }
