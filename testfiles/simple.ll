@@ -1,5 +1,5 @@
-; Generated 02/08/2013 19:00:25
-; GlobalUID 9dab19f6-56ad-411e-8f0a-0930d24b0a21
+; Generated 03/08/2013 17:00:15
+; GlobalUID c5cf6578-520e-4c70-8ede-4303db510896
 ; 
 ; LLVM IR file for module "Simple"
 ; 
@@ -60,23 +60,7 @@ define double @Simple.FindPI(i32 %iters) nounwind {
     
     ; RETURN pi
     %21 = load double* %pi
-    %22 = fsub double  0.000000e+000, %21
-    %23 = fsub double  0.000000e+000, %22
-    %24 = fsub double  0.000000e+000, %23
-    %25 = fsub double  0.000000e+000, %24
-    %26 = fsub double  0.000000e+000, %25
-    %27 = fsub double  0.000000e+000, %26
-    %28 = fsub double  0.000000e+000, %27
-    %29 = fsub double  0.000000e+000, %28
-    %30 = fsub double  0.000000e+000, %29
-    %31 = fsub double  0.000000e+000, %30
-    %32 = fsub double  0.000000e+000, %31
-    %33 = fsub double  0.000000e+000, %32
-    %34 = fsub double  0.000000e+000, %33
-    %35 = fsub double  0.000000e+000, %34
-    %36 = fsub double  0.000000e+000, %35
-    %37 = fsub double  0.000000e+000, %36
-    ret double %37
+    ret double %21
 }
 
 define i32 @main() {
