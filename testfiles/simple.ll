@@ -1,5 +1,5 @@
-; Generated 02/08/2013 19:00:25
-; GlobalUID 9dab19f6-56ad-411e-8f0a-0930d24b0a21
+; Generated 03/08/2013 21:57:45
+; GlobalUID 07a6bc70-234c-4a61-a9e9-071212dbc53f
 ; 
 ; LLVM IR file for module "Simple"
 ; 
@@ -22,10 +22,8 @@ define double @Simple.FindPI(i32 %iters) nounwind {
     %i  = alloca i32
     %pi = alloca double
     
-    ; pi := 4
     store double 4.000000e+000, double* %pi
     
-    ; FOR i := 1 TO iters DO
     store i32    1,   i32*  %i
     br    label  %1
     
@@ -35,7 +33,6 @@ define double @Simple.FindPI(i32 %iters) nounwind {
     br    i1     %3,  label %20, label %4
     
 ; <label>:4
-    ; pi := pi - 4.000000e+000 / (i * 4 - 1) + 4.000000e+000 / (i * 4 + 1)
     %5    = load   double* %pi
     %6    = load   i32*    %i
     %7    = mul    i32     %6,            4
@@ -58,7 +55,6 @@ define double @Simple.FindPI(i32 %iters) nounwind {
     
 ; <label>:20
     
-    ; RETURN pi
     %21 = load double* %pi
     %22 = fsub double  0.000000e+000, %21
     %23 = fsub double  0.000000e+000, %22
@@ -81,11 +77,9 @@ define double @Simple.FindPI(i32 %iters) nounwind {
 
 define i32 @main() {
     
-    ; Out.Real(FindPI(1000000))
     %1 = call double (i32)* @Simple.FindPI(i32 1000000) nounwind
     %2 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @const.string.0, i32 0, i32 0), double %1) nounwind
     
-    ; Out.Ln()
     %3 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @const.string.1, i32 0, i32 0)) nounwind
     
     ret i32 0

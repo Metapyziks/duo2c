@@ -71,23 +71,27 @@ namespace DUO2C
             Console.ResetColor();
         }
 
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
             if (args.Length == 0) {
                 // TODO: Improve useage statement
                 Console.WriteLine("Usage: {0} <source-file-path>",
                     Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().MainModule.FileName));
+                return 1;
             } else {
                 var ruleset = Ruleset.FromString(File.ReadAllText("oberon2.txt"));
                 ruleset.AddSubstitutionNS("DUO2C.Nodes.Oberon2", true);
 
                 try {
+#if DEBUG
                     var timer = new Stopwatch();
                     timer.Start();
+#endif
                     var module = (NModule) ruleset.ParseFile(args[0]);
+#if DEBUG
                     timer.Stop();
                     Console.WriteLine("File parsed in {0}ms", timer.ElapsedMilliseconds);
-
+#endif
                     var root = new RootScope();
                     // Includes would be here
 
@@ -113,6 +117,7 @@ namespace DUO2C
                             WriteError(error);
                         }
                         Console.WriteLine();
+                        return 1;
                     } else {
                         var guid = Guid.NewGuid();
                         
@@ -131,50 +136,13 @@ namespace DUO2C
 
                         string ir = IntermediaryCodeGenerator.Generate(module, guid);
                         File.WriteAllText(outpath, ir);
-
-#if RELEASE
-                        try {
-                            var ps = new ProcessStartInfo("C:\\llvm\\bin\\llc.exe", "-O0");
-                            ps.UseShellExecute = false;
-                            ps.RedirectStandardInput = true;
-                            ps.RedirectStandardOutput = true;
-                            ps.RedirectStandardError = true;
-                            var llc = Process.Start(ps);
-
-                            llc.StandardInput.Write(ir);
-                            llc.StandardInput.Flush();
-                            llc.StandardInput.Close();
-
-                            outpath = Path.GetDirectoryName(args[0])
-                            + Path.DirectorySeparatorChar
-                            + Path.GetFileNameWithoutExtension(args[0])
-                            + ".asm";
-
-                            var file = File.Create(outpath);
-                            var writer = new StreamWriter(file);
-
-                            while (!llc.HasExited) {
-                                while (!llc.StandardError.EndOfStream) {
-                                    WriteError(llc.StandardError.ReadToEnd());
-                                }
-
-                                while (!llc.StandardOutput.EndOfStream) {
-                                    writer.Write(llc.StandardOutput.ReadToEnd());
-                                }
-                            }
-
-                            writer.Flush();
-                            writer.Close();
-                            file.Close();
-                        } catch (Exception e) {
-                            WriteErrorHeader("Unable to start the LLVM static compiler");
-                        }
-#endif
+                        return 0;
                     }
                 } catch (CompilerException e) {
                     WriteErrorHeader("Encountered 1 error while parsing:");
                     WriteError(e);
                     Console.WriteLine();
+                    return 1;
                 }
             }
         }
