@@ -15,7 +15,7 @@ MODULE Simple;
             pi := pi - 4.0D0 / (i * 4 - 1) + 4.0D0 / (i * 4 + 1);
         END;
 
-        RETURN ---+---++++---+---++--+--pi;
+        RETURN pi;
     END;
 
 BEGIN

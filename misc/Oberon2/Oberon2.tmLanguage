@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>fileTypes</key>
+    <array>
+        <string>ob2</string>
+        <string>mod</string>
+    </array>
+    <key>foldingStartMarker</key>
+    <string>\(\*|BEGIN|DO|THEN|ELSE</string>
+    <key>foldingStopMarker</key>
+    <string>\*\)|END</string>
+    <key>name</key>
+    <string>Oberon-2</string>
+    <key>patterns</key>
+    <array>
+        <dict>
+            <key>comment</key>
+            <string>oberon-2 keywords</string>
+            <key>match</key>
+            <string>\b(MODULE|EXTERNAL|BEGIN|END|IMPORT|CONST|TYPE|VAR|PROCEDURE|ARRAY|OF|RECORD|IF|THEN|ELSIF|ELSE|CASE|WHILE|REPEAT|UNTIL|FOR|DO|LOOP|WITH|EXIT|RETURN|TRUE|FALSE|NIL|OR|FROM|TO)\b</string>
+            <key>name</key>
+            <string>keyword.instruction.ob2</string>
+        </dict>
+        <dict>
+            <key>match</key>
+            <string>\b((LONG)?REAL|(LONG|SHORT)INT|INTEGER|CHAR|SET|BYTE)</string>
+            <key>name</key>
+            <string>storage.type.language.ob2</string>
+        </dict>
+        <dict>
+            <key>match</key>
+            <string>(POINTER\s+TO|:)\s*(([A-Za-z][A-Za-z0-9]*\.)?[A-Za-z][A-Za-z0-9]*)</string>
+            <key>captures</key>
+            <dict>
+                <key>1</key>
+                <dict>
+                    <key>name</key>
+                    <string>keyword.instruction.ob2</string>
+                </dict>
+                <key>2</key>
+                <dict>
+                    <key>name</key>
+                    <string>storage.type.language.ob2</string>
+                </dict>
+            </dict>
+        </dict>
+        <dict>
+            <key>match</key>
+            <string>\b([0-9]+\.[0-9]*((E|D)(\+|-)?[0-9]+)?|[0-9]+|[0-9][0-9A-F]*H)\b</string>
+            <key>name</key>
+            <string>constant.numeric.ob2</string>
+        </dict>
+        <dict>
+            <key>begin</key>
+            <string>\(\*</string>
+            <key>captures</key>
+            <dict>
+                <key>0</key>
+                <dict>
+                    <key>name</key>
+                    <string>punctuation.definition.comment.ob2</string>
+                </dict>
+            </dict>
+            <key>end</key>
+            <string>\*\)</string>
+            <key>name</key>
+            <string>comment.block.ob2</string>
+        </dict>
+    </array>
+    <key>scopeName</key>
+    <string>source.ob2</string>
+</dict>
+</plist>
