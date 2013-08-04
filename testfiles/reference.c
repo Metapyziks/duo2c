@@ -13,15 +13,18 @@ SDL_Quit_t SDL_Quit;
 
 int sdl_initialized = 0;
 
-int test(int arg) {
+int test(int* arg) {
     int i;
-    for (i = 1; i < arg; ++ i) {
+    for (i = 1; i < *arg; ++ i) {
         printf("%i", i);
     }
     return 1;
 }
 
 void cleanup() {
+    int v = 5;
+    test(&v);
+
     if (sdl_initialized) {
         SDL_Quit();
     }

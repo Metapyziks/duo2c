@@ -134,7 +134,7 @@ namespace DUO2C.CodeGen.LLVM
             public AccessModifier Visibility
             {
                 get {
-                    return Declaration.Visibility;
+                    return Declaration != null ? Declaration.Visibility : AccessModifier.Private;
                 }
             }
 
@@ -159,7 +159,7 @@ namespace DUO2C.CodeGen.LLVM
                 String module = Module;
                 String ident = module != null ? String.Format("{0}.{1}", module, Identifier) : Identifier;
 
-                if (Visibility != AccessModifier.Private) {
+                if (_scopeAtDecl.Parent is RootScope) {
                     return String.Format("@{0}", ident);
                 } else {
                     return String.Format("%{0}", ident);

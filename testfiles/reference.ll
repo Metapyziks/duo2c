@@ -19,57 +19,61 @@ target triple = "i686-w64-mingw32"
 @.str7 = private unnamed_addr constant [24 x i8] c"Unable to init SDL: %s\0A\00", align 1
 @.str8 = private unnamed_addr constant [16 x i8] c"Great success!\0A\00", align 1
 
-define i32 @test(i32 %arg) nounwind {
-  %1 = alloca i32, align 4
+define i32 @test(i32* %arg) nounwind {
+  %1 = alloca i32*, align 4
   %i = alloca i32, align 4
-  store i32 %arg, i32* %1, align 4
+  store i32* %arg, i32** %1, align 4
   store i32 1, i32* %i, align 4
   br label %2
 
-; <label>:2                                       ; preds = %9, %0
+; <label>:2                                       ; preds = %10, %0
   %3 = load i32* %i, align 4
-  %4 = load i32* %1, align 4
-  %5 = icmp slt i32 %3, %4
-  br i1 %5, label %6, label %12
+  %4 = load i32** %1, align 4
+  %5 = load i32* %4, align 4
+  %6 = icmp slt i32 %3, %5
+  br i1 %6, label %7, label %13
 
-; <label>:6                                       ; preds = %2
-  %7 = load i32* %i, align 4
-  %8 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.str, i32 0, i32 0), i32 %7) nounwind
-  br label %9
+; <label>:7                                       ; preds = %2
+  %8 = load i32* %i, align 4
+  %9 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.str, i32 0, i32 0), i32 %8) nounwind
+  br label %10
 
-; <label>:9                                       ; preds = %6
-  %10 = load i32* %i, align 4
-  %11 = add nsw i32 %10, 1
-  store i32 %11, i32* %i, align 4
+; <label>:10                                      ; preds = %7
+  %11 = load i32* %i, align 4
+  %12 = add nsw i32 %11, 1
+  store i32 %12, i32* %i, align 4
   br label %2
 
-; <label>:12                                      ; preds = %2
+; <label>:13                                      ; preds = %2
   ret i32 1
 }
 
 declare i32 @printf(i8*, ...) nounwind
 
 define void @cleanup() nounwind {
-  %1 = load i32* @sdl_initialized, align 4
-  %2 = icmp ne i32 %1, 0
-  br i1 %2, label %3, label %5
+  %v = alloca i32, align 4
+  store i32 5, i32* %v, align 4
+  %1 = call i32 @test(i32* %v)
+  %2 = load i32* @sdl_initialized, align 4
+  %3 = icmp ne i32 %2, 0
+  br i1 %3, label %4, label %6
 
-; <label>:3                                       ; preds = %0
-  %4 = load void ()** @SDL_Quit, align 4
-  call void %4()
-  br label %5
+; <label>:4                                       ; preds = %0
+  %5 = load void ()** @SDL_Quit, align 4
+  call void %5()
+  br label %6
 
-; <label>:5                                       ; preds = %3, %0
-  %6 = load %struct.HINSTANCE__** @sdl, align 4
-  %7 = icmp ne %struct.HINSTANCE__* %6, null
-  br i1 %7, label %8, label %11
+; <label>:6                                       ; preds = %4, %0
+  %7 = load %struct.HINSTANCE__** @sdl, align 4
+  %8 = icmp ne %struct.HINSTANCE__* %7, null
+  br i1 %8, label %9, label %12
 
-; <label>:8                                       ; preds = %5
-  %9 = load %struct.HINSTANCE__** @sdl, align 4
-  %10 = call x86_stdcallcc i32 @FreeLibrary(%struct.HINSTANCE__* %9)
-  br label %11
+; <label>:9                                       ; preds = %6
+  %10 = load %struct.HINSTANCE__** @sdl, align 4
+  %11 = call x86_stdcallcc i32 @FreeLibrary(%struct.HINSTANCE__* %10)
+  br label %12
 
-; <label>:11                                      ; preds = %8, %5
+; <label>:12                                      ; preds = %9, %6
   ret void
 }
 

@@ -36,12 +36,23 @@ namespace DUO2C.CodeGen.LLVM
             ctx.Write(" \t{0}\t(", new QualIdent(proc.Identifier));
             ctx.PushScope(proc.Scope);
             foreach (var p in type.Params) {
-                ctx.Argument(p.Type, new QualIdent(p.Identifier));
+                if (p.ByReference) {
+                    ctx.Argument(new PointerType(p.Type), new QualIdent(p.Identifier));
+                } else {
+                    ctx.Argument(p.Type, new QualIdent("$" + p.Identifier));
+                }
             }
             ctx.Write(") \t").Keyword("nounwind").Write("{");
             ctx = ctx.Enter().Ln().Ln();
             
             TempIdent.Reset();
+
+            ctx = ctx.Enter(0);
+            foreach (var p in type.Params.Where(x => !x.ByReference)) {
+                ctx.Local(new QualIdent(p.Identifier), p.Type);
+                ctx.Assign(new QualIdent(p.Identifier), p.Type, new QualIdent("$" + p.Identifier));
+            }
+            ctx = ctx.Leave().Ln().Ln();
 
             ctx = ctx.Enter(0);
             foreach (var decl in proc.Scope.GetSymbols()) {
@@ -53,6 +64,10 @@ namespace DUO2C.CodeGen.LLVM
             
             ctx.Statements(proc.Statements);
             ctx.PopScope();
+            
+            if (_returnType is VoidType && !proc.Statements.EndsInBranch()) {
+                ctx.Keyword("ret", "void").EndOperation();
+            }
 
             _returnType = null;
 

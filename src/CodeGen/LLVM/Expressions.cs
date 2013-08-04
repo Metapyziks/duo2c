@@ -85,6 +85,12 @@ namespace DUO2C.CodeGen.LLVM
         {
             if (node.Inner is NDesignator) {
                 var val = ctx.GetDesignation((NDesignator) node.Inner);
+                var ntype = node.Inner.GetFinalType(_scope);
+                if (type.IsPointer && val is QualIdent && !type.CanTestEquality(ntype)
+                    && type.CanTestEquality(new PointerType(ntype))) {
+                    dest = val;
+                    return ctx;
+                }
                 return ctx.ResolveValue(val, ref dest, type);
             }
 
@@ -141,6 +147,9 @@ namespace DUO2C.CodeGen.LLVM
             var temp = new TempIdent();
             var val = (Value) temp;
             var ntype = node.GetFinalType(_scope);
+            if (!type.CanTestEquality(ntype) && type.CanTestEquality(new PointerType(ntype))) {
+                ntype = type;
+            }
             if (node is NFactor) {
                 ctx.Factor((NFactor) node, ref val, ntype);
             } else if (node is NTerm) {

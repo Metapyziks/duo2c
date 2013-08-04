@@ -118,22 +118,26 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Call(this GenerationContext ctx, Value dest, ProcedureType procType, Value proc, NExprList args)
         {
-            return ctx.Call(dest, procType, proc, args.Expressions.Select(x => x.GetFinalType(_scope)).ToArray(),
-                args.Expressions.Select(x => ctx.PrepareOperand(x, x.GetFinalType(_scope), new TempIdent())).ToArray());
+            var argDefns = procType.Params.ToArray();
+            var argExprs = args.Expressions.ToArray();
+            var argTypes = new OberonType[argExprs.Length];
+            var argValus = new Value[argExprs.Length];
+            for (int i = 0; i < argTypes.Length; ++i) {
+                if (argDefns[i].ByReference) {
+                    argTypes[i] = new PointerType(argDefns[i].Type);
+                } else {
+                    argTypes[i] = argDefns[i].Type;
+                }
+                argValus[i] = ctx.PrepareOperand(argExprs[i], argTypes[i], new TempIdent());
+            }
+
+            return ctx.Call(dest, procType, proc, argTypes, argValus);
         }
 
         static GenerationContext Call(this GenerationContext ctx, Value dest, ProcedureType procType, Value proc, OberonType[] argTypes, Value[] args)
         {
-            for (int i = 0; i < args.Length; ++i) {
-                var arg = args[i];
-                var fromType = argTypes[i];
-                var toType = procType.Params.Select(x => x.Type).ElementAtOrDefault(i);
-                if (toType is VarArgsType || toType == null) toType = fromType;
-
-                ctx.Conversion(fromType, toType, ref arg);
-            }
-
-            ctx.Assign(dest).Keyword("call").Type(new PointerType(procType)).Write(" ").Write(proc).Write("(");
+            if (procType.ReturnType != null) ctx.Assign(dest);
+            ctx.Keyword("call").Type(new PointerType(procType)).Write(" ").Write(proc).Write("(");
             for (int i = 0; i < args.Length; ++i) {
                 ctx.Argument(argTypes[i], args[i], false);
             }

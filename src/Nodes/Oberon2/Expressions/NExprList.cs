@@ -9,6 +9,13 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("ExprList")]
     public class NExprList : SubstituteNode
     {
+        public override string String
+        {
+            get {
+                return String.Join(", ", Children.Select(x => x.String));
+            }
+        }
+
         public IEnumerable<NExpr> Expressions
         {
             get { return Children.Select(x => (NExpr) x); }

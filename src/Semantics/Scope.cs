@@ -31,7 +31,7 @@ namespace DUO2C.Semantics
         public bool IsConstant { get { return DeclarationType == DeclarationType.Constant; } }
         public bool IsGlobal { get { return DeclarationType == DeclarationType.Global; } }
         public bool IsLocal { get { return DeclarationType == DeclarationType.Local; } }
-        public bool IsVariable { get { return IsLocal || IsGlobal; } }
+        public bool IsVariable { get { return IsLocal || IsGlobal || IsParameter; } }
         public bool IsParameter { get { return DeclarationType == DeclarationType.Parameter; } }
         public bool IsField { get { return DeclarationType == DeclarationType.Field; } }
 

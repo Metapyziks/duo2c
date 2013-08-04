@@ -101,8 +101,8 @@ namespace DUO2C.CodeGen.LLVM
             var returnType = type.ReturnType ?? VoidType.Default;
 
             ctx.Type(returnType).Write(" (");
-            foreach (var t in type.Params.Select(x => x.Type)) {
-                ctx.Argument(t, false);
+            foreach (var p in type.Params) {
+                ctx.Argument(p.ByReference ? new PointerType(p.Type) : p.Type, false);
             }
             return ctx.EndArguments().Write(")");
         }
