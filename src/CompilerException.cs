@@ -186,17 +186,17 @@ namespace DUO2C
 
     public class CombinedException : CompilerException
     {
-        private IEnumerable<CompilerException> _exceptions;
+        public IEnumerable<CompilerException> Exceptions { get; private set; }
 
         public override string MessageNoLocation
         {
             get {
-                if (_exceptions.All(x => x is SymbolExpectedException)) {
-                    var es = _exceptions.Select(x => ((SymbolExpectedException) x).Symbol).Distinct().OrderBy(x => x);
+                if (Exceptions.All(x => x is SymbolExpectedException)) {
+                    var es = Exceptions.Select(x => ((SymbolExpectedException) x).Symbol).Distinct();
                     return String.Join(", ", es.Where(x => x != es.Last()))
                         + (es.Count() > 1 ? " or " : "") + (es.Count() > 0 ? es.Last() : "something") + " expected";
                 }
-                return String.Join(" or ",  _exceptions.Select(x => x is SymbolExpectedException
+                return String.Join(" or ",  Exceptions.Select(x => x is SymbolExpectedException
                     ? ((SymbolExpectedException) x).Symbol : x.MessageNoLocation).Distinct());
             }
         }
@@ -204,10 +204,10 @@ namespace DUO2C
         public CombinedException(params CompilerException[] exceptions)
             : base(exceptions.First().ErrorType, null, exceptions.First().SourceIndex, 0)
         {
-            _exceptions = exceptions.SelectMany(x => x is CombinedException
-                ? ((CombinedException) x)._exceptions : new CompilerException[] { x });
+            Exceptions = exceptions.SelectMany(x => x is CombinedException
+                ? ((CombinedException) x).Exceptions : new CompilerException[] { x });
 
-            Utility = _exceptions.Max(x => x.Utility);
+            Utility = Exceptions.Max(x => x.Utility);
         }
     }
 }

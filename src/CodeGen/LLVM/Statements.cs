@@ -145,7 +145,7 @@ namespace DUO2C.CodeGen.LLVM
                 if (!node.ElseBody.EndsInBranch()) ctx.Branch(ifend);
             }
 
-            return ctx.LabelMarker(ifend, iftrue);
+            return ctx.LabelMarker(ifend);
         }
 
         static GenerationContext Node(this GenerationContext ctx, NUncondLoop node)
@@ -155,7 +155,7 @@ namespace DUO2C.CodeGen.LLVM
 
             ctx.Branch(start);
 
-            ctx.LabelMarker(start, start).Ln();
+            ctx.LabelMarker(start).Ln();
             ctx.PushExitLabel(end).Statements(node.Body).PopExitLabel();
             ctx.Branch(start);
 
@@ -171,15 +171,15 @@ namespace DUO2C.CodeGen.LLVM
 
             ctx.Branch(condstart);
 
-            ctx.LabelMarker(condstart, bodystart).Ln();
+            ctx.LabelMarker(condstart).Ln();
             ctx.Expr(node.Condition, ref cond, BooleanType.Default);
             ctx.Branch(cond, bodystart, bodyend);
 
-            ctx.LabelMarker(bodystart, condstart).Ln();
+            ctx.LabelMarker(bodystart).Ln();
             ctx.PushExitLabel(bodyend).Statements(node.Body).PopExitLabel();
             ctx.Branch(condstart);
 
-            return ctx.LabelMarker(bodyend, condstart);
+            return ctx.LabelMarker(bodyend);
         }
 
         static GenerationContext Node(this GenerationContext ctx, NRepeatUntil node)
@@ -190,13 +190,13 @@ namespace DUO2C.CodeGen.LLVM
 
             ctx.Branch(bodystart);
 
-            ctx.LabelMarker(bodystart, bodystart).Ln();
+            ctx.LabelMarker(bodystart).Ln();
             ctx.PushExitLabel(condend).Statements(node.Body).PopExitLabel();
 
             ctx.Expr(node.Condition, ref cond, BooleanType.Default);
             ctx.Branch(cond, condend, bodystart);
 
-            return ctx.LabelMarker(condend, bodystart);
+            return ctx.LabelMarker(condend);
         }
 
         static GenerationContext Node(this GenerationContext ctx, NForLoop node)
@@ -212,14 +212,14 @@ namespace DUO2C.CodeGen.LLVM
             ctx.Assign(iter, iter.Declaration.Type, node.Initial);
             ctx.Branch(condstart);
 
-            ctx.LabelMarker(condstart, bodystart).Ln();
+            ctx.LabelMarker(condstart).Ln();
             ctx.Expr(node.Final, ref final, iter.Declaration.Type);
             Value temp = new TempIdent();
             ctx.ResolveValue(iter, ref temp, iter.Declaration.Type);
             ctx.BinaryComp(cond, "sgt", "ogt", iter.Declaration.Type, temp, final);
             ctx.Branch(cond, bodyend, bodystart);
 
-            ctx.LabelMarker(bodystart, condstart).Ln();
+            ctx.LabelMarker(bodystart).Ln();
             ctx.PushExitLabel(bodyend).Statements(node.Body).PopExitLabel();
             temp = new TempIdent();
             ctx.ResolveValue(iter, ref temp, iter.Declaration.Type);
@@ -227,7 +227,7 @@ namespace DUO2C.CodeGen.LLVM
             ctx.Assign(iter, iter.Declaration.Type, incr);
             ctx.Branch(condstart);
 
-            return ctx.LabelMarker(bodyend, condstart);
+            return ctx.LabelMarker(bodyend);
         }
 
         static GenerationContext Node(this GenerationContext ctx, NInvocStmnt node)
@@ -266,7 +266,7 @@ namespace DUO2C.CodeGen.LLVM
                     case "LongReal":
                         return ctx.Call(new TempIdent(), _printfProcType, _printfProc,
                             new PointerType(CharType.Default),
-                            new ElementPointer(true, GetStringType("%f"), GetStringIdent("%f"), 0, 0),
+                            new ElementPointer(true, GetStringType("%g"), GetStringIdent("%g"), 0, 0),
                             RealType.LongReal, src);
                     case "Ln":
                         return ctx.Call(new TempIdent(), _printfProcType, _printfProc,

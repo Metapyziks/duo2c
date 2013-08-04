@@ -56,7 +56,7 @@ namespace DUO2C
             snippet = snippet.TrimEnd();
             Console.WriteLine();
             int start = error.Column - 1 - trimmed;
-            int end = start + error.SourceLength;
+            int end = start + Math.Max(1, error.SourceLength);
             Console.ResetColor();
             Console.Write("   " + snippet.Substring(0, start));
             Console.ForegroundColor = ConsoleColor.Red;

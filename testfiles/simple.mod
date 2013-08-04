@@ -6,9 +6,9 @@ MODULE Simple;
 
     VAR PI : LONGREAL;
 
-    PROCEDURE FindPI* (VAR pi : LONGREAL; iters : INTEGER);
+    PROCEDURE FindPI* (VAR pi : LONGREAL; iters : LONGINT);
     VAR
-        i : INTEGER;
+        i : LONGINT;
     BEGIN        
         FOR i := 1 TO iters DO
             pi := pi - 4.0D0 / (i * 4 - 1) + 4.0D0 / (i * 4 + 1);
@@ -16,8 +16,7 @@ MODULE Simple;
     END;
 
 BEGIN
-    PI := 8;
-    FindPI(PI, 1000000);
-    FindPI(PI, 1000000);
-    Out.Real(PI / 2); Out.Ln;
+    PI := 4;
+    FindPI(PI, 10000000);
+    Out.Real(PI); Out.Ln;
 END Simple.

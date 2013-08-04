@@ -1,5 +1,5 @@
-; Generated 04/08/2013 23:28:13
-; GlobalUID 796b6502-8423-42e1-a671-247bd1f1a10c
+; Generated 05/08/2013 00:31:17
+; GlobalUID 0c324cac-2e93-45ef-bf27-6aa9501f054d
 ; 
 ; LLVM IR file for module "Simple"
 ; 
@@ -12,51 +12,49 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
 %SET  = type i64
 %Simple.Test = type i32*
 
-@const.string.0 = private constant [3 x i8] c"\25\66\00"
+@const.string.0 = private constant [3 x i8] c"\25\67\00"
 @const.string.1 = private constant [2 x i8] c"\0A\00"
 
 declare i32 @printf(%CHAR*, ...) nounwind 
 @PI = private global double 0.000000e+000
 
-define void @Simple.FindPI(double* %pi, i32 %$iters) nounwind {
+define void @Simple.FindPI(double* %pi, i64 %$iters) nounwind {
     
-    %iters = alloca i32
-    store  i32      %$iters, i32* %iters
+    %iters = alloca i64
+    store  i64      %$iters, i64* %iters
     
-    %i = alloca i32
+    %i = alloca i64
     
-    ; FOR i := 1 TO iters DO
-    store i32    1,   i32*  %i
+    store i64    1,   i64*  %i
     br    label  %1
     
 ; <label>:1                                       ; preds = %0, %5
     
-    %2    = load i32* %iters
-    %3    = load i32* %i
-    %4    = icmp sgt  i32   %3,  %2
+    %2    = load i64* %iters
+    %3    = load i64* %i
+    %4    = icmp sgt  i64   %3,  %2
     br    i1     %4,  label %21, label %5
     
 ; <label>:5                                       ; preds = %1
     
-    ; pi := pi - 4.000000e+000 / (i * 4 - 1) + 4.000000e+000 / (i * 4 + 1)
     %6    = load   double* %pi
-    %7    = load   i32*    %i
-    %8    = mul    i32     %7,     4
-    %9    = sub    i32     %8,     1
-    %10   = sitofp i32     %9      to double
+    %7    = load   i64*    %i
+    %8    = mul    i64     %7,     4
+    %9    = sub    i64     %8,     1
+    %10   = sitofp i64     %9      to double
     %11   = fdiv   double  4.000000e+000, %10
     %12   = fsub   double  %6,     %11
-    %13   = load   i32*    %i
-    %14   = mul    i32     %13,    4
-    %15   = add    i32     %14,    1
-    %16   = sitofp i32     %15     to double
+    %13   = load   i64*    %i
+    %14   = mul    i64     %13,    4
+    %15   = add    i64     %14,    1
+    %16   = sitofp i64     %15     to double
     %17   = fdiv   double  4.000000e+000, %16
     %18   = fadd   double  %12,    %17
     store double   %18,    double* %pi
     
-    %19   = load i32* %i
-    %20   = add  i32  %19,  1
-    store i32    %20, i32*  %i
+    %19   = load i64* %i
+    %20   = add  i64  %19,  1
+    store i64    %20, i64*  %i
     br    label  %1
     
 ; <label>:21                                      ; preds = %1
@@ -66,22 +64,14 @@ define void @Simple.FindPI(double* %pi, i32 %$iters) nounwind {
 
 define i32 @main() {
     
-    ; PI := 8
-    store double 8.000000e+000, double* @PI
+    store double 4.000000e+000, double* @PI
     
-    ; FindPI(PI, 1000000)
-    call void (double*, i32)* @Simple.FindPI(double* @PI, i32 1000000) nounwind
+    call void (double*, i64)* @Simple.FindPI(double* @PI, i64 10000000) nounwind
     
-    ; FindPI(PI, 1000000)
-    call void (double*, i32)* @Simple.FindPI(double* @PI, i32 1000000) nounwind
-    
-    ; Out.Real(PI / 2)
     %1 = load double* @PI
-    %2 = fdiv double  %1, 2.000000e+000
-    %3 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @const.string.0, i32 0, i32 0), double %2) nounwind
+    %2 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @const.string.0, i32 0, i32 0), double %1) nounwind
     
-    ; Out.Ln()
-    %4 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @const.string.1, i32 0, i32 0)) nounwind
+    %3 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @const.string.1, i32 0, i32 0)) nounwind
     
     ret i32 0
 }

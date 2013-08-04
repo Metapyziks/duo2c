@@ -90,20 +90,19 @@ namespace DUO2C.CodeGen.LLVM
             return ctx.Argument().Keyword("label").Argument(label);
         }
 
-        static GenerationContext LabelMarker(this GenerationContext ctx, TempIdent label, params TempIdent[] predecessors)
+        static TempIdent _blockLabel = null;
+        static GenerationContext LabelMarker(this GenerationContext ctx, TempIdent label)
         {
+            _blockLabel = label;
             var marker = String.Format("; <label>:{0}", label.ToString().Substring(1));
             var padding = Enumerable.Range(0, 50 - marker.Length).Aggregate(String.Empty, (s, x) => s + " ");
             ctx.Ln().Write("\r{0}{1}; preds = ", marker, padding);
             
             return ctx.Write(() => {
-                if (predecessors.Length == 0) {
+                if (label.Predecessors.Count() == 0) {
                     return "%0";
                 } else {
-                    var preds = (IEnumerable<TempIdent>) predecessors.OrderBy(x => x.ID);
-                    if (!preds.Any(x => x.ID < label.ID)) {
-                        preds = new TempIdent[] { null }.Concat(preds);
-                    }
+                    var preds = (IEnumerable<TempIdent>) label.Predecessors.OrderBy(x => x == null ? 0 : x.ID);
                     return String.Join(", ", preds.Select(x => x == null ? "%0" : x.ToString()));
                 }
             }).EndOperation();
@@ -111,11 +110,14 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Branch(this GenerationContext ctx, TempIdent dest)
         {
+            dest.AddPredecessor(_blockLabel);
             return ctx.Keyword("br").Label(dest).EndOperation();
         }
 
         static GenerationContext Branch(this GenerationContext ctx, Value cond, TempIdent ifTrue, TempIdent ifFalse)
         {
+            ifTrue.AddPredecessor(_blockLabel);
+            ifFalse.AddPredecessor(_blockLabel);
             return ctx.Keyword("br").Argument(BooleanType.Default, cond).Label(ifTrue).Label(ifFalse).EndOperation();
         }
 

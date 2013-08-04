@@ -173,10 +173,17 @@ namespace DUO2C.CodeGen.LLVM
 
             public static void Reset()
             {
+                _blockLabel = null;
                 _sLast = 0;
             }
 
             int _id;
+            List<TempIdent> _preds;
+
+            public IEnumerable<TempIdent> Predecessors
+            {
+                get { return _preds; }
+            }
 
             public int ID
             {
@@ -190,6 +197,12 @@ namespace DUO2C.CodeGen.LLVM
             public TempIdent()
             {
                 _id = 0;
+                _preds = new List<TempIdent>();
+            }
+
+            public void AddPredecessor(TempIdent pred)
+            {
+                _preds.Add(pred);
             }
 
             public void ResolveID()

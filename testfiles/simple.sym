@@ -1,6 +1,6 @@
 (**
- *  Generated 04/08/2013 23:28:13
- *  GlobalUID 796b6502-8423-42e1-a671-247bd1f1a10c
+ *  Generated 05/08/2013 00:31:17
+ *  GlobalUID 0c324cac-2e93-45ef-bf27-6aa9501f054d
  *
  *  Exported symbol file for module "Simple"
  *
@@ -12,6 +12,6 @@ MODULE Simple;
     TYPE
         Test  = POINTER TO INTEGER;
     VAR
-        FindPI * : PROCEDURE (pi : LONGREAL; iters : INTEGER);
+        FindPI * : PROCEDURE (pi : LONGREAL; iters : LONGINT);
 END Simple.
 
