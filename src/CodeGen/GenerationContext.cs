@@ -94,6 +94,7 @@ namespace DUO2C.CodeGen
 
                 for (int i = 0, c = 0; i < _str.Length; ++i) {
                     if (_str[i] == '\t') {
+                        if (c > 10) yield break;
                         yield return c;
                         c = 0;
                     } else {
