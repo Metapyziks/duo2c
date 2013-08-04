@@ -88,7 +88,7 @@ namespace DUO2C.Parsers
             if (IgnoreWhitespace) SkipWhitespace(str, ref i);
             var nodes = Parser.Parse(str, i, IgnoreWhitespace, out exception);
             if (nodes.Count() == 0) {
-                exception = ChooseParserException(exception, new SymbolExpectedException(Token, i, 2));
+                exception = ChooseParserException(exception, new SymbolExpectedException(Token, i, 0));
             }
             var except = exception;
             nodes = nodes.Select(node => {

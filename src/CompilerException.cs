@@ -194,7 +194,7 @@ namespace DUO2C
                 if (_exceptions.All(x => x is SymbolExpectedException)) {
                     var es = _exceptions.Select(x => ((SymbolExpectedException) x).Symbol).Distinct().OrderBy(x => x);
                     return String.Join(", ", es.Where(x => x != es.Last()))
-                        + (es.Count() > 0 ? " or " + es.Last() : "") + " expected";
+                        + (es.Count() > 1 ? " or " : "") + (es.Count() > 0 ? es.Last() : "something") + " expected";
                 }
                 return String.Join(" or ",  _exceptions.Select(x => x is SymbolExpectedException
                     ? ((SymbolExpectedException) x).Symbol : x.MessageNoLocation).Distinct());
