@@ -85,22 +85,36 @@ namespace DUO2C.CodeGen.LLVM
                 .Argument(type, a).Argument(b).EndOperation();
         }
 
-        static GenerationContext Label(this GenerationContext ctx, Value label)
+        static GenerationContext Label(this GenerationContext ctx, TempIdent label)
         {
             return ctx.Argument().Keyword("label").Argument(label);
         }
 
-        static GenerationContext LabelMarker(this GenerationContext ctx, Value label)
+        static GenerationContext LabelMarker(this GenerationContext ctx, TempIdent label, params TempIdent[] predecessors)
         {
-            return ctx.Ln().Write("\r; <label>:{0}", label.ToString().Substring(1)).Ln();
+            var marker = String.Format("; <label>:{0}", label.ToString().Substring(1));
+            var padding = Enumerable.Range(0, 50 - marker.Length).Aggregate(String.Empty, (s, x) => s + " ");
+            ctx.Ln().Write("\r{0}{1}; preds = ", marker, padding);
+            
+            return ctx.Write(() => {
+                if (predecessors.Length == 0) {
+                    return "%0";
+                } else {
+                    var preds = (IEnumerable<TempIdent>) predecessors.OrderBy(x => x.ID);
+                    if (!preds.Any(x => x.ID < label.ID)) {
+                        preds = new TempIdent[] { null }.Concat(preds);
+                    }
+                    return String.Join(", ", preds.Select(x => x == null ? "%0" : x.ToString()));
+                }
+            }).EndOperation();
         }
 
-        static GenerationContext Branch(this GenerationContext ctx, Value dest)
+        static GenerationContext Branch(this GenerationContext ctx, TempIdent dest)
         {
             return ctx.Keyword("br").Label(dest).EndOperation();
         }
 
-        static GenerationContext Branch(this GenerationContext ctx, Value cond, Value ifTrue, Value ifFalse)
+        static GenerationContext Branch(this GenerationContext ctx, Value cond, TempIdent ifTrue, TempIdent ifFalse)
         {
             return ctx.Keyword("br").Argument(BooleanType.Default, cond).Label(ifTrue).Label(ifFalse).EndOperation();
         }

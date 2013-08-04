@@ -85,14 +85,14 @@ namespace DUO2C.CodeGen.LLVM
             return ctx;
         }
 
-        static Stack<Value> _exitLabels = new Stack<Value>();
-        static GenerationContext PushExitLabel(this GenerationContext ctx, Value label)
+        static Stack<TempIdent> _exitLabels = new Stack<TempIdent>();
+        static GenerationContext PushExitLabel(this GenerationContext ctx, TempIdent label)
         {
             _exitLabels.Push(label);
             return ctx;
         }
 
-        static Value ExitLabel
+        static TempIdent ExitLabel
         {
             get { return _exitLabels.Count > 0 ? _exitLabels.Peek() : null; }
         }
@@ -215,14 +215,14 @@ namespace DUO2C.CodeGen.LLVM
             ctx.Assign(iter, iter.Declaration.Type, node.Initial);
             ctx.Branch(condstart);
 
-            ctx.LabelMarker(condstart);
+            ctx.LabelMarker(condstart, bodystart);
             ctx.Expr(node.Final, ref final, iter.Declaration.Type);
             Value temp = new TempIdent();
             ctx.ResolveValue(iter, ref temp, iter.Declaration.Type);
             ctx.BinaryComp(cond, "sgt", "ogt", iter.Declaration.Type, temp, final);
             ctx.Branch(cond, bodyend, bodystart);
 
-            ctx.LabelMarker(bodystart);
+            ctx.LabelMarker(bodystart, condstart);
             ctx.PushExitLabel(bodyend).Statements(node.Body).PopExitLabel();
             temp = new TempIdent();
             ctx.ResolveValue(iter, ref temp, iter.Declaration.Type);
@@ -230,7 +230,7 @@ namespace DUO2C.CodeGen.LLVM
             ctx.Assign(iter, iter.Declaration.Type, incr);
             ctx.Branch(condstart);
 
-            return ctx.LabelMarker(bodyend);
+            return ctx.LabelMarker(bodyend, condstart);
         }
 
         static GenerationContext Node(this GenerationContext ctx, NInvocStmnt node)
