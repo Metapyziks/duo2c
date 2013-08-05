@@ -38,9 +38,14 @@ namespace DUO2C.CodeGen.LLVM
             }
         }
 
+        static int GetStringLength(String str)
+        {
+            return Encoding.UTF8.GetByteCount(str + "\0");
+        }
+
         static OberonType GetStringType(String str)
         {
-            return new PointerType(new ConstArrayType(CharType.Default, Encoding.UTF8.GetByteCount(str + "\0")));
+            return new PointerType(new ConstArrayType(CharType.Default, GetStringLength(str)));
         }
 
         static GenerationContext PushScope(this GenerationContext ctx, Scope scope)

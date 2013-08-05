@@ -243,12 +243,10 @@ namespace DUO2C.CodeGen.LLVM
                 var arg = invoc.Args != null ? invoc.Args.Expressions.FirstOrDefault() : null;
                 Value src = null;
                 var type = arg != null ? _scope.GetSymbol(elem.Identifier, elem.Module).As<ProcedureType>().Params.First().Type : PointerType.NilPointer;
-                if (arg != null) {
-                    src = ctx.PrepareOperand(arg, type, null);
-                }
                 switch (elem.Identifier) {
                     case "Boolean":
                         var temp = new TempIdent();
+                        src = ctx.PrepareOperand(arg, type, null);
                         ctx.Select(temp, src, new PointerType(CharType.Default),
                             new ElementPointer(true, GetStringType("TRUE"), GetStringIdent("TRUE"), 0, 0),
                             new ElementPointer(true, GetStringType("FALSE"), GetStringIdent("FALSE"), 0, 0));
@@ -258,16 +256,31 @@ namespace DUO2C.CodeGen.LLVM
                     case "ShortInt":
                     case "Integer":
                     case "LongInt":
+                        src = ctx.PrepareOperand(arg, type, null);
                         return ctx.Call(new TempIdent(), _printfProcType, _printfProc,
                             new PointerType(CharType.Default),
                             new ElementPointer(true, GetStringType("%i"), GetStringIdent("%i"), 0, 0),
                             IntegerType.LongInt, src);
                     case "Real":
                     case "LongReal":
+                        src = ctx.PrepareOperand(arg, type, null);
                         return ctx.Call(new TempIdent(), _printfProcType, _printfProc,
                             new PointerType(CharType.Default),
                             new ElementPointer(true, GetStringType("%g"), GetStringIdent("%g"), 0, 0),
                             RealType.LongReal, src);
+                    case "String":
+                        type = type.As<ArrayType>();
+                        src = ctx.PrepareOperand(arg, new PointerType(type), null);
+                        var ptr = new TempIdent();
+                        ctx.Assign(ptr);
+                        ctx.Argument(new ElementPointer(false, new PointerType(type), src, 0, 1));
+                        ctx.EndOperation();
+                        src = new TempIdent();
+                        ctx.Load(src, new PointerType(CharType.Default), ptr);
+                        return ctx.Call(new TempIdent(), _printfProcType, _printfProc,
+                            new PointerType(CharType.Default),
+                            new ElementPointer(true, GetStringType("%s"), GetStringIdent("%s"), 0, 0),
+                            new PointerType(CharType.Default), src);
                     case "Ln":
                         return ctx.Call(new TempIdent(), _printfProcType, _printfProc,
                             new PointerType(CharType.Default),

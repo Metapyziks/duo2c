@@ -1,22 +1,28 @@
 MODULE Simple;
     IMPORT Out;
 
-    TYPE
-        Test = POINTER TO INTEGER;
-
-    VAR PI : LONGREAL;
-
-    PROCEDURE FindPI* (VAR pi : LONGREAL; iters : LONGINT);
+    PROCEDURE Test;
     VAR
-        i : LONGINT;
-    BEGIN        
-        FOR i := 1 TO iters DO
-            pi := pi - 4.0D0 / (i * 4 - 1) + 4.0D0 / (i * 4 + 1);
+        i : INTEGER;
+        n : INTEGER;
+        stra : ARRAY OF CHAR;
+        strb : ARRAY OF CHAR;
+    BEGIN
+        stra := "#";
+        strb := "-";
+
+        FOR i := 1 TO 9 DO
+            FOR n := 0 TO 16 DO
+                IF n < i * i - 10 * i + 25 THEN
+                    Out.String(stra);
+                ELSE
+                    Out.String(strb);
+                END;
+            END;
+            Out.Ln;
         END;
     END;
 
 BEGIN
-    PI := 4;
-    FindPI(PI, 10000000);
-    Out.Real(PI); Out.Ln;
+    Test();
 END Simple.

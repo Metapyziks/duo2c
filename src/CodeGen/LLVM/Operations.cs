@@ -135,7 +135,7 @@ namespace DUO2C.CodeGen.LLVM
         static GenerationContext Call(this GenerationContext ctx, Value dest, ProcedureType procType, Value proc, NExprList args)
         {
             var argDefns = procType.Params.ToArray();
-            var argExprs = args.Expressions.ToArray();
+            var argExprs = args != null ? args.Expressions.ToArray() : new NExpr[0];
             var argTypes = new OberonType[argExprs.Length];
             var argValus = new Value[argExprs.Length];
             for (int i = 0; i < argTypes.Length; ++i) {

@@ -409,7 +409,7 @@ namespace DUO2C.Semantics
                     var arg = args[i];
 
                     if (arg.FindTypeErrors(scope).Count() == 0) { 
-                        var argType = arg.GetFinalType(scope);
+                        var argType = arg.GetFinalType(scope).Resolve(scope);
 
                         if (!param.Type.Resolve(scope).CanTestEquality(argType)) {
                             yield return new TypeMismatchException(param.Type, argType, arg);
@@ -468,12 +468,12 @@ namespace DUO2C.Semantics
 
         public override bool CanCompare(OberonType other)
         {
-            if (ElementType is CharType) {
-                if (other is CharType) {
+            if (ElementType.IsChar) {
+                if (other.IsChar) {
                     return true;
-                } else if (other is ArrayType) {
-                    var otherArray = (ArrayType) other;
-                    return otherArray.ElementType is CharType;
+                } else if (other.IsArray) {
+                    var otherArray = other.As<ArrayType>();
+                    return otherArray.ElementType.IsChar;
                 }
             }
 

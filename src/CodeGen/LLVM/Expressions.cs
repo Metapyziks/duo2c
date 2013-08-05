@@ -133,6 +133,10 @@ namespace DUO2C.CodeGen.LLVM
                 } else if (node.Inner is NBool) {
                     dest = new Literal(node.Inner.String.ToLower());
                     return ctx;
+                } else if (node.Inner is NString) {
+                    GetStringIdent(node.Inner.String);
+                    dest = new StringLiteral(node.Inner.String);
+                    return ctx;
                 } else if (node.Inner is NDesignator && ((NDesignator) node.Inner).IsRoot) {
                     dest = new QualIdent((NQualIdent) ((NDesignator) node.Inner).Element);
                     return ctx;

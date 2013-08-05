@@ -80,6 +80,7 @@ namespace DUO2C.CodeGen.LLVM
                 if (type.IsBool) return new Literal("false");
                 if (type.IsInteger) return new Literal(0.ToString());
                 if (type.IsReal) return new Literal(0.ToString("e"));
+                if (type.IsArray) return new ArrayLiteral(type.As<ArrayType>());
                 throw new NotImplementedException(String.Format("No default literal for type '{0}' found", type));
             }
 
@@ -104,6 +105,33 @@ namespace DUO2C.CodeGen.LLVM
             public override string ToString()
             {
                 return _str;
+            }
+        }
+
+        public class ArrayLiteral : Literal
+        {
+            public ArrayType Type { get; private set; }
+
+            public ArrayLiteral(ArrayType type)
+                : base("{" + (type.Length > -1 ? type.Length : 0) + ", null}")
+            {
+                Type = type;
+            }
+        }
+
+        public class StringLiteral : ArrayLiteral
+        {
+            String _str;
+
+            public StringLiteral(String str)
+                : base(new ArrayType(CharType.Default, GetStringLength(str)))
+            {
+                _str = str;
+            }
+
+            public override string ToString()
+            {
+                return "{i32 " + Type.Length + ", i8* getelementptr inbounds ([" + GetStringLength(_str) + " x i8]* " + GetStringIdent(_str) + ", i32 0, i32 0)}";
             }
         }
 
@@ -253,14 +281,18 @@ namespace DUO2C.CodeGen.LLVM
 
         public class ElementPointer : Value, IComplexWrite
         {
+            bool _inBraces;
+
             public bool InBounds { get; private set; }
             public OberonType StructureType { get; private set; }
             public Value Structure { get; private set; }
             public int[] Indices { get; private set; }
 
-            public ElementPointer(bool inBounds, OberonType structType, Value structure, params int[] indices)
+            public ElementPointer(bool inBraces, OberonType structType, Value structure, params int[] indices)
             {
-                InBounds = inBounds;
+                _inBraces = inBraces;
+
+                InBounds = true;
                 StructureType = structType;
                 Structure = structure;
                 Indices = indices;
@@ -270,11 +302,13 @@ namespace DUO2C.CodeGen.LLVM
             {
                 ctx.Keyword("getelementptr");
                 if (InBounds) ctx.Keyword("inbounds");
-                ctx.Write("(").Argument(StructureType, Structure);
+                if (_inBraces) ctx.Write("(");
+                ctx.Argument(StructureType, Structure);
                 foreach (var ind in Indices) {
                     ctx.Argument(IntegerType.Integer, new Literal(ind.ToString()));
                 }
-                return ctx.Write("\t)");
+                if (_inBraces) ctx.Write("\t)");
+                return ctx;
             }
         }
 
