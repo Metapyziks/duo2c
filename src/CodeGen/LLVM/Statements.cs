@@ -276,7 +276,7 @@ namespace DUO2C.CodeGen.LLVM
                             if (src is StringLiteral) {
                                 var lit = (StringLiteral) src;
                                 ctx.Assign(ptr);
-                                ctx.Argument(new ElementPointer(false, GetStringType(lit.String), GetStringIdent(lit.String), 0, 0));
+                                ctx.Argument(new ElementPointer(false, lit.ConstType, lit.Identifier, 0, 0));
                                 ctx.EndOperation();
                                 src = ptr;
                             } else {

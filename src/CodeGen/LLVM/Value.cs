@@ -119,9 +119,24 @@ namespace DUO2C.CodeGen.LLVM
             }
         }
 
-        public class StringLiteral : ArrayLiteral
+        public class StringLiteral : ArrayLiteral, IComplexWrite
         {
             public String String { get; private set; }
+
+            public GlobalStringIdent Identifier
+            {
+                get { return GetStringIdent(String); }
+            }
+
+            public OberonType ConstType
+            {
+                get { return GetStringType(String); }
+            }
+
+            public int Length
+            {
+                get { return GetStringLength(String); }
+            }
 
             public StringLiteral(String str)
                 : base(new ArrayType(CharType.Default, GetStringLength(str)))
@@ -129,9 +144,15 @@ namespace DUO2C.CodeGen.LLVM
                 String = str;
             }
 
-            public override string ToString()
+            public GenerationContext Write(GenerationContext ctx)
             {
-                return "{i32 " + Type.Length + ", i8* getelementptr inbounds ([" + GetStringLength(String) + " x i8]* " + GetStringIdent(String) + ", i32 0, i32 0)}";
+                ctx.Write("{").EndArguments();
+                ctx.Argument(IntegerType.Integer, new Literal(Type.Length.ToString()));
+                ctx.Argument(new PointerType(CharType.Default),
+                    new ElementPointer(true, new PointerType(new ConstArrayType(CharType.Default,
+                        GetStringLength(String))), GetStringIdent(String), 0, 0));
+                ctx.EndArguments();
+                return ctx.Write("}");
             }
         }
 

@@ -1,5 +1,5 @@
-; Generated 06/08/2013 16:29:22
-; GlobalUID d27374f1-8e26-4b1a-8bd9-0cbd067f79bf
+; Generated 06/08/2013 18:35:18
+; GlobalUID 6e98c193-9ffb-4db4-b9fd-218904afef77
 ; 
 ; LLVM IR file for module "Simple"
 ; 
@@ -45,7 +45,7 @@ define i32 @main() {
     %3 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @.str1, i32 0, i32 0)) nounwind
     
     ; WriteLine(Hello to you too!)
-    call void ({i32, %CHAR*})* @WriteLine({i32, %CHAR*} {i32 18, i8* getelementptr inbounds ([18 x i8]* @.str3, i32 0, i32 0)}) nounwind
+    call void ({i32, %CHAR*})* @WriteLine({i32, %CHAR*} {i32 18, %CHAR* getelementptr inbounds ([18 x %CHAR]* @.str3, i32 0, i32 0)}) nounwind
     
     ret i32 0
 }
