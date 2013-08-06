@@ -208,7 +208,7 @@ namespace DUO2C.CodeGen.LLVM
                 String module = Module;
                 String ident = module != null ? String.Format("{0}.{1}", module, Identifier) : Identifier;
 
-                if (_scopeAtDecl.Parent is RootScope) {
+                if (_scopeAtDecl.Parent is RootScope && _scope.GetType(Identifier, module) == null) {
                     return String.Format("@{0}", ident);
                 } else {
                     return String.Format("%{0}", ident);
@@ -216,25 +216,25 @@ namespace DUO2C.CodeGen.LLVM
             }
         }
 
-        public class BoundProcedureIdent : QualIdent
+        public class BoundProcedureIdent : Value
         {
-            public RecordType ReceiverType { get; private set; }
+            Scope _scopeAtDecl;
 
-            public override Declaration Declaration
+            public RecordType ReceiverType { get; private set; }
+            public String Identifier { get; private set; }
+
+            public BoundProcedureIdent(RecordType receiver, String ident)
             {
-                get {
-                    if (ReceiverType == null) {
-                        return base.Declaration;
-                    } else {
-                        return ReceiverType.GetFieldDecl(Identifier);
-                    }
-                }
+                ReceiverType = receiver;
+                Identifier = ident;
+
+                _scopeAtDecl = _scope;
             }
 
-            public BoundProcedureIdent(UnresolvedType receiver, String ident)
-                : base(String.Format("{0}.{1}", receiver.Identifier, ident))
+            public override string ToString()
             {
-                ReceiverType = receiver.As<RecordType>();
+                return String.Format("@{0}.{1}.{2}", _module.Identifier,
+                    _scopeAtDecl.GetTypes().First(x => x.Value.Type == ReceiverType).Key, Identifier);
             }
         }
 
@@ -253,7 +253,7 @@ namespace DUO2C.CodeGen.LLVM
 
             public GenerationContext Write(GenerationContext ctx)
             {
-                return ctx.Keyword("bitcast \t(").Argument(_from, _val).Keyword(" to").Argument(_to).Keyword(")");
+                return ctx.Keyword("bitcast").Write("(").Argument(_from, _val).Keyword(" to").Argument(_to).Write(")");
             }
         }
 
@@ -277,7 +277,7 @@ namespace DUO2C.CodeGen.LLVM
                 foreach (var proc in _type.Procedures) {
                     ctx.Argument(new PointerType(IntegerType.Byte),
                         new BitCast(new PointerType(proc.Value.Type),
-                        new BoundProcedureIdent(new UnresolvedType(_ident), proc.Key),
+                        new BoundProcedureIdent(_type.GetProcedureDefiner(proc.Key), proc.Key),
                         new PointerType(IntegerType.Byte)));
                 }
                 return ctx.Write("]").EndArguments();
@@ -365,6 +365,39 @@ namespace DUO2C.CodeGen.LLVM
             public override string ToString()
             {
                 return String.Format("@.str{0}", ID);
+            }
+        }
+
+        public class RecordTableIdent : Value
+        {
+            static int _sNext = 0;
+
+            public static void Reset()
+            {
+                _sNext = 0;
+            }
+
+            int _id;
+
+            public int ID
+            {
+                get
+                {
+                    if (_id == -1) {
+                        _id = _sNext++;
+                    }
+                    return _id;
+                }
+            }
+
+            public RecordTableIdent()
+            {
+                _id = -1;
+            }
+
+            public override string ToString()
+            {
+                return String.Format("@.rec{0}", ID);
             }
         }
 

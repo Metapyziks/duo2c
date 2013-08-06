@@ -40,8 +40,8 @@ namespace DUO2C.CodeGen.LLVM
             }
 
             var ident = proc.Receiver != null
-                ? new BoundProcedureIdent(new UnresolvedType(proc.Receiver.TypeName), proc.Identifier)
-                : new QualIdent(proc.Identifier);
+                ? new BoundProcedureIdent(_scope.GetType(proc.Receiver.TypeName).As<RecordType>(), proc.Identifier)
+                : (Value) new QualIdent(proc.Identifier);
 
             ctx.Write(" \t{0}\t(", ident);
             ctx.PushScope(proc.Scope);

@@ -101,7 +101,7 @@ namespace DUO2C.CodeGen.LLVM
 
             ctx = ctx.Enter(0);
             foreach (var kv in _scope.GetTypes().Where(x => x.Value.Type is RecordType)) {
-                ctx.RecordTable(GetRecordTableIdent(kv.Key), (RecordType) kv.Value.Type);
+                ctx.RecordTable(kv.Key, (RecordType) kv.Value.Type);
             }
             ctx = ctx.Leave().Ln().Ln();
 

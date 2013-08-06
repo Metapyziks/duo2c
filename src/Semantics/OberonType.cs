@@ -282,7 +282,8 @@ namespace DUO2C.Semantics
             get { 
                 var procs = _fields.Where(x => x.Value.Type.IsProcedure);
                 if (SuperRecord != null) {
-                    procs = SuperRecord.Procedures.Where(x => !procs.Any(y => y.Key == x.Key)).Concat(procs);
+                    var found = procs.ToArray();
+                    procs = SuperRecord.Procedures.Where(x => !found.Any(y => y.Key == x.Key)).Concat(found);
                 }
                 return procs;
             }
@@ -307,6 +308,13 @@ namespace DUO2C.Semantics
         public void BindProcedure(String ident, AccessModifier visibility, ProcedureType signature)
         {
             _fields.Add(ident, new Declaration(signature, visibility, DeclarationType.BoundProcedure));
+        }
+
+        public RecordType GetProcedureDefiner(String ident)
+        {
+            if (_fields.Any(x => x.Value.Type.IsProcedure && x.Key == ident)) return this;
+            if (SuperRecord != null) return SuperRecord.GetProcedureDefiner(ident);
+            return null;
         }
 
         public bool HasField(String ident)

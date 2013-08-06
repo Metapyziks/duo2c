@@ -65,9 +65,16 @@ namespace DUO2C.CodeGen.LLVM
             return ctx.Assign(ident).Keyword("private", "constant").Argument(type, value).EndOperation();
         }
 
-        static QualIdent GetRecordTableIdent(String ident, String module = null)
+        static Dictionary<RecordType, RecordTableIdent> _recordTableIdents = new Dictionary<RecordType,RecordTableIdent>();
+        static RecordTableIdent GetRecordTableIdent(RecordType type)
         {
-            return new QualIdent(ident, module);
+            if (_recordTableIdents.ContainsKey(type)) {
+                return _recordTableIdents[type];
+            } else {
+                var ident = new RecordTableIdent();
+                _recordTableIdents.Add(type, ident);
+                return ident;
+            }
         }
 
         static ConstArrayType GetRecordTableType(RecordType type)
@@ -75,9 +82,9 @@ namespace DUO2C.CodeGen.LLVM
             return new ConstArrayType(new PointerType(IntegerType.Byte), 2 + type.Procedures.Count());
         }
 
-        static GenerationContext RecordTable(this GenerationContext ctx, QualIdent ident, RecordType type)
+        static GenerationContext RecordTable(this GenerationContext ctx, String ident, RecordType type)
         {
-            ctx.Assign(ident).Keyword("global").Argument(GetRecordTableType(type), new RecordTableConst(ident.Identifier, type));
+            ctx.Assign(GetRecordTableIdent(type)).Keyword("global").Argument(GetRecordTableType(type), new RecordTableConst(ident, type));
             return ctx.EndOperation();
         }
     }

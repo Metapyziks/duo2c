@@ -5,8 +5,16 @@ MODULE Simple;
         TestRec = RECORD
             x : INTEGER;
         END;
+        AnotherRec = RECORD (TestRec)
+            y : INTEGER;
+        END;
 
-    PROCEDURE (this : TestRec) Set (v : INTEGER);
+    PROCEDURE (this : TestRec) SetX (v : INTEGER);
+    BEGIN
+        Out.Integer(v); Out.Ln;
+    END;
+
+    PROCEDURE (this : AnotherRec) SetY (v : INTEGER);
     BEGIN
         Out.Integer(v); Out.Ln;
     END;
