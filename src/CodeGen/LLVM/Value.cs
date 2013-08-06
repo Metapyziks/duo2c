@@ -121,17 +121,17 @@ namespace DUO2C.CodeGen.LLVM
 
         public class StringLiteral : ArrayLiteral
         {
-            String _str;
+            public String String { get; private set; }
 
             public StringLiteral(String str)
                 : base(new ArrayType(CharType.Default, GetStringLength(str)))
             {
-                _str = str;
+                String = str;
             }
 
             public override string ToString()
             {
-                return "{i32 " + Type.Length + ", i8* getelementptr inbounds ([" + GetStringLength(_str) + " x i8]* " + GetStringIdent(_str) + ", i32 0, i32 0)}";
+                return "{i32 " + Type.Length + ", i8* getelementptr inbounds ([" + GetStringLength(String) + " x i8]* " + GetStringIdent(String) + ", i32 0, i32 0)}";
             }
         }
 
@@ -275,7 +275,7 @@ namespace DUO2C.CodeGen.LLVM
 
             public override string ToString()
             {
-                return String.Format("@const.string.{0}", ID);
+                return String.Format("@.str{0}", ID);
             }
         }
 

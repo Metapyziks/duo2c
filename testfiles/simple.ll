@@ -1,5 +1,5 @@
-; Generated 05/08/2013 21:26:09
-; GlobalUID de25b8a7-5716-45f7-aad3-9e9d458dfb4c
+; Generated 06/08/2013 16:29:22
+; GlobalUID d27374f1-8e26-4b1a-8bd9-0cbd067f79bf
 ; 
 ; LLVM IR file for module "Simple"
 ; 
@@ -11,107 +11,41 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
 %CHAR = type i8
 %SET  = type i64
 
-@const.string.0 = private constant [2 x i8] c"\23\00"
-@const.string.1 = private constant [2 x i8] c"\2D\00"
-@const.string.2 = private constant [3 x i8] c"\25\73\00"
-@const.string.3 = private constant [2 x i8] c"\0A\00"
+@.str0 = private constant [3  x i8] c"\25\73\00"
+@.str1 = private constant [2  x i8] c"\0A\00"
+@.str2 = private constant [13 x i8] c"\48\65\6C\6C\6F\20\77\6F\72\6C\64\21\00"
+@.str3 = private constant [18 x i8] c"\48\65\6C\6C\6F\20\74\6F\20\79\6F\75\20\74\6F\6F\21\00"
 
 declare i32 @printf(%CHAR*, ...) nounwind 
 
-define void @Test() nounwind {
+define void @WriteLine({i32, %CHAR*} %$str) nounwind {
+    
+    %str  = alloca {i32, %CHAR*}
+    store {i32, %CHAR*} %$str, {i32, %CHAR*}* %str
     
     
-    %i    = alloca i32
-    %n    = alloca i32
-    %stra = alloca {i32, %CHAR*}
-    %strb = alloca {i32, %CHAR*}
-    
-    ; stra := #
-    store {i32, %CHAR*} {i32 2, i8* getelementptr inbounds ([2 x i8]* @const.string.0, i32 0, i32 0)}, {i32, %CHAR*}* %stra
-    
-    ; strb := -
-    store {i32, %CHAR*} {i32 2, i8* getelementptr inbounds ([2 x i8]* @const.string.1, i32 0, i32 0)}, {i32, %CHAR*}* %strb
-    
-    ; FOR i := 1 TO 9 DO
-    store i32    1,   i32*  %i
-    br    label  %1
-    
-; <label>:1                                       ; preds = %0, %29
-    
-    %2    = load i32* %i
-    %3    = icmp sgt  i32   %2,  9
-    br    i1     %3,  label %33, label %4
-    
-; <label>:4                                       ; preds = %1
-    
-    ; FOR n := 0 TO 16 DO
-    store i32    0,   i32*  %n
-    br    label  %5
-    
-; <label>:5                                       ; preds = %4, %26
-    
-    %6    = load i32* %n
-    %7    = icmp sgt  i32   %6,  16
-    br    i1     %7,  label %29, label %8
-    
-; <label>:8                                       ; preds = %5
-    
-    ; IF n < i * i - 10 * i + 25 THEN
-    %9  = load i32* %n
-    %10 = load i32* %i
-    %11 = load i32* %i
-    %12 = mul  i32  %10,  %11
-    %13 = load i32* %i
-    %14 = mul  i32  10,   %13
-    %15 = sub  i32  %12,  %14
-    %16 = add  i32  %15,  25
-    %17 = icmp slt  i32   %9,  %16
-    br  i1     %17, label %18, label %22
-    
-; <label>:18                                      ; preds = %8
-    
-    ; Out.String(stra)
-    %19 = getelementptr inbounds {i32, %CHAR*}* %stra, i32 0, i32 1
-    %20 = load %CHAR** %19
-    %21 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @const.string.2, i32 0, i32 0), %CHAR* %20) nounwind
-    
-    br  label  %26
-    
-; <label>:22                                      ; preds = %8
-    
-    ; Out.String(strb)
-    %23 = getelementptr inbounds {i32, %CHAR*}* %strb, i32 0, i32 1
-    %24 = load %CHAR** %23
-    %25 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @const.string.2, i32 0, i32 0), %CHAR* %24) nounwind
-    
-    br  label  %26
-    
-; <label>:26                                      ; preds = %18, %22
-    
-    %27   = load i32* %n
-    %28   = add  i32  %27,  1
-    store i32    %28, i32*  %n
-    br    label  %5
-    
-; <label>:29                                      ; preds = %5
+    ; Out.String(str)
+    %1 = getelementptr inbounds {i32, %CHAR*}* %str, i32 0, i32 1
+    %2 = load %CHAR** %1
+    %3 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str0, i32 0, i32 0), %CHAR* %2) nounwind
     
     ; Out.Ln()
-    %30 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @const.string.3, i32 0, i32 0)) nounwind
-    
-    %31   = load i32* %i
-    %32   = add  i32  %31,  1
-    store i32    %32, i32*  %i
-    br    label  %1
-    
-; <label>:33                                      ; preds = %1
+    %4 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @.str1, i32 0, i32 0)) nounwind
     
     ret void 
 }
 
 define i32 @main() {
     
-    ; Test()
-    call void ()* @Test() nounwind
+    ; Out.String(Hello world!)
+    %1 = getelementptr inbounds [13 x %CHAR]* @.str2, i32 0, i32 0
+    %2 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str0, i32 0, i32 0), %CHAR* %1) nounwind
+    
+    ; Out.Ln()
+    %3 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @.str1, i32 0, i32 0)) nounwind
+    
+    ; WriteLine(Hello to you too!)
+    call void ({i32, %CHAR*})* @WriteLine({i32, %CHAR*} {i32 18, i8* getelementptr inbounds ([18 x i8]* @.str3, i32 0, i32 0)}) nounwind
     
     ret i32 0
 }

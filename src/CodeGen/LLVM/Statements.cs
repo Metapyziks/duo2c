@@ -270,13 +270,26 @@ namespace DUO2C.CodeGen.LLVM
                             RealType.LongReal, src);
                     case "String":
                         type = type.As<ArrayType>();
-                        src = ctx.PrepareOperand(arg, new PointerType(type), null);
                         var ptr = new TempIdent();
-                        ctx.Assign(ptr);
-                        ctx.Argument(new ElementPointer(false, new PointerType(type), src, 0, 1));
-                        ctx.EndOperation();
-                        src = new TempIdent();
-                        ctx.Load(src, new PointerType(CharType.Default), ptr);
+                        if (arg.IsConstant(_scope)) {
+                            src = ctx.PrepareOperand(arg, type, null);
+                            if (src is StringLiteral) {
+                                var lit = (StringLiteral) src;
+                                ctx.Assign(ptr);
+                                ctx.Argument(new ElementPointer(false, GetStringType(lit.String), GetStringIdent(lit.String), 0, 0));
+                                ctx.EndOperation();
+                                src = ptr;
+                            } else {
+                                throw new InvalidOperationException();
+                            }
+                        } else {
+                            src = ctx.PrepareOperand(arg, new PointerType(type), null);
+                            ctx.Assign(ptr);
+                            ctx.Argument(new ElementPointer(false, new PointerType(type), src, 0, 1));
+                            ctx.EndOperation();
+                            src = new TempIdent();
+                            ctx.Load(src, new PointerType(CharType.Default), ptr);
+                        }
                         return ctx.Call(new TempIdent(), _printfProcType, _printfProc,
                             new PointerType(CharType.Default),
                             new ElementPointer(true, GetStringType("%s"), GetStringIdent("%s"), 0, 0),

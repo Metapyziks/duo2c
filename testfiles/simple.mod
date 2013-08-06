@@ -1,28 +1,12 @@
 MODULE Simple;
     IMPORT Out;
 
-    PROCEDURE Test;
-    VAR
-        i : INTEGER;
-        n : INTEGER;
-        stra : ARRAY OF CHAR;
-        strb : ARRAY OF CHAR;
+    PROCEDURE WriteLine (str : ARRAY OF CHAR);
     BEGIN
-        stra := "#";
-        strb := "-";
-
-        FOR i := 1 TO 9 DO
-            FOR n := 0 TO 16 DO
-                IF n < i * i - 10 * i + 25 THEN
-                    Out.String(stra);
-                ELSE
-                    Out.String(strb);
-                END;
-            END;
-            Out.Ln;
-        END;
+        Out.String(str); Out.Ln;
     END;
 
 BEGIN
-    Test();
+    Out.String("Hello world!"); Out.Ln;
+    WriteLine("Hello to you too!");
 END Simple.
