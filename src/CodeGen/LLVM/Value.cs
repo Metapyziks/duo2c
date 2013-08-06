@@ -166,7 +166,7 @@ namespace DUO2C.CodeGen.LLVM
                 get { return _ident.Identifier; }
             }
 
-            public String Module
+            public virtual String Module
             {
                 get {
                     if (_ident.Module != null) return _ident.Module;
@@ -175,7 +175,7 @@ namespace DUO2C.CodeGen.LLVM
                 }
             }
 
-            public Declaration Declaration
+            public virtual Declaration Declaration
             {
                 get { return _scopeAtDecl.GetSymbolDecl(_ident.Identifier, _ident.Module); }
             }
@@ -213,6 +213,74 @@ namespace DUO2C.CodeGen.LLVM
                 } else {
                     return String.Format("%{0}", ident);
                 }
+            }
+        }
+
+        public class BoundProcedureIdent : QualIdent
+        {
+            public RecordType ReceiverType { get; private set; }
+
+            public override Declaration Declaration
+            {
+                get {
+                    if (ReceiverType == null) {
+                        return base.Declaration;
+                    } else {
+                        return ReceiverType.GetFieldDecl(Identifier);
+                    }
+                }
+            }
+
+            public BoundProcedureIdent(UnresolvedType receiver, String ident)
+                : base(String.Format("{0}.{1}", receiver.Identifier, ident))
+            {
+                ReceiverType = receiver.As<RecordType>();
+            }
+        }
+
+        public class BitCast : Value, IComplexWrite
+        {
+            OberonType _from;
+            Value _val;
+            OberonType _to;
+
+            public BitCast(OberonType from, Value val, OberonType to)
+            {
+                _from = from;
+                _val = val;
+                _to = to;
+            }
+
+            public GenerationContext Write(GenerationContext ctx)
+            {
+                return ctx.Keyword("bitcast \t(").Argument(_from, _val).Keyword(" to").Argument(_to).Keyword(")");
+            }
+        }
+
+        public class RecordTableConst : Value, IComplexWrite
+        {
+            String _ident;
+            RecordType _type;
+
+            public RecordTableConst(String ident, RecordType type)
+            {
+                _ident = ident;
+                _type = type;
+            }
+
+            public GenerationContext Write(GenerationContext ctx)
+            {
+                ctx.Write("[").EndArguments();
+                ctx.Argument(new PointerType(IntegerType.Byte), new ElementPointer(true,
+                    GetStringType(_ident), GetStringIdent(_ident), 0, 0));
+                ctx.Argument(new PointerType(IntegerType.Byte), new Literal("null"));
+                foreach (var proc in _type.Procedures) {
+                    ctx.Argument(new PointerType(IntegerType.Byte),
+                        new BitCast(new PointerType(proc.Value.Type),
+                        new BoundProcedureIdent(new UnresolvedType(_ident), proc.Key),
+                        new PointerType(IntegerType.Byte)));
+                }
+                return ctx.Write("]").EndArguments();
             }
         }
 

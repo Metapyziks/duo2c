@@ -113,7 +113,7 @@ namespace DUO2C.CodeGen.LLVM
 
             if (type.SuperRecordName != null) types.Add(new UnresolvedType(type.SuperRecordName));
 
-            types.AddRange(type.Fields.Where(x => !(x.Type is ProcedureType)).Select(x => x.Type));
+            types.AddRange(type.FieldDecls.Where(x => !(x.Type is ProcedureType)).Select(x => x.Type));
 
             return ctx.Structure(types.ToArray());
         }

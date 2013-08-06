@@ -22,8 +22,14 @@ namespace DUO2C.CodeGen.LLVM
         {
             ctx.Keyword("define");
 
-            var type = _scope.GetSymbol(proc.Identifier).As<ProcedureType>();
-            var isPublic = _scope.GetSymbolDecl(proc.Identifier, null).Visibility != AccessModifier.Private;
+            ProcedureType type;
+
+            if (proc.Receiver != null) {
+                type = _scope.GetType(proc.Receiver.TypeName).As<RecordType>()
+                    .GetFieldType(proc.Identifier).As<ProcedureType>();
+            } else {
+                type = _scope.GetSymbol(proc.Identifier).As<ProcedureType>();
+            }
 
             _returnType = type.ReturnType ?? VoidType.Default;
 
@@ -33,7 +39,11 @@ namespace DUO2C.CodeGen.LLVM
                 ctx.Type(VoidType.Default);
             }
 
-            ctx.Write(" \t{0}\t(", new QualIdent(proc.Identifier));
+            var ident = proc.Receiver != null
+                ? new BoundProcedureIdent(new UnresolvedType(proc.Receiver.TypeName), proc.Identifier)
+                : new QualIdent(proc.Identifier);
+
+            ctx.Write(" \t{0}\t(", ident);
             ctx.PushScope(proc.Scope);
             foreach (var p in type.Params) {
                 if (p.ByReference) {

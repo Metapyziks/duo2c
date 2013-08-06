@@ -64,5 +64,21 @@ namespace DUO2C.CodeGen.LLVM
         {
             return ctx.Assign(ident).Keyword("private", "constant").Argument(type, value).EndOperation();
         }
+
+        static QualIdent GetRecordTableIdent(String ident, String module = null)
+        {
+            return new QualIdent(ident, module);
+        }
+
+        static ConstArrayType GetRecordTableType(RecordType type)
+        {
+            return new ConstArrayType(new PointerType(IntegerType.Byte), 2 + type.Procedures.Count());
+        }
+
+        static GenerationContext RecordTable(this GenerationContext ctx, QualIdent ident, RecordType type)
+        {
+            ctx.Assign(ident).Keyword("global").Argument(GetRecordTableType(type), new RecordTableConst(ident.Identifier, type));
+            return ctx.EndOperation();
+        }
     }
 }

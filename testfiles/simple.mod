@@ -1,12 +1,16 @@
 MODULE Simple;
     IMPORT Out;
 
-    PROCEDURE WriteLine (str : ARRAY OF CHAR);
+    TYPE
+        TestRec = RECORD
+            x : INTEGER;
+        END;
+
+    PROCEDURE (this : TestRec) Set (v : INTEGER);
     BEGIN
-        Out.String(str); Out.Ln;
+        Out.Integer(v); Out.Ln;
     END;
 
 BEGIN
     Out.String("Hello world!"); Out.Ln;
-    WriteLine("Hello to you too!");
 END Simple.

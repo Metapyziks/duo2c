@@ -28,23 +28,28 @@ namespace DUO2C.CodeGen.LLVM
         static GenerationContext Argument(this GenerationContext ctx, bool align = true)
         {
             if (_lastWasArg) ctx.Write(", {0}", align ? "\t" : "");
-            _lastWasArg = true;
             return ctx;
         }
 
         static GenerationContext Argument(this GenerationContext ctx, OberonType type, bool align = true)
         {
-            return ctx.Argument(align).Type(type);
+            ctx.Argument(align).Type(type);
+            _lastWasArg = true;
+            return ctx;
         }
 
         static GenerationContext Argument(this GenerationContext ctx, Value val, bool align = true)
         {
-            return ctx.Argument(align).Write(val);
+            ctx.Argument(align).Write(val);
+            _lastWasArg = true;
+            return ctx;
         }
 
         static GenerationContext Argument(this GenerationContext ctx, OberonType type, Value val, bool align = true)
         {
-            return ctx.Argument(align).Type(type).Write(" {0}", align ? "\t" : "").Write(val);
+            ctx.Argument(align).Type(type).Write(" {0}", align ? "\t" : "").Write(val);
+            _lastWasArg = true;
+            return ctx;
         }
 
         static GenerationContext EndArguments(this GenerationContext ctx)

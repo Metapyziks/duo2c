@@ -243,31 +243,12 @@ namespace DUO2C.Semantics
         }
     }
 
-    public class Field
-    {
-        public String Identifier { get; private set; }
-        public AccessModifier Visibility { get; private set; }
-        public OberonType Type { get; private set; }
-
-        public Field(String identifier, AccessModifier visibility, OberonType type)
-        {
-            Identifier = identifier;
-            Visibility = visibility;
-            Type = type;
-        }
-
-        public override string ToString()
-        {
-            return String.Format("{0} : {1}", Identifier, Type);
-        }
-    }
-
     public class RecordType : OberonType
     {
         public static readonly RecordType Base = new RecordType();
 
         private NQualIdent _superRecordIdent;
-        private Dictionary<String, Field> _fields;
+        private Dictionary<String, Declaration> _fields;
 
         public String SuperRecordName
         {
@@ -281,15 +262,36 @@ namespace DUO2C.Semantics
             get { return true; }
         }
 
-        public IEnumerable<Field> Fields
+        public IEnumerable<String> FieldNames
+        {
+            get { return _fields.Keys; }
+        }
+
+        public IEnumerable<Declaration> FieldDecls
         {
             get { return _fields.Values; }
+        }
+
+        public IEnumerable<KeyValuePair<String, Declaration>> Fields
+        {
+            get { return _fields; }
+        }
+
+        public IEnumerable<KeyValuePair<String, Declaration>> Procedures
+        {
+            get { 
+                var procs = _fields.Where(x => x.Value.Type.IsProcedure);
+                if (SuperRecord != null) {
+                    procs = SuperRecord.Procedures.Where(x => !procs.Any(y => y.Key == x.Key)).Concat(procs);
+                }
+                return procs;
+            }
         }
 
         private RecordType()
         {
             _superRecordIdent = null;
-            _fields = new Dictionary<string,Field>();
+            _fields = new Dictionary<string, Declaration>();
         }
 
         public RecordType(NRecordType node)
@@ -297,13 +299,14 @@ namespace DUO2C.Semantics
             _superRecordIdent = (node.SuperRecord != null ? node.SuperRecord.Identifier : null);
 
             _fields = node.Fields.Select(x =>
-                new Field(x.Key.Identifier, x.Key.Visibility, x.Value.Type)
-            ).ToDictionary(x => x.Identifier);
+                new KeyValuePair<String, Declaration>(x.Key.Identifier,
+                    new Declaration(x.Value.Type, x.Key.Visibility, DeclarationType.Field))
+            ).ToDictionary(x => x.Key, x => x.Value);
         }
 
         public void BindProcedure(String ident, AccessModifier visibility, ProcedureType signature)
         {
-            _fields.Add(ident, new Field(ident, visibility, signature));
+            _fields.Add(ident, new Declaration(signature, visibility, DeclarationType.BoundProcedure));
         }
 
         public bool HasField(String ident)
@@ -315,6 +318,12 @@ namespace DUO2C.Semantics
         {
             return _fields.ContainsKey(ident) ? _fields[ident].Type
                 : SuperRecord != null ? SuperRecord.GetFieldType(ident) : null;
+        }
+
+        public Declaration GetFieldDecl(String ident)
+        {
+            return _fields.ContainsKey(ident) ? _fields[ident]
+                : SuperRecord != null ? SuperRecord.GetFieldDecl(ident) : null;
         }
 
         protected override void OnResolve(Scope scope)

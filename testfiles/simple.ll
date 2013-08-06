@@ -1,5 +1,5 @@
-; Generated 06/08/2013 18:35:18
-; GlobalUID 6e98c193-9ffb-4db4-b9fd-218904afef77
+; Generated 06/08/2013 23:30:19
+; GlobalUID 9cb7bd4d-2d52-4ca1-ac55-82d6f3f25c29
 ; 
 ; LLVM IR file for module "Simple"
 ; 
@@ -10,27 +10,32 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
 
 %CHAR = type i8
 %SET  = type i64
+%Simple.TestRec = type {i32}
 
-@.str0 = private constant [3  x i8] c"\25\73\00"
-@.str1 = private constant [2  x i8] c"\0A\00"
-@.str2 = private constant [13 x i8] c"\48\65\6C\6C\6F\20\77\6F\72\6C\64\21\00"
-@.str3 = private constant [18 x i8] c"\48\65\6C\6C\6F\20\74\6F\20\79\6F\75\20\74\6F\6F\21\00"
+@TestRec = global [3 x i8*] [i8* getelementptr inbounds ([8 x %CHAR]* @.str0, i32 0, i32 0), i8* null, i8* bitcast ( void (i32)* @TestRec.Set to i8*) ]
+
+@.str0 = private constant [8  x i8] c"\54\65\73\74\52\65\63\00"
+@.str1 = private constant [3  x i8] c"\25\69\00"
+@.str2 = private constant [2  x i8] c"\0A\00"
+@.str3 = private constant [13 x i8] c"\48\65\6C\6C\6F\20\77\6F\72\6C\64\21\00"
+@.str4 = private constant [3  x i8] c"\25\73\00"
 
 declare i32 @printf(%CHAR*, ...) nounwind 
 
-define void @WriteLine({i32, %CHAR*} %$str) nounwind {
+define void @TestRec.Set(i32 %$v) nounwind {
     
-    %str  = alloca {i32, %CHAR*}
-    store {i32, %CHAR*} %$str, {i32, %CHAR*}* %str
+    %v    = alloca i32
+    store i32      %$v, i32* %v
     
+    %this = alloca %Simple.TestRec
     
-    ; Out.String(str)
-    %1 = getelementptr inbounds {i32, %CHAR*}* %str, i32 0, i32 1
-    %2 = load %CHAR** %1
-    %3 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str0, i32 0, i32 0), %CHAR* %2) nounwind
+    ; Out.Integer(v)
+    %1 = load i32* %v
+    %2 = sext i32  %1 to i64
+    %3 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str1, i32 0, i32 0), i64 %2) nounwind
     
     ; Out.Ln()
-    %4 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @.str1, i32 0, i32 0)) nounwind
+    %4 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @.str2, i32 0, i32 0)) nounwind
     
     ret void 
 }
@@ -38,14 +43,11 @@ define void @WriteLine({i32, %CHAR*} %$str) nounwind {
 define i32 @main() {
     
     ; Out.String(Hello world!)
-    %1 = getelementptr inbounds [13 x %CHAR]* @.str2, i32 0, i32 0
-    %2 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str0, i32 0, i32 0), %CHAR* %1) nounwind
+    %1 = getelementptr inbounds [13 x %CHAR]* @.str3, i32 0, i32 0
+    %2 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str4, i32 0, i32 0), %CHAR* %1) nounwind
     
     ; Out.Ln()
-    %3 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @.str1, i32 0, i32 0)) nounwind
-    
-    ; WriteLine(Hello to you too!)
-    call void ({i32, %CHAR*})* @WriteLine({i32, %CHAR*} {i32 18, %CHAR* getelementptr inbounds ([18 x %CHAR]* @.str3, i32 0, i32 0)}) nounwind
+    %3 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @.str2, i32 0, i32 0)) nounwind
     
     ret i32 0
 }

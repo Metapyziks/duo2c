@@ -76,8 +76,8 @@ namespace DUO2C.CodeGen
                 }
                 ctx = ctx.Ln().Enter();
 
-                foreach (var field in rec.Fields.Where(x => x.Visibility != AccessModifier.Private)) {
-                    ctx.WriteVarDecl(module, field.Identifier, field.Type, field.Visibility);
+                foreach (var kv in rec.Fields.Where(x => x.Value.Visibility != AccessModifier.Private)) {
+                    ctx.WriteVarDecl(module, kv.Key, kv.Value.Type, kv.Value.Visibility);
                 }
 
                 return ctx.Leave().Write("END");

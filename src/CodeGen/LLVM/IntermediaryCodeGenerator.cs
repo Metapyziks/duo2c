@@ -89,12 +89,6 @@ namespace DUO2C.CodeGen.LLVM
                 .NativeAlign(8, 16, 32)
                 .StackAlign(32)
                 .DataLayoutEnd().Ln();
-
-            var printIntStr = new GlobalStringIdent();
-            var printFloatStr = new GlobalStringIdent();
-            var printLineStr = new GlobalStringIdent();
-            var printTrueStr = new GlobalStringIdent();
-            var printFalseStr = new GlobalStringIdent();
             
             ctx = ctx.Enter(0);
             ctx.TypeDecl(new TypeIdent(CharType.Default.ToString()), IntegerType.Byte);
@@ -102,6 +96,12 @@ namespace DUO2C.CodeGen.LLVM
 
             foreach (var kv in _scope.GetTypes()) {
                 ctx.TypeDecl(new TypeIdent(kv.Key, module.Identifier), kv.Value.Type);
+            }
+            ctx = ctx.Leave().Ln().Ln();
+
+            ctx = ctx.Enter(0);
+            foreach (var kv in _scope.GetTypes().Where(x => x.Value.Type is RecordType)) {
+                ctx.RecordTable(GetRecordTableIdent(kv.Key), (RecordType) kv.Value.Type);
             }
             ctx = ctx.Leave().Ln().Ln();
 

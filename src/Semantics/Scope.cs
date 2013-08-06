@@ -19,7 +19,8 @@ namespace DUO2C.Semantics
         Global = 1,
         Local = 2,
         Parameter = 3,
-        Field = 4
+        Field = 4,
+        BoundProcedure = 5
     }
 
     public class Declaration
