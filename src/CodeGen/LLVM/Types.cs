@@ -109,11 +109,15 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Type(this GenerationContext ctx, RecordType type)
         {
-            var types = new List<OberonType>();
+            IEnumerable<OberonType> types = new OberonType[0];
 
-            if (type.SuperRecordName != null) types.Add(new UnresolvedType(type.SuperRecordName));
+            while (type != null) {
+                types = type.FieldDecls.Where(x => !(x.Type is ProcedureType)).Select(x => x.Type)
+                    .Concat(types);
+                type = type.SuperRecord;
+            }
 
-            types.AddRange(type.FieldDecls.Where(x => !(x.Type is ProcedureType)).Select(x => x.Type));
+            types = new OberonType[] { new PointerType(IntegerType.Byte) }.Concat(types);
 
             return ctx.Structure(types.ToArray());
         }

@@ -334,6 +334,28 @@ namespace DUO2C.Semantics
                 : SuperRecord != null ? SuperRecord.GetFieldDecl(ident) : null;
         }
 
+        public int GetFieldCount()
+        {
+            int count = Fields.Count(x => !x.Value.Type.IsProcedure);
+            if (SuperRecordName != null) return count + SuperRecord.GetFieldCount();
+            return count;
+        }
+
+        public int GetFieldIndex(String ident)
+        {
+            if (SuperRecordName != null) {
+                int index = SuperRecord.GetFieldIndex(ident);
+                if (index > -1) return index;
+            }
+
+            int i = (SuperRecordName != null ? SuperRecord.GetFieldCount() : 0);
+            foreach (var field in _fields.Where(x => !x.Value.Type.IsProcedure)) {
+                if (field.Key == ident) return i;
+                ++i;
+            }
+            return -1;
+        }
+
         protected override void OnResolve(Scope scope)
         {
             if (_superRecordIdent != null) {

@@ -77,11 +77,7 @@ namespace DUO2C.CodeGen.LLVM
         {
             public static Literal GetDefault(OberonType type)
             {
-                if (type.IsBool) return new Literal("false");
-                if (type.IsInteger) return new Literal(0.ToString());
-                if (type.IsReal) return new Literal(0.ToString("e"));
-                if (type.IsArray) return new ArrayLiteral(type.As<ArrayType>());
-                throw new NotImplementedException(String.Format("No default literal for type '{0}' found", type));
+                return new Literal("zeroinitializer");
             }
 
             String _str;
@@ -89,7 +85,7 @@ namespace DUO2C.CodeGen.LLVM
             public Literal(byte[] bytes)
             {
                 _str = String.Format("c\"{0}\"", bytes.Aggregate(String.Empty,
-                    (s, x) => String.Format("{0}\\{1}", s, x.ToString("X2"))));
+                    (s, x) => String.Format("{0}{1}", s, 32 <= x && x < 127 ? ((char) x).ToString() : "\\" + x.ToString("X2"))));
             }
 
             public Literal(String str)
@@ -108,18 +104,7 @@ namespace DUO2C.CodeGen.LLVM
             }
         }
 
-        public class ArrayLiteral : Literal
-        {
-            public ArrayType Type { get; private set; }
-
-            public ArrayLiteral(ArrayType type)
-                : base("{" + (type.Length > -1 ? type.Length : 0) + ", null}")
-            {
-                Type = type;
-            }
-        }
-
-        public class StringLiteral : ArrayLiteral, IComplexWrite
+        public class StringLiteral : Value, IComplexWrite
         {
             public String String { get; private set; }
 
@@ -134,12 +119,12 @@ namespace DUO2C.CodeGen.LLVM
             }
 
             public int Length
+
             {
                 get { return GetStringLength(String); }
             }
 
             public StringLiteral(String str)
-                : base(new ArrayType(CharType.Default, GetStringLength(str)))
             {
                 String = str;
             }
@@ -147,10 +132,10 @@ namespace DUO2C.CodeGen.LLVM
             public GenerationContext Write(GenerationContext ctx)
             {
                 ctx.Write("{").EndArguments();
-                ctx.Argument(IntegerType.Integer, new Literal(Type.Length.ToString()));
+                ctx.Argument(IntegerType.Integer, new Literal(Length.ToString()));
                 ctx.Argument(new PointerType(CharType.Default),
                     new ElementPointer(true, new PointerType(new ConstArrayType(CharType.Default,
-                        GetStringLength(String))), GetStringIdent(String), 0, 0));
+                        Length)), Identifier, 0, 0));
                 ctx.EndArguments();
                 return ctx.Write("}");
             }
@@ -419,7 +404,7 @@ namespace DUO2C.CodeGen.LLVM
 
         public class ElementPointer : Value, IComplexWrite
         {
-            bool _inBraces;
+            public bool InBraces { get; private set; }
 
             public bool InBounds { get; private set; }
             public OberonType StructureType { get; private set; }
@@ -428,7 +413,7 @@ namespace DUO2C.CodeGen.LLVM
 
             public ElementPointer(bool inBraces, OberonType structType, Value structure, params int[] indices)
             {
-                _inBraces = inBraces;
+                InBraces = inBraces;
 
                 InBounds = true;
                 StructureType = structType;
@@ -436,16 +421,26 @@ namespace DUO2C.CodeGen.LLVM
                 Indices = indices;
             }
 
+            public ElementPointer(bool inBraces, ElementPointer clone)
+            {
+                InBraces = inBraces;
+
+                InBounds = clone.InBounds;
+                StructureType = clone.StructureType;
+                Structure = clone.Structure;
+                Indices = clone.Indices;
+            }
+
             public GenerationContext Write(GenerationContext ctx)
             {
                 ctx.Keyword("getelementptr");
                 if (InBounds) ctx.Keyword("inbounds");
-                if (_inBraces) ctx.Write("(");
+                if (InBraces) ctx.Write("(");
                 ctx.Argument(StructureType, Structure);
                 foreach (var ind in Indices) {
                     ctx.Argument(IntegerType.Integer, new Literal(ind.ToString()));
                 }
-                if (_inBraces) ctx.Write("\t)");
+                if (InBraces) ctx.Write("\t)");
                 return ctx;
             }
         }

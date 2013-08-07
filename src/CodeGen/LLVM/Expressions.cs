@@ -29,6 +29,13 @@ namespace DUO2C.CodeGen.LLVM
                 var temp = new TempIdent();
                 ctx.Call(temp, procType, procPtr, args);
                 return temp;
+            } else if (node.Operation is NMemberAccess) {
+                var ident = ((NMemberAccess) node.Operation).Identifier;
+                var record = (NDesignator) node.Element;
+                var recPtr = ctx.GetDesignation(record);
+                var type = record.GetFinalType(_scope);
+                var recType = type.As<RecordType>();
+                return new ElementPointer(false, new PointerType(type), recPtr, 0, recType.GetFieldIndex(ident) + 1);
             } else {
                 throw new NotImplementedException();
             }
@@ -65,20 +72,24 @@ namespace DUO2C.CodeGen.LLVM
             throw new InvalidOperationException("No conversion between " + from.ToString() + " to " + to.ToString() + "defined");
         }
 
-        static GenerationContext ResolveValue(this GenerationContext ctx, Value val, ref Value dest, OberonType type)
+        static GenerationContext ResolveValue(this GenerationContext ctx, Value val, ref Value dest, OberonType type, bool isConstant)
         {
             if (val is QualIdent) {
                 var ident = (QualIdent) val;
                 if (ident.Declaration.IsVariable) {
                     return ctx.Load(dest, type, val);
-                } else {
-                    dest = ident;
-                    return ctx;
                 }
-            } else {
-                dest = val;
-                return ctx;
+            } else if (val is ElementPointer) {
+                ElementPointer ptr = (ElementPointer) val;
+                if (!isConstant) {
+                    val = new TempIdent();
+                    ctx.Assign(val).Argument(ptr).EndOperation();
+                }
+                return ctx.Load(dest, type, val);
             }
+
+            dest = val;
+            return ctx;
         }
 
         static GenerationContext Factor(this GenerationContext ctx, NFactor node, ref Value dest, OberonType type)
@@ -91,7 +102,7 @@ namespace DUO2C.CodeGen.LLVM
                     dest = val;
                     return ctx;
                 }
-                return ctx.ResolveValue(val, ref dest, type);
+                return ctx.ResolveValue(val, ref dest, type, node.IsConstant(_scope));
             }
 
             if (node.Inner is NUnary) {
@@ -164,6 +175,7 @@ namespace DUO2C.CodeGen.LLVM
                 ctx.Expr((NExpr) node, ref val, ntype);
             }
             ctx.Conversion(ntype, type, ref val);
+
             return val;
         }
 

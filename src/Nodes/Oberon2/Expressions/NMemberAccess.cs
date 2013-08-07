@@ -13,7 +13,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override string String
         {
-            get { return Identifier; }
+            get { return String.Format(".{0}", Identifier); }
         }
         
         public NMemberAccess(ParseNode original)

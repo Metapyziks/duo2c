@@ -9,16 +9,16 @@ MODULE Simple;
             y : INTEGER;
         END;
 
-    PROCEDURE (this : TestRec) SetX (v : INTEGER);
-    BEGIN
-        Out.Integer(v); Out.Ln;
-    END;
-
-    PROCEDURE (this : AnotherRec) SetY (v : INTEGER);
-    BEGIN
-        Out.Integer(v); Out.Ln;
-    END;
+    VAR a : TestRec;
+    VAR b : AnotherRec;
 
 BEGIN
-    Out.String("Hello world!"); Out.Ln;
+    a.x := 5;
+
+    b.x := 12;
+    b.y := a.x + b.x * 2;
+
+    Out.String("a.x: "); Out.Integer(a.x); Out.Ln;
+    Out.String("b.x: "); Out.Integer(b.x); Out.Ln;
+    Out.String("b.y: "); Out.Integer(b.y); Out.Ln;
 END Simple.

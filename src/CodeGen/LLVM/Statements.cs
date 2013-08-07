@@ -225,14 +225,14 @@ namespace DUO2C.CodeGen.LLVM
             ctx.LabelMarker(condstart).Ln();
             ctx.Expr(node.Final, ref final, iter.Declaration.Type);
             Value temp = new TempIdent();
-            ctx.ResolveValue(iter, ref temp, iter.Declaration.Type);
+            ctx.ResolveValue(iter, ref temp, iter.Declaration.Type, false);
             ctx.BinaryComp(cond, "sgt", "ogt", iter.Declaration.Type, temp, final);
             ctx.Branch(cond, bodyend, bodystart);
 
             ctx.LabelMarker(bodystart).Ln();
             ctx.PushExitLabel(bodyend).Statements(node.Body).PopExitLabel();
             temp = new TempIdent();
-            ctx.ResolveValue(iter, ref temp, iter.Declaration.Type);
+            ctx.ResolveValue(iter, ref temp, iter.Declaration.Type, false);
             ctx.BinaryOp(incr, "add", "fadd", iter.Declaration.Type, temp, new Literal(1.ToString()));
             ctx.Assign(iter, iter.Declaration.Type, incr);
             ctx.Branch(condstart);
