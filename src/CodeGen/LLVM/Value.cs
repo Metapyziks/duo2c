@@ -270,17 +270,33 @@ namespace DUO2C.CodeGen.LLVM
 
             public GenerationContext Write(GenerationContext ctx)
             {
-                ctx.Write("[").EndArguments();
+                ctx.Write("[").EndOperation();
+                ctx = ctx.Enter();
                 ctx.Argument(new PointerType(IntegerType.Byte), new ElementPointer(true,
                     GetStringType(_ident), GetStringIdent(_ident), 0, 0));
-                ctx.Argument(new PointerType(IntegerType.Byte), new Literal("null"));
-                foreach (var proc in _type.Procedures) {
+                ctx.Write(",").EndOperation();
+
+                if (_type.SuperRecordName == null) {
+                    ctx.Argument(new PointerType(IntegerType.Byte), new Literal("null"));
+                } else {
+                    ctx.Argument(new PointerType(IntegerType.Byte), new BitCast(
+                        new PointerType(GetRecordTableType(_type.SuperRecord)),
+                        GetRecordTableIdent(_type.SuperRecord), new PointerType(IntegerType.Byte)));
+                }
+
+                var procs = _type.Procedures;
+                if (procs.Count() > 0) ctx.Write(",");
+
+                ctx.EndOperation();
+                foreach (var proc in procs) {
                     ctx.Argument(new PointerType(IntegerType.Byte),
                         new BitCast(new PointerType(proc.Value.Type),
                         new BoundProcedureIdent(_type.GetProcedureDefiner(proc.Key), proc.Key),
                         new PointerType(IntegerType.Byte)));
+                    if (proc.Key != procs.Last().Key) ctx.Write(",");
+                    ctx.EndOperation();
                 }
-                return ctx.Write("]").EndArguments();
+                return ctx.Leave().Write("]").EndArguments();
             }
         }
 

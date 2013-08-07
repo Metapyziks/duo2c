@@ -1,5 +1,5 @@
-; Generated 07/08/2013 00:56:04
-; GlobalUID f74dace6-f47f-4a04-a969-897645162ef3
+; Generated 07/08/2013 01:03:58
+; GlobalUID 801fde74-e0a9-4edb-9abf-65d977fb49b7
 ; 
 ; LLVM IR file for module "Simple"
 ; 
@@ -13,8 +13,17 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
 %Simple.TestRec = type {i32}
 %Simple.AnotherRec = type {%Simple.TestRec, i32}
 
-@.rec0 = global [3 x i8*] [i8* getelementptr inbounds ([8 x %CHAR]* @.str0, i32 0, i32 0), i8* null, i8* bitcast (void (i32)* @Simple.TestRec.SetX to i8*)]
-@.rec1 = global [4 x i8*] [i8* getelementptr inbounds ([11 x %CHAR]* @.str1, i32 0, i32 0), i8* null, i8* bitcast (void (i32)* @Simple.TestRec.SetX to i8*), i8* bitcast (void (i32)* @Simple.AnotherRec.SetY to i8*)]
+@.rec0 = global [3 x i8*] [
+    i8* getelementptr inbounds ([8 x %CHAR]* @.str0, i32 0, i32 0),
+    i8* null,
+    i8* bitcast (void (i32)* @Simple.TestRec.SetX to i8*)
+]
+@.rec1 = global [4 x i8*] [
+    i8* getelementptr inbounds ([11 x  %CHAR]*        @.str1, i32 0, i32 0),
+    i8* bitcast ([3 x i8*]* @.rec0 to i8*),
+    i8* bitcast (void (i32)* @Simple.TestRec.SetX to i8*),
+    i8* bitcast (void (i32)* @Simple.AnotherRec.SetY to i8*)
+]
 
 @.str0 = private constant [8  x i8] c"\54\65\73\74\52\65\63\00"
 @.str1 = private constant [11 x i8] c"\41\6E\6F\74\68\65\72\52\65\63\00"
