@@ -77,7 +77,11 @@ namespace DUO2C.CodeGen.LLVM
         {
             public static Literal GetDefault(OberonType type)
             {
-                return new Literal("zeroinitializer");
+                if (type.IsRecord) {
+                    return new RecordLiteral(type.As<RecordType>());
+                } else {
+                    return new Literal("zeroinitializer");
+                }
             }
 
             String _str;
@@ -101,6 +105,31 @@ namespace DUO2C.CodeGen.LLVM
             public override string ToString()
             {
                 return _str;
+            }
+        }
+
+        public class RecordLiteral : Literal, IComplexWrite
+        {
+            public RecordType Type { get; private set; }
+
+            public RecordLiteral(RecordType type)
+                : base(String.Empty)
+            {
+                Type = type;
+            }
+
+            public GenerationContext Write(GenerationContext ctx)
+            {
+                ctx.Write("{").Argument(new PointerType(IntegerType.Byte),
+                    new BitCast(new PointerType(GetRecordTableType(Type)), GetRecordTableIdent(Type),
+                        new PointerType(IntegerType.Byte)));
+
+                for (int i = 0; i < Type.GetFieldCount(); ++i) {
+                    var type = Type.GetFieldType(i);
+                    ctx.Argument(type, GetDefault(type));
+                }
+
+                return ctx.Write("}");
             }
         }
 

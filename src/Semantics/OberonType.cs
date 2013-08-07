@@ -322,10 +322,31 @@ namespace DUO2C.Semantics
             return _fields.ContainsKey(ident) || (SuperRecord != null && SuperRecord.HasField(ident));
         }
 
+        public OberonType GetFieldType(int index)
+        {
+            var decl = GetFieldDecl(index);
+            return decl != null ? decl.Type : null;
+        }
+
         public OberonType GetFieldType(String ident)
         {
-            return _fields.ContainsKey(ident) ? _fields[ident].Type
-                : SuperRecord != null ? SuperRecord.GetFieldType(ident) : null;
+            var decl = GetFieldDecl(ident);
+            return decl != null ? decl.Type : null;
+        }
+
+        public Declaration GetFieldDecl(int index)
+        {
+            if (index > GetFieldCount()) return null;
+
+            if (SuperRecordName != null) {
+                if (index < SuperRecord.GetFieldCount()) {
+                    return SuperRecord.GetFieldDecl(index);
+                } else {
+                    index -= SuperRecord.GetFieldCount();
+                }
+            }
+            
+            return _fields.Where(x => !x.Value.Type.IsProcedure).ElementAt(index).Value;
         }
 
         public Declaration GetFieldDecl(String ident)
