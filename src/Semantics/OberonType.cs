@@ -304,7 +304,9 @@ namespace DUO2C.Semantics
         {
             get {
                 if (HasSuperRecord) {
-                    return SuperRecord.Procedures.Concat(_procedures);
+                    var superProcedures = SuperRecord.Procedures.Select(x => _procedures.ContainsKey(x.Key)
+                        ? new KeyValuePair<String, Declaration>(x.Key, _procedures[x.Key]) : x);
+                    return superProcedures.Concat(_procedures.Where(x => !superProcedures.Any(y => y.Key == x.Key)));
                 } else {
                     return _procedures;
                 }
@@ -374,7 +376,7 @@ namespace DUO2C.Semantics
         {
             int i = 0;
             foreach (var field in FieldNames) {
-                if (field == ident) return i;
+                if (field == ident) return i; else ++i;
             }
             return -1;
         }
@@ -410,7 +412,7 @@ namespace DUO2C.Semantics
         {
             int i = 0;
             foreach (var proc in ProcedureNames) {
-                if (proc == ident) return i;
+                if (proc == ident) return i; else ++i;
             }
             return -1;
         }

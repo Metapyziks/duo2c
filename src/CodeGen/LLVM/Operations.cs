@@ -137,25 +137,30 @@ namespace DUO2C.CodeGen.LLVM
                 args.Where(x => x is Value).Cast<Value>().ToArray());
         }
 
-        static GenerationContext Call(this GenerationContext ctx, Value dest, ProcedureType procType, Value proc, Value receiver, NExprList args)
+        static GenerationContext Call(this GenerationContext ctx, Value dest, ProcedureType procType, Value proc,
+            OberonType receiverType, Value receiverValue, NExprList args)
         {
             var argDefns = procType.ParamsWithReceiver.ToArray();
             var argExprs = args != null ? args.Expressions.ToArray() : new NExpr[0];
             var argTypes = new OberonType[argDefns.Length];
             var argValus = new Value[argDefns.Length];
+
             for (int i = 0; i < argTypes.Length; ++i) {
                 if (argDefns[i].ByReference) {
                     argTypes[i] = new PointerType(argDefns[i].Type);
                 } else {
                     argTypes[i] = argDefns[i].Type;
                 }
-                if (receiver == null) {
+                if (receiverValue == null) {
                     argValus[i] = ctx.PrepareOperand(argExprs[i], argTypes[i], new TempIdent());
-                } else if (i == 0) {
-                    argValus[i] = receiver;
-                } else {
+                } else if (i > 0) {
                     argValus[i] = ctx.PrepareOperand(argExprs[i - 1], argTypes[i], new TempIdent());
                 }
+            }
+            
+            if (receiverValue != null) {
+                ctx.Conversion(new PointerType(receiverType), argTypes[0], ref receiverValue);
+                argValus[0] = receiverValue;
             }
 
             return ctx.Call(dest, procType, proc, argTypes, argValus);

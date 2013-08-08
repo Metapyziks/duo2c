@@ -19,23 +19,27 @@ namespace DUO2C.CodeGen.LLVM
 
         static Value GetDesignation(this GenerationContext ctx, NDesignator node)
         {
-            Value container;
-            return ctx.GetDesignation(node, out container);
+            UnresolvedType containerType;
+            Value containerValue;
+            return ctx.GetDesignation(node, out containerType, out containerValue);
         }
 
-        static Value GetDesignation(this GenerationContext ctx, NDesignator node, out Value container)
+        static Value GetDesignation(this GenerationContext ctx, NDesignator node,
+            out UnresolvedType containerType, out Value containerValue)
         {
-            container = null;
+            containerType = null;
+            containerValue = null;
             if (node.IsRoot) {
                 return new QualIdent((NQualIdent) node.Element);
             } else if (node.Operation is NInvocation) {
                 var args = ((NInvocation) node.Operation).Args;
                 var proc = (NDesignator) node.Element;
-                Value receiver;
-                var procPtr = ctx.GetDesignation(proc, out receiver);
+                UnresolvedType receiverType;
+                Value receiverValue;
+                var procPtr = ctx.GetDesignation(proc, out receiverType, out receiverValue);
                 var procType = proc.GetFinalType(_scope).As<ProcedureType>();
                 var temp = new TempIdent();
-                ctx.Call(temp, procType, procPtr, receiver, args);
+                ctx.Call(temp, procType, procPtr, receiverType, receiverValue, args);
                 return temp;
             } else if (node.Operation is NMemberAccess) {
                 var ident = ((NMemberAccess) node.Operation).Identifier;
@@ -43,11 +47,12 @@ namespace DUO2C.CodeGen.LLVM
                 var recPtr = ctx.GetDesignation(record);
                 var type = record.GetFinalType(_scope);
                 var recType = type.As<RecordType>();
-                container = recPtr;
                 if (recType.HasField(ident)) {
                     return new ElementPointer(false, new PointerType(type), recPtr,
                         0, 1 + recType.GetFieldIndex(ident));
                 } else {
+                    containerType = (UnresolvedType) type;
+                    containerValue = recPtr;
                     var recTablePtrType = new PointerType(GetRecordTableType(recType));
                     var temp = new TempIdent();
                     ctx.Assign(temp);
@@ -87,11 +92,18 @@ namespace DUO2C.CodeGen.LLVM
                     src = new Literal(int.Parse(src.ToString()).ToString("e"));
                 }
                 return ctx;
+            } else if (from is PointerType && to is PointerType) {
+                var temp = new TempIdent();
+                ctx.Assign(temp).Argument(new BitCast(false, from, src, to));
+                ctx.EndOperation();
+                src = temp;
+                return ctx;
             }
 
             var tsrc = src;
             src = new TempIdent();
 
+           
             if (from is IntegerType && to is IntegerType) {
                 IntegerType fi = (IntegerType) from, ti = (IntegerType) to;
                 if (fi.Range < ti.Range) {

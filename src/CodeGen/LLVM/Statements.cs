@@ -57,20 +57,22 @@ namespace DUO2C.CodeGen.LLVM
             
             TempIdent.Reset();
 
-            ctx = ctx.Enter(0);
-            foreach (var p in type.Params.Where(x => !x.ByReference)) {
-                ctx.Local(new QualIdent(p.Identifier), p.Type);
-                ctx.Assign(new QualIdent(p.Identifier), p.Type, new QualIdent("$" + p.Identifier));
+            if (type.Params.Count(x => !x.ByReference) > 0) {
+                ctx = ctx.Enter(0);
+                foreach (var p in type.Params.Where(x => !x.ByReference)) {
+                    ctx.Local(new QualIdent(p.Identifier), p.Type);
+                    ctx.Assign(new QualIdent(p.Identifier), p.Type, new QualIdent("$" + p.Identifier));
+                }
+                ctx = ctx.Leave().Ln().Ln();
             }
-            ctx = ctx.Leave().Ln().Ln();
 
-            ctx = ctx.Enter(0);
-            foreach (var decl in proc.Scope.GetSymbols()) {
-                if (type.ParamsWithReceiver.Any(x => x.Identifier == decl.Key)) continue;
-
-                ctx.Local(new QualIdent(decl.Key), decl.Value.Type);
+            if (proc.Scope.GetSymbols().Count(x => !x.Value.IsParameter) > 0) {
+                ctx = ctx.Enter(0);
+                foreach (var decl in proc.Scope.GetSymbols().Where(x => !x.Value.IsParameter)) {
+                    ctx.Local(new QualIdent(decl.Key), decl.Value.Type);
+                }
+                ctx = ctx.Leave().Ln().Ln();
             }
-            ctx = ctx.Leave().Ln().Ln();
             
             ctx.Statements(proc.Statements);
             ctx.PopScope();
@@ -81,7 +83,7 @@ namespace DUO2C.CodeGen.LLVM
 
             _returnType = null;
 
-            return ctx.Leave().Write("}").Ln();
+            return ctx.Leave().Write("}").Ln().Ln();
         }
 
         static GenerationContext Statements(this GenerationContext ctx, NStatementSeq block)
