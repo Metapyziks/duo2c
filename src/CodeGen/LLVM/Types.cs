@@ -89,8 +89,13 @@ namespace DUO2C.CodeGen.LLVM
         static GenerationContext Structure(this GenerationContext ctx, params OberonType[] types)
         {
             ctx.Write("{");
+            bool first = true;
             foreach (var type in types) {
-                if (type != types.First()) ctx.Write(", ");
+                if (!first) {
+                    ctx.Write(", ");
+                } else {
+                    first = false;
+                }
                 ctx.Type(type);
             }
             return ctx.Write("}");
@@ -109,17 +114,8 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Type(this GenerationContext ctx, RecordType type)
         {
-            IEnumerable<OberonType> types = new OberonType[0];
-
-            while (type != null) {
-                types = type.FieldDecls.Where(x => !(x.Type is ProcedureType)).Select(x => x.Type)
-                    .Concat(types);
-                type = type.SuperRecord;
-            }
-
-            types = new OberonType[] { new PointerType(IntegerType.Byte) }.Concat(types);
-
-            return ctx.Structure(types.ToArray());
+            return ctx.Structure(new OberonType[] { new PointerType(IntegerType.Byte) }
+                .Concat(type.FieldDecls.Select(x => x.Type)).ToArray());
         }
 
         static GenerationContext Type(this GenerationContext ctx, PointerType type)

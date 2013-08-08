@@ -270,28 +270,43 @@ namespace DUO2C.Semantics
 
         public IEnumerable<String> FieldNames
         {
-            get { return _fields.Keys; }
+            get { return Fields.Select(x => x.Key); }
         }
 
         public IEnumerable<Declaration> FieldDecls
         {
-            get { return _fields.Values; }
+            get { return Fields.Select(x => x.Value); }
         }
 
         public IEnumerable<KeyValuePair<String, Declaration>> Fields
         {
-            get { return _fields; }
+            get {
+                if (HasSuperRecord) {
+                    return SuperRecord.Fields.Concat(_fields);
+                } else {
+                    return _fields;
+                }
+            }
+        }
+
+        public IEnumerable<String> ProcedureNames
+        {
+            get { return Procedures.Select(x => x.Key); }
+        }
+
+        public IEnumerable<Declaration> ProcedureDecls
+        {
+            get { return Procedures.Select(x => x.Value); }
         }
 
         public IEnumerable<KeyValuePair<String, Declaration>> Procedures
         {
-            get { 
-                var procs = _fields.Where(x => x.Value.Type.IsProcedure);
-                if (SuperRecord != null) {
-                    var found = procs.ToArray();
-                    procs = SuperRecord.Procedures.Where(x => !found.Any(y => y.Key == x.Key)).Concat(found);
+            get {
+                if (HasSuperRecord) {
+                    return SuperRecord.Procedures.Concat(_procedures);
+                } else {
+                    return _procedures;
                 }
-                return procs;
             }
         }
 
@@ -310,6 +325,7 @@ namespace DUO2C.Semantics
                 new KeyValuePair<String, Declaration>(x.Key.Identifier,
                     new Declaration(x.Value.Type, x.Key.Visibility, DeclarationType.Field))
             ).ToDictionary(x => x.Key, x => x.Value);
+            _procedures = new Dictionary<string, Declaration>();
         }
 
         public void BindProcedure(String ident, AccessModifier visibility, ProcedureType signature)
@@ -364,7 +380,7 @@ namespace DUO2C.Semantics
 
         public int GetFieldCount()
         {
-            int count = Fields.Count();
+            int count = _fields.Count();
             if (HasSuperRecord) return count + SuperRecord.GetFieldCount();
             return count;
         }
