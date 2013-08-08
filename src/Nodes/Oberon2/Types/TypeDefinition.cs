@@ -15,7 +15,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override string String
         {
-            get { return (Type ?? PointerType.NilPointer).ToString(); }
+            get { return (Type ?? PointerType.Null).ToString(); }
         }
 
         public TypeDefinition(ParseNode original, bool leaf, bool hasPayload = true)

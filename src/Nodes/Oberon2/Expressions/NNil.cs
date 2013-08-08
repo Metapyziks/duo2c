@@ -19,7 +19,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override OberonType GetFinalType(Scope scope)
         {
-            return PointerType.NilPointer;
+            return PointerType.Null;
         }
 
         public override bool IsConstant(Scope scope)

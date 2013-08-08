@@ -201,7 +201,8 @@ namespace DUO2C.Semantics
 
     public class PointerType : OberonType
     {
-        public static readonly PointerType NilPointer = new PointerType(null);
+        public static readonly PointerType Null = new PointerType(null);
+        public static readonly PointerType Byte = new PointerType(IntegerType.Byte);
 
         public OberonType ResolvedType { get; private set; }
 
@@ -328,8 +329,10 @@ namespace DUO2C.Semantics
             _procedures = new Dictionary<string, Declaration>();
         }
 
-        public void BindProcedure(String ident, AccessModifier visibility, ProcedureType signature)
+        public void BindProcedure(String ident, AccessModifier visibility,
+            ProcedureType signature, UnresolvedType receiverType, String receiverIdent)
         {
+            signature = new ProcedureType(signature.ReturnType, receiverType, receiverIdent, signature.Params);
             _procedures.Add(ident, new Declaration(signature, visibility, DeclarationType.BoundProcedure));
         }
 
@@ -342,7 +345,7 @@ namespace DUO2C.Semantics
 
         public bool HasField(String ident)
         {
-            return _fields.ContainsKey(ident) || (HasSuperRecord && SuperRecord.HasField(ident));
+            return FieldNames.Contains(ident);
         }
 
         public OberonType GetFieldType(int index)
@@ -359,43 +362,55 @@ namespace DUO2C.Semantics
 
         public Declaration GetFieldDecl(int index)
         {
-            if (index > GetFieldCount()) return null;
-
-            if (HasSuperRecord) {
-                if (index < SuperRecord.GetFieldCount()) {
-                    return SuperRecord.GetFieldDecl(index);
-                } else {
-                    index -= SuperRecord.GetFieldCount();
-                }
-            }
-            
-            return _fields.ElementAt(index).Value;
+            return Fields.ElementAtOrDefault(index).Value;
         }
 
         public Declaration GetFieldDecl(String ident)
         {
-            return _fields.ContainsKey(ident) ? _fields[ident]
-                : HasSuperRecord ? SuperRecord.GetFieldDecl(ident) : null;
-        }
-
-        public int GetFieldCount()
-        {
-            int count = _fields.Count();
-            if (HasSuperRecord) return count + SuperRecord.GetFieldCount();
-            return count;
+            return Fields.FirstOrDefault(x => x.Key == ident).Value;
         }
 
         public int GetFieldIndex(String ident)
         {
-            if (HasSuperRecord) {
-                int index = SuperRecord.GetFieldIndex(ident);
-                if (index > -1) return index;
-            }
-
-            int i = (HasSuperRecord ? SuperRecord.GetFieldCount() : 0);
-            foreach (var field in _fields.Keys) {
+            int i = 0;
+            foreach (var field in FieldNames) {
                 if (field == ident) return i;
-                ++i;
+            }
+            return -1;
+        }
+
+        public bool HasProcedure(String ident)
+        {
+            return ProcedureNames.Contains(ident);
+        }
+
+        public ProcedureType GetProcedureSignature(int index)
+        {
+            var decl = GetProcedureDecl(index);
+            return decl != null ? decl.Type.As<ProcedureType>() : null;
+        }
+
+        public ProcedureType GetProcedureSignature(String ident)
+        {
+            var decl = GetProcedureDecl(ident);
+            return decl != null ? decl.Type.As<ProcedureType>() : null;
+        }
+
+        public Declaration GetProcedureDecl(int index)
+        {
+            return Procedures.ElementAtOrDefault(index).Value;
+        }
+
+        public Declaration GetProcedureDecl(String ident)
+        {
+            return Procedures.First(x => x.Key == ident).Value;
+        }
+
+        public int GetProcedureIndex(String ident)
+        {
+            int i = 0;
+            foreach (var proc in ProcedureNames) {
+                if (proc == ident) return i;
             }
             return -1;
         }
@@ -456,6 +471,10 @@ namespace DUO2C.Semantics
     {
         public OberonType ReturnType { get; private set; }
         public Parameter[] Params { get; private set; }
+        public Parameter[] ParamsWithReceiver { get; private set; }
+
+        public UnresolvedType ReceiverType { get; private set; }
+        public String ReceiverIdent { get; private set; }
 
         public override bool IsProcedure
         {
@@ -472,12 +491,26 @@ namespace DUO2C.Semantics
                 ReturnType = null;
                 Params = new Parameter[0];
             }
+            ParamsWithReceiver = Params;
         }
 
         public ProcedureType(OberonType returnType, params Parameter[] args)
         {
             ReturnType = returnType;
+            ReceiverType = null;
+            ReceiverIdent = null;
             Params = args;
+            ParamsWithReceiver = Params;
+        }
+
+        public ProcedureType(OberonType returnType, UnresolvedType receiverType, String receiverIdent, params Parameter[] args)
+        {
+            ReturnType = returnType;
+            ReceiverType = receiverType;
+            ReceiverIdent = receiverIdent;
+            Params = args;
+            ParamsWithReceiver = new Parameter[] { new Parameter(true, receiverIdent, receiverType) }
+                .Concat(Params).ToArray();
         }
 
         public IEnumerable<CompilerException> MatchParameters(NInvocation invoc, Scope scope)

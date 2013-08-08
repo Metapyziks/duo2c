@@ -10,13 +10,14 @@ MODULE Simple;
         END;
 
     VAR a : TestRec;
-    VAR b : AnotherRec;
+
+    PROCEDURE (this : TestRec) SetX (val : INTEGER);
+    BEGIN
+        this.x := val;
+    END;
 
 BEGIN
-    a.x := 5;
+    a.SetX(13);
 
-    b.x := 12;
-    b.y := a.x + b.x * 2;
-
-    Out.String("b.y: "); Out.Integer(b.y); Out.Ln;
+    Out.String("a.x: "); Out.Integer(a.x); Out.Ln;
 END Simple.

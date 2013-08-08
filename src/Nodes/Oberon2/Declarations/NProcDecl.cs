@@ -193,7 +193,8 @@ namespace DUO2C.Nodes.Oberon2
                 }
 
                 if (type != null && type.IsRecord) {
-                    type.As<RecordType>().BindProcedure(Identifier, Visibility, new ProcedureType(FormalParams));
+                    type.As<RecordType>().BindProcedure(Identifier, Visibility,
+                        new ProcedureType(FormalParams), new UnresolvedType(Receiver.TypeName), Receiver.Identifier);
                 }
             }
         }

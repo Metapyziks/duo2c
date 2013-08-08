@@ -34,7 +34,8 @@ namespace DUO2C.CodeGen
             ctx = ctx.Write("MODULE {0};", module.Identifier).Ln().Enter();
 
             ctx = ctx.Write("TYPE").Ln().Enter();
-            foreach (var kv in module.Scope.GetTypes()) {
+            foreach (var kv in module.Scope.GetTypes().Where(x => x.Value.Visibility != AccessModifier.Private)) {
+                kv.Value.Type.Resolve(module.Scope);
                 ctx.WriteTypeDecl(module, kv.Key, kv.Value.Type, kv.Value.Visibility);
             }
             ctx = ctx.Leave();

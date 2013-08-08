@@ -62,7 +62,8 @@ namespace DUO2C.Nodes.Oberon2
                         return mdl.Scope.GetSymbol(op.Identifier).Resolve(scope);
                     } else if (type.IsRecord) {
                         var rec = type.As<RecordType>();
-                        return rec.GetFieldType(op.Identifier).Resolve(scope);
+                        var decl = rec.GetFieldDecl(op.Identifier) ?? rec.GetProcedureDecl(op.Identifier);
+                        return decl.Type.Resolve(scope);
                     }
                 } else if (Operation is NIndexer) {
                     return type.As<ArrayType>().ElementType.Resolve(scope);
@@ -71,7 +72,7 @@ namespace DUO2C.Nodes.Oberon2
                 } else if (Operation is NInvocation) {
                     var op = (NInvocation) Operation;
                     if (type.IsProcedure) {
-                        return (type.As<ProcedureType>().ReturnType ?? PointerType.NilPointer).Resolve(scope);
+                        return (type.As<ProcedureType>().ReturnType ?? PointerType.Null).Resolve(scope);
                     } else {
                         var arg = op.Args.Expressions.First();
                         var fact = arg.SimpleExpr.Term.Factor.Inner as NDesignator;
@@ -80,7 +81,7 @@ namespace DUO2C.Nodes.Oberon2
                     }
                 }
 
-                return PointerType.NilPointer;
+                return PointerType.Null;
             }
         }
 
@@ -149,7 +150,7 @@ namespace DUO2C.Nodes.Oberon2
                             }
                         } else if (type.IsRecord) {
                             var rec = type.As<RecordType>();
-                            if (!rec.HasField(op.Identifier)) {
+                            if (!rec.HasField(op.Identifier) && !rec.HasProcedure(op.Identifier)) {
                                 yield return new MemberNotFoundException(type, this);
                             }
                         } else {

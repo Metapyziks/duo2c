@@ -137,19 +137,25 @@ namespace DUO2C.CodeGen.LLVM
                 args.Where(x => x is Value).Cast<Value>().ToArray());
         }
 
-        static GenerationContext Call(this GenerationContext ctx, Value dest, ProcedureType procType, Value proc, NExprList args)
+        static GenerationContext Call(this GenerationContext ctx, Value dest, ProcedureType procType, Value proc, Value receiver, NExprList args)
         {
-            var argDefns = procType.Params.ToArray();
+            var argDefns = procType.ParamsWithReceiver.ToArray();
             var argExprs = args != null ? args.Expressions.ToArray() : new NExpr[0];
-            var argTypes = new OberonType[argExprs.Length];
-            var argValus = new Value[argExprs.Length];
+            var argTypes = new OberonType[argDefns.Length];
+            var argValus = new Value[argDefns.Length];
             for (int i = 0; i < argTypes.Length; ++i) {
                 if (argDefns[i].ByReference) {
                     argTypes[i] = new PointerType(argDefns[i].Type);
                 } else {
                     argTypes[i] = argDefns[i].Type;
                 }
-                argValus[i] = ctx.PrepareOperand(argExprs[i], argTypes[i], new TempIdent());
+                if (receiver == null) {
+                    argValus[i] = ctx.PrepareOperand(argExprs[i], argTypes[i], new TempIdent());
+                } else if (i == 0) {
+                    argValus[i] = receiver;
+                } else {
+                    argValus[i] = ctx.PrepareOperand(argExprs[i - 1], argTypes[i], new TempIdent());
+                }
             }
 
             return ctx.Call(dest, procType, proc, argTypes, argValus);
@@ -157,8 +163,19 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Call(this GenerationContext ctx, Value dest, ProcedureType procType, Value proc, OberonType[] argTypes, Value[] args)
         {
+            if (proc is ElementPointer) {
+                var ptr = (ElementPointer) proc;
+                if (ptr.StructureType.IsPointer && ptr.StructureType.As<PointerType>().ResolvedType.IsRecord) {
+                    var temp = new TempIdent();
+                    ctx.Assign(temp).Argument(ptr).EndOperation();
+                    proc = temp;
+                } else {
+                    proc = new ElementPointer(true, ptr);
+                }
+            }
+
             if (procType.ReturnType != null) ctx.Assign(dest);
-            ctx.Keyword("call").Type(new PointerType(procType)).Write(" ").Write(proc).Write("(");
+            ctx.Keyword("call").Type(new PointerType(procType)).Write(" ").Write(proc).Write("(").EndArguments();
             for (int i = 0; i < args.Length; ++i) {
                 ctx.Argument(argTypes[i], args[i], false);
             }

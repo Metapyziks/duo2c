@@ -26,7 +26,7 @@ namespace DUO2C.CodeGen.LLVM
 
             if (proc.Receiver != null) {
                 type = _scope.GetType(proc.Receiver.TypeName).As<RecordType>()
-                    .GetFieldType(proc.Identifier).As<ProcedureType>();
+                    .GetProcedureSignature(proc.Identifier).As<ProcedureType>();
             } else {
                 type = _scope.GetSymbol(proc.Identifier).As<ProcedureType>();
             }
@@ -45,7 +45,7 @@ namespace DUO2C.CodeGen.LLVM
 
             ctx.Write(" \t{0}\t(", ident);
             ctx.PushScope(proc.Scope);
-            foreach (var p in type.Params) {
+            foreach (var p in type.ParamsWithReceiver) {
                 if (p.ByReference) {
                     ctx.Argument(new PointerType(p.Type), new QualIdent(p.Identifier));
                 } else {
@@ -66,7 +66,7 @@ namespace DUO2C.CodeGen.LLVM
 
             ctx = ctx.Enter(0);
             foreach (var decl in proc.Scope.GetSymbols()) {
-                if (type.Params.Any(x => x.Identifier == decl.Key)) continue;
+                if (type.ParamsWithReceiver.Any(x => x.Identifier == decl.Key)) continue;
 
                 ctx.Local(new QualIdent(decl.Key), decl.Value.Type);
             }
@@ -252,7 +252,7 @@ namespace DUO2C.CodeGen.LLVM
                 var invoc = (NInvocation) node.Invocation.Operation;
                 var arg = invoc.Args != null ? invoc.Args.Expressions.FirstOrDefault() : null;
                 Value src = null;
-                var type = arg != null ? _scope.GetSymbol(elem.Identifier, elem.Module).As<ProcedureType>().Params.First().Type : PointerType.NilPointer;
+                var type = arg != null ? _scope.GetSymbol(elem.Identifier, elem.Module).As<ProcedureType>().Params.First().Type : PointerType.Null;
                 switch (elem.Identifier) {
                     case "Boolean":
                         var temp = new TempIdent();

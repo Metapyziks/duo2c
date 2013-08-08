@@ -80,7 +80,7 @@ namespace DUO2C.CodeGen.LLVM
             }
 
             if (_typeMethods.ContainsKey(type.GetType())) {
-                return (GenerationContext) _typeMethods[type.GetType()].Invoke(null, new Object[] { ctx, type });
+                return (GenerationContext) _typeMethods[type.GetType()].Invoke(null, new Object[] { ctx, type.Resolve(_scope) });
             } else {
                 throw new NotImplementedException(String.Format("No rule to generate IR for type '{0}' found", type));
             }
@@ -105,8 +105,8 @@ namespace DUO2C.CodeGen.LLVM
         {
             var returnType = type.ReturnType ?? VoidType.Default;
 
-            ctx.Type(returnType).Write(" (");
-            foreach (var p in type.Params) {
+            ctx.Type(returnType).Write(" (").EndArguments();
+            foreach (var p in type.ParamsWithReceiver) {
                 ctx.Argument(p.ByReference ? new PointerType(p.Type) : p.Type, false);
             }
             return ctx.EndArguments().Write(")");

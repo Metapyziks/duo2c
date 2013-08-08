@@ -1,6 +1,6 @@
 (**
- *  Generated 08/08/2013 21:24:03
- *  GlobalUID 761fc0eb-cab4-44f1-b7ac-b5994c64e0b5
+ *  Generated 08/08/2013 23:22:51
+ *  GlobalUID 102e3379-7464-4827-b9b8-1bef55733065
  *
  *  Exported symbol file for module "Simple"
  *
@@ -10,10 +10,6 @@
 
 MODULE Simple;
     TYPE
-        TestRec  = RECORD
-        END;
-        AnotherRec  = RECORD (TestRec)
-        END;
     VAR
 END Simple.
 

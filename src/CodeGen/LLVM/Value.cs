@@ -123,10 +123,11 @@ namespace DUO2C.CodeGen.LLVM
             public GenerationContext Write(GenerationContext ctx)
             {
                 ctx.Write("{").Argument(new PointerType(IntegerType.Byte),
-                    new BitCast(new PointerType(GetRecordTableType(Type)), GetRecordTableIdent(Type),
+                    new BitCast(true, new PointerType(GetRecordTableType(Type)), GetRecordTableIdent(Type),
                         new PointerType(IntegerType.Byte)));
 
-                for (int i = 0; i < Type.GetFieldCount(); ++i) {
+                int count = Type.Fields.Count();
+                for (int i = 0; i < count; ++i) {
                     var type = Type.GetFieldType(i);
                     ctx.Argument(type, GetDefault(type));
                 }
@@ -254,25 +255,6 @@ namespace DUO2C.CodeGen.LLVM
             }
         }
 
-        public class BitCast : Value, IComplexWrite
-        {
-            OberonType _from;
-            Value _val;
-            OberonType _to;
-
-            public BitCast(OberonType from, Value val, OberonType to)
-            {
-                _from = from;
-                _val = val;
-                _to = to;
-            }
-
-            public GenerationContext Write(GenerationContext ctx)
-            {
-                return ctx.Keyword("bitcast").Write("(").Argument(_from, _val).Keyword(" to").Argument(_to).Write(")");
-            }
-        }
-
         public class RecordTableConst : Value, IComplexWrite
         {
             String _ident;
@@ -295,7 +277,7 @@ namespace DUO2C.CodeGen.LLVM
                 if (_type.SuperRecordName == null) {
                     ctx.Argument(new PointerType(IntegerType.Byte), new Literal("null"));
                 } else {
-                    ctx.Argument(new PointerType(IntegerType.Byte), new BitCast(
+                    ctx.Argument(new PointerType(IntegerType.Byte), new BitCast(true,
                         new PointerType(GetRecordTableType(_type.SuperRecord)),
                         GetRecordTableIdent(_type.SuperRecord), new PointerType(IntegerType.Byte)));
                 }
@@ -306,7 +288,7 @@ namespace DUO2C.CodeGen.LLVM
                 ctx.EndOperation();
                 foreach (var proc in procs) {
                     ctx.Argument(new PointerType(IntegerType.Byte),
-                        new BitCast(new PointerType(proc.Value.Type),
+                        new BitCast(true, new PointerType(proc.Value.Type),
                         new BoundProcedureIdent(_type.GetProcedureDefiner(proc.Key), proc.Key),
                         new PointerType(IntegerType.Byte)));
                     if (proc.Key != procs.Last().Key) ctx.Write(",");
@@ -472,6 +454,33 @@ namespace DUO2C.CodeGen.LLVM
                     ctx.Argument(IntegerType.Integer, new Literal(ind.ToString()));
                 }
                 if (InBraces) ctx.Write("\t)");
+                return ctx;
+            }
+        }
+
+        public class BitCast : Value, IComplexWrite
+        {
+            public bool InBraces { get; private set; }
+
+            OberonType _from;
+            Value _val;
+            OberonType _to;
+
+            public BitCast(bool inBraces, OberonType from, Value val, OberonType to)
+            {
+                InBraces = inBraces;
+
+                _from = from;
+                _val = val;
+                _to = to;
+            }
+
+            public GenerationContext Write(GenerationContext ctx)
+            {
+                ctx.Keyword("bitcast");
+                if (InBraces) ctx.Write("(");
+                ctx.Argument(_from, _val).Keyword(" to").Argument(_to);
+                if (InBraces) ctx.Write(")");
                 return ctx;
             }
         }
