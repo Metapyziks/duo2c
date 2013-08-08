@@ -249,6 +249,12 @@ namespace DUO2C.Semantics
 
         private NQualIdent _superRecordIdent;
         private Dictionary<String, Declaration> _fields;
+        private Dictionary<String, Declaration> _procedures;
+
+        public bool HasSuperRecord
+        {
+            get { return _superRecordIdent != null; }
+        }
 
         public String SuperRecordName
         {
@@ -293,6 +299,7 @@ namespace DUO2C.Semantics
         {
             _superRecordIdent = null;
             _fields = new Dictionary<string, Declaration>();
+            _procedures = new Dictionary<string,Declaration>();
         }
 
         public RecordType(NRecordType node)
@@ -307,19 +314,19 @@ namespace DUO2C.Semantics
 
         public void BindProcedure(String ident, AccessModifier visibility, ProcedureType signature)
         {
-            _fields.Add(ident, new Declaration(signature, visibility, DeclarationType.BoundProcedure));
+            _procedures.Add(ident, new Declaration(signature, visibility, DeclarationType.BoundProcedure));
         }
 
         public RecordType GetProcedureDefiner(String ident)
         {
-            if (_fields.Any(x => x.Value.Type.IsProcedure && x.Key == ident)) return this;
-            if (SuperRecord != null) return SuperRecord.GetProcedureDefiner(ident);
+            if (_procedures.Any(x => x.Key == ident)) return this;
+            if (HasSuperRecord) return SuperRecord.GetProcedureDefiner(ident);
             return null;
         }
 
         public bool HasField(String ident)
         {
-            return _fields.ContainsKey(ident) || (SuperRecord != null && SuperRecord.HasField(ident));
+            return _fields.ContainsKey(ident) || (HasSuperRecord && SuperRecord.HasField(ident));
         }
 
         public OberonType GetFieldType(int index)
@@ -338,7 +345,7 @@ namespace DUO2C.Semantics
         {
             if (index > GetFieldCount()) return null;
 
-            if (SuperRecordName != null) {
+            if (HasSuperRecord) {
                 if (index < SuperRecord.GetFieldCount()) {
                     return SuperRecord.GetFieldDecl(index);
                 } else {
@@ -346,32 +353,32 @@ namespace DUO2C.Semantics
                 }
             }
             
-            return _fields.Where(x => !x.Value.Type.IsProcedure).ElementAt(index).Value;
+            return _fields.ElementAt(index).Value;
         }
 
         public Declaration GetFieldDecl(String ident)
         {
             return _fields.ContainsKey(ident) ? _fields[ident]
-                : SuperRecord != null ? SuperRecord.GetFieldDecl(ident) : null;
+                : HasSuperRecord ? SuperRecord.GetFieldDecl(ident) : null;
         }
 
         public int GetFieldCount()
         {
-            int count = Fields.Count(x => !x.Value.Type.IsProcedure);
-            if (SuperRecordName != null) return count + SuperRecord.GetFieldCount();
+            int count = Fields.Count();
+            if (HasSuperRecord) return count + SuperRecord.GetFieldCount();
             return count;
         }
 
         public int GetFieldIndex(String ident)
         {
-            if (SuperRecordName != null) {
+            if (HasSuperRecord) {
                 int index = SuperRecord.GetFieldIndex(ident);
                 if (index > -1) return index;
             }
 
-            int i = (SuperRecordName != null ? SuperRecord.GetFieldCount() : 0);
-            foreach (var field in _fields.Where(x => !x.Value.Type.IsProcedure)) {
-                if (field.Key == ident) return i;
+            int i = (HasSuperRecord ? SuperRecord.GetFieldCount() : 0);
+            foreach (var field in _fields.Keys) {
+                if (field == ident) return i;
                 ++i;
             }
             return -1;
@@ -379,7 +386,7 @@ namespace DUO2C.Semantics
 
         protected override void OnResolve(Scope scope)
         {
-            if (_superRecordIdent != null) {
+            if (HasSuperRecord) {
                 SuperRecord = scope.GetType(_superRecordIdent.Identifier, _superRecordIdent.Module).As<RecordType>();
             } else if (this != Base) {
                 SuperRecord = Base;
@@ -406,7 +413,7 @@ namespace DUO2C.Semantics
 
             var sb = new StringBuilder();
             sb.Append("RECORD ");
-            if (_superRecordIdent != null) sb.AppendFormat("({0}) ", _superRecordIdent.Identifier);
+            if (HasSuperRecord) sb.AppendFormat("({0}) ", _superRecordIdent.Identifier);
             foreach (var field in _fields) {
                 sb.AppendFormat("{0}; ", field.Value);
             }

@@ -79,6 +79,8 @@ namespace DUO2C.CodeGen.LLVM
             {
                 if (type.IsRecord) {
                     return new RecordLiteral(type.As<RecordType>());
+                } else if (type.IsPointer) {
+                    return new Literal("null");
                 } else {
                     return new Literal("zeroinitializer");
                 }
