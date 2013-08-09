@@ -77,7 +77,11 @@ namespace DUO2C.CodeGen
                 var sb = new StringBuilder();
                 for (int i = 0, c = 0, n = 0; i < _str.Length; ++i) {
                     if (_str[i] == '\t') {
-                        int width = widths.ElementAtOrDefault(n++);
+                        int width;
+                        do {
+                            width = widths.ElementAtOrDefault(n++);
+                        } while (width - c > 8 && n < widths.Count());
+
                         while (c++ < width) sb.Append(" ");
                         c = 0;
                     } else {
@@ -94,7 +98,7 @@ namespace DUO2C.CodeGen
 
                 for (int i = 0, c = 0; i < _str.Length; ++i) {
                     if (_str[i] == '\t') {
-                        if (c > 10) yield break;
+                        if (c > 8) yield break;
                         yield return c;
                         c = 0;
                     } else {

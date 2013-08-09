@@ -110,21 +110,26 @@ namespace DUO2C.CodeGen.LLVM
                     x.StringConstant(kv.Value, kv.Key);
                 }
             });
-
-
+            
             ctx.Global(_printfProc, _printfProcType);
             
-            ctx = ctx.Enter(0);
-            foreach (var v in _scope.GetSymbols().Where(y => !y.Value.Type.IsProcedure)) {
-                ctx.Global(new QualIdent(v.Key), v.Value.Type);
+            var globals = _scope.GetSymbols().Where(y => !y.Value.Type.IsProcedure);
+            if (globals.Count() > 0) {
+                ctx = ctx.Enter(0);
+                foreach (var v in globals) {
+                    ctx.Global(new QualIdent(v.Key), v.Value.Type);
+                }
+                ctx = ctx.Leave().Ln().Ln();
             }
-            ctx = ctx.Leave().Ln().Ln();
 
-            ctx = ctx.Enter(0);
-            foreach (var proc in _module.Declarations.Procedures.Where(y => y is NProcDecl).Cast<NProcDecl>()) {
-                ctx.Procedure(proc);
+            var procs = _module.Declarations.Procedures.Where(y => y is NProcDecl).Cast<NProcDecl>();
+            if (procs.Count() > 0) {
+                ctx = ctx.Enter(0);
+                foreach (var proc in procs) {
+                    ctx.Procedure(proc);
+                }
+                ctx = ctx.Leave().Ln();
             }
-            ctx = ctx.Leave().Ln().Ln();
 
             TempIdent.Reset();
 
