@@ -781,4 +781,34 @@ namespace DUO2C.Semantics
             return Range.ToString().ToUpper();
         }
     }
+
+    class VoidType : OberonType
+    {
+        public static readonly VoidType Default = new VoidType();
+
+        public override bool CanCompare(OberonType other)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool CanTestEquality(OberonType other)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    class VarArgsType : OberonType
+    {
+        public static readonly VarArgsType Default = new VarArgsType();
+
+        public override bool CanCompare(OberonType other)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool CanTestEquality(OberonType other)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

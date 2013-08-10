@@ -42,7 +42,18 @@ namespace DUO2C.Nodes.Oberon2
 
         public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
-            return base.FindTypeErrors(scope);
+            bool found = false;
+            foreach (var e in base.FindTypeErrors(scope)) {
+                yield return e;
+                found = true;
+            }
+
+            if (!found && Visibility != AccessModifier.Private) {
+                var type = Type.Type as UnresolvedType; // type Type type type
+                if (type != null && scope.GetTypeVisibility(type.Identifier) == AccessModifier.Private) {
+                    yield return new AccessibilityException((NQualIdent) Type.Inner.Children.First());
+                }
+            }
         }
 
         public override void FindDeclarations(Scope scope)

@@ -12,9 +12,10 @@ MODULE Simple;
             z : INTEGER;
         END;
 
-    VAR a : Vector1;
-    VAR b : Vector2;
-    VAR C* : Vector3;
+    VAR
+        a : Vector1;
+        b : Vector2;
+        C* : Vector3;
 
     PROCEDURE (this : Vector1) SetX (val : INTEGER);
     BEGIN

@@ -93,7 +93,11 @@ namespace DUO2C
                     Console.WriteLine("File parsed in {0}ms", timer.ElapsedMilliseconds);
 #endif
                     var root = new RootScope();
-                    // Includes would be here
+
+                    root.DeclareSymbol("NEW", new ProcedureType(null,
+                        new Parameter(true, "ptr", PointerType.Byte),
+                        new Parameter(false, "sizes", new VarArgsType())
+                    ), AccessModifier.Private, DeclarationType.Global);
 
                     foreach (var import in module.Imports) {
                         String path = Path.GetDirectoryName(args[0]) + Path.DirectorySeparatorChar
