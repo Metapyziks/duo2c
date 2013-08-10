@@ -26,6 +26,10 @@ namespace DUO2C.CodeGen.LLVM
                 
                 ctx.Keyword("declare");
 
+                if (dest is GlobalIdent && ((GlobalIdent) dest).OptionTags.HasFlag(GlobalIdent.Options.NoAlias)) {
+                    ctx.Keyword("noalias");
+                }
+
                 if (proc.ReturnType != null) {
                     ctx.Type(proc.ReturnType);
                 } else {
@@ -36,7 +40,13 @@ namespace DUO2C.CodeGen.LLVM
                 foreach (var t in proc.Params.Select(x => x.Type)) {
                     ctx.Argument(t);
                 }
-                return ctx.Write(") \t").Keyword("nounwind").EndOperation();
+                ctx.Write(") \t");
+                
+                if (!(dest is GlobalIdent) || ((GlobalIdent) dest).OptionTags.HasFlag(GlobalIdent.Options.NoUnwind)) {
+                    ctx.Keyword("nounwind");
+                }
+                
+                return ctx.EndOperation();
             } else {
                 ctx.Assign(dest);
                 if (!isPublic) ctx.Keyword("private"); else ctx.Write("\t");

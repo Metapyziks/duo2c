@@ -20,6 +20,9 @@ namespace DUO2C.CodeGen.LLVM
         static GlobalIdent _printfProc;
         static ProcedureType _printfProcType;
 
+        static GlobalIdent _gcMallocProc;
+        static ProcedureType _gcMallocProcType;
+
         public static String Generate(NModule module, Guid uniqueID)
         {
             var ctx = new GenerationContext();
@@ -66,10 +69,14 @@ namespace DUO2C.CodeGen.LLVM
             _scope = module.Type.Scope;
             _stringConsts = new Dictionary<string, GlobalStringIdent>();
 
-            _printfProc = new GlobalIdent("printf", false);
+            _printfProc = new GlobalIdent("printf", false, GlobalIdent.Options.NoUnwind);
             _printfProcType = new ProcedureType(IntegerType.Integer,
                 new Parameter(false, "format", new PointerType(CharType.Default)),
                 new Parameter(false, "args", VarArgsType.Default));
+
+            _gcMallocProc = new GlobalIdent("GC_malloc", false, GlobalIdent.Options.NoAlias);
+            _gcMallocProcType = new ProcedureType(PointerType.Byte,
+                new Parameter(false, "bytes", IntegerType.Integer));
 
             GlobalStringIdent.Reset();
             TempIdent.Reset();
@@ -112,10 +119,11 @@ namespace DUO2C.CodeGen.LLVM
             });
             
             ctx.Global(_printfProc, _printfProcType);
+            ctx.Global(_gcMallocProc, _gcMallocProcType);
             
             var globals = _scope.GetSymbols().Where(y => !y.Value.Type.IsProcedure);
             if (globals.Count() > 0) {
-                ctx = ctx.Enter(0);
+                ctx = ctx.Ln().Enter(0);
                 foreach (var v in globals) {
                     ctx.Global(new QualIdent(v.Key), v.Value.Type);
                 }

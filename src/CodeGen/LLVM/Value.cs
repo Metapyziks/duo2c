@@ -57,14 +57,23 @@ namespace DUO2C.CodeGen.LLVM
 
         public class GlobalIdent : Value
         {
+            public enum Options
+            {
+                Default = 1,
+                NoUnwind = 2,
+                NoAlias = 4
+            }
+
             private String _ident;
 
             public bool IsPublic { get; private set; }
+            public Options OptionTags { get; private set; }
 
-            public GlobalIdent(String ident, bool isPublic)
+            public GlobalIdent(String ident, bool isPublic, Options options = Options.Default)
             {
                 _ident = ident;
                 IsPublic = isPublic;
+                OptionTags = options;
             }
 
             public override string ToString()
