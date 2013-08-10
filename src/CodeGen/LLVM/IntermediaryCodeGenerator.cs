@@ -108,9 +108,9 @@ namespace DUO2C.CodeGen.LLVM
 
             ctx = ctx.Enter(0);
             foreach (var kv in _scope.GetTypes().Where(x => x.Value.Type is RecordType)) {
-                ctx.RecordTable(kv.Key, (RecordType) kv.Value.Type);
+                ctx.RecordTable(kv.Key, (RecordType) kv.Value.Type).Ln();
             }
-            ctx = ctx.Leave().Ln().Ln();
+            ctx = ctx.Leave().Ln();
 
             ctx.Lazy(x => {
                 foreach (var kv in _stringConsts.OrderBy(y => y.Value.ID)) {
@@ -124,8 +124,11 @@ namespace DUO2C.CodeGen.LLVM
             var globals = _scope.GetSymbols().Where(y => !y.Value.Type.IsProcedure);
             if (globals.Count() > 0) {
                 ctx = ctx.Ln().Enter(0);
+                bool pad = false;
                 foreach (var v in globals) {
+                    if (pad) ctx.Ln();
                     ctx.Global(new QualIdent(v.Key), v.Value.Type);
+                    pad = v.Value.Type.IsRecord;
                 }
                 ctx = ctx.Leave().Ln().Ln();
             }

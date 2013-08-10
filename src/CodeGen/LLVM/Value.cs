@@ -131,17 +131,19 @@ namespace DUO2C.CodeGen.LLVM
 
             public GenerationContext Write(GenerationContext ctx)
             {
-                ctx.Write("{").Argument(new PointerType(IntegerType.Byte),
+                ctx = ctx.Write("{").Ln().Enter();
+                ctx.Argument(new PointerType(IntegerType.Byte),
                     new BitCast(true, new PointerType(GetRecordTableType(Type)), GetRecordTableIdent(Type),
                         new PointerType(IntegerType.Byte)));
 
                 int count = Type.Fields.Count();
                 for (int i = 0; i < count; ++i) {
+                    ctx.Write(",").Ln().EndArguments();
                     var type = Type.GetFieldType(i);
                     ctx.Argument(type, GetDefault(type));
                 }
 
-                return ctx.Write("}");
+                return ctx.Leave().Write("}");
             }
         }
 

@@ -1,5 +1,5 @@
-; Generated 10/08/2013 18:14:35
-; GlobalUID beeb350c-6a0d-4afe-80c6-1e06e6457c44
+; Generated 10/08/2013 18:21:16
+; GlobalUID 92fe1046-d9cd-4ccf-a887-447750376b00
 ; 
 ; LLVM IR file for module "Simple"
 ; 
@@ -21,6 +21,7 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
     i8* bitcast (i32 (%Simple.Vector1*)* @Simple.Vector1.GetX to i8*),
     i8* bitcast (void (%Simple.Vector1*)* @Simple.Vector1.Print to i8*)
 ]
+
 @.rec1 = global [7 x i8*] [
     i8* getelementptr inbounds ([8 x  %CHAR]* @.str1, i32 0, i32 0),
     i8* bitcast ([5 x i8*]* @.rec0 to i8*),
@@ -30,6 +31,7 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
     i8* bitcast (void (%Simple.Vector2*, i32)* @Simple.Vector2.SetY to i8*),
     i8* bitcast (i32 (%Simple.Vector2*)* @Simple.Vector2.GetY to i8*)
 ]
+
 @.rec2 = global [9 x i8*] [
     i8* getelementptr inbounds ([8 x  %CHAR]* @.str2, i32 0, i32 0),
     i8* bitcast ([7 x i8*]* @.rec1 to i8*),
@@ -55,9 +57,23 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
 declare i32     @printf(%CHAR*, ...) nounwind 
 declare noalias i8*    @GC_malloc(i32) 
 
-@a = private global %Simple.Vector1 {i8* bitcast ([5 x i8*]* @.rec0 to i8*), i32 zeroinitializer}
-@b = private global %Simple.Vector2 {i8* bitcast ([7 x i8*]* @.rec1 to i8*), i32 zeroinitializer, i32 zeroinitializer}
-@c = private global %Simple.Vector3 {i8* bitcast ([9 x i8*]* @.rec2 to i8*), i32 zeroinitializer, i32 zeroinitializer, i32 zeroinitializer}
+@a = private global %Simple.Vector1 {
+    i8* bitcast ([5 x i8*]* @.rec0 to i8*),
+    i32 zeroinitializer
+}
+
+@b = private global %Simple.Vector2 {
+    i8* bitcast ([7 x i8*]* @.rec1 to i8*),
+    i32 zeroinitializer,
+    i32 zeroinitializer
+}
+
+@c = private global %Simple.Vector3 {
+    i8* bitcast ([9 x i8*]* @.rec2 to i8*),
+    i32 zeroinitializer,
+    i32 zeroinitializer,
+    i32 zeroinitializer
+}
 
 define void @Simple.Vector1.SetX(%Simple.Vector1* %this, i32 %$val) nounwind {
     
