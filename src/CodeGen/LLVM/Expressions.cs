@@ -31,6 +31,14 @@ namespace DUO2C.CodeGen.LLVM
             containerValue = null;
             if (node.IsRoot) {
                 return new QualIdent((NQualIdent) node.Element);
+            } else if (node.Operation is NPtrResolve) {
+                var temp = new TempIdent();
+                var desig = (NDesignator) node.Element;
+                var ptr = ctx.GetDesignation(desig);
+                var type = desig.GetFinalType(_scope);
+                var tenp = new TempIdent();
+                ctx.Load(temp, type, ptr);
+                return temp;
             } else if (node.Operation is NInvocation) {
                 var args = ((NInvocation) node.Operation).Args;
                 var proc = (NDesignator) node.Element;
@@ -92,7 +100,7 @@ namespace DUO2C.CodeGen.LLVM
                     src = new Literal(int.Parse(src.ToString()).ToString("e"));
                 }
                 return ctx;
-            } else if (from is PointerType && to is PointerType) {
+            } else if (from.IsPointer && to.IsPointer) {
                 var temp = new TempIdent();
                 ctx.Assign(temp).Argument(new BitCast(false, from, src, to));
                 ctx.EndOperation();
@@ -118,7 +126,7 @@ namespace DUO2C.CodeGen.LLVM
                 }
             }
 
-            throw new InvalidOperationException("No conversion between " + from.ToString() + " to " + to.ToString() + "defined");
+            throw new InvalidOperationException(String.Format("No conversion between {0} to {1} defined", from.ToString(), to.ToString()));
         }
 
         static GenerationContext ResolveValue(this GenerationContext ctx, Value val, ref Value dest, OberonType type, bool isConstant)

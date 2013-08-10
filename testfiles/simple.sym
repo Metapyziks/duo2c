@@ -1,6 +1,6 @@
 (**
- *  Generated 10/08/2013 18:42:57
- *  GlobalUID d04cc496-844e-4220-a1ab-6139c58b8d3c
+ *  Generated 10/08/2013 22:22:49
+ *  GlobalUID ffee6dd6-551d-42db-af0c-ad7dfe7f2693
  *
  *  Exported symbol file for module "Simple"
  *
@@ -10,7 +10,18 @@
 
 MODULE Simple;
     TYPE
+        Vector1Rec * = RECORD
+        END;
+        Vector1 * = POINTER TO Vector1Rec;
+        Vector2Rec * = RECORD (Vector1Rec)
+        END;
+        Vector2 * = POINTER TO Vector2Rec;
+        Vector3Rec * = RECORD (Vector2Rec)
+        END;
+        Vector3 * = POINTER TO Vector3Rec;
     VAR
-        C * : Simple.Vector3;
+        A * : Simple.Vector1Rec;
+        B * : Simple.Vector2Rec;
+        C * : Simple.Vector3Rec;
 END Simple.
 

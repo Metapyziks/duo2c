@@ -9,7 +9,7 @@ using DUO2C.Semantics;
 namespace DUO2C.Nodes.Oberon2
 {
     [SubstituteToken("Receiver")]
-    public class NReceiver : SubstituteNode, IDeclarationSource
+    public class NReceiver : SubstituteNode, IDeclarationSource, ITypeErrorSource, IAccessibilityErrorSource
     {
         public bool ByReference { get; private set; }
 
@@ -33,6 +33,26 @@ namespace DUO2C.Nodes.Oberon2
         public void FindDeclarations(Scope scope)
         {
             scope.DeclareSymbol(Identifier, new UnresolvedType(TypeName), AccessModifier.Private, DeclarationType.Parameter);
+        }
+
+        public IEnumerable<CompilerException> FindTypeErrors(Scope scope)
+        {
+            if (!scope.IsTypeDeclared(TypeName)) {
+                yield return new UndeclaredIdentifierException(Children.Last());
+                yield break;
+            }
+
+            var decl = scope.GetTypeDecl(TypeName);
+            if (!decl.Type.IsPointer || !decl.Type.As<PointerType>().ResolvedType.IsRecord) {
+                yield return new TypeMismatchException(new PointerType(RecordType.Base), decl.Type, this);
+            }
+        }
+
+        public IEnumerable<CompilerException> FindAccessibilityErrors(Scope scope)
+        {
+            if (scope.GetTypeVisibility(TypeName) == AccessModifier.Private) {
+                yield return new AccessibilityException(Children.Last());
+            }
         }
     }
 
@@ -203,19 +223,18 @@ namespace DUO2C.Nodes.Oberon2
         {
             bool exported = Visibility != AccessModifier.Private;
             if (Receiver != null) {
-                var type = scope.GetType(Receiver.TypeName);
-
-                while (type != null && type.IsPointer) {
-                    type = type.As<PointerType>().ResolvedType;
-                    if (type != null) type.Resolve(scope);
+                bool found = false;
+                foreach (var e in Receiver.FindTypeErrors(scope)) {
+                    yield return e;
+                    found = true;
                 }
 
-                if (type == null) {
-                    yield return new UndeclaredIdentifierException(Receiver.Children.Last());
-                } else if (!type.IsRecord) {
-                    yield return new TypeMismatchException(RecordType.Base, type, Receiver);
-                } else {
-                    exported &= scope.GetTypeDecl(Receiver.TypeName, null).Visibility != AccessModifier.Private;
+                if (!found && exported) {
+                    foreach (var e in Receiver.FindAccessibilityErrors(scope)) {
+                        yield return e;
+                        found = true;
+                    }
+                    exported = scope.GetTypeDecl(Receiver.TypeName, null).Visibility != AccessModifier.Private;
                 }
             }
 

@@ -19,6 +19,8 @@ namespace DUO2C.Nodes.Oberon2
             get {
                 if (Inner is NExpr) {
                     return String.Format("({0})", Inner.String);
+                } else if (Inner is NString) {
+                    return String.Format("\"{0}\"", Inner.String);
                 } else {
                     return Inner.String;
                 }

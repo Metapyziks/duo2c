@@ -42,10 +42,14 @@ namespace DUO2C.Semantics
         public TDst As<TDst>()
             where TDst : OberonType
         {
-            if (this is UnresolvedType) {
-                return (TDst) ((UnresolvedType) this).ReferencedType;
+            if (this is TDst) {
+                return (TDst) this;
+            } else if (this is UnresolvedType) {
+                return ((UnresolvedType) this).ReferencedType.As<TDst>();
             } else {
-                return (TDst) (Object) this;
+                throw new InvalidOperationException(
+                    String.Format("Cannot cast type '{0}' to '{1}'",
+                        GetType().Name, typeof(TDst).Name));
             }
         }
 
@@ -511,7 +515,7 @@ namespace DUO2C.Semantics
             ReceiverType = receiverType;
             ReceiverIdent = receiverIdent;
             Params = args;
-            ParamsWithReceiver = new Parameter[] { new Parameter(true, receiverIdent, receiverType) }
+            ParamsWithReceiver = new Parameter[] { new Parameter(false, receiverIdent, receiverType) }
                 .Concat(Params).ToArray();
         }
 

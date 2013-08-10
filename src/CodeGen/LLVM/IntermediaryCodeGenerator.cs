@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-
 using DUO2C.Nodes;
 using DUO2C.Nodes.Oberon2;
 using DUO2C.Semantics;
@@ -169,7 +170,12 @@ namespace DUO2C.CodeGen.LLVM
             }
 
             if (_nodeMethods.ContainsKey(node.GetType())) {
-                return (GenerationContext) _nodeMethods[node.GetType()].Invoke(null, new object[] { ctx, node });
+                try {
+                    return (GenerationContext) _nodeMethods[node.GetType()].Invoke(null, new object[] { ctx, node });
+                } catch (TargetInvocationException e) {
+                    ExceptionDispatchInfo.Capture(e.InnerException).Throw();
+                    return null;
+                }
             } else {
                 throw new NotImplementedException(String.Format("No method of generating IR for nodes of type '{0}' found", node.GetType().Name));
             }

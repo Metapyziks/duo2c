@@ -24,9 +24,11 @@ namespace DUO2C.CodeGen.LLVM
 
             ProcedureType type;
 
+            RecordType receiverType = null;
+
             if (proc.Receiver != null) {
-                type = _scope.GetType(proc.Receiver.TypeName).As<RecordType>()
-                    .GetProcedureSignature(proc.Identifier).As<ProcedureType>();
+                receiverType = _scope.GetType(proc.Receiver.TypeName).As<PointerType>().ResolvedType.As<RecordType>();
+                type = receiverType.GetProcedureSignature(proc.Identifier).As<ProcedureType>();
             } else {
                 type = _scope.GetSymbol(proc.Identifier).As<ProcedureType>();
             }
@@ -40,7 +42,7 @@ namespace DUO2C.CodeGen.LLVM
             }
 
             var ident = proc.Receiver != null
-                ? new BoundProcedureIdent(_scope.GetType(proc.Receiver.TypeName).As<RecordType>(), proc.Identifier)
+                ? new BoundProcedureIdent(receiverType, proc.Identifier)
                 : (Value) new QualIdent(proc.Identifier);
 
             ctx.Write(" \t{0}\t(", ident);
@@ -57,13 +59,14 @@ namespace DUO2C.CodeGen.LLVM
             
             TempIdent.Reset();
 
-            if (type.Params.Count(x => !x.ByReference) > 0) {
+            if (type.ParamsWithReceiver.Count(x => !x.ByReference) > 0) {
                 ctx = ctx.Enter(0);
-                foreach (var p in type.Params.Where(x => !x.ByReference)) {
+                foreach (var p in type.ParamsWithReceiver.Where(x => !x.ByReference)) {
                     ctx.Local(new QualIdent(p.Identifier), p.Type);
                     ctx.Assign(new QualIdent(p.Identifier), p.Type, new QualIdent("$" + p.Identifier));
+                    ctx.Ln();
                 }
-                ctx = ctx.Leave().Ln().Ln();
+                ctx = ctx.Leave().Ln();
             }
 
             if (proc.Scope.GetSymbols().Count(x => !x.Value.IsParameter) > 0) {
