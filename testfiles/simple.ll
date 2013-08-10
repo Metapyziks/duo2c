@@ -1,5 +1,5 @@
-; Generated 10/08/2013 22:22:49
-; GlobalUID ffee6dd6-551d-42db-af0c-ad7dfe7f2693
+; Generated 10/08/2013 23:33:33
+; GlobalUID 5b0ef5e9-03d1-420b-9263-7311053aacf4
 ; 
 ; LLVM IR file for module "Simple"
 ; 
@@ -55,21 +55,13 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
 @.str5 = private constant [3 x i8] c"%i\00"
 @.str6 = private constant [2 x i8] c")\00"
 @.str7 = private constant [2 x i8] c"\0A\00"
-@.str8 = private constant [2 x i8] c",\00"
+@.str8 = private constant [2 x i8] c" \00"
 
 declare i32     @printf(%CHAR*, ...) nounwind 
 declare noalias i8*    @GC_malloc(i32) 
 
-@Simple.A = global %Simple.Vector1Rec zeroinitializer
-
-@Simple.B = global %Simple.Vector2Rec zeroinitializer
-
-@Simple.C = global %Simple.Vector3Rec {
-    i8* bitcast ([9 x i8*]* @.rec2 to i8*),
-    i32 zeroinitializer,
-    i32 zeroinitializer,
-    i32 zeroinitializer
-}
+@testRec = private global %Simple.Vector1Rec {i8* bitcast ([5 x i8*]* @.rec0 to i8*), i32 zeroinitializer}
+@testPtr = private global %Simple.Vector1 null
 
 define void @Simple.Vector1Rec.SetX(%Simple.Vector1 %$this, i32 %$val) nounwind {
     
@@ -171,7 +163,7 @@ define void @Simple.Vector2Rec.Print(%Simple.Vector2 %$this) nounwind {
     %6 = sext i32  %5 to i64
     %7 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str5, i32 0, i32 0), i64 %6) nounwind
     
-    ; Out.String(",")
+    ; Out.String(" ")
     %8 = getelementptr inbounds [2 x %CHAR]* @.str8, i32 0, i32 0
     %9 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str4, i32 0, i32 0), %CHAR* %8) nounwind
     
@@ -237,7 +229,7 @@ define void @Simple.Vector3Rec.Print(%Simple.Vector3 %$this) nounwind {
     %6 = sext i32  %5 to i64
     %7 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str5, i32 0, i32 0), i64 %6) nounwind
     
-    ; Out.String(",")
+    ; Out.String(" ")
     %8 = getelementptr inbounds [2 x %CHAR]* @.str8, i32 0, i32 0
     %9 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str4, i32 0, i32 0), %CHAR* %8) nounwind
     
@@ -248,7 +240,7 @@ define void @Simple.Vector3Rec.Print(%Simple.Vector3 %$this) nounwind {
     %13 = sext i32  %12 to i64
     %14 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str5, i32 0, i32 0), i64 %13) nounwind
     
-    ; Out.String(",")
+    ; Out.String(" ")
     %15 = getelementptr inbounds [2 x %CHAR]* @.str8, i32 0, i32 0
     %16 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str4, i32 0, i32 0), %CHAR* %15) nounwind
     
@@ -271,43 +263,51 @@ define void @Simple.Vector3Rec.Print(%Simple.Vector3 %$this) nounwind {
 
 define i32 @main() {
     
-    ; C.SetX(1)
-    %1   = getelementptr inbounds %Simple.Vector3Rec* @Simple.C, i32 0, i32 0
+    ; testRec.SetX(5)
+    %1   = getelementptr inbounds %Simple.Vector1Rec* @testRec, i32 0, i32 0
     %2   = load i8** %1
-    %3   = bitcast i8*  %2 to [9 x i8*]*
-    %4   = getelementptr inbounds [9 x i8*]* %3, i32 0, i32 2
+    %3   = bitcast i8*  %2 to [5 x i8*]*
+    %4   = getelementptr inbounds [5 x i8*]* %3, i32 0, i32 2
     %5   = load i8** %4
     %6   = bitcast i8*  %5 to void (%Simple.Vector1, i32)*
-    %7   = bitcast %Simple.Vector3Rec* @Simple.C to %Simple.Vector1
-    call void (%Simple.Vector1, i32)* %6(%Simple.Vector1 %7, i32 1) nounwind
+    call void (%Simple.Vector1, i32)* %6(%Simple.Vector1 @testRec, i32 5) nounwind
     
-    ; C.SetY(2)
-    %8   = getelementptr inbounds %Simple.Vector3Rec* @Simple.C, i32 0, i32 0
-    %9   = load i8** %8
-    %10  = bitcast i8*  %9 to [9 x i8*]*
-    %11  = getelementptr inbounds [9 x i8*]* %10, i32 0, i32 5
-    %12  = load i8** %11
-    %13  = bitcast i8*  %12 to void (%Simple.Vector2, i32)*
-    %14  = bitcast %Simple.Vector3Rec* @Simple.C to %Simple.Vector2
-    call void (%Simple.Vector2, i32)* %13(%Simple.Vector2 %14, i32 2) nounwind
+    ; Out.Integer(testRec.x)
+    %7  = getelementptr inbounds %Simple.Vector1Rec* @testRec, i32 0, i32 1
+    %8  = load i32* %7
+    %9  = sext i32  %8 to i64
+    %10 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str5, i32 0, i32 0), i64 %9) nounwind
     
-    ; C.SetZ(3)
-    %15  = getelementptr inbounds %Simple.Vector3Rec* @Simple.C, i32 0, i32 0
-    %16  = load i8** %15
-    %17  = bitcast i8*  %16 to [9 x i8*]*
-    %18  = getelementptr inbounds [9 x i8*]* %17, i32 0, i32 7
-    %19  = load i8** %18
-    %20  = bitcast i8*  %19 to void (%Simple.Vector3, i32)*
-    call void (%Simple.Vector3, i32)* %20(%Simple.Vector3 @Simple.C, i32 3) nounwind
+    ; Out.Ln()
+    %11 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @.str7, i32 0, i32 0)) nounwind
     
-    ; C.Print()
-    %21  = getelementptr inbounds %Simple.Vector3Rec* @Simple.C, i32 0, i32 0
-    %22  = load i8** %21
-    %23  = bitcast i8*  %22 to [9 x i8*]*
-    %24  = getelementptr inbounds [9 x i8*]* %23, i32 0, i32 4
-    %25  = load i8** %24
-    %26  = bitcast i8*  %25 to void (%Simple.Vector3)*
-    call void (%Simple.Vector3)* %26(%Simple.Vector3 @Simple.C) nounwind
+    ; NEW(testPtr)
+    %12   = getelementptr inbounds %Simple.Vector1Rec* null, i32 1
+    %13   = ptrtoint %Simple.Vector1Rec* %12 to i32
+    %14   = call i8* (i32)* @GC_malloc(i32 %13) nounwind
+    %15   = bitcast i8* %14 to %Simple.Vector1Rec*
+    store %Simple.Vector1Rec {i8* bitcast ([5 x i8*]* @.rec0 to i8*), i32 zeroinitializer}, %Simple.Vector1Rec* %15
+    store %Simple.Vector1Rec* %15, %Simple.Vector1Rec** @testPtr
+    
+    ; testPtr.SetX(5)
+    %16  = load %Simple.Vector1* @testPtr
+    %17  = getelementptr inbounds %Simple.Vector1Rec* %16, i32 0, i32 0
+    %18  = load i8** %17
+    %19  = bitcast i8*  %18 to [5 x i8*]*
+    %20  = getelementptr inbounds [5 x i8*]* %19, i32 0, i32 2
+    %21  = load i8** %20
+    %22  = bitcast i8*  %21 to void (%Simple.Vector1, i32)*
+    call void (%Simple.Vector1, i32)* %22(%Simple.Vector1 %16, i32 5) nounwind
+    
+    ; Out.Integer(testPtr.x)
+    %23 = load %Simple.Vector1* @testPtr
+    %24 = getelementptr inbounds %Simple.Vector1Rec* %23, i32 0, i32 1
+    %25 = load i32* %24
+    %26 = sext i32  %25 to i64
+    %27 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str5, i32 0, i32 0), i64 %26) nounwind
+    
+    ; Out.Ln()
+    %28 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @.str7, i32 0, i32 0)) nounwind
     
     ret i32 0
 }

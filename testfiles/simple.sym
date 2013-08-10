@@ -1,6 +1,6 @@
 (**
- *  Generated 10/08/2013 22:22:49
- *  GlobalUID ffee6dd6-551d-42db-af0c-ad7dfe7f2693
+ *  Generated 10/08/2013 23:33:33
+ *  GlobalUID 5b0ef5e9-03d1-420b-9263-7311053aacf4
  *
  *  Exported symbol file for module "Simple"
  *
@@ -20,8 +20,5 @@ MODULE Simple;
         END;
         Vector3 * = POINTER TO Vector3Rec;
     VAR
-        A * : Simple.Vector1Rec;
-        B * : Simple.Vector2Rec;
-        C * : Simple.Vector3Rec;
 END Simple.
 

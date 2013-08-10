@@ -252,6 +252,27 @@ namespace DUO2C.CodeGen.LLVM
             var desig = node.Invocation.Element as NDesignator;
             var elem = desig != null ? desig.Element as NQualIdent : null;
 
+            // Probably temporary hack
+            if (elem != null && elem.String == "NEW") {
+                var invoc = (NInvocation) node.Invocation.Operation;
+                var ptrType = invoc.Args.Expressions.First().GetFinalType(_scope).As<PointerType>();
+                var ptr = ctx.PrepareOperand(invoc.Args.Expressions.First(), new PointerType(ptrType), new TempIdent());
+                var type = ptrType.ResolvedType;
+                
+                Value temp = new TempIdent();
+                ctx.Assign(temp).Argument(new ElementPointer(false, ptrType, Literal.GetDefault(ptrType), 1)).EndOperation();
+                var size = new TempIdent();
+                ctx.Assign(size).Keyword("ptrtoint").Argument(ptrType, temp).Keyword(" to").Argument(IntegerType.Integer).EndOperation();
+                
+                temp = new TempIdent();
+                ctx.Call(temp, _gcMallocProcType, _gcMallocProc, IntegerType.Integer, size);
+                ctx.Conversion(PointerType.Byte, ptrType, ref temp);
+                ctx.Keyword("store").Argument(type, Literal.GetDefault(type)).Argument(ptrType, temp).EndOperation();
+                ctx.Keyword("store").Argument(ptrType, temp).Argument(new PointerType(ptrType), ptr).EndOperation();
+
+                return ctx;
+            }
+
             // Temporary print hack
             if (elem != null && elem.Module == "Out") {
                 var invoc = (NInvocation) node.Invocation.Operation;

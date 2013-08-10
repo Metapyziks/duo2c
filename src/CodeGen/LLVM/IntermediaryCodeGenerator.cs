@@ -77,7 +77,7 @@ namespace DUO2C.CodeGen.LLVM
 
             _gcMallocProc = new GlobalIdent("GC_malloc", false, GlobalIdent.Options.NoAlias);
             _gcMallocProcType = new ProcedureType(PointerType.Byte,
-                new Parameter(false, "bytes", IntegerType.Integer));
+                new Parameter(false, "size", IntegerType.Integer));
 
             GlobalStringIdent.Reset();
             TempIdent.Reset();
@@ -125,11 +125,8 @@ namespace DUO2C.CodeGen.LLVM
             var globals = _scope.GetSymbols().Where(y => !y.Value.Type.IsProcedure);
             if (globals.Count() > 0) {
                 ctx = ctx.Ln().Enter(0);
-                bool pad = false;
                 foreach (var v in globals) {
-                    if (pad) ctx.Ln();
                     ctx.Global(new QualIdent(v.Key), v.Value.Type);
-                    pad = v.Value.Type.IsRecord;
                 }
                 ctx = ctx.Leave().Ln().Ln();
             }

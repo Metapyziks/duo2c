@@ -95,8 +95,7 @@ namespace DUO2C
                     var root = new RootScope();
 
                     root.DeclareSymbol("NEW", new ProcedureType(null,
-                        new Parameter(true, "ptr", PointerType.Byte),
-                        new Parameter(false, "sizes", new VarArgsType())
+                        new Parameter(true, "ptr", PointerType.Null)
                     ), AccessModifier.Private, DeclarationType.Global);
 
                     foreach (var import in module.Imports) {

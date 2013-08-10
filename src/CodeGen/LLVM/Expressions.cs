@@ -101,6 +101,7 @@ namespace DUO2C.CodeGen.LLVM
                 }
                 return ctx;
             } else if (from.IsPointer && to.IsPointer) {
+                if (from.As<PointerType>().ResolvedType.Equals(to.As<PointerType>().ResolvedType)) return ctx;
                 var temp = new TempIdent();
                 ctx.Assign(temp).Argument(new BitCast(false, from, src, to));
                 ctx.EndOperation();
