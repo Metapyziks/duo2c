@@ -1,6 +1,6 @@
 (**
- *  Generated 10/08/2013 18:21:16
- *  GlobalUID 92fe1046-d9cd-4ccf-a887-447750376b00
+ *  Generated 10/08/2013 18:29:35
+ *  GlobalUID 00d5ca4a-67ff-4cde-807b-babb882dd693
  *
  *  Exported symbol file for module "Simple"
  *
@@ -11,5 +11,6 @@
 MODULE Simple;
     TYPE
     VAR
+        C * : Simple.Vector3;
 END Simple.
 

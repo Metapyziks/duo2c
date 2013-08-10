@@ -14,7 +14,7 @@ MODULE Simple;
 
     VAR a : Vector1;
     VAR b : Vector2;
-    VAR c : Vector3;
+    VAR C* : Vector3;
 
     PROCEDURE (this : Vector1) SetX (val : INTEGER);
     BEGIN
@@ -73,11 +73,11 @@ BEGIN
     b.SetX(8);
     b.SetY(-3);
 
-    c.SetX(8);
-    c.SetY(-3);
-    c.SetZ(92);
+    C.SetX(a.GetX());
+    C.SetY(b.GetX());
+    C.SetZ(b.GetY());
 
     a.Print;
     b.Print;
-    c.Print;
+    C.Print;
 END Simple.

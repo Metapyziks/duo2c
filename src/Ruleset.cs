@@ -19,7 +19,7 @@ namespace DUO2C
         /// <param name="ruleset">Ruleset containing all known tokens</param>
         /// <param name="nodes">Collection of nodes to build an expression parser from</param>
         /// <returns>Constructed expression parser</returns>
-        static Parser BuildExpr(Ruleset ruleset, IEnumerable<ParseNode> nodes)
+        static Parser BuildExpr(Ruleset ruleset, IEnumerable<ParseNode> nodes, bool reserveKeywords)
         {
             Parser curr = null;
             foreach (var node in nodes) {
@@ -27,7 +27,7 @@ namespace DUO2C
                 if (node.Token == "keyword" && node.String == "|") continue;
 
                 // Each expression is a collection of term lists
-                var list = BuildList(ruleset, ((BranchNode) node).Children);
+                var list = BuildList(ruleset, ((BranchNode) node).Children, reserveKeywords);
 
                 if (curr == null) {
                     // First term list becomes the current
@@ -46,12 +46,12 @@ namespace DUO2C
         /// <param name="ruleset">Ruleset containing all known tokens</param>
         /// <param name="nodes">Collection of nodes to build a concatenated term list parser from</param>
         /// <returns>Constructed concatenated term list parser</returns>
-        static Parser BuildList(Ruleset ruleset, IEnumerable<ParseNode> nodes)
+        static Parser BuildList(Ruleset ruleset, IEnumerable<ParseNode> nodes, bool reserveKeywords)
         {
             Parser curr = null;
             foreach (var node in nodes.Reverse()) {
                 // Build individual term
-                var term = BuildTerm(ruleset, ((BranchNode) node).Children);
+                var term = BuildTerm(ruleset, ((BranchNode) node).Children, reserveKeywords);
 
                 if (curr == null) {
                     // First term list becomes the current
@@ -89,14 +89,14 @@ namespace DUO2C
         /// <param name="ruleset">Ruleset containing all known tokens</param>
         /// <param name="nodes">Collection of nodes to build a term parser from</param>
         /// <returns>Constructed term parser</returns>
-        static Parser BuildTerm(Ruleset ruleset, IEnumerable<ParseNode> nodes)
+        static Parser BuildTerm(Ruleset ruleset, IEnumerable<ParseNode> nodes, bool reserveKeywords)
         {
             if (nodes.Count() == 1) {
                 // If there is only one node, expect a literal or rule reference
                 var node = nodes.First();
                 if (node.Token == "string") {
                     // String literals are keywords
-                    return ruleset.CreateKeywordParser(node.String);
+                    return ruleset.CreateKeywordParser(node.String, reserveKeywords);
                 } else if (node.Token == "ident") {
                     switch (node.String) {
                         // Check for various predefined parsers
@@ -115,7 +115,7 @@ namespace DUO2C
                             if (rule != null) return rule;
 
                             // If no matching rule is found, assume term is a keyword
-                            return ruleset.CreateKeywordParser(node.String);
+                            return ruleset.CreateKeywordParser(node.String, reserveKeywords);
                     }
                 } else {
                     // I can't think of anything that lead to here, but to be safe...
@@ -123,7 +123,7 @@ namespace DUO2C
                 }
             } else {
                 // If we are here, expect an expression inside parentheses
-                var expr = BuildExpr(ruleset, ((BranchNode) nodes.ElementAt(1)).Children);
+                var expr = BuildExpr(ruleset, ((BranchNode) nodes.ElementAt(1)).Children, reserveKeywords);
                 if (nodes.First().String == "[") {
                     // Square braces surround an optional expression
                     return new OptionalParser(ruleset, null, expr);
@@ -150,17 +150,17 @@ namespace DUO2C
                 var ruleset = _sEBNFRuleset = new Ruleset();
 
                 // Define keywords
-                var eq = ruleset.CreateKeywordParser("=");
-                var fs = ruleset.CreateKeywordParser(".");
-                var pipe = ruleset.CreateKeywordParser("|");
-                var flat = ruleset.CreateKeywordParser("*");
-                var nosub = ruleset.CreateKeywordParser("!");
-                var pbOpen = ruleset.CreateKeywordParser("(");
-                var pbClose = ruleset.CreateKeywordParser(")");
-                var sbOpen = ruleset.CreateKeywordParser("[");
-                var sbClose = ruleset.CreateKeywordParser("]");
-                var cbOpen = ruleset.CreateKeywordParser("{");
-                var cbClose = ruleset.CreateKeywordParser("}");
+                var eq = ruleset.CreateKeywordParser("=", false);
+                var fs = ruleset.CreateKeywordParser(".", false);
+                var pipe = ruleset.CreateKeywordParser("|", false);
+                var flat = ruleset.CreateKeywordParser("*", false);
+                var nosub = ruleset.CreateKeywordParser("!", false);
+                var pbOpen = ruleset.CreateKeywordParser("(", false);
+                var pbClose = ruleset.CreateKeywordParser(")", false);
+                var sbOpen = ruleset.CreateKeywordParser("[", false);
+                var sbClose = ruleset.CreateKeywordParser("]", false);
+                var cbOpen = ruleset.CreateKeywordParser("{", false);
+                var cbClose = ruleset.CreateKeywordParser("}", false);
 
                 // Define some simple parsers to use
                 var ident = ruleset.CreateIdentifierParser();
@@ -222,7 +222,7 @@ namespace DUO2C
 
             // Build rules
             foreach (var rule in toBuild) {
-                parsed.AddRule(rule.Key, BuildExpr(parsed, rule.Value));
+                parsed.AddRule(rule.Key, BuildExpr(parsed, rule.Value, rule.Key.IgnoreWhitespace));
             }
 
             return parsed;
@@ -313,9 +313,9 @@ namespace DUO2C
         /// </summary>
         /// <param name="keyword">Keyword to declare</param>
         /// <returns>Parser for the given keyword</returns>
-        public PKeyword CreateKeywordParser(String keyword)
+        public PKeyword CreateKeywordParser(String keyword, bool reserve)
         {
-            _keywords.Add(keyword);
+            if (reserve) _keywords.Add(keyword);
             return new PKeyword(this, keyword);
         }
 
