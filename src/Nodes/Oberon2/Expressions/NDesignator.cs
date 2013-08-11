@@ -34,7 +34,9 @@ namespace DUO2C.Nodes.Oberon2
 
         public Selector Operation
         {
-            get { return (Selector) Children.Last(); }
+            get {
+                return (Selector) Children.Last();
+            }
         }
 
         public override string String
@@ -75,14 +77,10 @@ namespace DUO2C.Nodes.Oberon2
                     return type.As<PointerType>().ResolvedType.Resolve(scope);
                 } else if (Operation is NInvocation) {
                     var op = (NInvocation) Operation;
-                    if (type.IsProcedure) {
-                        return (type.As<ProcedureType>().ReturnType ?? PointerType.Null).Resolve(scope);
-                    } else {
-                        var arg = op.Args.Expressions.First();
-                        var fact = arg.SimpleExpr.Term.Factor.Inner as NDesignator;
-                        var ident = (NQualIdent) fact.Element;
-                        return scope.GetType(ident.Identifier, ident.Module);
-                    }
+                    return (type.As<ProcedureType>().ReturnType ?? PointerType.Null).Resolve(scope);
+                } else if (Operation is NTypeGuard) {
+                    var op = (NTypeGuard) Operation;
+                    return new UnresolvedType(op.TypeIdent.Identifier, op.TypeIdent.Module).Resolve(scope);
                 }
 
                 return PointerType.Null;
@@ -215,27 +213,21 @@ namespace DUO2C.Nodes.Oberon2
                                 yield return e;
                             }
                         } else {
-                            var badProc = true;
                             if (op.Args.Expressions.Count() == 1) {
-                                var arg = op.Args.Expressions.First();
-                                if (arg.Prev == null && arg.SimpleExpr.Prev == null
-                                    && arg.SimpleExpr.Term.Prev == null) {
-                                    var fact = arg.SimpleExpr.Term.Factor.Inner as NDesignator;
-                                    if (fact != null && fact.IsRoot) {
-                                        badProc = false;
-                                        var ident = (NQualIdent) fact.Element;
-                                        var newType = scope.GetType(ident.Identifier, ident.Module);
-                                        if (newType == null) {
-                                            yield return new UndeclaredIdentifierException(ident);
-                                        } else if (!OberonType.CanTestEquality(type, newType)) {
-                                            yield return new CompilerException(ParserError.Semantics,
-                                                String.Format("Cannot convert from {0} to {1}", type, newType),
-                                                StartIndex, Length);
-                                        }
-                                    }
+                                var guard = new NTypeGuard(op);
+                                ((ParseNode[]) Children)[1] = guard;
+                                if (guard == null) {
+                                    yield return new ProcedureExpectedException(type, Element);
                                 }
-                            }
-                            if (badProc) {
+                                var newType = scope.GetType(guard.TypeIdent.Identifier, guard.TypeIdent.Module);
+                                if (newType == null) {
+                                    yield return new UndeclaredIdentifierException(guard.TypeIdent);
+                                } else if (!OberonType.CanTestEquality(type, newType)) {
+                                    yield return new CompilerException(ParserError.Semantics,
+                                        String.Format("Cannot convert from {0} to {1}", type, newType),
+                                        StartIndex, Length);
+                                }
+                            } else {
                                 yield return new ProcedureExpectedException(type, Element);
                             }
                         }

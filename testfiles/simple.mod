@@ -74,16 +74,19 @@ MODULE Simple;
 BEGIN
     NEW (C);
 
-    C.Print;
-
     C.SetY(-3);
     C.SetZ(8);
 
     C.Print;
 
     B := C;
-    B.Print;
 
-    A := C;
-    A.Print;
+    NEW (C);
+
+    C.Print;
+
+    C := B (Vector3);
+    
+    C.Print;
+
 END Simple.

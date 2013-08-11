@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DUO2C</RootNamespace>
-    <AssemblyName>DUO2C</AssemblyName>
+    <AssemblyName>duo2c</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -54,6 +54,7 @@
     <Compile Include="src\Nodes\BranchNode.cs" />
     <Compile Include="src\Nodes\Interfaces.cs" />
     <Compile Include="src\Nodes\LeafNode.cs" />
+    <Compile Include="src\Nodes\Oberon2\Expressions\NTypeGuard.cs" />
     <Compile Include="src\Nodes\Oberon2\NModule.cs" />
     <Compile Include="src\Nodes\Oberon2\Declarations\Declaration.cs" />
     <Compile Include="src\Nodes\Oberon2\Declarations\NDeclSeq.cs" />

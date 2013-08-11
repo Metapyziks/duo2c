@@ -28,6 +28,18 @@ namespace DUO2C.CodeGen.LLVM
                 Value ptr = new TempIdent();
                 ctx.ResolveValue(temp, ref ptr, type, false);
                 return ptr;
+            } else if (node.Operation is NTypeGuard) {
+                var op = (NTypeGuard) node.Operation;
+                var desig = (NDesignator) node.Element;
+                var oldType = desig.GetFinalType(_scope);
+                var newType = new UnresolvedType(op.TypeIdent.Identifier, op.TypeIdent.Module).Resolve(_scope);
+                var val = ctx.GetDesignation(desig);
+                Value temp = new TempIdent();
+                ctx.ResolveValue(val, ref temp, oldType, false);
+                val = temp;
+                temp = new TempIdent();
+                ctx.Assign(temp).Argument(new BitCast(false, oldType, val, newType)).EndOperation();
+                return temp;
             } else if (node.Operation is NInvocation) {
                 var args = ((NInvocation) node.Operation).Args;
                 var proc = (NDesignator) node.Element;
