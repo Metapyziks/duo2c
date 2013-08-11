@@ -1,12 +1,13 @@
 ﻿MODULE Lists;
+    IMPORT Out;
 
     (*** declare global constants, types and variables ***)
 
     TYPE
-        (* Integer  = INTEGER; *)
-        List*    = POINTER TO ListNode;
-        ListNode = RECORD
-            value : Integer;
+        Int32*  = INTEGER;
+        List*     = POINTER TO ListNode;
+        ListNode* = RECORD
+            value : Int32;
             next  : List;
         END;
 
@@ -16,7 +17,7 @@
 
     (*** declare procedures ***)
 
-    PROCEDURE (l : List) Add* (v : Integer);
+    PROCEDURE (l : List) Add* (v : Int32);
     BEGIN
         IF l = NIL THEN
             NEW(l);             (* create record instance *)
@@ -26,9 +27,9 @@
         END
     END Add;
 
-    PROCEDURE (l : List) Get* () : Integer;
+    PROCEDURE (l : List) Get* () : Int32;
     VAR
-        v : Integer;
+        v : Int32;
     BEGIN
         IF l = NIL THEN
             RETURN 0           (* .get() must always return an INTEGER *)

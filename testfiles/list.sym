@@ -1,20 +1,19 @@
 (**
- *  Generated 11/08/2013 13:11:39
- *  GlobalUID 2a9adbeb-257f-4feb-b7ec-c811340c3773
+ *  Generated 11/08/2013 13:54:35
+ *  GlobalUID 2c048f50-8aaf-4b08-9375-31e72509f53a
  *
- *  Exported symbol file for module "List"
+ *  Exported symbol file for module "Lists"
  *
  *  WARNING: This file is automatically
  *  generated and should not be edited
 **)
 
-MODULE List;
+MODULE Lists;
     TYPE
+        Int32 * = INTEGER;
         List * = POINTER TO ListNode;
         ListNode * = RECORD
-            value * : INTEGER;
-            next * : List.List;
         END;
     VAR
-END List.
+END Lists.
 

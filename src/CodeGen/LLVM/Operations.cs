@@ -136,6 +136,16 @@ namespace DUO2C.CodeGen.LLVM
             return ctx.Assign(dest).Keyword("select").Argument(BooleanType.Default, cond).Argument(type, ifTrue).Argument(type, ifFalse).EndOperation();
         }
 
+        static GenerationContext Phi(this GenerationContext ctx, Value dest, OberonType type, params Value[] pairs)
+        {
+            ctx.Assign(dest).Keyword("phi").Argument(type).EndArguments();
+            for (int i = 0; i < pairs.Length; i += 2) {
+                if (i > 0) ctx.Write(",");
+                ctx.Write(" \t[").Argument(pairs[i]).Argument(pairs[i + 1]).Write("\t]").EndArguments();
+            }
+            return ctx.EndOperation();
+        }
+
         static GenerationContext Call(this GenerationContext ctx, Value dest, ProcedureType procType, Value proc, params Object[] args)
         {
             return ctx.Call(dest, procType, proc, args.Where(x => x is OberonType).Cast<OberonType>().ToArray(),

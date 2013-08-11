@@ -48,6 +48,7 @@ namespace DUO2C.CodeGen.LLVM
                     ctx.BinaryComp(isNull, "eq", type, recPtr, Literal.GetDefault(PointerType.Null));
 
                     // Prepare labels
+                    var staticDispatch = _blockLabel;
                     var dynamicDispatch = new TempIdent();
                     var dispatchEnd = new TempIdent();
                     ctx.Branch(isNull, dispatchEnd, dynamicDispatch);
@@ -108,7 +109,7 @@ namespace DUO2C.CodeGen.LLVM
                     // Select whichever pointer was found
                     ctx.LabelMarker(dispatchEnd);
                     var procPtr = new TempIdent();
-                    ctx.Select(procPtr, isNull, procPtrType, staticPtr, dynamicPtr);
+                    ctx.Phi(procPtr, procPtrType, staticPtr, staticDispatch, dynamicPtr, dynamicDispatch);
 
                     // Finally, call the procedure
                     temp = new TempIdent();

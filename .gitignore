@@ -110,4 +110,5 @@ UpgradeLog*.XML
 *.syntax
 testfiles/*.bc
 testfiles/*.asm
-testfiles/SDL2.dll
+testfiles/*.dll
+testfiles/*.exe
