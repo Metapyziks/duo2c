@@ -11,7 +11,7 @@
     VAR
         test : List;
         i : INTEGER;
-
+        n : INTEGER;
 
     PROCEDURE (l : List) Add* (v : INTEGER);
     BEGIN
@@ -39,13 +39,15 @@
 BEGIN
     NEW(test);
     
+    n := 1;
     FOR i := 1 TO 10 DO
-        test.Add(i);
+        n := (n * 8723 + 181) MOD 256;
+        test.Add(n);
     END;
 
     REPEAT
         i := test.Get();
-        Out.Integer(i); Out.Ln;
+        IF i > 0 THEN Out.Integer(i); Out.Ln; END;
     UNTIL i = 0;
 
 END List.
