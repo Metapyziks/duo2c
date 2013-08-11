@@ -9,6 +9,11 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("TypeTest")]
     public class NTypeTest : Selector
     {
+        public override string String
+        {
+            get { return String.Format(" IS {0}", TypeIdent.String); }
+        }
+
         public NQualIdent TypeIdent { get { return (NQualIdent) Children.First(); } }
 
         public NTypeTest(ParseNode original)

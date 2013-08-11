@@ -1,5 +1,5 @@
-; Generated 12/08/2013 00:03:21
-; GlobalUID 8350440c-abc2-4f07-b39a-8d20b4759f75
+; Generated 12/08/2013 00:14:06
+; GlobalUID 4d6eecfc-48d6-4172-a145-4c06b0eb755c
 ; 
 ; LLVM IR file for module "Simple"
 ; 
@@ -311,7 +311,7 @@ define void @TestType(%Simple.Vector1 %$vec, {i32, %CHAR*} %$name) nounwind {
     %name = alloca {i32, %CHAR*}
     store {i32, %CHAR*} %$name, {i32, %CHAR*}* %name
     
-    ; IF vecVector3 THEN
+    ; IF vec IS Vector3 THEN
     %1 = load %Simple.Vector1* %vec
     %2 = icmp eq %Simple.Vector1 %1, null
     br i1 %2, label %14, label %3
@@ -355,7 +355,7 @@ define void @TestType(%Simple.Vector1 %$vec, {i32, %CHAR*} %$name) nounwind {
     
 ; <label>:23                                      ; preds = %14
     
-    ; IF vecVector2 THEN
+    ; IF vec IS Vector2 THEN
     %24 = load %Simple.Vector1* %vec
     %25 = icmp eq %Simple.Vector1 %24, null
     br i1 %25, label %37, label %26
@@ -399,7 +399,7 @@ define void @TestType(%Simple.Vector1 %$vec, {i32, %CHAR*} %$name) nounwind {
     
 ; <label>:46                                      ; preds = %37
     
-    ; IF vecVector1 THEN
+    ; IF vec IS Vector1 THEN
     %47 = load %Simple.Vector1* %vec
     %48 = icmp eq %Simple.Vector1 %47, null
     br i1 %48, label %60, label %49
