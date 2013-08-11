@@ -141,7 +141,7 @@ namespace DUO2C.CodeGen.LLVM
             ctx.Assign(dest).Keyword("phi").Argument(type).EndArguments();
             for (int i = 0; i < pairs.Length; i += 2) {
                 if (i > 0) ctx.Write(",");
-                ctx.Write(" \t[").Argument(pairs[i]).Argument(pairs[i + 1]).Write("\t]").EndArguments();
+                ctx.Write(" \t[").Argument(pairs[i]).Argument(pairs[i + 1] ?? TempIdent.Zero).Write("\t]").EndArguments();
             }
             return ctx.EndOperation();
         }

@@ -142,7 +142,9 @@ namespace DUO2C.CodeGen.LLVM
 
             ctx.Procedure(new GlobalIdent("main", false), new ProcedureType(IntegerType.Integer), new Scope(_scope),
                 (context) => {
-                    context.Statements(module.Body);
+                    if (module.Body != null) {
+                        context.Statements(module.Body);
+                    }
                     context.Keyword("ret").Argument(IntegerType.Integer, new Literal(0.ToString())).EndOperation();
                 });
 

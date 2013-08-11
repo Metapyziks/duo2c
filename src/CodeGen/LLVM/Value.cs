@@ -313,6 +313,8 @@ namespace DUO2C.CodeGen.LLVM
         {
             static int _sLast = 0;
 
+            public static readonly TempIdent Zero = new TempIdent();
+
             public static void Reset()
             {
                 _blockLabel = null;
@@ -349,7 +351,7 @@ namespace DUO2C.CodeGen.LLVM
 
             public void ResolveID()
             {
-                if (_id == 0) {
+                if (_id == 0 && this != Zero) {
                     _id = ++_sLast;
                 }
             }

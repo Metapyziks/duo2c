@@ -202,7 +202,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override void FindDeclarations(Scope scope)
         {
-            if (FormalParams.FindTypeErrors(scope).Count() > 0) return;
+            if (FormalParams != null && FormalParams.FindTypeErrors(scope).Count() > 0) return;
 
             if (Receiver == null) {
                 scope.DeclareSymbol(Identifier, new ProcedureType(FormalParams), Visibility, DeclarationType.Global);

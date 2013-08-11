@@ -70,10 +70,12 @@ MODULE Simple;
         Out.String(" "); Out.Integer(this^.z);
         Out.String(")"); Out.Ln;
     END;
+
 BEGIN
     NEW (C);
 
-    C.SetX(5);
+    C.Print;
+
     C.SetY(-3);
     C.SetZ(8);
 
@@ -81,9 +83,7 @@ BEGIN
 
     B := C;
     B.Print;
-    (* B.SetZ(5); *)
 
     A := C;
     A.Print;
-
 END Simple.
