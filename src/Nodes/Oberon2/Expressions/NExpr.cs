@@ -15,8 +15,7 @@ namespace DUO2C.Nodes.Oberon2
         LessThanOrEqual,
         GreaterThan,
         GreaterThanOrEqual,
-        InSet,
-        IsType
+        InSet
     }
 
     [SubstituteToken("Expr")]
@@ -29,8 +28,7 @@ namespace DUO2C.Nodes.Oberon2
             { "<=", ExprOperator.LessThanOrEqual },
             { ">", ExprOperator.GreaterThan },
             { ">=", ExprOperator.GreaterThanOrEqual },
-            { "IN", ExprOperator.InSet },
-            { "IS", ExprOperator.IsType }
+            { "IN", ExprOperator.InSet }
         };
 
         String _opString;

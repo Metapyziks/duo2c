@@ -55,6 +55,7 @@
     <Compile Include="src\Nodes\Interfaces.cs" />
     <Compile Include="src\Nodes\LeafNode.cs" />
     <Compile Include="src\Nodes\Oberon2\Expressions\NTypeGuard.cs" />
+    <Compile Include="src\Nodes\Oberon2\Expressions\NTypeTest.cs" />
     <Compile Include="src\Nodes\Oberon2\NModule.cs" />
     <Compile Include="src\Nodes\Oberon2\Declarations\Declaration.cs" />
     <Compile Include="src\Nodes\Oberon2\Declarations\NDeclSeq.cs" />

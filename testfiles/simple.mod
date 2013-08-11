@@ -72,21 +72,12 @@ MODULE Simple;
     END;
 
 BEGIN
-    NEW (C);
+    NEW(B);
 
-    C.SetY(-3);
-    C.SetZ(8);
-
-    C.Print;
-
-    B := C;
-
-    NEW (C);
-
-    C.Print;
-
-    C := B (Vector3);
-    
-    C.Print;
+    IF B IS Vector1 THEN
+        Out.String("B is a Vector2"); Out.Ln;
+    ELSE
+        Out.String("B is not a Vector2"); Out.Ln;
+    END;
 
 END Simple.

@@ -1,5 +1,5 @@
-; Generated 11/08/2013 16:43:09
-; GlobalUID 8e23004e-360f-408a-9acf-c2c0c6828922
+; Generated 11/08/2013 23:46:39
+; GlobalUID 93cebb73-9cb5-450f-9431-12c1959a85b2
 ; 
 ; LLVM IR file for module "Simple"
 ; 
@@ -56,13 +56,15 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
 @.str6 = private constant [2 x i8] c")\00"
 @.str7 = private constant [2 x i8] c"\0A\00"
 @.str8 = private constant [2 x i8] c" \00"
+@.str9 = private constant [15 x i8] c"B is a Vector2\00"
+@.str10 = private constant [19 x i8] c"B is not a Vector2\00"
 
 declare i32 @printf(%CHAR*, ...) nounwind 
 declare noalias i8* @GC_malloc(i32) 
 
 @Simple.A = global %Simple.Vector1 zeroinitializer
 @Simple.B = global %Simple.Vector2 null
-@Simple.C = global %Simple.Vector3 null
+@Simple.C = global %Simple.Vector3 zeroinitializer
 
 define void @Simple.Vector1Rec.SetX(%Simple.Vector1* %this, i32 %$val) nounwind {
     
@@ -237,122 +239,63 @@ define void @Simple.Vector3Rec.Print(%Simple.Vector3* %this) nounwind {
 
 define i32 @main() nounwind {
     
-    ; NEW(C)
-    %1 = getelementptr inbounds %Simple.Vector3Rec* null, i32 1
-    %2 = ptrtoint %Simple.Vector3Rec* %1 to i32
+    ; NEW(B)
+    %1 = getelementptr inbounds %Simple.Vector2Rec* null, i32 1
+    %2 = ptrtoint %Simple.Vector2Rec* %1 to i32
     %3 = call i8* (i32)* @GC_malloc(i32 %2) nounwind
-    %4 = bitcast i8* %3 to %Simple.Vector3Rec*
-    store %Simple.Vector3Rec {i8* bitcast ([9 x i8*]* @.rec2 to i8*), i32 zeroinitializer, i32 zeroinitializer, i32 zeroinitializer}, %Simple.Vector3Rec* %4
-    store %Simple.Vector3Rec* %4, %Simple.Vector3Rec** @Simple.C
+    %4 = bitcast i8* %3 to %Simple.Vector2Rec*
+    store %Simple.Vector2Rec {i8* bitcast ([7 x i8*]* @.rec1 to i8*), i32 zeroinitializer, i32 zeroinitializer}, %Simple.Vector2Rec* %4
+    store %Simple.Vector2Rec* %4, %Simple.Vector2Rec** @Simple.B
     
-    ; C.SetY(3)
-    %5 = load %Simple.Vector3* @Simple.C
-    %6 = icmp eq %Simple.Vector3 %5, null
-    br i1 %6, label %14, label %7
+    ; IF BVector1 THEN
+    %5 = load %Simple.Vector2* @Simple.B
+    %6 = icmp eq %Simple.Vector2 %5, null
+    br i1 %6, label %18, label %7
     
 ; <label>:7                                       ; preds = %0
-    %8 = getelementptr inbounds %Simple.Vector3 %5, i32 0, i32 0
+    %8 = getelementptr inbounds %Simple.Vector2 %5, i32 0, i32 0
     %9 = load i8** %8
-    %10 = bitcast i8* %9 to [9 x i8*]*
-    %11 = getelementptr inbounds [9 x i8*]* %10, i32 0, i32 5
-    %12 = load i8** %11
-    %13 = bitcast i8* %12 to void (%Simple.Vector2*, i32)*
-    br label %14
+    br label %10
     
-; <label>:14                                      ; preds = %0, %7
-    %15 = phi void (%Simple.Vector2*, i32)* [@Simple.Vector2Rec.SetY, %0], [%13, %7]
-    %16 = bitcast %Simple.Vector3* @Simple.C to %Simple.Vector2*
-    call void (%Simple.Vector2*, i32)* %15(%Simple.Vector2* %16, i32 -3) nounwind
+; <label>:10                                      ; preds = %7, %13
+    %11 = phi i8* [%9, %7], [%17, %13]
+    %12 = icmp eq i8* %11, null
+    br i1 %12, label %18, label %13
     
-    ; C.SetZ(8)
-    %17 = load %Simple.Vector3* @Simple.C
-    %18 = icmp eq %Simple.Vector3 %17, null
-    br i1 %18, label %26, label %19
+; <label>:13                                      ; preds = %10
+    %14 = icmp eq i8* %11, bitcast ([5 x i8*]* @.rec0 to i8*)
+    %15 = bitcast i8* %11 to i8**
+    %16 = getelementptr inbounds i8** %15, i32 1
+    %17 = load i8** %16
+    br i1 %14, label %18, label %10
     
-; <label>:19                                      ; preds = %14
-    %20 = getelementptr inbounds %Simple.Vector3 %17, i32 0, i32 0
-    %21 = load i8** %20
-    %22 = bitcast i8* %21 to [9 x i8*]*
-    %23 = getelementptr inbounds [9 x i8*]* %22, i32 0, i32 7
-    %24 = load i8** %23
-    %25 = bitcast i8* %24 to void (%Simple.Vector3*, i32)*
-    br label %26
+; <label>:18                                      ; preds = %0, %10, %13
+    %19 = phi i1 [0, %0], [0, %10], [1, %13]
+    br i1 %19, label %20, label %24
     
-; <label>:26                                      ; preds = %14, %19
-    %27 = phi void (%Simple.Vector3*, i32)* [@Simple.Vector3Rec.SetZ, %14], [%25, %19]
-    call void (%Simple.Vector3*, i32)* %27(%Simple.Vector3* @Simple.C, i32 8) nounwind
+; <label>:20                                      ; preds = %18
     
-    ; C.Print()
-    %28 = load %Simple.Vector3* @Simple.C
-    %29 = icmp eq %Simple.Vector3 %28, null
-    br i1 %29, label %37, label %30
+    ; Out.String("B is a Vector2")
+    %21 = getelementptr inbounds [15 x %CHAR]* @.str9, i32 0, i32 0
+    %22 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str4, i32 0, i32 0), %CHAR* %21) nounwind
     
-; <label>:30                                      ; preds = %26
-    %31 = getelementptr inbounds %Simple.Vector3 %28, i32 0, i32 0
-    %32 = load i8** %31
-    %33 = bitcast i8* %32 to [9 x i8*]*
-    %34 = getelementptr inbounds [9 x i8*]* %33, i32 0, i32 4
-    %35 = load i8** %34
-    %36 = bitcast i8* %35 to void (%Simple.Vector3*)*
-    br label %37
+    ; Out.Ln()
+    %23 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @.str7, i32 0, i32 0)) nounwind
     
-; <label>:37                                      ; preds = %26, %30
-    %38 = phi void (%Simple.Vector3*)* [@Simple.Vector3Rec.Print, %26], [%36, %30]
-    call void (%Simple.Vector3*)* %38(%Simple.Vector3* @Simple.C) nounwind
+    br label %28
     
-    ; B := C
-    %39 = load %Simple.Vector3* @Simple.C
-    %40 = bitcast %Simple.Vector3 %39 to %Simple.Vector2
-    store %Simple.Vector2 %40, %Simple.Vector2* @Simple.B
+; <label>:24                                      ; preds = %18
     
-    ; NEW(C)
-    %41 = getelementptr inbounds %Simple.Vector3Rec* null, i32 1
-    %42 = ptrtoint %Simple.Vector3Rec* %41 to i32
-    %43 = call i8* (i32)* @GC_malloc(i32 %42) nounwind
-    %44 = bitcast i8* %43 to %Simple.Vector3Rec*
-    store %Simple.Vector3Rec {i8* bitcast ([9 x i8*]* @.rec2 to i8*), i32 zeroinitializer, i32 zeroinitializer, i32 zeroinitializer}, %Simple.Vector3Rec* %44
-    store %Simple.Vector3Rec* %44, %Simple.Vector3Rec** @Simple.C
+    ; Out.String("B is not a Vector2")
+    %25 = getelementptr inbounds [19 x %CHAR]* @.str10, i32 0, i32 0
+    %26 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str4, i32 0, i32 0), %CHAR* %25) nounwind
     
-    ; C.Print()
-    %45 = load %Simple.Vector3* @Simple.C
-    %46 = icmp eq %Simple.Vector3 %45, null
-    br i1 %46, label %54, label %47
+    ; Out.Ln()
+    %27 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @.str7, i32 0, i32 0)) nounwind
     
-; <label>:47                                      ; preds = %37
-    %48 = getelementptr inbounds %Simple.Vector3 %45, i32 0, i32 0
-    %49 = load i8** %48
-    %50 = bitcast i8* %49 to [9 x i8*]*
-    %51 = getelementptr inbounds [9 x i8*]* %50, i32 0, i32 4
-    %52 = load i8** %51
-    %53 = bitcast i8* %52 to void (%Simple.Vector3*)*
-    br label %54
+    br label %28
     
-; <label>:54                                      ; preds = %37, %47
-    %55 = phi void (%Simple.Vector3*)* [@Simple.Vector3Rec.Print, %37], [%53, %47]
-    call void (%Simple.Vector3*)* %55(%Simple.Vector3* @Simple.C) nounwind
-    
-    ; C := B(Vector3)
-    %56 = load %Simple.Vector2* @Simple.B
-    %57 = bitcast %Simple.Vector2 %56 to %Simple.Vector3
-    store %Simple.Vector3 %57, %Simple.Vector3* @Simple.C
-    
-    ; C.Print()
-    %58 = load %Simple.Vector3* @Simple.C
-    %59 = icmp eq %Simple.Vector3 %58, null
-    br i1 %59, label %67, label %60
-    
-; <label>:60                                      ; preds = %54
-    %61 = getelementptr inbounds %Simple.Vector3 %58, i32 0, i32 0
-    %62 = load i8** %61
-    %63 = bitcast i8* %62 to [9 x i8*]*
-    %64 = getelementptr inbounds [9 x i8*]* %63, i32 0, i32 4
-    %65 = load i8** %64
-    %66 = bitcast i8* %65 to void (%Simple.Vector3*)*
-    br label %67
-    
-; <label>:67                                      ; preds = %54, %60
-    %68 = phi void (%Simple.Vector3*)* [@Simple.Vector3Rec.Print, %54], [%66, %60]
-    call void (%Simple.Vector3*)* %68(%Simple.Vector3* @Simple.C) nounwind
+; <label>:28                                      ; preds = %20, %24
     
     ret i32 0
 }

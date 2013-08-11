@@ -40,6 +40,75 @@ namespace DUO2C.CodeGen.LLVM
                 temp = new TempIdent();
                 ctx.Assign(temp).Argument(new BitCast(false, oldType, val, newType)).EndOperation();
                 return temp;
+            } else if (node.Operation is NTypeTest) {
+                var op = (NTypeTest) node.Operation;
+                var desig = (NDesignator) node.Element;
+                var val = ctx.GetDesignation(desig);
+                var type = desig.GetFinalType(_scope);
+                var recType = type.As<PointerType>().ResolvedType.As<RecordType>();
+                var testType = _scope.GetType(op.TypeIdent.Identifier,
+                    op.TypeIdent.Module).As<PointerType>().ResolvedType.As<RecordType>();
+
+                Value temp = new TempIdent();
+                ctx.ResolveValue(val, ref temp, type, false);
+                val = temp;
+                temp = new TempIdent();
+
+                var isNull = new TempIdent();
+                ctx.BinaryComp(isNull, "eq", type, val, Literal.GetDefault(PointerType.Null));
+
+                var startLabel = _blockLabel;
+
+                var end = new TempIdent();
+                var initLoop = new TempIdent();
+                var checkNull = new TempIdent();
+                var testPtr = new TempIdent();
+                ctx.Branch(isNull, end, initLoop);
+
+                ctx.LabelMarker(initLoop);
+
+                // Get the type of the record's vtable
+                var recTablePtrType = new PointerType(GetRecordTableType(recType));
+
+                // Find pointer to the vtable
+                Value recTablePtr = new TempIdent();
+                ctx.Assign(recTablePtr);
+                ctx.Argument(new ElementPointer(false, type, val, 0, 0));
+                ctx.EndOperation();
+                temp = recTablePtr;
+                
+                recTablePtr = new TempIdent();
+                ctx.Load(recTablePtr, PointerType.Byte, temp);
+                ctx.Branch(checkNull);
+
+                ctx.LabelMarker(checkNull);
+                Value curTablePtr = new TempIdent();
+                var nextTablePtr = new TempIdent();
+                ctx.Phi(curTablePtr, PointerType.Byte, recTablePtr, initLoop, nextTablePtr, testPtr);
+
+                isNull = new TempIdent();
+                ctx.BinaryComp(isNull, "eq", PointerType.Byte, curTablePtr, Literal.GetDefault(PointerType.Null));
+                ctx.Branch(isNull, end, testPtr);
+
+                ctx.LabelMarker(testPtr);
+                var isMatch = new TempIdent();
+                ctx.BinaryComp(isMatch, "eq", PointerType.Byte, curTablePtr, new BitCast(true,
+                    new PointerType(GetRecordTableType(testType)), GetRecordTableIdent(testType), PointerType.Byte));
+
+                ctx.Conversion(PointerType.Byte, new PointerType(PointerType.Byte), ref curTablePtr);
+                temp = new TempIdent();
+                ctx.Assign(temp).Argument(new ElementPointer(false, new PointerType(PointerType.Byte), curTablePtr, 1)).EndOperation();
+                ctx.Load(nextTablePtr, PointerType.Byte, temp);
+                ctx.Branch(isMatch, end, checkNull);
+
+                ctx.LabelMarker(end);
+                var result = new TempIdent();
+                ctx.Phi(result, BooleanType.Default,
+                    new Literal(0.ToString()), startLabel ?? TempIdent.Zero,
+                    new Literal(0.ToString()), checkNull,
+                    new Literal(1.ToString()), testPtr);
+
+                return result;
             } else if (node.Operation is NInvocation) {
                 var args = ((NInvocation) node.Operation).Args;
                 var proc = (NDesignator) node.Element;
@@ -162,6 +231,11 @@ namespace DUO2C.CodeGen.LLVM
                 var temp = new TempIdent();
                 ctx.Assign(temp).Argument(new BitCast(false, from, src, to));
                 ctx.EndOperation();
+                src = temp;
+                return ctx;
+            } else if (from.IsPointer && to.IsInteger) {
+                var temp = new TempIdent();
+                ctx.Assign(temp).Keyword("ptrtoint").Argument(from, src).Keyword(" to").Argument(to).EndOperation();
                 src = temp;
                 return ctx;
             }

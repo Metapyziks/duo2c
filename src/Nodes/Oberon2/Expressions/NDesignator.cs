@@ -75,6 +75,8 @@ namespace DUO2C.Nodes.Oberon2
                     return type.As<ArrayType>().ElementType.Resolve(scope);
                 } else if (Operation is NPtrResolve) {
                     return type.As<PointerType>().ResolvedType.Resolve(scope);
+                } else if (Operation is NTypeTest) {
+                    return BooleanType.Default;
                 } else if (Operation is NInvocation) {
                     var op = (NInvocation) Operation;
                     return (type.As<ProcedureType>().ReturnType ?? PointerType.Null).Resolve(scope);
@@ -197,6 +199,18 @@ namespace DUO2C.Nodes.Oberon2
                     } else if (Operation is NPtrResolve) {
                         if (!type.IsPointer) {
                             yield return new PointerExpectedException(type, this);
+                        }
+                    } else if (Operation is NTypeTest) {
+                        var op = (NTypeTest) Operation;
+                        if (!scope.IsTypeDeclared(op.TypeIdent.Identifier, op.TypeIdent.Module)) {
+                            yield return new UndeclaredIdentifierException(op);
+                        }
+
+                        var test = scope.GetType(op.TypeIdent.Identifier, op.TypeIdent.Module);
+
+                        if (!type.IsPointer || !type.As<PointerType>().ResolvedType.IsRecord ||
+                            !test.IsPointer || !test.As<PointerType>().ResolvedType.IsRecord) {
+                            yield return new OperandTypeException(type, test, "IS", this);
                         }
                     } else if (Operation is NInvocation) {
                         var op = (NInvocation) Operation;

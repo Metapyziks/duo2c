@@ -46,13 +46,14 @@ Unary         = ("+" | "-" | "~") Factor.
 Bool          = "TRUE" | "FALSE".
 Set           = "{" [Element {"," Element}] "}".
 Element       = Expr [".." Expr].
-Relation!     = "=" | "#" | "<" | "<=" | ">" | ">=" | IN | IS.
+Relation!     = "=" | "#" | "<" | "<=" | ">" | ">=" | IN.
 AddOp!        = "+" | "-" | OR.
 MulOp!        = "*" | "/" | DIV | MOD | "&".
-Designator    = QualIdent {MemberAccess | Indexer | PtrResolve | Invocation}.
+Designator    = QualIdent {MemberAccess | Indexer | PtrResolve | Invocation | TypeTest}.
 MemberAccess  = "." ident.
 Indexer       = "[" ExprList "]".
 PtrResolve    = "^".
+TypeTest      = IS QualIdent.
 Invocation    = "(" [ExprList] ")".
 ExprList      = Expr {"," Expr}.
 IdentList     = IdentDef {"," IdentDef}.
