@@ -102,13 +102,13 @@ namespace DUO2C.CodeGen.LLVM
             ctx.TypeDecl(new TypeIdent(CharType.Default.ToString()), IntegerType.Byte);
             ctx.TypeDecl(new TypeIdent(SetType.Default.ToString()), IntegerType.LongInt);
 
-            foreach (var kv in _scope.GetTypes()) {
+            foreach (var kv in _scope.GetTypes(false)) {
                 ctx.TypeDecl(new TypeIdent(kv.Key, module.Identifier), kv.Value.Type);
             }
             ctx = ctx.Leave().Ln().Ln();
 
             ctx = ctx.Enter(0);
-            foreach (var kv in _scope.GetTypes().Where(x => x.Value.Type is RecordType)) {
+            foreach (var kv in _scope.GetTypes(false).Where(x => x.Value.Type is RecordType)) {
                 ctx.RecordTable(kv.Key, (RecordType) kv.Value.Type).Ln();
             }
             ctx = ctx.Leave().Ln();
@@ -122,7 +122,7 @@ namespace DUO2C.CodeGen.LLVM
             ctx.Global(_printfProc, _printfProcType);
             ctx.Global(_gcMallocProc, _gcMallocProcType);
             
-            var globals = _scope.GetSymbols().Where(y => !y.Value.Type.IsProcedure);
+            var globals = _scope.GetSymbols(false).Where(y => !y.Value.Type.IsProcedure);
             if (globals.Count() > 0) {
                 ctx = ctx.Ln().Enter(0);
                 foreach (var v in globals) {
@@ -140,13 +140,11 @@ namespace DUO2C.CodeGen.LLVM
                 ctx = ctx.Leave().Ln();
             }
 
-            TempIdent.Reset();
-
-            ctx = ctx.Write("define i32 @main() {").Enter().Ln().Ln();
-            if (module.Body != null) {
-                ctx.Statements(module.Body);
-            }
-            ctx = ctx.Write("ret i32 0").EndOperation().Leave().Write("}").Ln();
+            ctx.Procedure(new GlobalIdent("main", false), new ProcedureType(IntegerType.Integer), new Scope(_scope),
+                (context) => {
+                    context.Statements(module.Body);
+                    context.Keyword("ret").Argument(IntegerType.Integer, new Literal(0.ToString())).EndOperation();
+                });
 
             return ctx;
         }

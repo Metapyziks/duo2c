@@ -94,6 +94,9 @@ namespace DUO2C.CodeGen
 
             public IEnumerable<int> GetColumns()
             {
+                // Temp
+                yield break;
+
                 if (_str == null) _str = _func();
 
                 for (int i = 0, c = 0; i < _str.Length; ++i) {

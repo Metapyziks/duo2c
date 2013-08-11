@@ -103,6 +103,21 @@ namespace DUO2C.Semantics
             return GetSymbolDecl(identifier, module) != null;
         }
 
+        public virtual Scope GetDeclaringScope(String identifier, String module = null)
+        {
+            if (module != null && HasParent) {
+                return Parent.GetDeclaringScope(identifier, module);
+            }
+
+            if (_symbols.ContainsKey(identifier) || _types.ContainsKey(identifier)) {
+                return this;
+            } else if (HasParent) {
+                return Parent.GetDeclaringScope(identifier);
+            } else {
+                return null;
+            }
+        }
+
         public bool IsSymbolConstant(String identifier, String module = null)
         {
             var decl = GetSymbolDecl(identifier, module);
@@ -153,14 +168,22 @@ namespace DUO2C.Semantics
             }
         }
 
-        public IEnumerable<KeyValuePair<String, Declaration>> GetTypes()
+        public IEnumerable<KeyValuePair<String, Declaration>> GetTypes(bool inherit)
         {
-            return _types;
+            if (inherit && HasParent) {
+                return Parent.GetTypes(true).Concat(_types);
+            } else {
+                return _types;
+            }
         }
 
-        public IEnumerable<KeyValuePair<String, Declaration>> GetSymbols()
+        public IEnumerable<KeyValuePair<String, Declaration>> GetSymbols(bool inherit)
         {
-            return _symbols;
+            if (inherit && HasParent) {
+                return Parent.GetSymbols(true).Concat(_symbols);
+            } else {
+                return _symbols;
+            }
         }
     }
 
@@ -193,6 +216,13 @@ namespace DUO2C.Semantics
             return module != null && _modules.ContainsKey(module)
                 ? _modules[module].GetSymbolDecl(identifier, null)
                 : base.GetSymbolDecl(identifier, null);
+        }
+
+        public override Scope GetDeclaringScope(string identifier, string module = null)
+        {
+            return module != null && _modules.ContainsKey(module)
+                ? _modules[module].GetDeclaringScope(identifier, null)
+                : base.GetDeclaringScope(identifier, null);
         }
     }
 }

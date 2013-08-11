@@ -34,14 +34,14 @@ namespace DUO2C.CodeGen
             ctx = ctx.Write("MODULE {0};", module.Identifier).Ln().Enter();
 
             ctx = ctx.Write("TYPE").Ln().Enter();
-            foreach (var kv in module.Scope.GetTypes().Where(x => x.Value.Visibility != AccessModifier.Private)) {
+            foreach (var kv in module.Scope.GetTypes(false).Where(x => x.Value.Visibility != AccessModifier.Private)) {
                 kv.Value.Type.Resolve(module.Scope);
                 ctx.WriteTypeDecl(module, kv.Key, kv.Value.Type, kv.Value.Visibility);
             }
             ctx = ctx.Leave();
 
             ctx = ctx.Write("VAR").Ln().Enter();
-            foreach (var kv in module.Scope.GetSymbols().Where(x => x.Value.Visibility != AccessModifier.Private)) {
+            foreach (var kv in module.Scope.GetSymbols(false).Where(x => x.Value.Visibility != AccessModifier.Private)) {
                 ctx.WriteVarDecl(module, kv.Key, kv.Value.Type, kv.Value.Visibility);
             }
             ctx = ctx.Leave();

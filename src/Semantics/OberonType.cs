@@ -515,7 +515,7 @@ namespace DUO2C.Semantics
             ReceiverType = receiverType;
             ReceiverIdent = receiverIdent;
             Params = args;
-            ParamsWithReceiver = new Parameter[] { new Parameter(false, receiverIdent, receiverType) }
+            ParamsWithReceiver = new Parameter[] { new Parameter(true, receiverIdent, receiverType) }
                 .Concat(Params).ToArray();
         }
 

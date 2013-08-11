@@ -16,8 +16,9 @@ MODULE Simple;
         Vector3* = POINTER TO Vector3Rec;
 
     VAR
-        testRec : Vector1Rec;
-        testPtr : Vector1;
+        A* : Vector1;
+        B* : Vector2;
+        C* : Vector3;
 
     PROCEDURE (this : Vector1) SetX (val : INTEGER);
     BEGIN
@@ -70,10 +71,19 @@ MODULE Simple;
         Out.String(")"); Out.Ln;
     END;
 BEGIN
-    testRec.SetX(5);
-    Out.Integer(testRec.x); Out.Ln;
+    NEW (C);
 
-    NEW (testPtr);
-    testPtr^.SetX(5);
-    Out.Integer(testPtr^.x); Out.Ln;
+    C^.SetX(5);
+    C^.SetY(-3);
+    C^.SetZ(8);
+
+    C^.Print;
+
+    B := C;
+    B^.Print;
+    (* B^.SetZ(5); *)
+
+    A := C;
+    A^.Print;
+
 END Simple.

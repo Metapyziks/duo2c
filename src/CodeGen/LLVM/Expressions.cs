@@ -19,73 +19,117 @@ namespace DUO2C.CodeGen.LLVM
 
         static Value GetDesignation(this GenerationContext ctx, NDesignator node)
         {
-            UnresolvedType containerType;
-            Value containerValue;
-            return ctx.GetDesignation(node, out containerType, out containerValue);
-        }
-
-        static Value GetDesignation(this GenerationContext ctx, NDesignator node,
-            out UnresolvedType containerType, out Value containerValue)
-        {
-            containerType = null;
-            containerValue = null;
             if (node.IsRoot) {
                 return new QualIdent((NQualIdent) node.Element);
             } else if (node.Operation is NPtrResolve) {
-                var temp = new TempIdent();
                 var desig = (NDesignator) node.Element;
-                var ptr = ctx.GetDesignation(desig);
                 var type = desig.GetFinalType(_scope);
-                var tenp = new TempIdent();
-                ctx.Load(temp, type, ptr);
-                return temp;
+                var temp = ctx.GetDesignation(desig);
+                Value ptr = new TempIdent();
+                ctx.ResolveValue(temp, ref ptr, type, false);
+                return ptr;
             } else if (node.Operation is NInvocation) {
                 var args = ((NInvocation) node.Operation).Args;
                 var proc = (NDesignator) node.Element;
-                UnresolvedType receiverType;
-                Value receiverValue;
-                var procPtr = ctx.GetDesignation(proc, out receiverType, out receiverValue);
-                var procType = proc.GetFinalType(_scope).As<ProcedureType>();
-                var temp = new TempIdent();
-                ctx.Call(temp, procType, procPtr, receiverType, receiverValue, args);
-                return temp;
+
+                if (proc.Operation is NMemberAccess) {
+                    var ident = ((NMemberAccess) proc.Operation).Identifier;
+                    var record = (NDesignator) proc.Element;
+                    var recPtrPtr = ctx.GetDesignation(record);
+                    var type = record.GetFinalType(_scope);
+                    var recType = type.As<PointerType>().ResolvedType.As<RecordType>();
+
+                    // Load the pointer to the record
+                    Value recPtr = new TempIdent();
+                    ctx.ResolveValue(recPtrPtr, ref recPtr, type, false);
+
+                    // Check if the pointer is null
+                    var isNull = new TempIdent();
+                    ctx.BinaryComp(isNull, "eq", type, recPtr, Literal.GetDefault(PointerType.Null));
+
+                    // Prepare labels
+                    var dynamicDispatch = new TempIdent();
+                    var dispatchEnd = new TempIdent();
+                    ctx.Branch(isNull, dispatchEnd, dynamicDispatch);
+
+                    var procType = recType.GetProcedureSignature(ident);
+                    var procPtrType = new PointerType(procType);
+
+                    Value temp = new TempIdent();
+
+                    Value staticPtr = new BoundProcedureIdent(recType, ident);
+
+                    Value dynamicPtr;
+                    {
+                        // Dynamic dispatching
+                        ctx.LabelMarker(dynamicDispatch);
+
+                        // Get the type of the record's vtable
+                        var recTablePtrType = new PointerType(GetRecordTableType(recType));
+
+                        // Find pointer to the vtable
+                        temp = new TempIdent();
+                        ctx.Assign(temp);
+                        ctx.Argument(new ElementPointer(false, type, recPtr, 0, 0));
+                        ctx.EndOperation();
+
+                        // Load pointer to vtable
+                        var vtablePtr = new TempIdent();
+                        ctx.Load(vtablePtr, PointerType.Byte, temp);
+                        temp = vtablePtr;
+
+                        // Bitcast to correct type (from i8*)
+                        vtablePtr = new TempIdent();
+                        ctx.Assign(vtablePtr);
+                        ctx.Argument(new BitCast(false, PointerType.Byte, temp, recTablePtrType));
+                        ctx.EndOperation();
+
+                        // Find pointer to procedure
+                        temp = new TempIdent();
+                        ctx.Assign(temp);
+                        ctx.Argument(new ElementPointer(false, recTablePtrType, vtablePtr,
+                            0, 2 + recType.GetProcedureIndex(ident)));
+                        ctx.EndOperation();
+
+                        // Load pointer to procedure
+                        dynamicPtr = new TempIdent();
+                        ctx.Load(dynamicPtr, PointerType.Byte, temp);
+                        temp = dynamicPtr;
+
+                        // Bitcast to correct type (from i8*)
+                        dynamicPtr = new TempIdent();
+                        ctx.Assign(dynamicPtr);
+                        ctx.Argument(new BitCast(false, PointerType.Byte, temp, procPtrType));
+                        ctx.EndOperation();
+
+                        ctx.Branch(dispatchEnd);
+                    }
+
+                    // Select whichever pointer was found
+                    ctx.LabelMarker(dispatchEnd);
+                    var procPtr = new TempIdent();
+                    ctx.Select(procPtr, isNull, procPtrType, staticPtr, dynamicPtr);
+
+                    // Finally, call the procedure
+                    temp = new TempIdent();
+                    ctx.Call(temp, procType, procPtr, type, recPtrPtr, args);
+                    return temp;
+                } else {
+                    var procPtr = ctx.GetDesignation(proc);
+                    var procType = proc.GetFinalType(_scope).As<ProcedureType>();
+                    var temp = new TempIdent();
+                    ctx.Call(temp, procType, procPtr, null, null, args);
+                    return temp;
+                }
             } else if (node.Operation is NMemberAccess) {
                 var ident = ((NMemberAccess) node.Operation).Identifier;
                 var record = (NDesignator) node.Element;
                 var recPtr = ctx.GetDesignation(record);
                 var type = record.GetFinalType(_scope);
                 var recType = type.As<RecordType>();
-                if (recType.HasField(ident)) {
-                    return new ElementPointer(false, new PointerType(type), recPtr,
-                        0, 1 + recType.GetFieldIndex(ident));
-                } else {
-                    containerType = (UnresolvedType) type;
-                    containerValue = recPtr;
-                    var recTablePtrType = new PointerType(GetRecordTableType(recType));
-                    var temp = new TempIdent();
-                    ctx.Assign(temp);
-                    ctx.Argument(new ElementPointer(false, new PointerType(type), recPtr, 0, 0));
-                    ctx.EndOperation();
-                    var vtablePtr = new TempIdent();
-                    ctx.Load(vtablePtr, PointerType.Byte, temp);
-                    var marshalledPtr = new TempIdent();
-                    ctx.Assign(marshalledPtr);
-                    ctx.Argument(new BitCast(false, PointerType.Byte, vtablePtr, recTablePtrType));
-                    ctx.EndOperation();
-                    temp = new TempIdent();
-                    ctx.Assign(temp);
-                    ctx.Argument(new ElementPointer(false, recTablePtrType, marshalledPtr,
-                        0, 2 + recType.GetProcedureIndex(ident)));
-                    ctx.EndOperation();
-                    var procPtr = new TempIdent();
-                    ctx.Load(procPtr, PointerType.Byte, temp);
-                    var marshalledProcPtr = new TempIdent();
-                    ctx.Assign(marshalledProcPtr);
-                    ctx.Argument(new BitCast(false, PointerType.Byte, procPtr,
-                        new PointerType(recType.GetProcedureSignature(ident))));
-                    ctx.EndOperation();
-                    return marshalledProcPtr;
-                }
+                var temp = new TempIdent();
+                return new ElementPointer(false, new PointerType(type), recPtr,
+                    0, 1 + recType.GetFieldIndex(ident));
             } else {
                 throw new NotImplementedException();
             }
@@ -112,16 +156,16 @@ namespace DUO2C.CodeGen.LLVM
             var tsrc = src;
             src = new TempIdent();
 
-           
-            if (from is IntegerType && to is IntegerType) {
-                IntegerType fi = (IntegerType) from, ti = (IntegerType) to;
+
+            if (from.IsInteger && to.IsInteger) {
+                IntegerType fi = from.As<IntegerType>(), ti = to.As<IntegerType>();
                 if (fi.Range < ti.Range) {
                     return ctx.Conversion(src, "sext", from, tsrc, to);
                 }
-            } else if (from is IntegerType && to is RealType) {
+            } else if (from.IsInteger && to.IsReal) {
                 return ctx.Conversion(src, "sitofp", from, tsrc, to);
-            } else if (from is RealType && to is RealType) {
-                RealType fr = (RealType) from, tf = (RealType) to;
+            } else if (from.IsReal && to.IsReal) {
+                RealType fr = from.As<RealType>(), tf = to.As<RealType>();
                 if (fr.Range < tf.Range) {
                     return ctx.Conversion(src, "fpext", from, tsrc, to);
                 }
@@ -155,9 +199,16 @@ namespace DUO2C.CodeGen.LLVM
             if (node.Inner is NDesignator) {
                 var val = ctx.GetDesignation((NDesignator) node.Inner);
                 var ntype = node.Inner.GetFinalType(_scope);
-                if (type.IsPointer && val is QualIdent && !type.CanTestEquality(ntype)
+                if (type.IsPointer && (val is QualIdent || val is ElementPointer) && !type.CanTestEquality(ntype)
                     && type.CanTestEquality(new PointerType(ntype))) {
-                    dest = val;
+
+                    if (val is ElementPointer && !node.IsConstant(_scope)) {
+                        dest = new TempIdent();
+                        ctx.Assign(dest).Argument(val).EndOperation();
+                    } else {
+                        dest = val;
+                    }
+
                     return ctx;
                 }
                 return ctx.ResolveValue(val, ref dest, type, node.IsConstant(_scope));
@@ -196,7 +247,10 @@ namespace DUO2C.CodeGen.LLVM
             }
             
             if (dest is TempIdent) {
-                if (node.Inner is NNumber) {
+                if (node.Inner is NNil) {
+                    dest = Literal.GetDefault(PointerType.Null);
+                    return ctx;
+                } else if (node.Inner is NNumber) {
                     dest = new Literal((NNumber) node.Inner);
                     return ctx;
                 } else if (node.Inner is NBool) {

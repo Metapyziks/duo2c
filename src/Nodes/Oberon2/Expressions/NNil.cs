@@ -11,6 +11,11 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("Nil")]
     public class NNil : ExpressionElement
     {
+        public override string String
+        {
+            get { return "NIL"; }
+        }
+
         public NNil(ParseNode original)
             : base(original, true, false)
         {

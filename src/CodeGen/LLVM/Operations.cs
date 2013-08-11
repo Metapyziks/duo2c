@@ -90,6 +90,11 @@ namespace DUO2C.CodeGen.LLVM
                 .Argument(type, a).Argument(b).EndOperation();
         }
 
+        static GenerationContext BinaryComp(this GenerationContext ctx, Value dest, String comp, OberonType type, Value a, Value b)
+        {
+            return ctx.Assign(dest).Keyword("icmp").Keyword(comp).Argument(type, a).Argument(b).EndOperation();
+        }
+
         static GenerationContext Label(this GenerationContext ctx, TempIdent label)
         {
             return ctx.Argument().Keyword("label").Argument(label);
@@ -160,6 +165,13 @@ namespace DUO2C.CodeGen.LLVM
             
             if (receiverValue != null) {
                 ctx.Conversion(new PointerType(receiverType), argTypes[0], ref receiverValue);
+
+                if (receiverValue is ElementPointer) {
+                    var temp = new TempIdent();
+                    ctx.Assign(temp).Argument(receiverValue).EndOperation();
+                    receiverValue = temp;
+                }
+
                 argValus[0] = receiverValue;
             }
 

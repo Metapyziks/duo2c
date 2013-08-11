@@ -9,6 +9,11 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("PtrResolve")]
     class NPtrResolve : Selector
     {
+        public override string String
+        {
+            get { return "^"; }
+        }
+
         public NPtrResolve(ParseNode original)
             : base(original, true, false)
         {

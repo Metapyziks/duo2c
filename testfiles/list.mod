@@ -1,37 +1,51 @@
-﻿MODULE Lists;
-
-    (*** declare global constants, types and variables ***)
+﻿MODULE List;
+    IMPORT Out;
 
     TYPE
-        Int32    = Integer;
-        List*    = POINTER TO ListNode;
-        ListNode = RECORD
-            value : Int32;
-            next  : List;
+        List*     = POINTER TO ListNode;
+        ListNode* = RECORD
+            value* : INTEGER;
+            next*  : List;
         END;
 
-    (*** declare procedures ***)
+    VAR
+        test : List;
+        i : INTEGER;
 
-    PROCEDURE (l : List) Add* (v : Int32);
+
+    PROCEDURE (l : List) Add* (v : INTEGER);
     BEGIN
-        IF l = NIL THEN
-            NEW(l);                  (* create record instance *)
-            l.value := v;
+        IF l^.next = NIL THEN
+            NEW(l^.next);
+            l^.value := v;
         ELSE
-            l.next.Add(v(Int32));    (* recursive call to .add(n) *)
+            l^.next.Add(v);
         END;
     END Add;
 
-    PROCEDURE (l : List) Get* : Int32;
+    PROCEDURE (l : List) Get* : INTEGER;
     VAR
-        v : Int32;
+        v : INTEGER;
     BEGIN
-        IF l = NIL THEN
-            RETURN 0;          (* .get() must always return an INTEGER *)
+        IF l^.next = NIL THEN
+            RETURN 0;
         ELSE
-            v := l.value;      (* this line will crash if l is NIL *)
-            l := l.next;
+            v := l^.value;
+            l := l^.next;
             RETURN v;
         END
     END Get;
-END Lists.
+
+BEGIN
+    NEW(test);
+    
+    FOR i := 1 TO 10 DO
+        test.Add(i);
+    END;
+
+    REPEAT
+        i := test.Get();
+        Out.Integer(i); Out.Ln;
+    UNTIL i = 0;
+
+END List.

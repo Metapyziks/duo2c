@@ -61,7 +61,8 @@ namespace DUO2C.CodeGen.LLVM
             {
                 Default = 1,
                 NoUnwind = 2,
-                NoAlias = 4
+                NoAlias = 4,
+                AlwaysInline = 8
             }
 
             private String _ident;
@@ -227,15 +228,15 @@ namespace DUO2C.CodeGen.LLVM
             public QualIdent(NQualIdent ident)
             {
                 _ident = ident;
-                _scopeAtDecl = _scope;
+                _scopeAtDecl = _scope.GetDeclaringScope(ident.Identifier, ident.Module) ?? _scope;
             }
 
             public override string ToString()
             {
                 String module = Module;
                 String ident = module != null ? String.Format("{0}.{1}", module, Identifier) : Identifier;
-
-                if (_scopeAtDecl.Parent is RootScope && _scope.GetType(Identifier, module) == null) {
+                
+                if (_scopeAtDecl.Parent is RootScope && _scopeAtDecl.GetType(Identifier, module) == null) {
                     return String.Format("@{0}", ident);
                 } else {
                     return String.Format("%{0}", ident);
@@ -261,7 +262,7 @@ namespace DUO2C.CodeGen.LLVM
             public override string ToString()
             {
                 return String.Format("@{0}.{1}.{2}", _module.Identifier,
-                    _scopeAtDecl.GetTypes().First(x => x.Value.Type == ReceiverType).Key, Identifier);
+                    _scopeAtDecl.GetTypes(true).First(x => x.Value.Type == ReceiverType).Key, Identifier);
             }
         }
 

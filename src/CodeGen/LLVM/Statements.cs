@@ -18,35 +18,16 @@ namespace DUO2C.CodeGen.LLVM
         }
 
         static OberonType _returnType;
-        static GenerationContext Procedure(this GenerationContext ctx, NProcDecl proc)
+        static GenerationContext Procedure(this GenerationContext ctx, Value ident,
+            ProcedureType type, Scope scope, Action<GenerationContext> body)
         {
             ctx.Keyword("define");
 
-            ProcedureType type;
-
-            RecordType receiverType = null;
-
-            if (proc.Receiver != null) {
-                receiverType = _scope.GetType(proc.Receiver.TypeName).As<PointerType>().ResolvedType.As<RecordType>();
-                type = receiverType.GetProcedureSignature(proc.Identifier).As<ProcedureType>();
-            } else {
-                type = _scope.GetSymbol(proc.Identifier).As<ProcedureType>();
-            }
-
             _returnType = type.ReturnType ?? VoidType.Default;
-
-            if (type.ReturnType != null) {
-                ctx.Type(type.ReturnType);
-            } else {
-                ctx.Type(VoidType.Default);
-            }
-
-            var ident = proc.Receiver != null
-                ? new BoundProcedureIdent(receiverType, proc.Identifier)
-                : (Value) new QualIdent(proc.Identifier);
-
+            ctx.Type(_returnType);
+            
             ctx.Write(" \t{0}\t(", ident);
-            ctx.PushScope(proc.Scope);
+            ctx.PushScope(scope);
             foreach (var p in type.ParamsWithReceiver) {
                 if (p.ByReference) {
                     ctx.Argument(new PointerType(p.Type), new QualIdent(p.Identifier));
@@ -56,7 +37,7 @@ namespace DUO2C.CodeGen.LLVM
             }
             ctx.Write(") \t").Keyword("nounwind").Write("{");
             ctx = ctx.Enter().Ln().Ln();
-            
+
             TempIdent.Reset();
 
             if (type.ParamsWithReceiver.Count(x => !x.ByReference) > 0) {
@@ -69,24 +50,46 @@ namespace DUO2C.CodeGen.LLVM
                 ctx = ctx.Leave().Ln();
             }
 
-            if (proc.Scope.GetSymbols().Count(x => !x.Value.IsParameter) > 0) {
+            if (scope.GetSymbols(false).Count(x => !x.Value.IsParameter) > 0) {
                 ctx = ctx.Enter(0);
-                foreach (var decl in proc.Scope.GetSymbols().Where(x => !x.Value.IsParameter)) {
+                foreach (var decl in scope.GetSymbols(false).Where(x => !x.Value.IsParameter)) {
                     ctx.Local(new QualIdent(decl.Key), decl.Value.Type);
                 }
                 ctx = ctx.Leave().Ln().Ln();
             }
-            
-            ctx.Statements(proc.Statements);
+
+            body(ctx);
+
             ctx.PopScope();
-            
-            if (_returnType is VoidType && !proc.Statements.EndsInBranch()) {
-                ctx.Keyword("ret", "void").EndOperation();
-            }
 
             _returnType = null;
 
             return ctx.Leave().Write("}").Ln().Ln();
+        }
+
+        static GenerationContext Procedure(this GenerationContext ctx, NProcDecl proc)
+        {
+            ProcedureType type;
+            RecordType receiverType = null;
+
+            if (proc.Receiver != null) {
+                receiverType = _scope.GetType(proc.Receiver.TypeName).As<PointerType>().ResolvedType.As<RecordType>();
+                type = receiverType.GetProcedureSignature(proc.Identifier).As<ProcedureType>();
+            } else {
+                type = _scope.GetSymbol(proc.Identifier).As<ProcedureType>();
+            }
+
+            var ident = proc.Receiver != null
+                ? new BoundProcedureIdent(receiverType, proc.Identifier)
+                : (Value) new QualIdent(proc.Identifier);
+
+            return ctx.Procedure(ident, type, proc.Scope, (context) => {
+                context.Statements(proc.Statements);
+
+                if (_returnType is VoidType && !proc.Statements.EndsInBranch()) {
+                    context.Keyword("ret", "void").EndOperation();
+                }
+            });
         }
 
         static GenerationContext Statements(this GenerationContext ctx, NStatementSeq block)
