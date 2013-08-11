@@ -57,7 +57,7 @@ namespace DUO2C.CodeGen.LLVM
 
                     Value temp = new TempIdent();
 
-                    Value staticPtr = new BoundProcedureIdent(recType, ident);
+                    Value staticPtr = new BoundProcedureIdent(recType.GetProcedureDefiner(ident), ident);
 
                     Value dynamicPtr;
                     {

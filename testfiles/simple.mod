@@ -73,17 +73,17 @@ MODULE Simple;
 BEGIN
     NEW (C);
 
-    C^.SetX(5);
-    C^.SetY(-3);
-    C^.SetZ(8);
+    C.SetX(5);
+    C.SetY(-3);
+    C.SetZ(8);
 
-    C^.Print;
+    C.Print;
 
     B := C;
-    B^.Print;
+    B.Print;
     (* B^.SetZ(5); *)
 
     A := C;
-    A^.Print;
+    A.Print;
 
 END Simple.
