@@ -213,7 +213,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override OberonType Type
         {
-            get { return _type ?? new RecordType(this); }
+            get { return _type ?? (_type = new RecordType(this)); }
         }
 
         public IEnumerable<KeyValuePair<NIdentDef, NType>> Fields

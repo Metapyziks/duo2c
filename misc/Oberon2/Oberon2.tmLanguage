@@ -19,7 +19,7 @@
             <key>comment</key>
             <string>oberon-2 keywords</string>
             <key>match</key>
-            <string>\b(MODULE|EXTERNAL|BEGIN|END|IMPORT|CONST|TYPE|VAR|PROCEDURE|ARRAY|OF|RECORD|IF|THEN|ELSIF|ELSE|CASE|WHILE|REPEAT|UNTIL|FOR|DO|LOOP|WITH|EXIT|RETURN|TRUE|FALSE|NIL|OR|FROM|TO)\b</string>
+            <string>\b(MODULE|EXTERNAL|BEGIN|END|IMPORT|CONST|TYPE|VAR|PROCEDURE|ARRAY|OF|RECORD|IF|THEN|ELSIF|ELSE|CASE|WHILE|REPEAT|UNTIL|FOR|DO|LOOP|WITH|EXIT|RETURN|TRUE|FALSE|NIL|OR|FROM|TO|NEW|IS)\b</string>
             <key>name</key>
             <string>keyword.instruction.ob2</string>
         </dict>

@@ -287,7 +287,7 @@ namespace DUO2C
                 return ParseString(src);
             } catch (CompilerException e) {
                 e.SetSourcePath(filepath);
-                throw e;
+                throw;
             }
         }
 
@@ -464,8 +464,8 @@ namespace DUO2C
                     }
                     try {
                         return (ParseNode) _subs[node.Token].Invoke(new Object[] { node });
-                    } catch (TargetInvocationException e) {
-                        throw e;
+                    } catch (TargetInvocationException) {
+                        throw;
                     }
                 }
             }
