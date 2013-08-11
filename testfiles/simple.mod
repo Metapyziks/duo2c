@@ -81,7 +81,7 @@ BEGIN
 
     B := C;
     B.Print;
-    (* B^.SetZ(5); *)
+    (* B.SetZ(5); *)
 
     A := C;
     A.Print;

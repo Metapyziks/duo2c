@@ -20,6 +20,8 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("Designator")]
     public class NDesignator : ExpressionElement
     {
+        bool _fudgedPtrs;
+
         public bool IsRoot
         {
             get { return Element is NQualIdent; }
@@ -46,14 +48,12 @@ namespace DUO2C.Nodes.Oberon2
                 var ident = (NQualIdent) Element;
                 return scope.GetSymbol(ident.Identifier, ident.Module);
             } else {
+                if (Operation is NIndexer || Operation is NMemberAccess) {
+                    if (!_fudgedPtrs) FudgePointers(scope);
+                }
+
                 var prev = (NDesignator) Element;
                 var type = prev.GetFinalType(scope);
-                
-                if (Operation is NIndexer || Operation is NMemberAccess) {
-                    while (type.IsPointer) {
-                        type = type.As<PointerType>().ResolvedType;
-                    }
-                }
 
                 if (Operation is NMemberAccess) {
                     var op = (NMemberAccess) Operation;
@@ -62,7 +62,11 @@ namespace DUO2C.Nodes.Oberon2
                         return mdl.Scope.GetSymbol(op.Identifier).Resolve(scope);
                     } else if (type.IsRecord) {
                         var rec = type.As<RecordType>();
-                        var decl = rec.GetFieldDecl(op.Identifier) ?? rec.GetProcedureDecl(op.Identifier);
+                        var decl = rec.GetFieldDecl(op.Identifier);
+                        return decl.Type.Resolve(scope);
+                    } else if (type.IsPointer) {
+                        var rec = type.As<PointerType>().ResolvedType.As<RecordType>();
+                        var decl = rec.GetProcedureDecl(op.Identifier);
                         return decl.Type.Resolve(scope);
                     }
                 } else if (Operation is NIndexer) {
@@ -98,12 +102,37 @@ namespace DUO2C.Nodes.Oberon2
         public NDesignator(ParseNode original)
             : base(original, false)
         {
+            _fudgedPtrs = false;
+
             if (Children.Count() >= 2 && Element is NQualIdent) {
                 var prev = Children.Take(Children.Count() - 1);
-                Children = new ParseNode[] { 
+                Children = new ParseNode[] {
                     new NDesignator(new BranchNode(prev, Token)),
                     Children.Last()
                 };
+            }
+        }
+
+        private void FudgePointers(Scope scope)
+        {
+            _fudgedPtrs = true;
+
+            if (Operation is NMemberAccess) {
+                var mbac = (NMemberAccess) Operation;
+                var prev = ((NDesignator) Element).GetFinalType(scope);
+                OberonType type;
+                if (prev.IsPointer && (type = prev.As<PointerType>().ResolvedType).IsRecord) {
+                    if (type.As<RecordType>().HasProcedure(mbac.Identifier)) {
+                        return;
+                    }
+                }
+            }
+
+            NDesignator elem;
+            if ((elem = (NDesignator) Element).GetFinalType(scope).IsPointer) {
+                ((ParseNode[]) Children)[0] = new NDesignator(new BranchNode(new ParseNode[] {
+                    Children.First(), new NPtrResolve(new BranchNode(Children.First().EndIndex, "PtrResolve"))
+                }));
             }
         }
 
@@ -124,16 +153,13 @@ namespace DUO2C.Nodes.Oberon2
             }
 
             if (!foundInner && !IsRoot) {
+                if (Operation is NIndexer || Operation is NMemberAccess) {
+                    if (!_fudgedPtrs) FudgePointers(scope);
+                }
+
                 var prev = (NDesignator) Element;
                 var type = prev.GetFinalType(scope);
                 type.Resolve(scope);
-
-                if (Operation is NIndexer || Operation is NMemberAccess) {
-                    while (type != null && type.IsPointer) {
-                        type = type.As<PointerType>().ResolvedType;
-                        if (type != null) type.Resolve(scope);
-                    }
-                }
 
                 if (type == null) {
                     yield return new UndeclaredIdentifierException(Element);
@@ -150,7 +176,16 @@ namespace DUO2C.Nodes.Oberon2
                             }
                         } else if (type.IsRecord) {
                             var rec = type.As<RecordType>();
-                            if (!rec.HasField(op.Identifier) && !rec.HasProcedure(op.Identifier)) {
+                            if (!rec.HasField(op.Identifier)) {
+                                yield return new MemberNotFoundException(type, this);
+                            }
+                        } else if (type.IsPointer) {
+                            var ptr = type.As<PointerType>();
+                            if (!ptr.ResolvedType.IsRecord) {
+                                yield return new OperandTypeException(type, ".", this);
+                            }
+                            var rec = ptr.ResolvedType.As<RecordType>();
+                            if (!rec.HasProcedure(op.Identifier)) {
                                 yield return new MemberNotFoundException(type, this);
                             }
                         } else {

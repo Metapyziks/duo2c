@@ -15,11 +15,11 @@
 
     PROCEDURE (l : List) Add* (v : INTEGER);
     BEGIN
-        IF l^.next = NIL THEN
-            NEW(l^.next);
-            l^.value := v;
+        IF l = NIL THEN
+            NEW(l);
+            l.value := v;
         ELSE
-            l^.next.Add(v);
+            l.next.Add(v);
         END;
     END Add;
 
@@ -27,18 +27,16 @@
     VAR
         v : INTEGER;
     BEGIN
-        IF l^.next = NIL THEN
+        IF l = NIL THEN
             RETURN 0;
         ELSE
-            v := l^.value;
-            l := l^.next;
+            v := l.value;
+            l := l.next;
             RETURN v;
         END
     END Get;
 
-BEGIN
-    NEW(test);
-    
+BEGIN    
     n := 1;
     FOR i := 1 TO 10 DO
         n := (n * 8723 + 181) MOD 256;
