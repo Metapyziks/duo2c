@@ -559,7 +559,11 @@ namespace DUO2C.Nodes.Oberon2
         public override string String
         {
             get {
-                return String.Format("RETURN {0}", Expression.String);
+                if (Expression != null) {
+                    return String.Format("RETURN {0}", Expression.String);
+                } else {
+                    return "RETURN";
+                }
             }
         }
 

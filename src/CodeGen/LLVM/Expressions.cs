@@ -113,7 +113,7 @@ namespace DUO2C.CodeGen.LLVM
                 var args = ((NInvocation) node.Operation).Args;
                 var proc = (NDesignator) node.Element;
 
-                if (proc.Operation is NMemberAccess) {
+                if (!proc.IsRoot && proc.Operation is NMemberAccess) {
                     var ident = ((NMemberAccess) proc.Operation).Identifier;
                     var record = (NDesignator) proc.Element;
                     var recPtrPtr = ctx.GetDesignation(record);

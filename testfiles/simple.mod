@@ -32,6 +32,11 @@ MODULE Simple;
 
     PROCEDURE (this : Vector1) Print;
     BEGIN
+        IF this = NIL THEN
+            Out.String("NIL"); Out.Ln;
+            RETURN;
+        END;
+
         Out.String("("); Out.Integer(this^.x);
         Out.String(")"); Out.Ln;
     END;
@@ -48,6 +53,11 @@ MODULE Simple;
 
     PROCEDURE (this : Vector2) Print;
     BEGIN
+        IF this = NIL THEN
+            Out.String("NIL"); Out.Ln;
+            RETURN;
+        END;
+
         Out.String("("); Out.Integer(this^.x);
         Out.String(" "); Out.Integer(this^.y);
         Out.String(")"); Out.Ln;
@@ -65,19 +75,55 @@ MODULE Simple;
 
     PROCEDURE (this : Vector3) Print;
     BEGIN
+        IF this = NIL THEN
+            Out.String("NIL"); Out.Ln;
+            RETURN;
+        END;
+
         Out.String("("); Out.Integer(this^.x);
         Out.String(" "); Out.Integer(this^.y);
         Out.String(" "); Out.Integer(this^.z);
         Out.String(")"); Out.Ln;
     END;
 
-BEGIN
-    NEW(B);
-
-    IF B IS Vector1 THEN
-        Out.String("B is a Vector2"); Out.Ln;
-    ELSE
-        Out.String("B is not a Vector2"); Out.Ln;
+    PROCEDURE TestType (vec : Vector1; name : ARRAY OF CHAR);
+    BEGIN
+        IF vec IS Vector3 THEN
+            Out.String(name); Out.String(" is a Vector3"); Out.Ln;
+        ELSIF vec IS Vector2 THEN
+            Out.String(name); Out.String(" is a Vector2"); Out.Ln;
+        ELSIF vec IS Vector1 THEN
+            Out.String(name); Out.String(" is a Vector1"); Out.Ln;
+        ELSE
+            Out.String(name); Out.String(" is not a vector"); Out.Ln;
+        END;
     END;
+
+BEGIN
+    NEW(C);
+
+    C.SetX(56);
+    C.SetY(-3);
+    C.SetZ(12);
+
+    Out.String("C = "); C.Print;
+    TestType(C, "C");
+
+    NEW(A);
+
+    A.SetX(C.GetY() * 3);
+
+    Out.String("A = "); A.Print;
+    TestType(A, "A");
+
+    B := C;
+
+    Out.String("B = "); B.Print;
+    TestType(B, "B");
+
+    A := NIL;
+
+    Out.String("A = "); A.Print;
+    TestType(A, "NIL");
 
 END Simple.
