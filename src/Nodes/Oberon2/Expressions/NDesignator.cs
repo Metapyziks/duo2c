@@ -132,7 +132,7 @@ namespace DUO2C.Nodes.Oberon2
             if ((elem = (NDesignator) Element).GetFinalType(scope).IsPointer) {
                 ((ParseNode[]) Children)[0] = new NDesignator(new BranchNode(new ParseNode[] {
                     Children.First(), new NPtrResolve(new BranchNode(Children.First().EndIndex, "PtrResolve"))
-                }));
+                }, Token));
             }
         }
 

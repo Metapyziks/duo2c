@@ -1,42 +1,45 @@
-﻿MODULE List;
-    IMPORT Out;
+﻿MODULE Lists;
+
+    (*** declare global constants, types and variables ***)
 
     TYPE
-        List*     = POINTER TO ListNode;
-        ListNode* = RECORD
-            value* : INTEGER;
-            next*  : List;
+        (* Integer  = INTEGER; *)
+        List*    = POINTER TO ListNode;
+        ListNode = RECORD
+            value : Integer;
+            next  : List;
         END;
 
     VAR
+        i, n : INTEGER;
         test : List;
-        i : INTEGER;
-        n : INTEGER;
 
-    PROCEDURE (l : List) Add* (v : INTEGER);
+    (*** declare procedures ***)
+
+    PROCEDURE (l : List) Add* (v : Integer);
     BEGIN
         IF l = NIL THEN
-            NEW(l);
-            l.value := v;
+            NEW(l);             (* create record instance *)
+            l.value := v
         ELSE
-            l.next.Add(v);
-        END;
+            l.next.Add(v)      (* recursive call to .add(n) *)
+        END
     END Add;
 
-    PROCEDURE (l : List) Get* : INTEGER;
+    PROCEDURE (l : List) Get* () : Integer;
     VAR
-        v : INTEGER;
+        v : Integer;
     BEGIN
         IF l = NIL THEN
-            RETURN 0;
+            RETURN 0           (* .get() must always return an INTEGER *)
         ELSE
-            v := l.value;
+            v := l.value;       (* this line will crash if l is NIL *)
             l := l.next;
-            RETURN v;
+            RETURN v
         END
     END Get;
 
-BEGIN    
+BEGIN
     n := 1;
     FOR i := 1 TO 10 DO
         n := (n * 8723 + 181) MOD 256;

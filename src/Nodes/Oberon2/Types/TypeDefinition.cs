@@ -199,6 +199,8 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("RecordType")]
     public class NRecordType : TypeDefinition, ITypeErrorSource
     {
+        RecordType _type;
+
         public NNamedType SuperRecord
         {
             get { return Children.FirstOrDefault() as NNamedType; }
@@ -211,7 +213,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override OberonType Type
         {
-            get { return new RecordType(this); }
+            get { return _type ?? new RecordType(this); }
         }
 
         public IEnumerable<KeyValuePair<NIdentDef, NType>> Fields
@@ -228,6 +230,11 @@ namespace DUO2C.Nodes.Oberon2
             : base(original, false)
         {
             Children = Children.Where(x => x is NNamedType || x is NFieldList);
+        }
+
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
+        {
+            return base.FindTypeErrors(scope);
         }
     }
 

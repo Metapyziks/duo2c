@@ -252,6 +252,8 @@ namespace DUO2C.Semantics
     {
         public static readonly RecordType Base = new RecordType();
 
+        private NRecordType _recNode;
+
         private NQualIdent _superRecordIdent;
         private Dictionary<String, Declaration> _fields;
         private Dictionary<String, Declaration> _procedures;
@@ -327,11 +329,8 @@ namespace DUO2C.Semantics
         public RecordType(NRecordType node)
         {
             _superRecordIdent = (node.SuperRecord != null ? node.SuperRecord.Identifier : null);
+            _recNode = node;
 
-            _fields = node.Fields.Select(x =>
-                new KeyValuePair<String, Declaration>(x.Key.Identifier,
-                    new Declaration(x.Value.Type, x.Key.Visibility, DeclarationType.Field))
-            ).ToDictionary(x => x.Key, x => x.Value);
             _procedures = new Dictionary<string, Declaration>();
         }
 
@@ -423,6 +422,11 @@ namespace DUO2C.Semantics
 
         protected override void OnResolve(Scope scope)
         {
+            _fields = _recNode.Fields.Where(x => x.Value.FindTypeErrors(scope).Count() == 0)
+                .Select(x => new KeyValuePair<String, Declaration>(x.Key.Identifier,
+                    new Declaration(x.Value.Type, x.Key.Visibility, DeclarationType.Field)))
+                .ToDictionary(x => x.Key, x => x.Value);
+
             if (HasSuperRecord) {
                 SuperRecord = scope.GetType(_superRecordIdent.Identifier, _superRecordIdent.Module).As<RecordType>();
             } else if (this != Base) {
