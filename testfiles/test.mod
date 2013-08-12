@@ -1,6 +1,8 @@
 MODULE Test;
+    IMPORT Out;
+
     TYPE
-        PointType*  = LongReal;
+        PointType*  = LONGREAL;
         Point2D*    = POINTER TO Point2DRec;
         Point2DRec* = RECORD
             x* : PointType;
@@ -10,30 +12,45 @@ MODULE Test;
         Point3DRec* = RECORD (Point2DRec)
             z* : PointType;
         END;
-        TestArray*  = ARRAY 12, 8 OF Integer;
     VAR
         a : Point3D;
         b : Point3D;
         c : Point3D;
 
-    PROCEDURE Point2D* (x : PointType; y : PointType) : Point2D;
-        VAR val : Point2D;
+    PROCEDURE (this : Point2D) New* (x : PointType; y : PointType);
     BEGIN
-        NEW(val);
-        val.x := x;
-        val.y := y;
-        RETURN val;
+        NEW(this);
+        this.x := x;
+        this.y := y;
     END Point2D;
 
-    PROCEDURE Point3D* (x : PointType; y : PointType; z : PointType) : Point3D;
-        VAR val : Point3D;
+    PROCEDURE (this : Point3D) New* (x : PointType; y : PointType; z : PointType);
     BEGIN
-        NEW(val);
-        val.x := x;
-        val.y := y;
-        val.z := z;
-        RETURN val;
+        NEW(this);
+        this.x := x;
+        this.y := y;
+        this.z := z;
     END Point3D;
+
+    PROCEDURE (this : Point2D) Print*;
+    BEGIN
+        Out.String("(");
+        Out.Real(this.x);
+        Out.String(" ");
+        Out.Real(this.y);
+        Out.String(")");
+    END Print;
+
+    PROCEDURE (this : Point3D) Print*;
+    BEGIN
+        Out.String("(");
+        Out.Real(this.x);
+        Out.String(" ");
+        Out.Real(this.y);
+        Out.String(" ");
+        Out.Real(this.z);
+        Out.String(")");
+    END Print;
 
     PROCEDURE (this : Point2D) Add* (that : Point2D) : Point2D;
         VAR sum : Point2D;
@@ -73,8 +90,13 @@ MODULE Test;
         RETURN dif;
     END Sub;
 BEGIN
-    a := Point3D(5.2, -6, 12.4E-1);
-    b := Point3D(3.824, 3.1D2, 12);
+    a.New(5.2, -6, 12.4E-1);
+    b.New(3.824, 3.1D2, 12);
+
+    a.Print; Out.Ln;
+    b.Print; Out.Ln;
 
     c := a.Add(b);
+
+    c.Print; Out.Ln;
 END Test.

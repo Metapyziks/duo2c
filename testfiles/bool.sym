@@ -1,0 +1,15 @@
+(**
+ *  Generated 12/08/2013 14:39:46
+ *  GlobalUID a7ee4f7b-6994-4bee-bc8b-58db49d0accf
+ *
+ *  Exported symbol file for module "Bool"
+ *
+ *  WARNING: This file is automatically
+ *  generated and should not be edited
+**)
+
+MODULE Bool;
+    TYPE
+    VAR
+END Bool.
+

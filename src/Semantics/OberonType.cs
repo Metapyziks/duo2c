@@ -194,7 +194,7 @@ namespace DUO2C.Semantics
 
         public override bool CanTestEquality(OberonType other)
         {
-            return ReferencedType.CanTestEquality(other);
+            return ReferencedType == null || ReferencedType.CanTestEquality(other);
         }
 
         public override string ToString()

@@ -1,6 +1,6 @@
 (**
- *  Generated 27/07/2013 14:16:38
- *  GlobalUID 784bc21d-9d0f-4269-bb14-106a8109d969
+ *  Generated 12/08/2013 14:53:00
+ *  GlobalUID 5fc9e8f2-36f1-4a8c-a73c-907d4914f7d0
  *
  *  Exported symbol file for module "Test"
  *
@@ -10,22 +10,18 @@
 
 MODULE Test;
     TYPE
-        PointType  * = LONGREAL;
-        Point2D    * = POINTER TO Point2DRec;
+        PointType * = LONGREAL;
+        Point2D * = POINTER TO Point2DRec;
         Point2DRec * = RECORD
-            x   * : Test.PointType;
-            y   * : Test.PointType;
-            Add * : PROCEDURE (that : Test.Point2D) : Test.Point2D;
-            Sub * : PROCEDURE (that : Test.Point2D) : Test.Point2D;
+            x * : Test.PointType;
+            y * : Test.PointType;
         END;
-        Point3D    * = POINTER TO Point3DRec;
+        Point3D * = POINTER TO Point3DRec;
         Point3DRec * = RECORD (Point2DRec)
-            z   * : Test.PointType;
-            Add * : PROCEDURE (that : Test.Point3D) : Test.Point3D;
-            Sub * : PROCEDURE (that : Test.Point3D) : Test.Point3D;
+            x * : Test.PointType;
+            y * : Test.PointType;
+            z * : Test.PointType;
         END;
-        TestArray  * = ARRAY 12 OF ARRAY 8 OF INTEGER;
     VAR
-        Point2D * : PROCEDURE (x : Test.PointType; y : Test.PointType) : Test.Point2D;
-        Point3D * : PROCEDURE (x : Test.PointType; y : Test.PointType; z : Test.PointType) : Test.Point3D;
 END Test.
+
