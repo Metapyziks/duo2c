@@ -14,6 +14,7 @@ MODULE Bool;
     END;
 
 BEGIN
+    Out.String("Start"); Out.Ln;
     IF True("A") & True("B") & False("C") & True("D") THEN
         Out.String("True"); Out.Ln;
     ELSE

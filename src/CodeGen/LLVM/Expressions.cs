@@ -382,6 +382,32 @@ namespace DUO2C.CodeGen.LLVM
         {
             if (node.Operator == TermOperator.None) {
                 return ctx.Factor(node.Factor, ref dest, type);
+            } else if (node.Operator == TermOperator.And) {
+                var a = ctx.PrepareOperand(node.Prev, type, dest);
+                if (node.Factor.IsConstant(_scope)) {
+                    return ctx.BinaryOp(dest, "and", type, a, ctx.PrepareOperand(node.Factor, type, dest));
+                } else {
+                    var initBlock = _blockLabel;
+
+                    var testB = new TempIdent();
+                    var end = new TempIdent();
+                    ctx.Branch(a, testB, end);
+
+                    ctx.LabelMarker(testB);
+                    var b = ctx.PrepareOperand(node.Factor, type, dest);
+                    if (!(b is TempIdent)) {
+                        var temp = new TempIdent();
+                        ctx.Assign(temp).Argument(BooleanType.Default, b).EndOperation();
+                        b = temp;
+                    }
+                    testB = _blockLabel;
+                    ctx.Branch(end);
+
+                    ctx.LabelMarker(end);
+                    return ctx.Phi(dest, BooleanType.Default,
+                        new Literal(0.ToString()), initBlock,
+                        b, testB);
+                }
             } else {
                 Value a = ctx.PrepareOperand(node.Prev, type, dest), b = ctx.PrepareOperand(node.Factor, type, dest);
                 switch (node.Operator) {
@@ -393,8 +419,6 @@ namespace DUO2C.CodeGen.LLVM
                         return ctx.BinaryOp(dest, "sdiv", type, a, b);
                     case TermOperator.Modulo:
                         return ctx.BinaryOp(dest, "srem", type, a, b);
-                    case TermOperator.And:
-                        return ctx.BinaryOp(dest, "and", type, a, b);
                     default:
                         throw new NotImplementedException();
                 }
