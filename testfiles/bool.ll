@@ -1,5 +1,5 @@
-; Generated 12/08/2013 17:20:30
-; GlobalUID 43507fc6-c7cf-4098-8d1c-9d6056de5970
+; Generated 12/08/2013 17:22:44
+; GlobalUID dac29bbc-24c2-497d-a7e4-0dfa70f34432
 ; 
 ; LLVM IR file for module "Bool"
 ; 
@@ -76,32 +76,32 @@ define i32 @main() nounwind {
     ; Out.Ln()
     %3 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @.str2, i32 0, i32 0)) nounwind
     
-    ; IF True("A") & True("B") & False("C") & True("D") THEN
-    %4 = call i1 ({i32, %CHAR*})* @True({i32, %CHAR*} {i32 2, %CHAR* getelementptr inbounds ([2 x %CHAR]* @.str5, i32 0, i32 0)}) nounwind
-    br i1 %4, label %5, label %7
+    ; IF False("A") OR True("B") OR True("C") OR False("D") THEN
+    %4 = call i1 ({i32, %CHAR*})* @False({i32, %CHAR*} {i32 2, %CHAR* getelementptr inbounds ([2 x %CHAR]* @.str5, i32 0, i32 0)}) nounwind
+    br i1 %4, label %7, label %5
     
 ; <label>:5                                       ; preds = %0
     %6 = call i1 ({i32, %CHAR*})* @True({i32, %CHAR*} {i32 2, %CHAR* getelementptr inbounds ([2 x %CHAR]* @.str6, i32 0, i32 0)}) nounwind
     br label %7
     
 ; <label>:7                                       ; preds = %0, %5
-    %8 = phi i1 [0, %0], [%6, %5]
-    br i1 %8, label %9, label %11
+    %8 = phi i1 [1, %0], [%6, %5]
+    br i1 %8, label %11, label %9
     
 ; <label>:9                                       ; preds = %7
-    %10 = call i1 ({i32, %CHAR*})* @False({i32, %CHAR*} {i32 2, %CHAR* getelementptr inbounds ([2 x %CHAR]* @.str7, i32 0, i32 0)}) nounwind
+    %10 = call i1 ({i32, %CHAR*})* @True({i32, %CHAR*} {i32 2, %CHAR* getelementptr inbounds ([2 x %CHAR]* @.str7, i32 0, i32 0)}) nounwind
     br label %11
     
 ; <label>:11                                      ; preds = %7, %9
-    %12 = phi i1 [0, %7], [%10, %9]
-    br i1 %12, label %13, label %15
+    %12 = phi i1 [1, %7], [%10, %9]
+    br i1 %12, label %15, label %13
     
 ; <label>:13                                      ; preds = %11
-    %14 = call i1 ({i32, %CHAR*})* @True({i32, %CHAR*} {i32 2, %CHAR* getelementptr inbounds ([2 x %CHAR]* @.str8, i32 0, i32 0)}) nounwind
+    %14 = call i1 ({i32, %CHAR*})* @False({i32, %CHAR*} {i32 2, %CHAR* getelementptr inbounds ([2 x %CHAR]* @.str8, i32 0, i32 0)}) nounwind
     br label %15
     
 ; <label>:15                                      ; preds = %11, %13
-    %16 = phi i1 [0, %11], [%14, %13]
+    %16 = phi i1 [1, %11], [%14, %13]
     br i1 %16, label %17, label %21
     
 ; <label>:17                                      ; preds = %15

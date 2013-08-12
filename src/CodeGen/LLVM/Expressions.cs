@@ -429,6 +429,32 @@ namespace DUO2C.CodeGen.LLVM
         {
             if (node.Operator == SimpleExprOperator.None) {
                 return ctx.Term(node.Term, ref dest, type);
+            } else if (node.Operator == SimpleExprOperator.Or) {
+                var a = ctx.PrepareOperand(node.Prev, type, dest);
+                if (node.Term.IsConstant(_scope)) {
+                    return ctx.BinaryOp(dest, "or", type, a, ctx.PrepareOperand(node.Term, type, dest));
+                } else {
+                    var initBlock = _blockLabel;
+
+                    var testB = new TempIdent();
+                    var end = new TempIdent();
+                    ctx.Branch(a, end, testB);
+
+                    ctx.LabelMarker(testB);
+                    var b = ctx.PrepareOperand(node.Term, type, dest);
+                    if (!(b is TempIdent)) {
+                        var temp = new TempIdent();
+                        ctx.Assign(temp).Argument(BooleanType.Default, b).EndOperation();
+                        b = temp;
+                    }
+                    testB = _blockLabel;
+                    ctx.Branch(end);
+
+                    ctx.LabelMarker(end);
+                    return ctx.Phi(dest, BooleanType.Default,
+                        new Literal(1.ToString()), initBlock,
+                        b, testB);
+                }
             } else {
                 Value a = ctx.PrepareOperand(node.Prev, type, dest), b = ctx.PrepareOperand(node.Term, type, dest);
                 switch (node.Operator) {
@@ -437,7 +463,6 @@ namespace DUO2C.CodeGen.LLVM
                     case SimpleExprOperator.Subtract:
                         return ctx.BinaryOp(dest, "sub", "fsub", type, a, b);
                     case SimpleExprOperator.Or:
-                        return ctx.BinaryOp(dest, "or", type, a, b);
                     default:
                         throw new NotImplementedException();
                 }
