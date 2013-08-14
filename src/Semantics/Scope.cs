@@ -115,6 +115,17 @@ namespace DUO2C.Semantics
             return GetSymbolDecl(identifier, module) != null;
         }
 
+        public virtual Scope GetDeclaringScope(OberonType type)
+        {
+            if (_types.Values.Any(x => x.Type == type)) {
+                return this;
+            } else if (HasParent) {
+                return Parent.GetDeclaringScope(type);
+            } else {
+                return null;
+            }
+        }
+
         public virtual Scope GetDeclaringScope(String identifier, String module = null)
         {
             if (module != null && HasParent) {
@@ -233,6 +244,11 @@ namespace DUO2C.Semantics
             return module != null && _modules.ContainsKey(module)
                 ? _modules[module].GetSymbolDecl(identifier, null)
                 : base.GetSymbolDecl(identifier, null);
+        }
+
+        public override Scope GetDeclaringScope(OberonType type)
+        {
+            return Modules.FirstOrDefault(x => x.Value.GetTypes(false).Any(y => y.Value.Type == type)).Value;
         }
 
         public override Scope GetDeclaringScope(string identifier, string module = null)

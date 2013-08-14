@@ -1,5 +1,5 @@
-; Generated 14/08/2013 17:32:16
-; GlobalUID 2d525306-505b-414b-a048-a0d28c92c8e5
+; Generated 14/08/2013 17:39:28
+; GlobalUID 2fdd0584-e027-491b-8458-57ff7195501f
 ; 
 ; LLVM IR file for module "Link"
 ; 
@@ -86,7 +86,7 @@ define i32 @Link._main() nounwind {
     br label %18
     
 ; <label>:18                                      ; preds = %4, %11
-    %19 = phi void (%List.List*, %List.Int32)* [@Link.ListNode.Add, %4], [%17, %11]
+    %19 = phi void (%List.List*, %List.Int32)* [@List.ListNode.Add, %4], [%17, %11]
     %20 = load i32* @n
     call void (%List.List*, %List.Int32)* %19(%List.List* @test, %List.Int32 %20) nounwind
     
@@ -117,7 +117,7 @@ define i32 @Link._main() nounwind {
     br label %34
     
 ; <label>:34                                      ; preds = %24, %27
-    %35 = phi %List.Int32 (%List.List*)* [@Link.ListNode.Get, %24], [%33, %27]
+    %35 = phi %List.Int32 (%List.List*)* [@List.ListNode.Get, %24], [%33, %27]
     %36 = call %List.Int32 (%List.List*)* %35(%List.List* @test) nounwind
     store i32 %36, i32* @i
     

@@ -247,7 +247,6 @@ namespace DUO2C.CodeGen.LLVM
         public class BoundProcedureIdent : Value
         {
             Scope _scopeAtDecl;
-            NModule _moduleAtDecl;
 
             public RecordType ReceiverType { get; private set; }
             public String Identifier { get; private set; }
@@ -258,12 +257,11 @@ namespace DUO2C.CodeGen.LLVM
                 Identifier = ident;
 
                 _scopeAtDecl = _scope;
-                _moduleAtDecl = _module;
             }
 
             public override string ToString()
             {
-                return String.Format("@{0}.{1}.{2}", _moduleAtDecl.Identifier,
+                return String.Format("@{0}.{1}.{2}", _scopeAtDecl.GetDeclaringScope(ReceiverType).CurrentModule.Identifier,
                     _scopeAtDecl.GetTypes(true).First(x => x.Value.Type == ReceiverType).Key, Identifier);
             }
         }
