@@ -1,5 +1,5 @@
-; Generated 14/08/2013 16:29:00
-; GlobalUID ef190352-beaf-407b-ab16-174721dfaae9
+; Generated 14/08/2013 17:09:12
+; GlobalUID 06ed6600-bcce-4aa6-8b34-dd2d370d7cf7
 ; 
 ; LLVM IR file for module "List"
 ; 
@@ -10,6 +10,19 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
 
 %CHAR = type i8
 %SET = type i64
+
+@.str0 = private constant [9 x i8] c"ListNode\00"
+
+declare i32 @printf(%CHAR*, ...) nounwind 
+declare noalias i8* @GC_malloc(i32) 
+
+%Out.String = type {i32, %CHAR*}
+
+define i32 @Out._main() nounwind {
+    
+    ret i32 0
+}
+
 %List.Int32 = type i32
 %List.List = type %List.ListNode*
 %List.ListNode = type {i8*, %List.Int32, %List.List}
@@ -21,10 +34,6 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
     i8* bitcast (%List.Int32 (%List.List*)* @List.ListNode.Get to i8*)
 ]
 
-@.str0 = private constant [9 x i8] c"ListNode\00"
-
-declare i32 @printf(%CHAR*, ...) nounwind 
-declare noalias i8* @GC_malloc(i32) 
 define void @List.ListNode.Add(%List.List* %l, %List.Int32 %$v) nounwind {
     
     %v = alloca %List.Int32
@@ -118,7 +127,7 @@ define %List.Int32 @List.ListNode.Get(%List.List* %l) nounwind {
     
 }
 
-define i32 @main() nounwind {
+define i32 @List._main() nounwind {
     
     ret i32 0
 }

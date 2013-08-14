@@ -67,7 +67,7 @@ namespace DUO2C.CodeGen.LLVM
             return ctx.Leave().Write("}").Ln().Ln();
         }
 
-        static GenerationContext Procedure(this GenerationContext ctx, NProcDecl proc)
+        static GenerationContext Procedure(this GenerationContext ctx, NForwardDecl proc)
         {
             ProcedureType type;
             RecordType receiverType = null;
@@ -83,13 +83,18 @@ namespace DUO2C.CodeGen.LLVM
                 ? new BoundProcedureIdent(receiverType, proc.Identifier)
                 : (Value) new QualIdent(proc.Identifier);
 
-            return ctx.Procedure(ident, type, proc.Scope, (context) => {
-                context.Statements(proc.Statements);
+            if (proc is NProcDecl) {
+                var decl = (NProcDecl) proc;
+                return ctx.Procedure(ident, type, decl.Scope, (context) => {
+                    context.Statements(decl.Statements);
 
-                if (_returnType is VoidType && !proc.Statements.EndsInBranch()) {
-                    context.Keyword("ret", "void").EndOperation();
-                }
-            });
+                    if (_returnType is VoidType && !decl.Statements.EndsInBranch()) {
+                        context.Keyword("ret", "void").EndOperation();
+                    }
+                });
+            } else {
+                return ctx.Global(ident, type);
+            }
         }
 
         static GenerationContext Statements(this GenerationContext ctx, NStatementSeq block)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DUO2C.Nodes.Oberon2;
 
 namespace DUO2C.Semantics
 {
@@ -52,6 +53,17 @@ namespace DUO2C.Semantics
 
         private Dictionary<String, Declaration> _types;
         private Dictionary<String, Declaration> _symbols;
+
+        public virtual ModuleType CurrentModule
+        {
+            get
+            {
+                if (Parent == null) return null;
+                if (!(Parent is RootScope)) return Parent.CurrentModule;
+                var root = (RootScope) Parent;
+                return (ModuleType) root.GetSymbol(root.Modules.First(x => x.Value == this).Key);
+            }
+        }
 
         public Scope(Scope parent = null)
         {

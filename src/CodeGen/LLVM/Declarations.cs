@@ -37,8 +37,12 @@ namespace DUO2C.CodeGen.LLVM
                 }
 
                 ctx.Write(" \t{0}\t(", dest);
-                foreach (var t in proc.Params.Select(x => x.Type)) {
-                    ctx.Argument(t);
+                foreach (var p in proc.ParamsWithReceiver) {
+                    if (p.ByReference) {
+                        ctx.Argument(new PointerType(p.Type));
+                    } else {
+                        ctx.Argument(p.Type);
+                    }
                 }
                 ctx.Write(") \t");
                 

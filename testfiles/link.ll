@@ -1,5 +1,5 @@
-; Generated 14/08/2013 17:06:13
-; GlobalUID 52ed0cf3-1cb0-4310-9d25-79c038d64b02
+; Generated 14/08/2013 17:32:16
+; GlobalUID 2d525306-505b-414b-a048-a0d28c92c8e5
 ; 
 ; LLVM IR file for module "Link"
 ; 
@@ -32,10 +32,12 @@ define i32 @Out._main() nounwind {
 @.rec0 = global [4 x i8*] [
     i8* getelementptr inbounds ([9 x %CHAR]* @.str0, i32 0, i32 0),
     i8* null,
-    i8* bitcast (void (%List.List*, %List.Int32)* @Link.ListNode.Add to i8*),
-    i8* bitcast (%List.Int32 (%List.List*)* @Link.ListNode.Get to i8*)
+    i8* bitcast (void (%List.List*, %List.Int32)* @List.ListNode.Add to i8*),
+    i8* bitcast (%List.Int32 (%List.List*)* @List.ListNode.Get to i8*)
 ]
 
+declare void @List.ListNode.Add(%List.List*, %List.Int32) nounwind 
+declare %List.Int32 @List.ListNode.Get(%List.List*) nounwind 
 define i32 @List._main() nounwind {
     
     ret i32 0
@@ -80,13 +82,13 @@ define i32 @Link._main() nounwind {
     %14 = bitcast i8* %13 to [4 x i8*]*
     %15 = getelementptr inbounds [4 x i8*]* %14, i32 0, i32 2
     %16 = load i8** %15
-    %17 = bitcast i8* %16 to void (%Link.List*, %List.Int32)*
+    %17 = bitcast i8* %16 to void (%List.List*, %List.Int32)*
     br label %18
     
 ; <label>:18                                      ; preds = %4, %11
-    %19 = phi void (%Link.List*, %List.Int32)* [@Link.ListNode.Add, %4], [%17, %11]
+    %19 = phi void (%List.List*, %List.Int32)* [@Link.ListNode.Add, %4], [%17, %11]
     %20 = load i32* @n
-    call void (%Link.List*, %List.Int32)* %19(%Link.List* @test, %List.Int32 %20) nounwind
+    call void (%List.List*, %List.Int32)* %19(%List.List* @test, %List.Int32 %20) nounwind
     
     %21 = load i32* @i
     %22 = add i32 %21, 1
@@ -111,12 +113,12 @@ define i32 @Link._main() nounwind {
     %30 = bitcast i8* %29 to [4 x i8*]*
     %31 = getelementptr inbounds [4 x i8*]* %30, i32 0, i32 3
     %32 = load i8** %31
-    %33 = bitcast i8* %32 to %List.Int32 (%Link.List*)*
+    %33 = bitcast i8* %32 to %List.Int32 (%List.List*)*
     br label %34
     
 ; <label>:34                                      ; preds = %24, %27
-    %35 = phi %List.Int32 (%Link.List*)* [@Link.ListNode.Get, %24], [%33, %27]
-    %36 = call %List.Int32 (%Link.List*)* %35(%Link.List* @test) nounwind
+    %35 = phi %List.Int32 (%List.List*)* [@Link.ListNode.Get, %24], [%33, %27]
+    %36 = call %List.Int32 (%List.List*)* %35(%List.List* @test) nounwind
     store i32 %36, i32* @i
     
     ; IF i > 0 THEN

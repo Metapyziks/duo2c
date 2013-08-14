@@ -149,7 +149,7 @@ namespace DUO2C.CodeGen.LLVM
                 ctx = ctx.Leave().Ln().Ln();
             }
 
-            var procs = _module.Declarations.Procedures.Where(y => y is NProcDecl).Cast<NProcDecl>();
+            var procs = _module.Declarations.Procedures;
             if (procs.Count() > 0) {
                 ctx = ctx.Enter(0);
                 foreach (var proc in procs) {
