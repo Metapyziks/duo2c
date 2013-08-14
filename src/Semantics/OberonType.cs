@@ -80,7 +80,11 @@ namespace DUO2C.Semantics
 
     public class ModuleType : OberonType
     {
-        public String Identifier { get; private set; }
+        public NModule Module { get; private set; }
+        public String Identifier
+        {
+            get { return Module.Identifier; }
+        }
 
         public Scope Scope { get; private set; }
 
@@ -89,10 +93,9 @@ namespace DUO2C.Semantics
             get { return true; }
         }
 
-        public ModuleType(String identifier, RootScope scope)
+        public ModuleType(NModule module, RootScope scope)
         {
-            Identifier = identifier;
-
+            Module = module;
             Scope = scope.CreateModuleScope(this);
         }
 

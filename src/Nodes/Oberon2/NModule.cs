@@ -53,7 +53,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public void FindDeclarations(RootScope scope)
         {
-            Type = new ModuleType(Identifier, scope);
+            Type = new ModuleType(this, scope);
 
             Declarations.FindDeclarations(Type.Scope);
 

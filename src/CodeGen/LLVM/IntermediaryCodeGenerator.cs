@@ -26,8 +26,59 @@ namespace DUO2C.CodeGen.LLVM
 
         public static String Generate(NModule module, Guid uniqueID)
         {
+            _stringConsts = new Dictionary<string, GlobalStringIdent>();
+
+            _printfProc = new GlobalIdent("printf", false, GlobalIdent.Options.NoUnwind);
+            _printfProcType = new ProcedureType(IntegerType.Integer,
+                new Parameter(false, "format", new PointerType(CharType.Default)),
+                new Parameter(false, "args", VarArgsType.Default));
+
+            _gcMallocProc = new GlobalIdent("GC_malloc", false, GlobalIdent.Options.NoAlias);
+            _gcMallocProcType = new ProcedureType(PointerType.Byte,
+                new Parameter(false, "size", IntegerType.Integer));
+
             var ctx = new GenerationContext();
-            ctx.WriteModule(module, uniqueID);
+
+            GlobalStringIdent.Reset();
+
+            ctx.Header(module.Identifier, uniqueID);
+
+            ctx.DataLayoutStart(false)
+                .PointerAlign(0, 32)
+                .IntegerAlign(1, 8, 8)
+                .IntegerAlign(8)
+                .IntegerAlign(16)
+                .IntegerAlign(32)
+                .IntegerAlign(64)
+                .FloatAlign(32)
+                .FloatAlign(64)
+                .AgregateAlign(64)
+                .NativeAlign(8, 16, 32)
+                .StackAlign(32)
+                .DataLayoutEnd().Ln();
+
+            ctx = ctx.Enter(0);
+            ctx.TypeDecl(new TypeIdent(CharType.Default.ToString()), IntegerType.Byte);
+            ctx.TypeDecl(new TypeIdent(SetType.Default.ToString()), IntegerType.LongInt);
+            ctx = ctx.Leave().Ln().Ln();
+
+            ctx.Lazy(x => {
+                foreach (var kv in _stringConsts.OrderBy(y => y.Value.ID)) {
+                    x.StringConstant(kv.Value, kv.Key);
+                }
+            });
+
+            ctx.Global(_printfProc, _printfProcType);
+            ctx.Global(_gcMallocProc, _gcMallocProcType);
+            ctx.Ln();
+
+            foreach (var import in module.Imports) {
+                var mdl = (ModuleType) ((RootScope) module.Type.Scope.Parent).GetSymbol(import);
+                ctx.Module(mdl.Module);
+            }
+
+            ctx.Module(module);
+
             return ctx.ToString();
         }
 
@@ -64,63 +115,30 @@ namespace DUO2C.CodeGen.LLVM
             return ctx;
         }
 
-        static GenerationContext WriteModule(this GenerationContext ctx, NModule module, Guid uniqueID)
+        static GenerationContext Module(this GenerationContext ctx, NModule module)
         {
             _module = module;
             _scope = module.Type.Scope;
-            _stringConsts = new Dictionary<string, GlobalStringIdent>();
-
-            _printfProc = new GlobalIdent("printf", false, GlobalIdent.Options.NoUnwind);
-            _printfProcType = new ProcedureType(IntegerType.Integer,
-                new Parameter(false, "format", new PointerType(CharType.Default)),
-                new Parameter(false, "args", VarArgsType.Default));
-
-            _gcMallocProc = new GlobalIdent("GC_malloc", false, GlobalIdent.Options.NoAlias);
-            _gcMallocProcType = new ProcedureType(PointerType.Byte,
-                new Parameter(false, "size", IntegerType.Integer));
-
-            GlobalStringIdent.Reset();
+            
             TempIdent.Reset();
 
-            ctx.Header(uniqueID);
-
-            ctx.DataLayoutStart(false)
-                .PointerAlign(0, 32)
-                .IntegerAlign(1, 8, 8)
-                .IntegerAlign(8)
-                .IntegerAlign(16)
-                .IntegerAlign(32)
-                .IntegerAlign(64)
-                .FloatAlign(32)
-                .FloatAlign(64)
-                .AgregateAlign(64)
-                .NativeAlign(8, 16, 32)
-                .StackAlign(32)
-                .DataLayoutEnd().Ln();
-            
-            ctx = ctx.Enter(0);
-            ctx.TypeDecl(new TypeIdent(CharType.Default.ToString()), IntegerType.Byte);
-            ctx.TypeDecl(new TypeIdent(SetType.Default.ToString()), IntegerType.LongInt);
-
-            foreach (var kv in _scope.GetTypes(false)) {
-                ctx.TypeDecl(new TypeIdent(kv.Key, module.Identifier), kv.Value.Type);
-            }
-            ctx = ctx.Leave().Ln().Ln();
-
-            ctx = ctx.Enter(0);
-            foreach (var kv in _scope.GetTypes(false).Where(x => x.Value.Type is RecordType)) {
-                ctx.RecordTable(kv.Key, (RecordType) kv.Value.Type).Ln();
-            }
-            ctx = ctx.Leave().Ln();
-
-            ctx.Lazy(x => {
-                foreach (var kv in _stringConsts.OrderBy(y => y.Value.ID)) {
-                    x.StringConstant(kv.Value, kv.Key);
+            var types = _scope.GetTypes(false);
+            if (types.Count() > 0) {
+                ctx = ctx.Enter(0);
+                foreach (var kv in types) {
+                    ctx.TypeDecl(new TypeIdent(kv.Key, module.Identifier), kv.Value.Type);
                 }
-            });
-            
-            ctx.Global(_printfProc, _printfProcType);
-            ctx.Global(_gcMallocProc, _gcMallocProcType);
+                ctx = ctx.Leave().Ln().Ln();
+            }
+
+            var records = _scope.GetTypes(false).Where(x => x.Value.Type is RecordType);
+            if (records.Count() > 0) {
+                ctx = ctx.Enter(0);
+                foreach (var kv in records) {
+                    ctx.RecordTable(kv.Key, (RecordType) kv.Value.Type).Ln();
+                }
+                ctx = ctx.Leave().Ln();
+            }
             
             var globals = _scope.GetSymbols(false).Where(y => !y.Value.Type.IsProcedure);
             if (globals.Count() > 0) {
@@ -140,7 +158,7 @@ namespace DUO2C.CodeGen.LLVM
                 ctx = ctx.Leave().Ln();
             }
 
-            ctx.Procedure(new GlobalIdent("main", false), new ProcedureType(IntegerType.Integer), new Scope(_scope),
+            ctx.Procedure(new GlobalIdent(String.Format("{0}._main", module.Identifier), false), new ProcedureType(IntegerType.Integer), new Scope(_scope),
                 (context) => {
                     if (module.Body != null) {
                         context.Statements(module.Body);

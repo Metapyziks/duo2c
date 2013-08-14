@@ -1,4 +1,4 @@
-﻿MODULE Lists;
+﻿MODULE List;
     IMPORT Out;
 
     (*** declare global constants, types and variables ***)
@@ -10,10 +10,6 @@
             value : Int32;
             next  : List;
         END;
-
-    VAR
-        i, n : INTEGER;
-        test : List;
 
     (*** declare procedures ***)
 
@@ -39,17 +35,4 @@
             RETURN v
         END
     END Get;
-
-BEGIN
-    n := 1;
-    FOR i := 1 TO 10 DO
-        n := (n * 8723 + 181) MOD 256;
-        test.Add(n);
-    END;
-
-    REPEAT
-        i := test.Get();
-        IF i > 0 THEN Out.Integer(i); Out.Ln; END;
-    UNTIL i = 0;
-
 END List.

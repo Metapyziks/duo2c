@@ -33,18 +33,40 @@ namespace DUO2C.CodeGen
             ctx.Write("**)").Ln().Ln();
             ctx = ctx.Write("MODULE {0};", module.Identifier).Ln().Enter();
 
-            ctx = ctx.Write("TYPE").Ln().Enter();
-            foreach (var kv in module.Scope.GetTypes(false).Where(x => x.Value.Visibility != AccessModifier.Private)) {
-                kv.Value.Type.Resolve(module.Scope);
-                ctx.WriteTypeDecl(module, kv.Key, kv.Value.Type, kv.Value.Visibility);
+            var types = module.Scope.GetTypes(false).Where(x => x.Value.Visibility != AccessModifier.Private);
+            if (types.Any(x => true)) {
+                ctx = ctx.Write("TYPE").Ln().Enter();
+                foreach (var kv in types) {
+                    kv.Value.Type.Resolve(module.Scope);
+                    ctx.WriteTypeDecl(module, kv.Key, kv.Value.Type, kv.Value.Visibility);
+                }
+                ctx = ctx.Leave();
             }
-            ctx = ctx.Leave();
 
-            ctx = ctx.Write("VAR").Ln().Enter();
-            foreach (var kv in module.Scope.GetSymbols(false).Where(x => x.Value.Visibility != AccessModifier.Private)) {
-                ctx.WriteVarDecl(module, kv.Key, kv.Value.Type, kv.Value.Visibility);
+            var vars = module.Scope.GetSymbols(false).Where(x => x.Value.Visibility != AccessModifier.Private);
+            if (vars.Any(x => true)) {
+                ctx = ctx.Write("VAR").Ln().Enter();
+                foreach (var kv in vars) {
+                    ctx.WriteVarDecl(module, kv.Key, kv.Value.Type, kv.Value.Visibility);
+                }
+                ctx = ctx.Leave();
             }
-            ctx = ctx.Leave();
+
+            var records = types.Where(x => x.Value.Type.IsRecord);
+            foreach (var rec in records) {
+                var type = rec.Value.Type.As<RecordType>();
+                var ptr = new UnresolvedType(types.First(x => {
+                    if (!x.Value.Type.IsPointer) return false;
+                    var resType = x.Value.Type.As<PointerType>().ResolvedType;
+                    if (!(resType is UnresolvedType)) return false;
+                    var unresType = (UnresolvedType) resType;
+                    if (unresType.Module != null && unresType.Module != module.Identifier) return false;
+                    return unresType.Identifier == rec.Key;
+                }).Key, module.Identifier);
+                foreach (var proc in type.Procedures.Where(x => x.Value.Visibility != AccessModifier.Private)) {
+                    ctx.WriteProcedure(module, proc.Key, proc.Value.Type.As<ProcedureType>(), proc.Value.Visibility, ptr);
+                }
+            }
 
             return ctx.Leave().Write("END {0}.", module.Identifier).Ln();
         }
@@ -101,9 +123,43 @@ namespace DUO2C.CodeGen
                     }
                 }
                 return ctx;
+            } else if (type is PointerType) {
+                var ptr = (PointerType) type;
+                ctx.Write("POINTER TO ");
+                ctx.WriteType(module, ptr.ResolvedType);
+                return ctx;
             } else {
                 return ctx.Write(type.ToString());
             }
+        }
+
+        static GenerationContext WriteProcedure(this GenerationContext ctx, ModuleType module, String ident,
+            ProcedureType proc, AccessModifier visibility, UnresolvedType receiver = null)
+        {
+            ctx.Write("PROCEDURE ^ ");
+            if (receiver != null) { 
+                ctx.Write("(this : {0}) ", receiver.Identifier);
+            }
+            ctx.Write(ident).WriteAccessModifier(visibility);
+
+            if (proc.ReturnType != null || proc.Params.Length > 0) {
+                ctx.Write(" (");
+                foreach (var para in proc.Params) {
+                    ctx.Write("{0} : ", para.Identifier).WriteType(module, para.Type);
+                    if (para != proc.Params.Last()) {
+                        ctx.Write("; ");
+                    }
+                }
+                ctx.Write(")");
+
+                if (proc.ReturnType != null) {
+                    ctx.Write(" : ").WriteType(module, proc.ReturnType);
+                }
+            }
+
+            ctx.Write(";").Ln();
+
+            return ctx;
         }
     }
 }

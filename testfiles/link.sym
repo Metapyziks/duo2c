@@ -1,0 +1,13 @@
+(**
+ *  Generated 14/08/2013 17:06:13
+ *  GlobalUID 52ed0cf3-1cb0-4310-9d25-79c038d64b02
+ *
+ *  Exported symbol file for module "Link"
+ *
+ *  WARNING: This file is automatically
+ *  generated and should not be edited
+**)
+
+MODULE Link;
+END Link.
+

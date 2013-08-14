@@ -462,7 +462,6 @@ namespace DUO2C.CodeGen.LLVM
                         return ctx.BinaryOp(dest, "add", "fadd", type, a, b);
                     case SimpleExprOperator.Subtract:
                         return ctx.BinaryOp(dest, "sub", "fsub", type, a, b);
-                    case SimpleExprOperator.Or:
                     default:
                         throw new NotImplementedException();
                 }

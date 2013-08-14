@@ -168,7 +168,7 @@ namespace DUO2C.Semantics
             }
         }
 
-        public IEnumerable<KeyValuePair<String, Declaration>> GetTypes(bool inherit)
+        public virtual IEnumerable<KeyValuePair<String, Declaration>> GetTypes(bool inherit)
         {
             if (inherit && HasParent) {
                 return Parent.GetTypes(true).Concat(_types);
@@ -177,7 +177,7 @@ namespace DUO2C.Semantics
             }
         }
 
-        public IEnumerable<KeyValuePair<String, Declaration>> GetSymbols(bool inherit)
+        public virtual IEnumerable<KeyValuePair<String, Declaration>> GetSymbols(bool inherit)
         {
             if (inherit && HasParent) {
                 return Parent.GetSymbols(true).Concat(_symbols);
@@ -190,6 +190,11 @@ namespace DUO2C.Semantics
     public class RootScope : Scope
     {
         private Dictionary<String, Scope> _modules;
+
+        public IEnumerable<KeyValuePair<String, Scope>> Modules
+        {
+            get { return _modules; }
+        }
 
         public RootScope()
         {
@@ -223,6 +228,16 @@ namespace DUO2C.Semantics
             return module != null && _modules.ContainsKey(module)
                 ? _modules[module].GetDeclaringScope(identifier, null)
                 : base.GetDeclaringScope(identifier, null);
+        }
+
+        public override IEnumerable<KeyValuePair<string, Declaration>> GetTypes(bool inherit)
+        {
+            return base.GetTypes(inherit).Concat(_modules.SelectMany(x => x.Value.GetTypes(false)));
+        }
+
+        public override IEnumerable<KeyValuePair<string, Declaration>> GetSymbols(bool inherit)
+        {
+            return base.GetSymbols(inherit).Concat(_modules.SelectMany(x => x.Value.GetSymbols(false)));
         }
     }
 }
