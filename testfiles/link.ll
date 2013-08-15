@@ -1,5 +1,5 @@
-; Generated 14/08/2013 17:39:28
-; GlobalUID 2fdd0584-e027-491b-8458-57ff7195501f
+; Generated 15/08/2013 16:58:19
+; GlobalUID fa17d10c-37bb-4c9d-bc49-ad92dce1d30c
 ; 
 ; LLVM IR file for module "Link"
 ; 
@@ -11,37 +11,25 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
 %CHAR = type i8
 %SET = type i64
 
-@.str0 = private constant [9 x i8] c"ListNode\00"
-@.str1 = private constant [3 x i8] c"%i\00"
-@.str2 = private constant [2 x i8] c"\0A\00"
+@.str0 = private constant [3 x i8] c"%i\00"
+@.str1 = private constant [2 x i8] c"\0A\00"
 
 declare i32 @printf(%CHAR*, ...) nounwind 
 declare noalias i8* @GC_malloc(i32) 
 
 %Out.String = type {i32, %CHAR*}
 
-define i32 @Out._main() nounwind {
-    
-    ret i32 0
-}
+declare i32 @Out._main() 
 
 %List.Int32 = type i32
 %List.List = type %List.ListNode*
-%List.ListNode = type {i8*}
+%List.ListNode = type {i8*, %List.Int32, %List.List}
 
-@.rec0 = global [4 x i8*] [
-    i8* getelementptr inbounds ([9 x %CHAR]* @.str0, i32 0, i32 0),
-    i8* null,
-    i8* bitcast (void (%List.List*, %List.Int32)* @List.ListNode.Add to i8*),
-    i8* bitcast (%List.Int32 (%List.List*)* @List.ListNode.Get to i8*)
-]
+@List.ListNode._vtable = linkonce global [0 x i8*][] 
 
 declare void @List.ListNode.Add(%List.List*, %List.Int32) nounwind 
 declare %List.Int32 @List.ListNode.Get(%List.List*) nounwind 
-define i32 @List._main() nounwind {
-    
-    ret i32 0
-}
+declare i32 @List._main() 
 
 @i = private global i32 zeroinitializer
 @n = private global i32 zeroinitializer
@@ -131,10 +119,10 @@ define i32 @Link._main() nounwind {
     ; Out.Integer(i)
     %40 = load i32* @i
     %41 = sext i32 %40 to i64
-    %42 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str1, i32 0, i32 0), i64 %41) nounwind
+    %42 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str0, i32 0, i32 0), i64 %41) nounwind
     
     ; Out.Ln()
-    %43 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @.str2, i32 0, i32 0)) nounwind
+    %43 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @.str1, i32 0, i32 0)) nounwind
     
     br label %44
     

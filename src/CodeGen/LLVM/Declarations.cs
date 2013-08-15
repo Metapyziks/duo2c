@@ -85,7 +85,7 @@ namespace DUO2C.CodeGen.LLVM
             if (_recordTableIdents.ContainsKey(type)) {
                 return _recordTableIdents[type];
             } else {
-                var ident = new RecordTableIdent();
+                var ident = new RecordTableIdent(type);
                 _recordTableIdents.Add(type, ident);
                 return ident;
             }
@@ -96,9 +96,14 @@ namespace DUO2C.CodeGen.LLVM
             return new ConstArrayType(new PointerType(IntegerType.Byte), 2 + type.Procedures.Count());
         }
 
-        static GenerationContext RecordTable(this GenerationContext ctx, String ident, RecordType type)
+        static GenerationContext RecordTable(this GenerationContext ctx, String ident, RecordType type, bool defineBody)
         {
-            ctx.Assign(GetRecordTableIdent(type)).Keyword("global").Argument(GetRecordTableType(type), new RecordTableConst(ident, type));
+            ctx.Assign(GetRecordTableIdent(type));
+            if (defineBody) {
+                ctx.Keyword("global").Argument(GetRecordTableType(type), new RecordTableConst(ident, type));
+            } else {
+                ctx.Keyword("linkonce", "global").Argument(new ConstArrayType(PointerType.Byte, 0)).Keyword("[]");
+            }
             return ctx.EndOperation();
         }
     }

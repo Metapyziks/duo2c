@@ -1,5 +1,5 @@
-; Generated 14/08/2013 17:09:12
-; GlobalUID 06ed6600-bcce-4aa6-8b34-dd2d370d7cf7
+; Generated 15/08/2013 16:53:39
+; GlobalUID cdcd8185-3895-485e-bbef-eaaa84e8a2b3
 ; 
 ; LLVM IR file for module "List"
 ; 
@@ -18,16 +18,13 @@ declare noalias i8* @GC_malloc(i32)
 
 %Out.String = type {i32, %CHAR*}
 
-define i32 @Out._main() nounwind {
-    
-    ret i32 0
-}
+declare i32 @Out._main() 
 
 %List.Int32 = type i32
 %List.List = type %List.ListNode*
 %List.ListNode = type {i8*, %List.Int32, %List.List}
 
-@.rec0 = global [4 x i8*] [
+@List.ListNode._vtable = global [4 x i8*] [
     i8* getelementptr inbounds ([9 x %CHAR]* @.str0, i32 0, i32 0),
     i8* null,
     i8* bitcast (void (%List.List*, %List.Int32)* @List.ListNode.Add to i8*),
@@ -51,7 +48,7 @@ define void @List.ListNode.Add(%List.List* %l, %List.Int32 %$v) nounwind {
     %5 = ptrtoint %List.ListNode* %4 to i32
     %6 = call i8* (i32)* @GC_malloc(i32 %5) nounwind
     %7 = bitcast i8* %6 to %List.ListNode*
-    store %List.ListNode {i8* bitcast ([4 x i8*]* @.rec0 to i8*), %List.Int32 zeroinitializer, %List.List null}, %List.ListNode* %7
+    store %List.ListNode {i8* bitcast ([4 x i8*]* @List.ListNode._vtable to i8*), %List.Int32 zeroinitializer, %List.List null}, %List.ListNode* %7
     store %List.ListNode* %7, %List.ListNode** %l
     
     ; l^.value := v

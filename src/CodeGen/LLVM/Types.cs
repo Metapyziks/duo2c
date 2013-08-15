@@ -33,6 +33,21 @@ namespace DUO2C.CodeGen.LLVM
             }
         }
 
+        class OpaqueType : OberonType
+        {
+            public OpaqueType() { }
+
+            public override bool CanCompare(OberonType other)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override bool CanTestEquality(OberonType other)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         static Dictionary<Type, MethodInfo> _typeMethods;
 
         static GenerationContext Type(this GenerationContext ctx, OberonType type)
@@ -142,6 +157,11 @@ namespace DUO2C.CodeGen.LLVM
         static GenerationContext Type(this GenerationContext ctx, ConstArrayType type)
         {
             return ctx.Write("[{0} \tx \t", type.Length).Type(type.ElementType).Write("\t]");
+        }
+
+        static GenerationContext Type(this GenerationContext ctx, OpaqueType type)
+        {
+            return ctx.Write("opaque");
         }
     }
 }

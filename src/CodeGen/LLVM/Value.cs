@@ -397,34 +397,18 @@ namespace DUO2C.CodeGen.LLVM
 
         public class RecordTableIdent : Value
         {
-            static int _sNext = 0;
+            public String Module { get; private set; }
+            public String TypeName { get; private set; }
 
-            public static void Reset()
+            public RecordTableIdent(RecordType type)
             {
-                _sNext = 0;
-            }
-
-            int _id;
-
-            public int ID
-            {
-                get
-                {
-                    if (_id == -1) {
-                        _id = _sNext++;
-                    }
-                    return _id;
-                }
-            }
-
-            public RecordTableIdent()
-            {
-                _id = -1;
+                TypeName = _scope.GetTypes(true).First(x => x.Value.Type == type).Key;
+                Module = _scope.GetDeclaringScope(type).CurrentModule.Identifier;
             }
 
             public override string ToString()
             {
-                return String.Format("@.rec{0}", ID);
+                return String.Format("@{0}.{1}._vtable", Module, TypeName);
             }
         }
 
