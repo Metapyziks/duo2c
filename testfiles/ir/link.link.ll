@@ -50,8 +50,6 @@ define i32 @Out._init() nounwind {
 
 ; <label>:6                                       ; preds = %2, %0
   ret i32 0
-                                                  ; No predecessors!
-  ret i32 1
 }
 
 define void @List.ListNode.Add(%List.ListNode** %l, i32 %"$v") nounwind {

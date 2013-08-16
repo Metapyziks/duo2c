@@ -1,5 +1,5 @@
-; Generated 17/08/2013 00:45:50
-; GlobalUID 7bd82aa8-41ec-4051-8967-4efdb75f57bc
+; Generated 17/08/2013 00:49:13
+; GlobalUID afd1be1c-9a8c-4ce0-9685-a12d22270f7c
 ; 
 ; LLVM IR file for module "Out"
 ; 
@@ -45,8 +45,5 @@ define i32 @Out._init() nounwind {
     
 ; <label>:6                                       ; preds = %0, %2
     ret i32 0
-    
-; <label>:7                                       ; preds = %0
-    ret i32 1
 }
 

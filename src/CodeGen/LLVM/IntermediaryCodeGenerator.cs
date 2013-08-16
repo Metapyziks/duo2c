@@ -201,8 +201,11 @@ namespace DUO2C.CodeGen.LLVM
                             context.LabelMarker(end);
                         }
                         context.Keyword("ret").Argument(IntegerType.Integer, new Literal(0.ToString())).EndOperation();
-                        context.LabelMarker(error);
-                        context.Keyword("ret").Argument(IntegerType.Integer, new Literal(1.ToString())).EndOperation();
+
+                        if (error.Predecessors.Count() > 0) {
+                            context.LabelMarker(error);
+                            context.Keyword("ret").Argument(IntegerType.Integer, new Literal(1.ToString())).EndOperation();
+                        }
                     });
 
                 if (entry) {
