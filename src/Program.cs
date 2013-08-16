@@ -341,6 +341,10 @@ namespace DUO2C
                     assemblyPath = RenameTempFileExtension(assemblyPath, "s");
                     cleanupFiles.Add(assemblyPath);
 
+                    if (!Directory.Exists(Path.GetDirectoryName(outPath))) {
+                        Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+                    }
+
                     RunTool("gcc", assemblyPath, "-lgc", "-o", outPath);
 
                     return 0;

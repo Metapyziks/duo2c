@@ -38,7 +38,34 @@ namespace DUO2C.Nodes.Oberon2
         public NString(ParseNode original)
             : base(original, true)
         {
-            _string = base.String.Substring(1, base.String.Length - 2);
+            var str = base.String.Substring(1, base.String.Length - 2);
+            _string = String.Empty;
+
+            int i = 0; var escaped = false;
+            while (i < str.Length) {
+                var c = str[i++];
+                if (!escaped) {
+                    if (c == '\\') {
+                        escaped = true;
+                    } else _string += c;
+                } else {
+                    switch (c) {
+                        case 'e':
+                            _string += '\x1B'; break;
+                        case 'r':
+                            _string += '\r'; break;
+                        case 'n':
+                            _string += '\n'; break;
+                        case 't':
+                            _string += '\t'; break;
+                        case '0':
+                            _string += '\0'; break;
+                        default:
+                            _string += c; break;
+                    }
+                    escaped = false;
+                }
+            }
         }
 
         public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
