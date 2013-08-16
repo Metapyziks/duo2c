@@ -35,4 +35,24 @@
             RETURN v
         END
     END Get;
+
+    PROCEDURE (l : List) Has* (v : Int32) : BOOLEAN;
+    BEGIN
+        IF l = NIL THEN
+            RETURN FALSE;
+        ELSIF l.value = v THEN
+            RETURN TRUE;
+        ELSE
+            RETURN l.next.Has(v);
+        END
+    END Has;
+
+    PROCEDURE (l : List) Count* : INTEGER;
+    BEGIN
+        IF l = NIL THEN
+            RETURN 0;
+        ELSE
+            RETURN 1 + l.next.Count();
+        END;
+    END Count;
 END List.

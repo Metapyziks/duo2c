@@ -168,7 +168,13 @@ namespace DUO2C.CodeGen.LLVM
                 if (!node.ElseBody.EndsInBranch()) ctx.Branch(ifend);
             }
 
-            return ctx.LabelMarker(ifend);
+            ctx.LabelMarker(ifend);
+
+            if (node.ThenBody.EndsInBranch() && (node.ElseBody == null || node.ElseBody.EndsInBranch())) {
+                ctx.Keyword("unreachable").EndOperation();
+            }
+
+            return ctx;
         }
 
         static GenerationContext Node(this GenerationContext ctx, NUncondLoop node)

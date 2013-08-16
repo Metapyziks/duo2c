@@ -7,13 +7,19 @@ MODULE Link;
 
 BEGIN
     n := 1;
-    FOR i := 1 TO 10 DO
-        n := (n * 8723 + 181) MOD 256;
+    FOR i := 1 TO 256 DO
+        n := (((n - 1) * 78721 + 1213) MOD 256) + 1;
         test.Add(n);
     END;
 
-    REPEAT
-        i := test.Get();
-        IF i > 0 THEN Out.Integer(i); Out.Ln; END;
-    UNTIL i = 0;
+    n := 0;
+    FOR i := 1 TO test.Count() DO
+        IF test.Has(i) THEN
+            n := n + 1;
+        END;
+    END;
+
+    Out.String("Used "); Out.Integer(n);
+    Out.String(" of ");
+    Out.Integer(test.Count()); Out.Ln;
 END Link.

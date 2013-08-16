@@ -478,7 +478,7 @@ namespace DUO2C.CodeGen.LLVM
                 OberonType ntype = lt;
 
                 if (lt.IsNumeric && rt.IsNumeric) {
-                    ntype = NumericType.Largest((NumericType) lt, (NumericType) rt);
+                    ntype = NumericType.Largest(lt.As<NumericType>(), rt.As<NumericType>());
                 }
 
                 Value a = ctx.PrepareOperand(node.Prev, ntype, dest), b = ctx.PrepareOperand(node.SimpleExpr, ntype, dest);

@@ -1,5 +1,5 @@
-; Generated 16/08/2013 23:45:53
-; GlobalUID e6f94b43-16c3-4b2c-89f5-b6b60c3de83b
+; Generated 17/08/2013 00:13:31
+; GlobalUID ca2d7921-809d-46d2-876a-b38111b9f6ad
 ; 
 ; LLVM IR file for module "List"
 ; 
@@ -24,11 +24,13 @@ declare i32 @Out._init()
 %List.List = type %List.ListNode*
 %List.ListNode = type {i8*, %List.Int32, %List.List}
 
-@List.ListNode._vtable = global [4 x i8*] [
+@List.ListNode._vtable = global [6 x i8*] [
     i8* getelementptr inbounds ([9 x %CHAR]* @.str0, i32 0, i32 0),
     i8* null,
     i8* bitcast (void (%List.List*, %List.Int32)* @List.ListNode.Add to i8*),
-    i8* bitcast (%List.Int32 (%List.List*)* @List.ListNode.Get to i8*)
+    i8* bitcast (%List.Int32 (%List.List*)* @List.ListNode.Get to i8*),
+    i8* bitcast (i1 (%List.List*, %List.Int32)* @List.ListNode.Has to i8*),
+    i8* bitcast (i32 (%List.List*)* @List.ListNode.Count to i8*)
 ]
 
 define void @List.ListNode.Add(%List.List* %l, %List.Int32 %$v) nounwind {
@@ -48,7 +50,7 @@ define void @List.ListNode.Add(%List.List* %l, %List.Int32 %$v) nounwind {
     %5 = ptrtoint %List.ListNode* %4 to i32
     %6 = call i8* (i32)* @GC_malloc(i32 %5) nounwind
     %7 = bitcast i8* %6 to %List.ListNode*
-    store %List.ListNode {i8* bitcast ([4 x i8*]* @List.ListNode._vtable to i8*), %List.Int32 zeroinitializer, %List.List null}, %List.ListNode* %7
+    store %List.ListNode {i8* bitcast ([6 x i8*]* @List.ListNode._vtable to i8*), %List.Int32 zeroinitializer, %List.List null}, %List.ListNode* %7
     store %List.ListNode* %7, %List.ListNode** %l
     
     ; l^.value := v
@@ -71,8 +73,8 @@ define void @List.ListNode.Add(%List.List* %l, %List.Int32 %$v) nounwind {
 ; <label>:16                                      ; preds = %11
     %17 = getelementptr inbounds %List.List %14, i32 0, i32 0
     %18 = load i8** %17
-    %19 = bitcast i8* %18 to [4 x i8*]*
-    %20 = getelementptr inbounds [4 x i8*]* %19, i32 0, i32 2
+    %19 = bitcast i8* %18 to [6 x i8*]*
+    %20 = getelementptr inbounds [6 x i8*]* %19, i32 0, i32 2
     %21 = load i8** %20
     %22 = bitcast i8* %21 to void (%List.List*, %List.Int32)*
     br label %23
@@ -121,6 +123,108 @@ define %List.Int32 @List.ListNode.Get(%List.List* %l) nounwind {
     %11 = load %List.Int32* %v
     ret %List.Int32 %11
 ; <label>:12                                      ; preds = %0
+    unreachable 
+    
+}
+
+define i1 @List.ListNode.Has(%List.List* %l, %List.Int32 %$v) nounwind {
+    
+    %v = alloca %List.Int32
+    store %List.Int32 %$v, %List.Int32* %v
+    
+    ; IF l = NIL THEN
+    %1 = load %List.List* %l
+    %2 = icmp eq %List.List %1, null
+    br i1 %2, label %3, label %4
+    
+; <label>:3                                       ; preds = %0
+    
+    ; RETURN FALSE
+    ret i1 false
+; <label>:4                                       ; preds = %0
+    
+    ; IF l^.value = v THEN
+    %5 = load %List.List* %l
+    %6 = getelementptr inbounds %List.ListNode* %5, i32 0, i32 1
+    %7 = load %List.Int32* %6
+    %8 = load %List.Int32* %v
+    %9 = icmp eq i32 %7, %8
+    br i1 %9, label %10, label %11
+    
+; <label>:10                                      ; preds = %4
+    
+    ; RETURN TRUE
+    ret i1 true
+; <label>:11                                      ; preds = %4
+    
+    ; RETURN l^.next.Has(v)
+    %12 = load %List.List* %l
+    %13 = getelementptr inbounds %List.ListNode* %12, i32 0, i32 2
+    %14 = load %List.List* %13
+    %15 = icmp eq %List.List %14, null
+    br i1 %15, label %23, label %16
+    
+; <label>:16                                      ; preds = %11
+    %17 = getelementptr inbounds %List.List %14, i32 0, i32 0
+    %18 = load i8** %17
+    %19 = bitcast i8* %18 to [6 x i8*]*
+    %20 = getelementptr inbounds [6 x i8*]* %19, i32 0, i32 4
+    %21 = load i8** %20
+    %22 = bitcast i8* %21 to i1 (%List.List*, %List.Int32)*
+    br label %23
+    
+; <label>:23                                      ; preds = %11, %16
+    %24 = phi i1 (%List.List*, %List.Int32)* [@List.ListNode.Has, %11], [%22, %16]
+    %25 = load %List.Int32* %v
+    %26 = getelementptr inbounds %List.ListNode* %12, i32 0, i32 2
+    %27 = call i1 (%List.List*, %List.Int32)* %24(%List.List* %26, %List.Int32 %25) nounwind
+    ret i1 %27
+; <label>:28                                      ; preds = %0
+    unreachable 
+    
+    br label %29
+    
+; <label>:29                                      ; preds = %28
+    
+}
+
+define i32 @List.ListNode.Count(%List.List* %l) nounwind {
+    
+    ; IF l = NIL THEN
+    %1 = load %List.List* %l
+    %2 = icmp eq %List.List %1, null
+    br i1 %2, label %3, label %4
+    
+; <label>:3                                       ; preds = %0
+    
+    ; RETURN 0
+    ret i32 0
+; <label>:4                                       ; preds = %0
+    
+    ; RETURN 1 + l^.next.Count()
+    %5 = load %List.List* %l
+    %6 = getelementptr inbounds %List.ListNode* %5, i32 0, i32 2
+    %7 = load %List.List* %6
+    %8 = icmp eq %List.List %7, null
+    br i1 %8, label %16, label %9
+    
+; <label>:9                                       ; preds = %4
+    %10 = getelementptr inbounds %List.List %7, i32 0, i32 0
+    %11 = load i8** %10
+    %12 = bitcast i8* %11 to [6 x i8*]*
+    %13 = getelementptr inbounds [6 x i8*]* %12, i32 0, i32 5
+    %14 = load i8** %13
+    %15 = bitcast i8* %14 to i32 (%List.List*)*
+    br label %16
+    
+; <label>:16                                      ; preds = %4, %9
+    %17 = phi i32 (%List.List*)* [@List.ListNode.Count, %4], [%15, %9]
+    %18 = getelementptr inbounds %List.ListNode* %5, i32 0, i32 2
+    %19 = call i32 (%List.List*)* %17(%List.List* %18) nounwind
+    %20 = add i32 1, %19
+    ret i32 %20
+; <label>:21                                      ; preds = %0
+    unreachable 
     
 }
 
