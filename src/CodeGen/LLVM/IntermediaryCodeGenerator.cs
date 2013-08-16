@@ -72,12 +72,7 @@ namespace DUO2C.CodeGen.LLVM
             ctx.Global(_gcMallocProc, _gcMallocProcType);
             ctx.Ln();
 
-            foreach (var import in module.Imports) {
-                var mdl = (ModuleType) ((RootScope) module.Type.Scope.Parent).GetSymbol(import);
-                ctx.Module(mdl.Module, false);
-            }
-
-            ctx.Module(module, true, entryModule);
+            ctx.Module(module, entryModule);
 
             return ctx.ToString();
         }
@@ -115,7 +110,7 @@ namespace DUO2C.CodeGen.LLVM
             return ctx;
         }
 
-        static GenerationContext Module(this GenerationContext ctx, NModule module, bool defineBody, bool entry = false)
+        static GenerationContext Module(this GenerationContext ctx, NModule module, bool entry)
         {
             _module = module;
             _scope = module.Type.Scope;
@@ -136,7 +131,7 @@ namespace DUO2C.CodeGen.LLVM
             if (records.Count() > 0) {
                 ctx = ctx.Enter(0);
                 foreach (var kv in records) {
-                    ctx.RecordTable(kv.Key, (RecordType) kv.Value.Type, defineBody).Ln();
+                    ctx.RecordTable(kv.Key, (RecordType) kv.Value.Type).Ln();
                 }
                 ctx = ctx.Leave().Ln();
             }
@@ -159,18 +154,25 @@ namespace DUO2C.CodeGen.LLVM
                 ctx = ctx.Leave().Ln();
             }
 
-            var mainIdent = new GlobalIdent(entry ? "main" : String.Format("{0}._main", module.Identifier), false);
-            var mainType = new ProcedureType(IntegerType.Integer);
-            if (defineBody) {
+            var initIdent = new GlobalIdent(String.Format("{0}._init", module.Identifier), false);
+            var initType = new ProcedureType(IntegerType.Integer);
+            ctx.Procedure(initIdent, initType, new Scope(_scope),
+                (context) => {
+                    if (module.Body != null) {
+                        context.Statements(module.Body);
+                    }
+                    context.Keyword("ret").Argument(IntegerType.Integer, new Literal(0.ToString())).EndOperation();
+                });
+
+            if (entry) {
+                var mainIdent = new GlobalIdent(String.Format("main", module.Identifier), false);
+                var mainType = new ProcedureType(IntegerType.Integer);
                 ctx.Procedure(mainIdent, mainType, new Scope(_scope),
                     (context) => {
-                        if (module.Body != null) {
-                            context.Statements(module.Body);
-                        }
-                        context.Keyword("ret").Argument(IntegerType.Integer, new Literal(0.ToString())).EndOperation();
+                        var temp = new TempIdent();
+                        context.Call(temp, initType, initIdent);
+                        context.Keyword("ret").Argument(IntegerType.Integer, temp).EndOperation();
                     });
-            } else {
-                ctx.Global(mainIdent, mainType).Ln();
             }
 
             return ctx;

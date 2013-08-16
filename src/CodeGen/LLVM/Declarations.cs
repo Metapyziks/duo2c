@@ -96,14 +96,10 @@ namespace DUO2C.CodeGen.LLVM
             return new ConstArrayType(new PointerType(IntegerType.Byte), 2 + type.Procedures.Count());
         }
 
-        static GenerationContext RecordTable(this GenerationContext ctx, String ident, RecordType type, bool defineBody)
+        static GenerationContext RecordTable(this GenerationContext ctx, String ident, RecordType type)
         {
             ctx.Assign(GetRecordTableIdent(type));
-            if (defineBody) {
-                ctx.Keyword("global").Argument(GetRecordTableType(type), new RecordTableConst(ident, type));
-            } else {
-                ctx.Keyword("linkonce", "global").Argument(new ConstArrayType(PointerType.Byte, 0)).Keyword("[]");
-            }
+            ctx.Keyword("global").Argument(GetRecordTableType(type), new RecordTableConst(ident, type));
             return ctx.EndOperation();
         }
     }

@@ -1,5 +1,5 @@
-; Generated 16/08/2013 16:36:17
-; GlobalUID 344d23c3-a4e5-4832-9c3a-f0a4c8fade70
+; Generated 16/08/2013 23:34:05
+; GlobalUID 52fab4f7-6557-4235-9188-8431e144ea5e
 ; 
 ; LLVM IR file for module "Link"
 ; 
@@ -17,25 +17,11 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
 declare i32 @printf(%CHAR*, ...) nounwind 
 declare noalias i8* @GC_malloc(i32) 
 
-%Out.String = type {i32, %CHAR*}
-
-declare i32 @Out._main() 
-
-%List.Int32 = type i32
-%List.List = type %List.ListNode*
-%List.ListNode = type {i8*, %List.Int32, %List.List}
-
-@List.ListNode._vtable = linkonce global [0 x i8*][] 
-
-declare void @List.ListNode.Add(%List.List*, %List.Int32) nounwind 
-declare %List.Int32 @List.ListNode.Get(%List.List*) nounwind 
-declare i32 @List._main() 
-
 @i = private global i32 zeroinitializer
 @n = private global i32 zeroinitializer
 @test = private global %List.List null
 
-define i32 @main() nounwind {
+define i32 @Link._init() nounwind {
     
     ; n := 1
     store i32 1, i32* @n
@@ -135,5 +121,11 @@ define i32 @main() nounwind {
 ; <label>:47                                      ; preds = %44
     
     ret i32 0
+}
+
+define i32 @main() nounwind {
+    
+    %1 = call i32 ()* @Link._init() nounwind
+    ret i32 %1
 }
 

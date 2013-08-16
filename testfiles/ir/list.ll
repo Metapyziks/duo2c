@@ -1,5 +1,5 @@
-; Generated 16/08/2013 16:36:17
-; GlobalUID d9f88552-2816-49d0-bfe2-4c1d4548eea8
+; Generated 16/08/2013 23:34:05
+; GlobalUID 337ce612-b23c-495b-8f2d-d3fceb116d89
 ; 
 ; LLVM IR file for module "List"
 ; 
@@ -15,10 +15,6 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
 
 declare i32 @printf(%CHAR*, ...) nounwind 
 declare noalias i8* @GC_malloc(i32) 
-
-%Out.String = type {i32, %CHAR*}
-
-declare i32 @Out._main() 
 
 %List.Int32 = type i32
 %List.List = type %List.ListNode*
@@ -124,7 +120,7 @@ define %List.Int32 @List.ListNode.Get(%List.List* %l) nounwind {
     
 }
 
-define i32 @List._main() nounwind {
+define i32 @List._init() nounwind {
     
     ret i32 0
 }
