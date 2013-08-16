@@ -1,22 +1,13 @@
 (**
- *  Generated 15/08/2013 16:53:38
- *  GlobalUID cdcd8185-3895-485e-bbef-eaaa84e8a2b3
+ *  Generated 16/08/2013 02:38:36
+ *  GlobalUID a8313f9f-f1c7-41b3-84c0-2c21bf68f848
  *
- *  Exported symbol file for module "List"
+ *  Exported symbol file for module "Link"
  *
  *  WARNING: This file is automatically
  *  generated and should not be edited
 **)
 
-MODULE List;
-    TYPE
-        Int32 * = INTEGER;
-        List * = POINTER TO List.ListNode;
-        ListNode * = RECORD
-            value  : List.Int32;
-            next  : List.List;
-        END;
-    PROCEDURE ^ (this : List) Add * (v : List.Int32);
-    PROCEDURE ^ (this : List) Get * () : List.Int32;
-END List.
+MODULE Link;
+END Link.
 

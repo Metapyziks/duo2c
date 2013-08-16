@@ -24,7 +24,7 @@ namespace DUO2C.CodeGen.LLVM
         static GlobalIdent _gcMallocProc;
         static ProcedureType _gcMallocProcType;
 
-        public static String Generate(NModule module, Guid uniqueID)
+        public static String Generate(NModule module, Guid uniqueID, bool entryModule)
         {
             _stringConsts = new Dictionary<string, GlobalStringIdent>();
 
@@ -77,7 +77,7 @@ namespace DUO2C.CodeGen.LLVM
                 ctx.Module(mdl.Module, false);
             }
 
-            ctx.Module(module, true);
+            ctx.Module(module, true, entryModule);
 
             return ctx.ToString();
         }
@@ -115,7 +115,7 @@ namespace DUO2C.CodeGen.LLVM
             return ctx;
         }
 
-        static GenerationContext Module(this GenerationContext ctx, NModule module, bool defineBody)
+        static GenerationContext Module(this GenerationContext ctx, NModule module, bool defineBody, bool entry = false)
         {
             _module = module;
             _scope = module.Type.Scope;
@@ -159,7 +159,7 @@ namespace DUO2C.CodeGen.LLVM
                 ctx = ctx.Leave().Ln();
             }
 
-            var mainIdent = new GlobalIdent(String.Format("{0}._main", module.Identifier), false);
+            var mainIdent = new GlobalIdent(entry ? "main" : String.Format("{0}._main", module.Identifier), false);
             var mainType = new ProcedureType(IntegerType.Integer);
             if (defineBody) {
                 ctx.Procedure(mainIdent, mainType, new Scope(_scope),
