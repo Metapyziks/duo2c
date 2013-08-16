@@ -1,5 +1,5 @@
-; Generated 17/08/2013 00:13:31
-; GlobalUID ca2d7921-809d-46d2-876a-b38111b9f6ad
+; Generated 17/08/2013 00:45:50
+; GlobalUID c184655c-3ed9-4f03-ae3e-f91ec9539635
 ; 
 ; LLVM IR file for module "List"
 ; 
@@ -12,11 +12,12 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
 %SET = type i64
 
 @.str0 = private constant [9 x i8] c"ListNode\00"
+@.str1 = private constant [17 x i8] c"Hello from List!\00"
+@.str2 = private constant [3 x i8] c"%s\00"
+@.str3 = private constant [2 x i8] c"\0A\00"
 
 declare i32 @printf(%CHAR*, ...) nounwind 
 declare noalias i8* @GC_malloc(i32) 
-
-%Out.String = type {i32, %CHAR*}
 
 declare i32 @Out._init() 
 
@@ -228,8 +229,36 @@ define i32 @List.ListNode.Count(%List.List* %l) nounwind {
     
 }
 
+
+@List._hasInit = private global i1 zeroinitializer
+
 define i32 @List._init() nounwind {
     
+    %1 = load i1* @List._hasInit
+    br i1 %1, label %9, label %2
+    
+; <label>:2                                       ; preds = %0
+    store i1 1, i1* @List._hasInit
+    
+    %3 = call i32 ()* @Out._init() nounwind
+    %4 = icmp eq i32 %3, 0
+    br i1 %4, label %5, label %10
+    
+; <label>:5                                       ; preds = %2
+    
+    ; Out.String("Hello from List!")
+    %6 = getelementptr inbounds [17 x %CHAR]* @.str1, i32 0, i32 0
+    %7 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str2, i32 0, i32 0), %CHAR* %6) nounwind
+    
+    ; Out.Ln()
+    %8 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @.str3, i32 0, i32 0)) nounwind
+    
+    br label %9
+    
+; <label>:9                                       ; preds = %0, %5
     ret i32 0
+    
+; <label>:10                                      ; preds = %2
+    ret i32 1
 }
 

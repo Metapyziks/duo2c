@@ -158,15 +158,51 @@ namespace DUO2C.CodeGen.LLVM
                 ctx = ctx.Leave().Ln();
             }
 
-            var initIdent = new GlobalIdent(String.Format("{0}._init", module.Identifier), false);
+            var initIdent = new GlobalIdent(String.Format("{0}._init", module.Identifier), true);
             var initType = new ProcedureType(IntegerType.Integer);
             if (define) {
+                var initFlag = new GlobalIdent(String.Format("{0}._hasInit", module.Identifier), false);
+                ctx.Ln().Global(initFlag, BooleanType.Default).Ln();
+
                 ctx.Procedure(initIdent, initType, new Scope(_scope),
                     (context) => {
+                        var error = new TempIdent();
                         if (module.Body != null) {
+                            var body = new TempIdent();
+                            var end = new TempIdent();
+                            var temp = new TempIdent();
+
+                            context.Load(temp, BooleanType.Default, initFlag);
+                            context.Branch(temp, end, body);
+                            
+                            context.LabelMarker(body);
+                            context.Assign(initFlag, BooleanType.Default, new Literal(1.ToString())).Ln();
+
+                            if (module.Imports.Count() > 0) {
+                                TempIdent next = null;
+                                context = context.Enter(0);
+                                foreach (var import in module.Imports) {
+                                    temp = new TempIdent();
+                                    context.Call(temp, initType, new GlobalIdent(String.Format("{0}._init", import), true));
+
+                                    var comp = new TempIdent();
+                                    context.BinaryComp(comp, "eq", IntegerType.Integer, temp, new Literal(0.ToString()));
+
+                                    next = new TempIdent();
+                                    context.Branch(comp, next, error);
+                                    context.LabelMarker(next);
+                                }
+                                context = context.Leave().Ln().Ln();
+                            }
+
                             context.Statements(module.Body);
+                            context.Branch(end);
+
+                            context.LabelMarker(end);
                         }
                         context.Keyword("ret").Argument(IntegerType.Integer, new Literal(0.ToString())).EndOperation();
+                        context.LabelMarker(error);
+                        context.Keyword("ret").Argument(IntegerType.Integer, new Literal(1.ToString())).EndOperation();
                     });
 
                 if (entry) {

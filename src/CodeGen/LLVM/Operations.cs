@@ -216,7 +216,7 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Assign(this GenerationContext ctx, Value dest, OberonType type, Value src)
         {
-            if (dest is QualIdent && ((QualIdent) dest).Declaration.IsVariable){
+            if (dest is GlobalIdent || (dest is QualIdent && ((QualIdent) dest).Declaration.IsVariable)) {
                 return ctx.Keyword("store").Argument(type, src).Argument(new PointerType(type), dest).EndOperation();
             } else if (dest is ElementPointer) {
                 var temp = new TempIdent();

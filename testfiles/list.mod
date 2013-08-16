@@ -55,4 +55,7 @@
             RETURN 1 + l.next.Count();
         END;
     END Count;
+
+BEGIN
+    Out.String("Hello from List!"); Out.Ln;
 END List.

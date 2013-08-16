@@ -1,24 +1,58 @@
-; ModuleID = 'testfiles/ir/list.ll'
+; ModuleID = 'testfiles/ir/out.ll'
 target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-a0:0:64-n8:16:32-S32"
 
 %List.ListNode = type { i8*, i32, %List.ListNode* }
 
-@.str0 = private constant [9 x i8] c"ListNode\00"
-@List.ListNode._vtable = global [6 x i8*] [i8* getelementptr inbounds ([9 x i8]* @.str0, i32 0, i32 0), i8* null, i8* bitcast (void (%List.ListNode**, i32)* @List.ListNode.Add to i8*), i8* bitcast (i32 (%List.ListNode**)* @List.ListNode.Get to i8*), i8* bitcast (i1 (%List.ListNode**, i32)* @List.ListNode.Has to i8*), i8* bitcast (i32 (%List.ListNode**)* @List.ListNode.Count to i8*)]
-@.str01 = private constant [6 x i8] c"Used \00"
+@.str0 = private constant [16 x i8] c"Hello from Out!\00"
 @.str1 = private constant [3 x i8] c"%s\00"
-@.str2 = private constant [3 x i8] c"%i\00"
-@.str3 = private constant [5 x i8] c" of \00"
+@.str2 = private constant [2 x i8] c"\0A\00"
+@Out._hasInit = private global i1 false
+@.str01 = private constant [9 x i8] c"ListNode\00"
+@.str12 = private constant [17 x i8] c"Hello from List!\00"
+@.str23 = private constant [3 x i8] c"%s\00"
+@.str3 = private constant [2 x i8] c"\0A\00"
+@List.ListNode._vtable = global [6 x i8*] [i8* getelementptr inbounds ([9 x i8]* @.str01, i32 0, i32 0), i8* null, i8* bitcast (void (%List.ListNode**, i32)* @List.ListNode.Add to i8*), i8* bitcast (i32 (%List.ListNode**)* @List.ListNode.Get to i8*), i8* bitcast (i1 (%List.ListNode**, i32)* @List.ListNode.Has to i8*), i8* bitcast (i32 (%List.ListNode**)* @List.ListNode.Count to i8*)]
+@List._hasInit = private global i1 false
+@.str04 = private constant [6 x i8] c"Used \00"
+@.str15 = private constant [3 x i8] c"%s\00"
+@.str26 = private constant [3 x i8] c"%i\00"
+@.str37 = private constant [5 x i8] c" of \00"
 @.str4 = private constant [2 x i8] c"\0A\00"
 @i = private global i32 0
 @n = private global i32 0
 @test = private global %List.ListNode* null
+@Link._hasInit = private global i1 false
 
 declare i32 @printf(i8*, ...) nounwind
 
 declare noalias i8* @GC_malloc(i32)
 
-declare i32 @Out._init()
+declare void @Out.Ln() nounwind
+
+declare void @Out.String({ i32, i8* }) nounwind
+
+declare void @Out.Integer(i64) nounwind
+
+declare void @Out.Real(double) nounwind
+
+declare void @Out.Boolean(i1) nounwind
+
+define i32 @Out._init() nounwind {
+  %1 = load i1* @Out._hasInit
+  br i1 %1, label %6, label %2
+
+; <label>:2                                       ; preds = %0
+  store i1 true, i1* @Out._hasInit
+  %3 = getelementptr inbounds [16 x i8]* @.str0, i32 0, i32 0
+  %4 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.str1, i32 0, i32 0), i8* %3) nounwind
+  %5 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @.str2, i32 0, i32 0)) nounwind
+  br label %6
+
+; <label>:6                                       ; preds = %2, %0
+  ret i32 0
+                                                  ; No predecessors!
+  ret i32 1
+}
 
 define void @List.ListNode.Add(%List.ListNode** %l, i32 %"$v") nounwind {
   %v = alloca i32
@@ -176,135 +210,175 @@ define i32 @List.ListNode.Count(%List.ListNode** %l) nounwind {
 }
 
 define i32 @List._init() nounwind {
+  %1 = load i1* @List._hasInit
+  br i1 %1, label %9, label %2
+
+; <label>:2                                       ; preds = %0
+  store i1 true, i1* @List._hasInit
+  %3 = call i32 @Out._init() nounwind
+  %4 = icmp eq i32 %3, 0
+  br i1 %4, label %5, label %10
+
+; <label>:5                                       ; preds = %2
+  %6 = getelementptr inbounds [17 x i8]* @.str12, i32 0, i32 0
+  %7 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.str23, i32 0, i32 0), i8* %6) nounwind
+  %8 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @.str3, i32 0, i32 0)) nounwind
+  br label %9
+
+; <label>:9                                       ; preds = %5, %0
   ret i32 0
+
+; <label>:10                                      ; preds = %2
+  ret i32 1
 }
 
 define i32 @Link._init() nounwind {
+  %1 = load i1* @Link._hasInit
+  br i1 %1, label %92, label %2
+
+; <label>:2                                       ; preds = %0
+  store i1 true, i1* @Link._hasInit
+  %3 = call i32 @Out._init() nounwind
+  %4 = icmp eq i32 %3, 0
+  br i1 %4, label %5, label %93
+
+; <label>:5                                       ; preds = %2
+  %6 = call i32 @List._init() nounwind
+  %7 = icmp eq i32 %6, 0
+  br i1 %7, label %8, label %93
+
+; <label>:8                                       ; preds = %5
   store i32 1, i32* @n
   store i32 1, i32* @i
-  br label %1
+  br label %9
 
-; <label>:1                                       ; preds = %20, %0
-  %2 = load i32* @i
-  %3 = icmp sgt i32 %2, 256
-  br i1 %3, label %25, label %4
+; <label>:9                                       ; preds = %28, %8
+  %10 = load i32* @i
+  %11 = icmp sgt i32 %10, 256
+  br i1 %11, label %33, label %12
 
-; <label>:4                                       ; preds = %1
-  %5 = load i32* @n
-  %6 = sub i32 %5, 1
-  %7 = mul i32 %6, 78721
-  %8 = add i32 %7, 1213
-  %9 = srem i32 %8, 256
-  %10 = add i32 %9, 1
-  store i32 %10, i32* @n
-  %11 = load %List.ListNode** @test
-  %12 = icmp eq %List.ListNode* %11, null
-  br i1 %12, label %20, label %13
+; <label>:12                                      ; preds = %9
+  %13 = load i32* @n
+  %14 = sub i32 %13, 1
+  %15 = mul i32 %14, 78721
+  %16 = add i32 %15, 1213
+  %17 = srem i32 %16, 256
+  %18 = add i32 %17, 1
+  store i32 %18, i32* @n
+  %19 = load %List.ListNode** @test
+  %20 = icmp eq %List.ListNode* %19, null
+  br i1 %20, label %28, label %21
 
-; <label>:13                                      ; preds = %4
-  %14 = getelementptr inbounds %List.ListNode* %11, i32 0, i32 0
-  %15 = load i8** %14
-  %16 = bitcast i8* %15 to [6 x i8*]*
-  %17 = getelementptr inbounds [6 x i8*]* %16, i32 0, i32 2
-  %18 = load i8** %17
-  %19 = bitcast i8* %18 to void (%List.ListNode**, i32)*
-  br label %20
+; <label>:21                                      ; preds = %12
+  %22 = getelementptr inbounds %List.ListNode* %19, i32 0, i32 0
+  %23 = load i8** %22
+  %24 = bitcast i8* %23 to [6 x i8*]*
+  %25 = getelementptr inbounds [6 x i8*]* %24, i32 0, i32 2
+  %26 = load i8** %25
+  %27 = bitcast i8* %26 to void (%List.ListNode**, i32)*
+  br label %28
 
-; <label>:20                                      ; preds = %13, %4
-  %21 = phi void (%List.ListNode**, i32)* [ @List.ListNode.Add, %4 ], [ %19, %13 ]
-  %22 = load i32* @n
-  call void %21(%List.ListNode** @test, i32 %22) nounwind
-  %23 = load i32* @i
-  %24 = add i32 %23, 1
-  store i32 %24, i32* @i
-  br label %1
+; <label>:28                                      ; preds = %21, %12
+  %29 = phi void (%List.ListNode**, i32)* [ @List.ListNode.Add, %12 ], [ %27, %21 ]
+  %30 = load i32* @n
+  call void %29(%List.ListNode** @test, i32 %30) nounwind
+  %31 = load i32* @i
+  %32 = add i32 %31, 1
+  store i32 %32, i32* @i
+  br label %9
 
-; <label>:25                                      ; preds = %1
+; <label>:33                                      ; preds = %9
   store i32 0, i32* @n
   store i32 1, i32* @i
-  br label %26
+  br label %34
 
-; <label>:26                                      ; preds = %58, %25
-  %27 = load %List.ListNode** @test
-  %28 = icmp eq %List.ListNode* %27, null
-  br i1 %28, label %36, label %29
+; <label>:34                                      ; preds = %66, %33
+  %35 = load %List.ListNode** @test
+  %36 = icmp eq %List.ListNode* %35, null
+  br i1 %36, label %44, label %37
 
-; <label>:29                                      ; preds = %26
-  %30 = getelementptr inbounds %List.ListNode* %27, i32 0, i32 0
-  %31 = load i8** %30
-  %32 = bitcast i8* %31 to [6 x i8*]*
-  %33 = getelementptr inbounds [6 x i8*]* %32, i32 0, i32 5
-  %34 = load i8** %33
-  %35 = bitcast i8* %34 to i32 (%List.ListNode**)*
-  br label %36
+; <label>:37                                      ; preds = %34
+  %38 = getelementptr inbounds %List.ListNode* %35, i32 0, i32 0
+  %39 = load i8** %38
+  %40 = bitcast i8* %39 to [6 x i8*]*
+  %41 = getelementptr inbounds [6 x i8*]* %40, i32 0, i32 5
+  %42 = load i8** %41
+  %43 = bitcast i8* %42 to i32 (%List.ListNode**)*
+  br label %44
 
-; <label>:36                                      ; preds = %29, %26
-  %37 = phi i32 (%List.ListNode**)* [ @List.ListNode.Count, %26 ], [ %35, %29 ]
-  %38 = call i32 %37(%List.ListNode** @test) nounwind
-  %39 = load i32* @i
-  %40 = icmp sgt i32 %39, %38
-  br i1 %40, label %61, label %41
+; <label>:44                                      ; preds = %37, %34
+  %45 = phi i32 (%List.ListNode**)* [ @List.ListNode.Count, %34 ], [ %43, %37 ]
+  %46 = call i32 %45(%List.ListNode** @test) nounwind
+  %47 = load i32* @i
+  %48 = icmp sgt i32 %47, %46
+  br i1 %48, label %69, label %49
 
-; <label>:41                                      ; preds = %36
-  %42 = load %List.ListNode** @test
-  %43 = icmp eq %List.ListNode* %42, null
-  br i1 %43, label %51, label %44
+; <label>:49                                      ; preds = %44
+  %50 = load %List.ListNode** @test
+  %51 = icmp eq %List.ListNode* %50, null
+  br i1 %51, label %59, label %52
 
-; <label>:44                                      ; preds = %41
-  %45 = getelementptr inbounds %List.ListNode* %42, i32 0, i32 0
-  %46 = load i8** %45
-  %47 = bitcast i8* %46 to [6 x i8*]*
-  %48 = getelementptr inbounds [6 x i8*]* %47, i32 0, i32 4
-  %49 = load i8** %48
-  %50 = bitcast i8* %49 to i1 (%List.ListNode**, i32)*
-  br label %51
+; <label>:52                                      ; preds = %49
+  %53 = getelementptr inbounds %List.ListNode* %50, i32 0, i32 0
+  %54 = load i8** %53
+  %55 = bitcast i8* %54 to [6 x i8*]*
+  %56 = getelementptr inbounds [6 x i8*]* %55, i32 0, i32 4
+  %57 = load i8** %56
+  %58 = bitcast i8* %57 to i1 (%List.ListNode**, i32)*
+  br label %59
 
-; <label>:51                                      ; preds = %44, %41
-  %52 = phi i1 (%List.ListNode**, i32)* [ @List.ListNode.Has, %41 ], [ %50, %44 ]
-  %53 = load i32* @i
-  %54 = call i1 %52(%List.ListNode** @test, i32 %53) nounwind
-  br i1 %54, label %55, label %58
+; <label>:59                                      ; preds = %52, %49
+  %60 = phi i1 (%List.ListNode**, i32)* [ @List.ListNode.Has, %49 ], [ %58, %52 ]
+  %61 = load i32* @i
+  %62 = call i1 %60(%List.ListNode** @test, i32 %61) nounwind
+  br i1 %62, label %63, label %66
 
-; <label>:55                                      ; preds = %51
-  %56 = load i32* @n
-  %57 = add i32 %56, 1
-  store i32 %57, i32* @n
-  br label %58
-
-; <label>:58                                      ; preds = %55, %51
-  %59 = load i32* @i
-  %60 = add i32 %59, 1
-  store i32 %60, i32* @i
-  br label %26
-
-; <label>:61                                      ; preds = %36
-  %62 = getelementptr inbounds [6 x i8]* @.str01, i32 0, i32 0
-  %63 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.str1, i32 0, i32 0), i8* %62) nounwind
+; <label>:63                                      ; preds = %59
   %64 = load i32* @n
-  %65 = sext i32 %64 to i64
-  %66 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.str2, i32 0, i32 0), i64 %65) nounwind
-  %67 = getelementptr inbounds [5 x i8]* @.str3, i32 0, i32 0
-  %68 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.str1, i32 0, i32 0), i8* %67) nounwind
-  %69 = load %List.ListNode** @test
-  %70 = icmp eq %List.ListNode* %69, null
-  br i1 %70, label %78, label %71
+  %65 = add i32 %64, 1
+  store i32 %65, i32* @n
+  br label %66
 
-; <label>:71                                      ; preds = %61
-  %72 = getelementptr inbounds %List.ListNode* %69, i32 0, i32 0
-  %73 = load i8** %72
-  %74 = bitcast i8* %73 to [6 x i8*]*
-  %75 = getelementptr inbounds [6 x i8*]* %74, i32 0, i32 5
-  %76 = load i8** %75
-  %77 = bitcast i8* %76 to i32 (%List.ListNode**)*
-  br label %78
+; <label>:66                                      ; preds = %63, %59
+  %67 = load i32* @i
+  %68 = add i32 %67, 1
+  store i32 %68, i32* @i
+  br label %34
 
-; <label>:78                                      ; preds = %71, %61
-  %79 = phi i32 (%List.ListNode**)* [ @List.ListNode.Count, %61 ], [ %77, %71 ]
-  %80 = call i32 %79(%List.ListNode** @test) nounwind
-  %81 = sext i32 %80 to i64
-  %82 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.str2, i32 0, i32 0), i64 %81) nounwind
-  %83 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @.str4, i32 0, i32 0)) nounwind
+; <label>:69                                      ; preds = %44
+  %70 = getelementptr inbounds [6 x i8]* @.str04, i32 0, i32 0
+  %71 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.str15, i32 0, i32 0), i8* %70) nounwind
+  %72 = load i32* @n
+  %73 = sext i32 %72 to i64
+  %74 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.str26, i32 0, i32 0), i64 %73) nounwind
+  %75 = getelementptr inbounds [5 x i8]* @.str37, i32 0, i32 0
+  %76 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.str15, i32 0, i32 0), i8* %75) nounwind
+  %77 = load %List.ListNode** @test
+  %78 = icmp eq %List.ListNode* %77, null
+  br i1 %78, label %86, label %79
+
+; <label>:79                                      ; preds = %69
+  %80 = getelementptr inbounds %List.ListNode* %77, i32 0, i32 0
+  %81 = load i8** %80
+  %82 = bitcast i8* %81 to [6 x i8*]*
+  %83 = getelementptr inbounds [6 x i8*]* %82, i32 0, i32 5
+  %84 = load i8** %83
+  %85 = bitcast i8* %84 to i32 (%List.ListNode**)*
+  br label %86
+
+; <label>:86                                      ; preds = %79, %69
+  %87 = phi i32 (%List.ListNode**)* [ @List.ListNode.Count, %69 ], [ %85, %79 ]
+  %88 = call i32 %87(%List.ListNode** @test) nounwind
+  %89 = sext i32 %88 to i64
+  %90 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.str26, i32 0, i32 0), i64 %89) nounwind
+  %91 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([2 x i8]* @.str4, i32 0, i32 0)) nounwind
+  br label %92
+
+; <label>:92                                      ; preds = %86, %0
   ret i32 0
+
+; <label>:93                                      ; preds = %5, %2
+  ret i32 1
 }
 
 define i32 @main() nounwind {

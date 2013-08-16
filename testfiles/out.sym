@@ -1,6 +1,6 @@
 (**
- *  Generated 29/07/2013 20:23:13
- *  GlobalUID ac0e58f8-86e7-4542-b287-8035ff877648
+ *  Generated 17/08/2013 00:45:50
+ *  GlobalUID 7bd82aa8-41ec-4051-8967-4efdb75f57bc
  *
  *  Exported symbol file for module "Out"
  *
@@ -9,12 +9,11 @@
 **)
 
 MODULE Out;
-    TYPE
-        String * = ARRAY OF CHAR;
     VAR
-        Ln      * : PROCEDURE;
-        String  * : PROCEDURE (val : Out.String);
+        Ln * : PROCEDURE;
+        String * : PROCEDURE (val : ARRAY OF CHAR);
         Integer * : PROCEDURE (val : LONGINT);
-        Real    * : PROCEDURE (val : LONGREAL);
+        Real * : PROCEDURE (val : LONGREAL);
         Boolean * : PROCEDURE (val : BOOLEAN);
 END Out.
+
