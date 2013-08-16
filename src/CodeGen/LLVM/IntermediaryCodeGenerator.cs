@@ -72,7 +72,7 @@ namespace DUO2C.CodeGen.LLVM
             ctx.Global(_gcMallocProc, _gcMallocProcType);
             ctx.Ln();
 
-            ctx.Module(module, entryModule);
+            ctx.Module(module, true, entryModule);
 
             return ctx.ToString();
         }
@@ -110,12 +110,16 @@ namespace DUO2C.CodeGen.LLVM
             return ctx;
         }
 
-        static GenerationContext Module(this GenerationContext ctx, NModule module, bool entry)
+        static GenerationContext Module(this GenerationContext ctx, NModule module, bool define, bool entry)
         {
+            if (define) {
+                foreach (var mdl in module.Imports) {
+                    ctx.Module(((ModuleType) module.Type.Scope.GetSymbol(mdl)).Module, false, false);
+                }
+            }
+
             _module = module;
             _scope = module.Type.Scope;
-            
-            TempIdent.Reset();
 
             var types = _scope.GetTypes(false);
             if (types.Count() > 0) {
@@ -131,7 +135,7 @@ namespace DUO2C.CodeGen.LLVM
             if (records.Count() > 0) {
                 ctx = ctx.Enter(0);
                 foreach (var kv in records) {
-                    ctx.RecordTable(kv.Key, (RecordType) kv.Value.Type).Ln();
+                    ctx.RecordTable(kv.Key, (RecordType) kv.Value.Type, define).Ln();
                 }
                 ctx = ctx.Leave().Ln();
             }
@@ -156,26 +160,30 @@ namespace DUO2C.CodeGen.LLVM
 
             var initIdent = new GlobalIdent(String.Format("{0}._init", module.Identifier), false);
             var initType = new ProcedureType(IntegerType.Integer);
-            ctx.Procedure(initIdent, initType, new Scope(_scope),
-                (context) => {
-                    if (module.Body != null) {
-                        context.Statements(module.Body);
-                    }
-                    context.Keyword("ret").Argument(IntegerType.Integer, new Literal(0.ToString())).EndOperation();
-                });
-
-            if (entry) {
-                var mainIdent = new GlobalIdent(String.Format("main", module.Identifier), false);
-                var mainType = new ProcedureType(IntegerType.Integer);
-                ctx.Procedure(mainIdent, mainType, new Scope(_scope),
+            if (define) {
+                ctx.Procedure(initIdent, initType, new Scope(_scope),
                     (context) => {
-                        var temp = new TempIdent();
-                        context.Call(temp, initType, initIdent);
-                        context.Keyword("ret").Argument(IntegerType.Integer, temp).EndOperation();
+                        if (module.Body != null) {
+                            context.Statements(module.Body);
+                        }
+                        context.Keyword("ret").Argument(IntegerType.Integer, new Literal(0.ToString())).EndOperation();
                     });
+
+                if (entry) {
+                    var mainIdent = new GlobalIdent(String.Format("main", module.Identifier), false);
+                    var mainType = new ProcedureType(IntegerType.Integer);
+                    ctx.Procedure(mainIdent, mainType, new Scope(_scope),
+                        (context) => {
+                            var temp = new TempIdent();
+                            context.Call(temp, initType, initIdent);
+                            context.Keyword("ret").Argument(IntegerType.Integer, temp).EndOperation();
+                        });
+                }
+            } else {
+                ctx.Global(initIdent, initType);
             }
 
-            return ctx;
+            return ctx.Ln();
         }
 
         static Dictionary<Type, MethodInfo> _nodeMethods;

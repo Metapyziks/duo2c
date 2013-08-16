@@ -1,5 +1,5 @@
-; Generated 16/08/2013 23:34:05
-; GlobalUID 52fab4f7-6557-4235-9188-8431e144ea5e
+; Generated 16/08/2013 23:45:53
+; GlobalUID 9da5da05-0d2d-4be9-bb2a-0692f16db097
 ; 
 ; LLVM IR file for module "Link"
 ; 
@@ -16,6 +16,20 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
 
 declare i32 @printf(%CHAR*, ...) nounwind 
 declare noalias i8* @GC_malloc(i32) 
+
+%Out.String = type {i32, %CHAR*}
+
+declare i32 @Out._init() 
+
+%List.Int32 = type i32
+%List.List = type %List.ListNode*
+%List.ListNode = type {i8*, %List.Int32, %List.List}
+
+@List.ListNode._vtable = linkonce global [0 x i8*][] 
+
+declare void @List.ListNode.Add(%List.List*, %List.Int32) nounwind 
+declare %List.Int32 @List.ListNode.Get(%List.List*) nounwind 
+declare i32 @List._init() 
 
 @i = private global i32 zeroinitializer
 @n = private global i32 zeroinitializer

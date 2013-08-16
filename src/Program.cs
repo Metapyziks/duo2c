@@ -335,12 +335,24 @@ namespace DUO2C
 
                     if (!link) return 0;
 
-                    var linkedPath = Path.GetTempFileName();
-                    cleanupFiles.Add(linkedPath);
+                    String linkedPath;
+                    if (keepIRFiles) {
+                        linkedPath = (keepDir ?? Path.GetDirectoryName(outPath))
+                            + Path.DirectorySeparatorChar
+                            + Path.GetFileNameWithoutExtension(outPath)
+                            + ".link.ll";
+                    } else {
+                        linkedPath = Path.GetTempFileName();
+                        cleanupFiles.Add(linkedPath);
+                    }
+
                     RunTool("llvm-link", irFiles.Values, "-S", "-o", linkedPath);
-                    cleanupFiles.Remove(linkedPath);
-                    linkedPath = RenameTempFileExtension(linkedPath, "ll");
-                    cleanupFiles.Add(linkedPath);
+
+                    if (!keepIRFiles) {
+                        cleanupFiles.Remove(linkedPath);
+                        linkedPath = RenameTempFileExtension(linkedPath, "ll");
+                        cleanupFiles.Add(linkedPath);
+                    }
 
                     var assemblyPath = Path.GetTempFileName();
                     cleanupFiles.Add(assemblyPath);
