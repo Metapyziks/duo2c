@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using DUO2C.CodeGen;
 using DUO2C.CodeGen.LLVM;
 using DUO2C.Nodes.Oberon2;
@@ -129,6 +130,35 @@ namespace DUO2C
             return newPath;
         }
 
+        static void RunTool(String name, params Object[] args)
+        {
+            var strArgs = args.SelectMany(x => x is IEnumerable<String>
+                ? (IEnumerable<String>) x : new String[] { x.ToString() })
+                .Select(x => x.StartsWith("\"") || x.StartsWith("-") ? x : String.Format("\"{0}\"", x));
+            var startInfo = new ProcessStartInfo(name, String.Join(" ", strArgs));
+            startInfo.RedirectStandardOutput = true;
+            startInfo.RedirectStandardError = true;
+            startInfo.UseShellExecute = false;
+
+            using (var process = Process.Start(startInfo)) {
+                while (!process.HasExited) {
+                    while (!process.StandardOutput.EndOfStream) {
+                        Console.WriteLine(process.StandardOutput.ReadLine());
+                    }
+
+                    while (!process.StandardError.EndOfStream) {
+                        Console.WriteLine(process.StandardError.ReadLine());
+                    }
+
+                    Thread.Sleep(10);
+                }
+
+                if (process.ExitCode != 0) {
+                    throw new Exception("Error while running " + name);
+                }
+            }
+        }
+
         static int Main(string[] args)
         {
             if (args.Length == 0) {
@@ -246,41 +276,14 @@ namespace DUO2C
                     }
 
                     var linkedPath = Path.GetTempFileName();
-                    using (var process = Process.Start("llvm-link", String.Format("\"{0}\" -S -o {1}",
-                        String.Join("\" \"", irFiles.Values), linkedPath))) {
-
-                        process.WaitForExit();
-
-                        if (process.ExitCode > 0) {
-                            Console.WriteLine("Error while calling llvm-link");
-                            return 1;
-                        }
-                    }
+                    RunTool("llvm-link", irFiles.Values, "-S", "-o", linkedPath);
                     linkedPath = RenameTempFileExtension(linkedPath, "ll");
 
                     var assemblyPath = Path.GetTempFileName();
-                    using (var process = Process.Start("llc", String.Format("\"{0}\" -load gc -O3 -o {1}",
-                        linkedPath, assemblyPath))) {
-
-                        process.WaitForExit();
-
-                        if (process.ExitCode > 0) {
-                            Console.WriteLine("Error while calling llc");
-                            return 1;
-                        }
-                    }
+                    RunTool("llc", linkedPath, "-load gc", "-O3", "-o", assemblyPath);
                     assemblyPath = RenameTempFileExtension(assemblyPath, "s");
 
-                    using (var process = Process.Start("gcc", String.Format("\"{0}\" -lgc -o {1}",
-                        assemblyPath, outPath))) {
-
-                        process.WaitForExit();
-
-                        if (process.ExitCode > 0) {
-                            Console.WriteLine("Error while calling gcc");
-                            return 1;
-                        }
-                    }
+                    RunTool("gcc", assemblyPath, "-lgc", "-o", outPath);
 
                     return 0;
                 } catch (InvalidArgumentException e) {
@@ -293,11 +296,11 @@ namespace DUO2C
                     WriteCompilerError(e);
                     Console.WriteLine();
                     return 1;
-                /*} catch (Exception e) {
+                } catch (Exception e) {
                     WriteErrorHeader("Encountered 1 error while compiling file(s):");
                     WriteError(e);
                     Console.WriteLine();
-                    return 1;*/
+                    return 1;
                 }
             }
         }
