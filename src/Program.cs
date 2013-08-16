@@ -190,6 +190,7 @@ namespace DUO2C
                 String entryModule = null;
                 String keepDir = null;
                 bool keepIRFiles = false;
+                bool link = true;
 
                 AddOption((arg, iter) => {
                     iter.MoveNext();
@@ -208,6 +209,11 @@ namespace DUO2C
                         keepDir = iter.Current.TrimEnd('/', '\\');
                     }
                 }, "k", "K", "keep", "keepdir");
+
+                AddOption((arg, iter) => {
+                    link = false;
+                    keepIRFiles = true;
+                }, "S");
 
                 var ruleset = Ruleset.FromString(File.ReadAllText("oberon2.txt"));
                 ruleset.AddSubstitutionNS("DUO2C.Nodes.Oberon2", true);
@@ -326,6 +332,8 @@ namespace DUO2C
                             irFiles.Add(module.Identifier, outpath);
                         }
                     }
+
+                    if (!link) return 0;
 
                     var linkedPath = Path.GetTempFileName();
                     cleanupFiles.Add(linkedPath);
