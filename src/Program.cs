@@ -159,6 +159,25 @@ namespace DUO2C
             }
         }
 
+        static IEnumerable<String> ListFileNames(String moduleIdent)
+        {
+            yield return moduleIdent + ".sym";
+            yield return moduleIdent.ToLower() + ".sym";
+        }
+
+        static IEnumerable<String> ListPaths(String moduleIdent, String dir)
+        {
+            foreach (var fileName in ListFileNames(moduleIdent).Distinct()) {
+                yield return dir + Path.DirectorySeparatorChar + fileName;
+                yield return Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + fileName;
+            }
+        }
+
+        static String FindSymbolFile(String moduleIdent, String dir)
+        {
+            return ListPaths(moduleIdent, dir).FirstOrDefault(x => File.Exists(x));
+        }
+
         static int Main(string[] args)
         {
             if (args.Length == 0) {
@@ -169,6 +188,8 @@ namespace DUO2C
             } else {
                 String outPath = null;
                 String entryModule = null;
+                String keepDir = null;
+                bool keepIRFiles = false;
 
                 AddOption((arg, iter) => {
                     iter.MoveNext();
@@ -180,11 +201,25 @@ namespace DUO2C
                     entryModule = iter.Current;
                 }, "e", "entry");
 
+                AddOption((arg, iter) => {
+                    keepIRFiles = true;
+                    if (arg == "K" || arg == "keepdir") {
+                        iter.MoveNext();
+                        keepDir = iter.Current.TrimEnd('/', '\\');
+                    }
+                }, "k", "K", "keep", "keepdir");
+
                 var ruleset = Ruleset.FromString(File.ReadAllText("oberon2.txt"));
                 ruleset.AddSubstitutionNS("DUO2C.Nodes.Oberon2", true);
 
+                var cleanupFiles = new List<String>();
+
                 try {
                     String[] files = ParseArgs(args);
+
+                    if (keepDir != null && !Directory.Exists(keepDir)) {
+                        Directory.CreateDirectory(keepDir);
+                    }
 
                     if (entryModule == null && outPath == null) {
                         throw new Exception("No entry module specified (-e <module>)");
@@ -206,25 +241,27 @@ namespace DUO2C
 #endif
                     foreach (var file in files) {
                         var module = (NModule) ruleset.ParseFile(file);
-                        modules.Add(module.Identifier, module);
+                        modules.Add(file, module);
                     }
 #if DEBUG
                     timer.Stop();
                     Console.WriteLine("File(s) parsed in {0}ms", timer.ElapsedMilliseconds);
 
-                    if (!modules.Any(x => x.Key == entryModule)) {
+                    if (!modules.Any(x => x.Value.Identifier == entryModule)) {
                         Console.WriteLine("Could not find entry module '{0}'", entryModule);
                         return 1;
                     }
 #endif
                     while (modules.Count > 0) {
-                        var module = modules.FirstOrDefault(x => !x.Value.Imports.Any(y => modules.ContainsKey(y))).Value;
+                        var pair = modules.FirstOrDefault(x => !x.Value.Imports.Any(y => modules.Values.Any(z => z.Identifier == y)));
+                        var mdlpath = pair.Key;
+                        var module = pair.Value;
 
                         if (module == null) {
                             throw new Exception("Cyclic dependency encountered between modules");
                         }
 
-                        modules.Remove(module.Identifier);
+                        modules.Remove(mdlpath);
 
                         var root = new RootScope();
 
@@ -233,12 +270,13 @@ namespace DUO2C
                         ), AccessModifier.Private, DeclarationType.Global);
 
                         foreach (var import in module.Imports) {
-                            String path = Path.GetDirectoryName(args[0]) + Path.DirectorySeparatorChar
-                                + import.ToLower() + ".sym";
-                            if (File.Exists(path)) {
-                                var mdl = (NModule) ruleset.ParseFile(path);
-                                mdl.FindDeclarations(root);
+                            var path = FindSymbolFile(import, Path.GetDirectoryName(modules.FirstOrDefault(x => x.Value.Identifier == import).Key ?? mdlpath));
+                            if (path == null) {
+                                throw new Exception(String.Format("Could not find symbol file for module '{0}'", import));
                             }
+
+                            var mdl = (NModule) ruleset.ParseFile(path);
+                            mdl.FindDeclarations(root);
                         }
 
                         module.FindDeclarations(root);
@@ -258,30 +296,50 @@ namespace DUO2C
                         } else {
                             var guid = Guid.NewGuid();
 
-                            var outpath = Path.GetDirectoryName(files[0])
+                            var outpath = Path.GetDirectoryName(mdlpath)
                                 + Path.DirectorySeparatorChar
-                                + Path.GetFileNameWithoutExtension(files[0])
+                                + Path.GetFileNameWithoutExtension(mdlpath)
                                 + ".sym";
 
                             string sym = SymbolCodeGenerator.Generate(module.Type, guid);
                             File.WriteAllText(outpath, sym);
 
-                            outpath = Path.GetTempFileName();
+                            if (keepIRFiles) {
+                                outpath = (keepDir ?? Path.GetDirectoryName(mdlpath))
+                                + Path.DirectorySeparatorChar
+                                + Path.GetFileNameWithoutExtension(mdlpath)
+                                + ".ll";
+                            } else {
+                                outpath = Path.GetTempFileName();
+                                cleanupFiles.Add(outpath);
+                            }
+
                             string ir = IntermediaryCodeGenerator.Generate(module, guid, module.Identifier == entryModule);
                             File.WriteAllText(outpath, ir);
 
-                            outpath = RenameTempFileExtension(outpath, "ll");
+                            if (!keepIRFiles) {
+                                cleanupFiles.Remove(outpath);
+                                outpath = RenameTempFileExtension(outpath, "ll");
+                                cleanupFiles.Add(outpath);
+                            }
+
                             irFiles.Add(module.Identifier, outpath);
                         }
                     }
 
                     var linkedPath = Path.GetTempFileName();
+                    cleanupFiles.Add(linkedPath);
                     RunTool("llvm-link", irFiles.Values, "-S", "-o", linkedPath);
+                    cleanupFiles.Remove(linkedPath);
                     linkedPath = RenameTempFileExtension(linkedPath, "ll");
+                    cleanupFiles.Add(linkedPath);
 
                     var assemblyPath = Path.GetTempFileName();
+                    cleanupFiles.Add(assemblyPath);
                     RunTool("llc", linkedPath, "-load gc", "-O3", "-o", assemblyPath);
+                    cleanupFiles.Remove(linkedPath);
                     assemblyPath = RenameTempFileExtension(assemblyPath, "s");
+                    cleanupFiles.Add(assemblyPath);
 
                     RunTool("gcc", assemblyPath, "-lgc", "-o", outPath);
 
@@ -301,6 +359,10 @@ namespace DUO2C
                     WriteError(e);
                     Console.WriteLine();
                     return 1;
+                } finally {
+                    foreach (var file in cleanupFiles) {
+                        File.Delete(file);
+                    }
                 }
             }
         }
