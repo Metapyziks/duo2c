@@ -236,7 +236,7 @@ namespace DUO2C.CodeGen.LLVM
                     if (paras.Count() != 2) return false;
                     if (paras.First().ParameterType != typeof(GenerationContext)) return false;
                     if (paras.Last().ParameterType == typeof(SubstituteNode)) return false;
-                    return paras.Last().ParameterType.Extends(typeof(SubstituteNode));
+                    return typeof(SubstituteNode).IsAssignableFrom(paras.Last().ParameterType);
                 }).ToDictionary(x => x.GetParameters().Last().ParameterType);
             }
 

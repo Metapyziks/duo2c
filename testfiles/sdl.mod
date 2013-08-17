@@ -12,13 +12,13 @@ MODULE SDL;
         InitPackage : SET;
 
     PROCEDURE Init* (packages : InitPackage) : INTEGER;
-    EXTERNAL SDL_Init FROM "SDL2.dll";
+    EXTERNAL SDL_Init;
     
-    PROCEDURE GetError* () : ARRAY OF CHAR;
-    EXTERNAL SDL_GetError FROM "SDL2.dll";
+    PROCEDURE GetError* : ARRAY OF CHAR;
+    EXTERNAL SDL_GetError;
 
     PROCEDURE Quit*;
-    EXTERNAL SDL_Quit FROM "SDL2.dll";
+    EXTERNAL SDL_Quit;
 
 BEGIN
     IF SDL.Init(SDL.InitAudio + SDL.InitVideo) < 0 THEN

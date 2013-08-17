@@ -432,7 +432,7 @@ namespace DUO2C
         public void AddSubstitutionNS(String ns, bool recursive = false)
         {
             foreach (var t in Assembly.GetExecutingAssembly().GetTypes().Where(t => {
-                return t.Extends(typeof(SubstituteNode)) && t.Namespace.StartsWith(ns)
+                return typeof(SubstituteNode).IsAssignableFrom(t) && t.Namespace.StartsWith(ns)
                     && (recursive || t.Namespace == ns) && t.GetCustomAttribute<SubstituteTokenAttribute>() != null;
             })) AddSubstitution(t);
 

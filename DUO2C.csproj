@@ -125,7 +125,6 @@
     <Compile Include="src\CodeGen\SymbolCodeGenerator.cs" />
     <Compile Include="src\Semantics\TypeMismatchException.cs" />
     <Compile Include="src\Semantics\UndeclaredIdentifierException.cs" />
-    <Compile Include="src\Tools.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="oberon2.txt">
