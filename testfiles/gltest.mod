@@ -13,13 +13,13 @@ MODULE GLTest;
         GL.MatrixMode(5888);
         GL.LoadIdentity;
         GLUT.LookAt(2, 2, 2, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-        GL.Scalef(.005,.005,.005);
+        GL.Scalef(0.005, 0.005, 0.005);
         GL.Rotatef(20, 0, 1, 0);
         GL.Rotatef(30, 0, 0, 1);
         GL.Rotatef(5, 1, 0, 0);
         GL.Translatef(-300, 0, 0);
 
-        GL.Color3f(1,1,1);
+        GL.Color3f(1, 1, 1);
         GLUT.StrokeCharacter(NIL, 'H');
         GLUT.StrokeCharacter(NIL, 'e');
         GLUT.StrokeCharacter(NIL, 'l');

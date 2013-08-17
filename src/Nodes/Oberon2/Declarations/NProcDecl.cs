@@ -195,9 +195,16 @@ namespace DUO2C.Nodes.Oberon2
         public NForwardDecl(ParseNode original)
             : base(original)
         {
-            Children = Children.Where(x => x.Token != "keyword");
             _identDef = (NIdentDef) Children.First(x => x is NIdentDef);
-            Children = Children.Where(x => !(x is NIdent));
+
+            if (GetType() == typeof(NForwardDecl)) {
+                Children = Children.Where(x => !(x is NIdent || x.Token == "keyword"));
+            }
+        }
+
+        protected virtual ProcedureType GetSignature()
+        {
+            return new ProcedureType(FormalParams);
         }
 
         public override void FindDeclarations(Scope scope)
@@ -205,7 +212,7 @@ namespace DUO2C.Nodes.Oberon2
             if (FormalParams != null && FormalParams.FindTypeErrors(scope).Count() > 0) return;
 
             if (Receiver == null) {
-                scope.DeclareSymbol(Identifier, new ProcedureType(FormalParams), Visibility, DeclarationType.Global);
+                scope.DeclareSymbol(Identifier, GetSignature(), Visibility, DeclarationType.Global);
             } else {
                 var type = scope.GetType(Receiver.TypeName);
 
@@ -254,6 +261,39 @@ namespace DUO2C.Nodes.Oberon2
         }
     }
 
+    [SubstituteToken("ExternalDecl")]
+    public class NExternalDecl : NForwardDecl
+    {
+        public Scope Scope { get; private set; }
+        public bool IsImport { get; private set; }
+        public String SymbolName { get; private set; }
+
+        public NExternalDecl(ParseNode original)
+            : base(original)
+        {
+            IsImport = Children.ElementAt(Children.Count() - 2).String == "IMPORT";
+            SymbolName = Children.Last().String;
+
+            Children = Children.Where(x => !(x is NIdent || x.Token == "keyword"));
+        }
+
+        protected override ProcedureType GetSignature()
+        {
+            return new ExternalProcedureType(FormalParams, SymbolName, IsImport);
+        }
+
+        public override void FindDeclarations(Scope scope)
+        {
+            base.FindDeclarations(scope);
+
+            Scope = new Scope(scope);
+
+            foreach (var child in Children.Where(x => x is IDeclarationSource)) {
+                ((IDeclarationSource) child).FindDeclarations(Scope);
+            }
+        }
+    }
+
     [SubstituteToken("ProcDecl")]
     public class NProcDecl : NForwardDecl
     {
@@ -265,7 +305,10 @@ namespace DUO2C.Nodes.Oberon2
         }
 
         public NProcDecl(ParseNode original)
-            : base(original) { }
+            : base(original)
+        {
+            Children = Children.Where(x => !(x is NIdent || x.Token == "keyword"));
+        }
 
         public override void FindDeclarations(Scope scope)
         {

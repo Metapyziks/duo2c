@@ -550,7 +550,7 @@ namespace DUO2C.Semantics
 
         public override bool CanTestEquality(OberonType other)
         {
-            return other is ProcedureType;
+            return other.IsProcedure;
         }
 
         public override bool CanCompare(OberonType other)
@@ -566,6 +566,24 @@ namespace DUO2C.Semantics
             } else {
                 return String.Format("PROCEDURE ({0})", paramStr);
             }
+        }
+    }
+
+    public class ExternalProcedureType : ProcedureType
+    {
+        public String ExternalSymbol { get; private set; }
+        public bool IsImported { get; private set; }
+
+        public ExternalProcedureType(NFormalPars paras, String externalSymbol, bool isImported)
+            : base(paras)
+        {
+            ExternalSymbol = externalSymbol;
+            IsImported = isImported;
+        }
+
+        public override string ToString()
+        {
+            return "EXTERNAL " + base.ToString();
         }
     }
 
@@ -597,13 +615,9 @@ namespace DUO2C.Semantics
 
         public override bool CanCompare(OberonType other)
         {
-            if (ElementType.IsChar) {
-                if (other.IsChar) {
-                    return true;
-                } else if (other.IsArray) {
-                    var otherArray = other.As<ArrayType>();
-                    return otherArray.ElementType.IsChar;
-                }
+            if (ElementType.IsChar && other.IsArray) {
+                var otherArray = other.As<ArrayType>();
+                return otherArray.ElementType.IsChar;
             }
 
             return false;
@@ -672,7 +686,7 @@ namespace DUO2C.Semantics
 
         public override bool CanCompare(OberonType other)
         {
-            return other is CharType || (other is ArrayType && ((ArrayType) other).ElementType is CharType);
+            return other.IsChar || (other.IsArray && other.As<ArrayType>().ElementType.IsChar);
         }
     }
 

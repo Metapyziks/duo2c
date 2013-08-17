@@ -97,6 +97,31 @@ namespace DUO2C.CodeGen.LLVM
             return ctx.EndArguments().Write(")");
         }
 
+        static OberonType Marshalled(this OberonType type, Scope scope)
+        {
+            if (type.IsArray) {
+                return new PointerType(type.As<ArrayType>().ElementType.Marshalled(scope)).Resolve(scope);
+            }
+
+            if (type.IsPointer) {
+                return new PointerType(type.As<PointerType>().ResolvedType.Marshalled(scope)).Resolve(scope);
+            }
+
+            return type;
+        }
+        
+        static GenerationContext Type(this GenerationContext ctx, ExternalProcedureType type)
+        {
+            var returnType = type.ReturnType ?? VoidType.Default;
+
+            ctx.Type(returnType).Write(" (").EndArguments();
+            foreach (var p in type.ParamsWithReceiver) {
+                var ptype = p.Type.Marshalled(_scope);
+                ctx.Argument(p.ByReference ? new PointerType(ptype) : ptype, false);
+            }
+            return ctx.EndArguments().Write(")");
+        }
+
         static GenerationContext Type(this GenerationContext ctx, RecordType type)
         {
             return ctx.Structure(new OberonType[] { new PointerType(IntegerType.Byte) }

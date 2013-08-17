@@ -43,13 +43,18 @@ namespace DUO2C.CodeGen
                 ctx = ctx.Leave();
             }
 
-            var vars = module.Scope.GetSymbols(false).Where(x => x.Value.Visibility != AccessModifier.Private);
+            var vars = module.Scope.GetSymbols(false).Where(x => x.Value.Visibility != AccessModifier.Private && !x.Value.Type.IsProcedure);
             if (vars.Any(x => true)) {
                 ctx = ctx.Write("VAR").Ln().Enter();
                 foreach (var kv in vars) {
                     ctx.WriteVarDecl(module, kv.Key, kv.Value.Type, kv.Value.Visibility);
                 }
                 ctx = ctx.Leave();
+            }
+
+            var procs = module.Scope.GetSymbols(false).Where(x => x.Value.Visibility != AccessModifier.Private && x.Value.Type.IsProcedure);
+            foreach (var kv in procs) {
+                ctx.WriteProcDecl(module, kv.Key, kv.Value.Type.As<ProcedureType>(), kv.Value.Visibility);
             }
 
             var records = types.Where(x => x.Value.Type.IsRecord);
@@ -84,6 +89,43 @@ namespace DUO2C.CodeGen
         static GenerationContext WriteVarDecl(this GenerationContext ctx, ModuleType module, String identifier, OberonType type, AccessModifier visibility)
         {
             return ctx.Write(identifier).WriteAccessModifier(visibility).Anchor().Write(" : ").WriteType(module, type).Write(";").Ln();
+        }
+
+        static GenerationContext WriteProcDecl(this GenerationContext ctx, ModuleType module, String identifier, ProcedureType type, AccessModifier visibility)
+        {
+            ctx.Write("PROCEDURE ");
+
+            if (!(type is ExternalProcedureType)) ctx.Write("^ ");
+
+            ctx.Write(identifier).WriteAccessModifier(visibility);
+            if (type.Params.Length > 0) {
+                ctx.Write(" (");
+                for(int i = 0; i < type.Params.Length; ++i) {
+                    var param = type.Params[i];
+                    if (param.ByReference) ctx.Write("VAR ");
+                    ctx.Write(param.Identifier);
+                    if (i < type.Params.Length - 1 && type.Params[i + 1].Type == param.Type) {
+                        ctx.Write(", ");
+                    } else {
+                        ctx.Write(" : ").WriteType(module, param.Type);
+                        if (i < type.Params.Length - 1) ctx.Write("; ");
+                    }
+                }
+                ctx.Write(")");
+            }
+            if (type.ReturnType != null) {
+                ctx.Write(" : ").WriteType(module, type.ReturnType);
+            }
+            ctx.Write(";").Ln();
+
+            if (type is ExternalProcedureType) {
+                var externType = (ExternalProcedureType) type;
+                ctx.Write("EXTERNAL ");
+                if (externType.IsImported) ctx.Write("IMPORT ");
+                ctx.Write("\"{0}\";", externType.ExternalSymbol).Ln();
+            }
+
+            return ctx.Ln();
         }
 
         static GenerationContext WriteType(this GenerationContext ctx, ModuleType module, OberonType type)

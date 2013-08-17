@@ -219,6 +219,24 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Conversion(this GenerationContext ctx, OberonType from, OberonType to, ref Value src)
         {
+            if (from.IsArray && to.IsChar) {
+                var ptr = new TempIdent();
+                if (src is StringLiteral) {
+                    var lit = (StringLiteral) src;
+                    ctx.Assign(ptr);
+                    ctx.Argument(new ElementPointer(false, lit.ConstType, lit.Identifier, 0, 0));
+                    ctx.EndOperation();
+                } else {
+                    var temp = new TempIdent();
+                    ctx.Assign(temp);
+                    ctx.Argument(new ElementPointer(false, new PointerType(from), src, 0, 1));
+                    ctx.EndOperation();
+                    ctx.Load(ptr, new PointerType(CharType.Default), temp);
+                }
+                src = new TempIdent();
+                return ctx.Load(src, to, ptr);
+            }
+
             if (from.Equals(to)) return ctx;
 
             if (src is Literal && to.IsNumeric && from.IsNumeric) {
@@ -286,6 +304,15 @@ namespace DUO2C.CodeGen.LLVM
             if (node.Inner is NDesignator) {
                 var val = ctx.GetDesignation((NDesignator) node.Inner);
                 var ntype = node.Inner.GetFinalType(_scope);
+                if (type.IsPointer && val is QualIdent && ntype.IsArray && !type.CanTestEquality(ntype)
+                    && type.As<PointerType>().ResolvedType.Equals(ntype.As<ArrayType>().ElementType)) {
+
+                    var temp = new TempIdent();
+                    ctx.Assign(temp);
+                    ctx.Argument(new ElementPointer(false, new PointerType(ntype), val, 0, 1));
+                    ctx.EndOperation();
+                    return ctx.Load(dest, new PointerType(CharType.Default), temp);
+                }
                 if (type.IsPointer && (val is QualIdent || val is ElementPointer) && !type.CanTestEquality(ntype)
                     && type.CanTestEquality(new PointerType(ntype))) {
 
@@ -361,7 +388,8 @@ namespace DUO2C.CodeGen.LLVM
             var temp = new TempIdent();
             var val = (Value) temp;
             var ntype = node.GetFinalType(_scope);
-            if (!type.CanTestEquality(ntype) && type.CanTestEquality(new PointerType(ntype))) {
+            if (!type.CanTestEquality(ntype) && (type.Equals(new PointerType(ntype)) || (type.IsPointer
+                && ntype.IsArray && type.As<PointerType>().ResolvedType.Equals(ntype.As<ArrayType>().ElementType)))) {
                 ntype = type;
             }
             if (node is NFactor) {

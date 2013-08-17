@@ -23,9 +23,10 @@ namespace DUO2C.CodeGen.LLVM
 
             if (type.IsProcedure) {
                 var proc = type.As<ProcedureType>();
+                var isExternal = proc is ExternalProcedureType;
                 
                 ctx.Keyword("declare");
-
+                
                 if (dest is GlobalIdent && ((GlobalIdent) dest).OptionTags.HasFlag(GlobalIdent.Options.NoAlias)) {
                     ctx.Keyword("noalias");
                 }
@@ -36,17 +37,18 @@ namespace DUO2C.CodeGen.LLVM
                     ctx.Type(VoidType.Default);
                 }
 
-                ctx.Write(" \t{0}\t(", dest);
+                ctx.Write(" \t{0}\t(", isExternal ? ((ExternalProcedureType) proc).ExternalSymbol : dest.ToString());
                 foreach (var p in proc.ParamsWithReceiver) {
+                    var ptype = isExternal ? p.Type.Marshalled(_scope) : p.Type;
                     if (p.ByReference) {
-                        ctx.Argument(new PointerType(p.Type));
+                        ctx.Argument(new PointerType(ptype));
                     } else {
-                        ctx.Argument(p.Type);
+                        ctx.Argument(ptype);
                     }
                 }
                 ctx.Write(") \t");
                 
-                if (!(dest is GlobalIdent) || ((GlobalIdent) dest).OptionTags.HasFlag(GlobalIdent.Options.NoUnwind)) {
+                if (!isExternal && (!(dest is GlobalIdent) || ((GlobalIdent) dest).OptionTags.HasFlag(GlobalIdent.Options.NoUnwind))) {
                     ctx.Keyword("nounwind");
                 }
                 

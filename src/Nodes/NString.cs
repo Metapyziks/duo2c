@@ -25,7 +25,8 @@ namespace DUO2C.Nodes
         public NString(ParseNode original)
             : base(original, true)
         {
-            var str = base.String.Substring(1, base.String.Length - 2);
+            var str = base.String.Trim();
+            str = str.Substring(1, str.Length - 2);
             _string = String.Empty;
 
             int i = 0; var escaped = false;

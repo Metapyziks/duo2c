@@ -1,6 +1,9 @@
 MODULE GLUT;
     TYPE
-        ExitType = POINTER TO PROCEDURE (v : INTEGER);
+        ExitType = PROCEDURE (v : INTEGER);
+
+    PROCEDURE Exit (errorCode : INTEGER);
+    EXTERNAL "exit";
 
     PROCEDURE LookAt* (eyeX,    eyeY,    eyeZ,
                        centerX, centerY, centerZ,
@@ -14,12 +17,12 @@ MODULE GLUT;
     EXTERNAL IMPORT "glutSwapBuffers";
 
     PROCEDURE InitInternal (argc : INTEGER;
-        argv : POINTER TO POINTER TO CHAR; exit : ExitType);
+        argv : POINTER TO POINTER TO CHAR; VAR exit : ExitType);
     EXTERNAL IMPORT "__glutInitWithExit";
 
     PROCEDURE Init*;
     BEGIN
-        InitInternal(0, NIL, NIL);
+        InitInternal(0, NIL, Exit);
     END Init;
 
     PROCEDURE InitDisplayMode* (mode : INTEGER);
@@ -31,15 +34,15 @@ MODULE GLUT;
     PROCEDURE InitWindowPosition* (x, y : INTEGER);
     EXTERNAL IMPORT "glutInitWindowPosition";
 
-    PROCEDURE CreateWindowInternal (title : ARRAY OF CHAR; exit : ExitType);
+    PROCEDURE CreateWindowInternal (title : ARRAY OF CHAR; VAR exit : ExitType);
     EXTERNAL IMPORT "__glutCreateWindowWithExit";
 
     PROCEDURE CreateWindow* (title : ARRAY OF CHAR);
     BEGIN
-        CreateWindowInternal(title, NIL);
+        CreateWindowInternal(title, Exit);
     END CreateWindow;
 
-    PROCEDURE DisplayFunc* (func : POINTER TO PROCEDURE);
+    PROCEDURE DisplayFunc* (VAR func : PROCEDURE);
     EXTERNAL IMPORT "glutDisplayFunc";
 
     PROCEDURE MainLoop*;

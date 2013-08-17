@@ -289,12 +289,12 @@ namespace DUO2C
 
                         var errors = module.FindTypeErrors(root);
                         if (errors.Count() > 0) {
-                            var src = File.ReadAllText(files[0]);
+                            var src = File.ReadAllText(mdlpath);
                             WriteErrorHeader("Encountered {0} error{1} while performing type checks:",
                                 errors.Count(), errors.Count() != 1 ? "s" : "");
                             foreach (var error in errors) {
                                 error.FindLocationInfo(src);
-                                error.SetSourcePath(files[0]);
+                                error.SetSourcePath(mdlpath);
                                 WriteCompilerError(error);
                             }
                             Console.WriteLine();
@@ -382,7 +382,8 @@ namespace DUO2C
                     WriteErrorHeader("Encountered 1 error while compiling file(s):");
                     WriteError(e);
                     Console.WriteLine();
-                    return 1;
+                    throw;
+                    // return 1;
                 } finally {
                     foreach (var file in cleanupFiles) {
                         File.Delete(file);

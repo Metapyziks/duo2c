@@ -161,11 +161,14 @@ namespace DUO2C.CodeGen.LLVM
             var argValus = new Value[argDefns.Length];
 
             for (int i = 0; i < argTypes.Length; ++i) {
+                var type = argDefns[i].Type;
+                if (procType is ExternalProcedureType) type = type.Marshalled(_scope);
                 if (argDefns[i].ByReference) {
-                    argTypes[i] = new PointerType(argDefns[i].Type);
+                    argTypes[i] = new PointerType(type);
                 } else {
-                    argTypes[i] = argDefns[i].Type;
+                    argTypes[i] = type;
                 }
+
                 if (receiverValue == null) {
                     argValus[i] = ctx.PrepareOperand(argExprs[i], argTypes[i], new TempIdent());
                 } else if (i > 0) {
@@ -190,6 +193,8 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Call(this GenerationContext ctx, Value dest, ProcedureType procType, Value proc, OberonType[] argTypes, Value[] args)
         {
+            var isExternal = procType is ExternalProcedureType;
+
             if (proc is ElementPointer) {
                 var ptr = (ElementPointer) proc;
                 if (ptr.StructureType.IsPointer && ptr.StructureType.As<PointerType>().ResolvedType.IsRecord) {
@@ -202,11 +207,18 @@ namespace DUO2C.CodeGen.LLVM
             }
 
             if (procType.ReturnType != null) ctx.Assign(dest);
-            ctx.Keyword("call").Type(new PointerType(procType)).Write(" ").Write(proc).Write("(").EndArguments();
+            ctx.Keyword("call").Type(new PointerType(procType)).Write(" ");
+            ctx.Write(procType is ExternalProcedureType ? ((ExternalProcedureType) procType).ExternalSymbol : proc.ToString()).Write("(").EndArguments();
             for (int i = 0; i < args.Length; ++i) {
                 ctx.Argument(argTypes[i], args[i], false);
             }
-            return ctx.Write(") nounwind").EndOperation();
+            ctx.Write(")");
+
+            if (!isExternal && (!(proc is GlobalIdent) || ((GlobalIdent) proc).OptionTags.HasFlag(GlobalIdent.Options.NoUnwind))) {
+                ctx.Write(" nounwind");
+            }
+            
+            return ctx.EndOperation();
         }
 
         static GenerationContext Assign(this GenerationContext ctx, Value dest, OberonType type, NExpr expression)
