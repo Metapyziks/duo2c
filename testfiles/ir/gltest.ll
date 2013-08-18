@@ -1,5 +1,5 @@
-; Generated 18/08/2013 03:03:53
-; GlobalUID 7f84f4f1-fbd6-4b9a-8e9f-e60cc9b9f350
+; Generated 18/08/2013 21:08:12
+; GlobalUID 0e26bad7-ab03-4ad4-97b9-23c057b812ba
 ; 
 ; LLVM IR file for module "GLTest"
 ; 
@@ -11,16 +11,7 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
 %CHAR = type i8
 %SET = type i64
 
-@.str0 = private constant [2 x i8] c"H\00"
-@.str1 = private constant [2 x i8] c"e\00"
-@.str2 = private constant [2 x i8] c"l\00"
-@.str3 = private constant [2 x i8] c"a\00"
-@.str4 = private constant [2 x i8] c"V\00"
-@.str5 = private constant [2 x i8] c"u\00"
-@.str6 = private constant [2 x i8] c"r\00"
-@.str7 = private constant [2 x i8] c"d\00"
-@.str8 = private constant [2 x i8] c"!\00"
-@.str9 = private constant [13 x i8] c"Hello World!\00"
+@.str0 = private constant [13 x i8] c"Hello World!\00"
 
 declare i32 @printf(%CHAR*, ...) nounwind 
 declare noalias i8* @GC_malloc(i32) 
@@ -241,49 +232,27 @@ define void @DisplayHandler() nounwind {
     %27 = load float* %bn
     call x86_stdcallcc void (float, float, float)* @glColor3f(float %25, float %26, float %27)
     
-    %28 = getelementptr inbounds [2 x %CHAR]* @.str0, i32 0, i32 0
-    %29 = load %CHAR* %28
-    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR %29)
+    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 72)
     
-    %30 = getelementptr inbounds [2 x %CHAR]* @.str1, i32 0, i32 0
-    %31 = load %CHAR* %30
-    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR %31)
+    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 101)
     
-    %32 = getelementptr inbounds [2 x %CHAR]* @.str2, i32 0, i32 0
-    %33 = load %CHAR* %32
-    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR %33)
+    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 108)
     
-    %34 = getelementptr inbounds [2 x %CHAR]* @.str2, i32 0, i32 0
-    %35 = load %CHAR* %34
-    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR %35)
+    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 108)
     
-    %36 = getelementptr inbounds [2 x %CHAR]* @.str3, i32 0, i32 0
-    %37 = load %CHAR* %36
-    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR %37)
+    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 97)
     
-    %38 = getelementptr inbounds [2 x %CHAR]* @.str4, i32 0, i32 0
-    %39 = load %CHAR* %38
-    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR %39)
+    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 86)
     
-    %40 = getelementptr inbounds [2 x %CHAR]* @.str5, i32 0, i32 0
-    %41 = load %CHAR* %40
-    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR %41)
+    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 117)
     
-    %42 = getelementptr inbounds [2 x %CHAR]* @.str6, i32 0, i32 0
-    %43 = load %CHAR* %42
-    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR %43)
+    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 114)
     
-    %44 = getelementptr inbounds [2 x %CHAR]* @.str2, i32 0, i32 0
-    %45 = load %CHAR* %44
-    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR %45)
+    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 108)
     
-    %46 = getelementptr inbounds [2 x %CHAR]* @.str7, i32 0, i32 0
-    %47 = load %CHAR* %46
-    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR %47)
+    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 100)
     
-    %48 = getelementptr inbounds [2 x %CHAR]* @.str8, i32 0, i32 0
-    %49 = load %CHAR* %48
-    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR %49)
+    call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 33)
     
     call x86_stdcallcc void ()* @glutSwapBuffers()
     
@@ -325,7 +294,7 @@ define i32 @GLTest._init() nounwind {
     
     call x86_stdcallcc void (i32, i32)* @glutInitWindowPosition(i32 300, i32 200)
     
-    call void ({i32, %CHAR*})* @GLUT.CreateWindow({i32, %CHAR*} {i32 13, %CHAR* getelementptr inbounds ([13 x %CHAR]* @.str9, i32 0, i32 0)}) nounwind
+    call void ({i32, %CHAR*})* @GLUT.CreateWindow({i32, %CHAR*} {i32 13, %CHAR* getelementptr inbounds ([13 x %CHAR]* @.str0, i32 0, i32 0)}) nounwind
     
     call x86_stdcallcc void (void ()*)* @glutDisplayFunc(void ()* @DisplayHandler)
     

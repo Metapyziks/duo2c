@@ -373,8 +373,12 @@ namespace DUO2C.CodeGen.LLVM
                     dest = new Literal(node.Inner.String.ToLower());
                     return ctx;
                 } else if (node.Inner is NString) {
-                    GetStringIdent(node.Inner.String);
-                    dest = new StringLiteral(node.Inner.String);
+                    if (type.IsChar) {
+                        dest = new Literal(((int) node.Inner.String[0]).ToString());
+                    } else {
+                        GetStringIdent(node.Inner.String);
+                        dest = new StringLiteral(node.Inner.String);
+                    }
                     return ctx;
                 } else if (node.Inner is NDesignator && ((NDesignator) node.Inner).IsRoot) {
                     dest = new QualIdent((NQualIdent) ((NDesignator) node.Inner).Element);
@@ -391,7 +395,8 @@ namespace DUO2C.CodeGen.LLVM
             var val = (Value) temp;
             var ntype = node.GetFinalType(_scope);
             if (!type.CanTestEquality(ntype) && (type.Equals(new PointerType(ntype)) || (type.IsPointer
-                && ntype.IsArray && type.As<PointerType>().ResolvedType.Equals(ntype.As<ArrayType>().ElementType)))) {
+                && ntype.IsArray && type.As<PointerType>().ResolvedType.Equals(ntype.As<ArrayType>().ElementType)))
+                || (type.IsChar && ntype.IsArray && node.IsConstant(_scope))) {
                 ntype = type;
             }
             if (node is NFactor) {

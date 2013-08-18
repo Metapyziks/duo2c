@@ -8,16 +8,7 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
 @.str2 = private constant [3 x i8] c"%i\00"
 @.str3 = private constant [2 x i8] c"\0A\00"
 @GLUT._hasInit = private global i1 false
-@.str01 = private constant [2 x i8] c"H\00"
-@.str12 = private constant [2 x i8] c"e\00"
-@.str23 = private constant [2 x i8] c"l\00"
-@.str34 = private constant [2 x i8] c"a\00"
-@.str4 = private constant [2 x i8] c"V\00"
-@.str5 = private constant [2 x i8] c"u\00"
-@.str6 = private constant [2 x i8] c"r\00"
-@.str7 = private constant [2 x i8] c"d\00"
-@.str8 = private constant [2 x i8] c"!\00"
-@.str9 = private constant [13 x i8] c"Hello World!\00"
+@.str01 = private constant [13 x i8] c"Hello World!\00"
 @r = private global float 0.000000e+00
 @g = private global float 0.000000e+00
 @b = private global float 0.000000e+00
@@ -258,39 +249,17 @@ define void @DisplayHandler() nounwind {
   %26 = load float* %gn
   %27 = load float* %bn
   call x86_stdcallcc void @glColor3f(float %25, float %26, float %27)
-  %28 = getelementptr inbounds [2 x i8]* @.str01, i32 0, i32 0
-  %29 = load i8* %28
-  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 %29)
-  %30 = getelementptr inbounds [2 x i8]* @.str12, i32 0, i32 0
-  %31 = load i8* %30
-  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 %31)
-  %32 = getelementptr inbounds [2 x i8]* @.str23, i32 0, i32 0
-  %33 = load i8* %32
-  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 %33)
-  %34 = getelementptr inbounds [2 x i8]* @.str23, i32 0, i32 0
-  %35 = load i8* %34
-  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 %35)
-  %36 = getelementptr inbounds [2 x i8]* @.str34, i32 0, i32 0
-  %37 = load i8* %36
-  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 %37)
-  %38 = getelementptr inbounds [2 x i8]* @.str4, i32 0, i32 0
-  %39 = load i8* %38
-  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 %39)
-  %40 = getelementptr inbounds [2 x i8]* @.str5, i32 0, i32 0
-  %41 = load i8* %40
-  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 %41)
-  %42 = getelementptr inbounds [2 x i8]* @.str6, i32 0, i32 0
-  %43 = load i8* %42
-  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 %43)
-  %44 = getelementptr inbounds [2 x i8]* @.str23, i32 0, i32 0
-  %45 = load i8* %44
-  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 %45)
-  %46 = getelementptr inbounds [2 x i8]* @.str7, i32 0, i32 0
-  %47 = load i8* %46
-  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 %47)
-  %48 = getelementptr inbounds [2 x i8]* @.str8, i32 0, i32 0
-  %49 = load i8* %48
-  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 %49)
+  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 72)
+  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 101)
+  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 108)
+  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 108)
+  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 97)
+  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 86)
+  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 117)
+  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 114)
+  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 108)
+  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 100)
+  call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 33)
   call x86_stdcallcc void @glutSwapBuffers()
   ret void
 }
@@ -320,7 +289,7 @@ define i32 @GLTest._init() nounwind {
   call x86_stdcallcc void @glutInitDisplayMode(i32 18)
   call x86_stdcallcc void @glutInitWindowSize(i32 500, i32 500)
   call x86_stdcallcc void @glutInitWindowPosition(i32 300, i32 200)
-  call void @GLUT.CreateWindow({ i32, i8* } { i32 13, i8* getelementptr inbounds ([13 x i8]* @.str9, i32 0, i32 0) }) nounwind
+  call void @GLUT.CreateWindow({ i32, i8* } { i32 13, i8* getelementptr inbounds ([13 x i8]* @.str01, i32 0, i32 0) }) nounwind
   call x86_stdcallcc void @glutDisplayFunc(void ()* @DisplayHandler)
   call x86_stdcallcc void @glutIdleFunc(void ()* @IdleHandler)
   call x86_stdcallcc void @glutMainLoop()
