@@ -1,6 +1,6 @@
 (**
- *  Generated 18/08/2013 02:23:10
- *  GlobalUID ca68350a-451e-4c70-9375-22b88cecbf8a
+ *  Generated 18/08/2013 03:03:53
+ *  GlobalUID 93cc44c3-a912-44e5-a804-0c841393d53e
  *
  *  Exported symbol file for module "GLUT"
  *
@@ -34,8 +34,14 @@ MODULE GLUT;
     PROCEDURE DisplayFunc * (VAR func : PROCEDURE);
     EXTERNAL IMPORT "glutDisplayFunc";
     
+    PROCEDURE IdleFunc * (VAR func : PROCEDURE);
+    EXTERNAL IMPORT "glutIdleFunc";
+    
     PROCEDURE MainLoop *;
     EXTERNAL IMPORT "glutMainLoop";
+    
+    PROCEDURE PostRedisplay *;
+    EXTERNAL IMPORT "glutPostRedisplay";
     
 END GLUT.
 

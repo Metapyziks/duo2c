@@ -149,6 +149,9 @@ namespace DUO2C
                 ? (IEnumerable<String>) x : new String[] { x.ToString() })
                 .Select(x => x.StartsWith("\"") || x.StartsWith("-") ? x : String.Format("\"{0}\"", x));
             var startInfo = new ProcessStartInfo(name, String.Join(" ", strArgs));
+#if DEBUG
+            Console.WriteLine("Exec {0} {1}", startInfo.FileName, startInfo.Arguments);
+#endif
             startInfo.RedirectStandardOutput = true;
             startInfo.RedirectStandardError = true;
             startInfo.UseShellExecute = false;
@@ -234,7 +237,7 @@ namespace DUO2C
                     libs.Add(iter.Current);
                 }, "l");
 
-                var ruleset = Ruleset.FromString(File.ReadAllText("oberon2.txt"));
+                var ruleset = Ruleset.FromString(Properties.Resources.oberon2);
                 ruleset.AddSubstitutionNS("DUO2C.Nodes.Oberon2", true);
 
                 var cleanupFiles = new List<String>();
@@ -295,7 +298,7 @@ namespace DUO2C
                         ), AccessModifier.Private, DeclarationType.Global);
 
                         foreach (var import in module.Imports) {
-                            var path = FindSymbolFile(import, Path.GetDirectoryName(modules.FirstOrDefault(x => x.Value.Identifier == import).Key ?? mdlpath));
+                            var path = FindSymbolFile(import, Path.GetDirectoryName(Path.GetFullPath(modules.FirstOrDefault(x => x.Value.Identifier == import).Key ?? mdlpath)));
                             if (path == null) {
                                 throw new Exception(String.Format("Could not find symbol file for module '{0}'", import));
                             }
@@ -321,7 +324,7 @@ namespace DUO2C
                         } else {
                             var guid = Guid.NewGuid();
 
-                            var outpath = Path.GetDirectoryName(mdlpath)
+                            var outpath = Path.GetDirectoryName(Path.GetFullPath(mdlpath))
                                 + Path.DirectorySeparatorChar
                                 + Path.GetFileNameWithoutExtension(mdlpath)
                                 + ".sym";
@@ -330,7 +333,7 @@ namespace DUO2C
                             File.WriteAllText(outpath, sym);
 
                             if (keepIRFiles) {
-                                outpath = (keepDir ?? Path.GetDirectoryName(mdlpath))
+                                outpath = (keepDir ?? Path.GetDirectoryName(Path.GetFullPath(mdlpath)))
                                 + Path.DirectorySeparatorChar
                                 + Path.GetFileNameWithoutExtension(mdlpath)
                                 + ".ll";
@@ -356,7 +359,7 @@ namespace DUO2C
 
                     String linkedPath;
                     if (keepIRFiles) {
-                        linkedPath = (keepDir ?? Path.GetDirectoryName(outPath))
+                        linkedPath = (keepDir ?? Path.GetDirectoryName(Path.GetFullPath(outPath)))
                             + Path.DirectorySeparatorChar
                             + Path.GetFileNameWithoutExtension(outPath)
                             + ".link.ll";
@@ -380,8 +383,8 @@ namespace DUO2C
                     assemblyPath = RenameTempFileExtension(assemblyPath, "s");
                     cleanupFiles.Add(assemblyPath);
 
-                    if (!Directory.Exists(Path.GetDirectoryName(outPath))) {
-                        Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+                    if (!Directory.Exists(Path.GetDirectoryName(Path.GetFullPath(outPath)))) {
+                        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(outPath)));
                     }
 
                     RunTool("gcc", assemblyPath, "-lgc", libs.Select(x => "-l" + x), "-o", outPath);

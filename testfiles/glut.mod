@@ -30,7 +30,7 @@ MODULE GLUT;
     BEGIN
         argc := 0;
         NEW (argv);
-        
+
         InitInternal(argc, argv, Exit);
     END Init;
 
@@ -54,7 +54,13 @@ MODULE GLUT;
     PROCEDURE DisplayFunc* (VAR func : PROCEDURE);
     EXTERNAL IMPORT "glutDisplayFunc";
 
+    PROCEDURE IdleFunc* (VAR func : PROCEDURE);
+    EXTERNAL IMPORT "glutIdleFunc";
+
     PROCEDURE MainLoop*;
     EXTERNAL IMPORT "glutMainLoop";
+
+    PROCEDURE PostRedisplay*;
+    EXTERNAL IMPORT "glutPostRedisplay";
 
 END GLUT.

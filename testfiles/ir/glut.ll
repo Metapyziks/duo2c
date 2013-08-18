@@ -1,5 +1,5 @@
-; Generated 18/08/2013 02:23:10
-; GlobalUID ca68350a-451e-4c70-9375-22b88cecbf8a
+; Generated 18/08/2013 03:03:53
+; GlobalUID 93cc44c3-a912-44e5-a804-0c841393d53e
 ; 
 ; LLVM IR file for module "GLUT"
 ; 
@@ -33,16 +33,13 @@ define void @Exit(i32 %$errorCode) nounwind {
     %errorCode = alloca i32
     store i32 %$errorCode, i32* %errorCode
     
-    ; Out.String("GLUT Error ")
     %1 = getelementptr inbounds [12 x %CHAR]* @.str0, i32 0, i32 0
     %2 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str1, i32 0, i32 0), %CHAR* %1) nounwind
     
-    ; Out.Integer(errorCode)
     %3 = load i32* %errorCode
     %4 = sext i32 %3 to i64
     %5 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([3 x %CHAR]* @.str2, i32 0, i32 0), i64 %4) nounwind
     
-    ; Out.Ln()
     %6 = call i32 (%CHAR*, ...)* @printf(%CHAR* getelementptr inbounds ([2 x %CHAR]* @.str3, i32 0, i32 0)) nounwind
     
     ret void 
@@ -57,10 +54,8 @@ define void @GLUT.Init() nounwind {
     %argc = alloca i32
     %argv = alloca %CHAR**
     
-    ; argc := 0
     store i32 0, i32* %argc
     
-    ; NEW(argv)
     %1 = getelementptr inbounds %CHAR** null, i32 1
     %2 = ptrtoint %CHAR** %1 to i32
     %3 = call i8* (i32)* @GC_malloc(i32 %2)
@@ -68,7 +63,6 @@ define void @GLUT.Init() nounwind {
     store %CHAR* null, %CHAR** %4
     store %CHAR** %4, %CHAR*** %argv
     
-    ; InitInternal(argc, argv, Exit)
     %5 = load %CHAR*** %argv
     call x86_stdcallcc void (i32*, %CHAR**, %GLUT.ExitType*)* @__glutInitWithExit(i32* %argc, %CHAR** %5, %GLUT.ExitType* @Exit)
     
@@ -84,7 +78,6 @@ define void @GLUT.CreateWindow({i32, %CHAR*} %$title) nounwind {
     %title = alloca {i32, %CHAR*}
     store {i32, %CHAR*} %$title, {i32, %CHAR*}* %title
     
-    ; CreateWindowInternal(title, Exit)
     %1 = getelementptr inbounds {i32, %CHAR*}* %title, i32 0, i32 1
     %2 = load %CHAR** %1
     call x86_stdcallcc void (%CHAR*, %GLUT.ExitType*)* @__glutCreateWindowWithExit(%CHAR* %2, %GLUT.ExitType* @Exit)
@@ -93,7 +86,9 @@ define void @GLUT.CreateWindow({i32, %CHAR*} %$title) nounwind {
 }
 
 declare dllimport x86_stdcallcc void @glutDisplayFunc(void ()*) 
+declare dllimport x86_stdcallcc void @glutIdleFunc(void ()*) 
 declare dllimport x86_stdcallcc void @glutMainLoop() 
+declare dllimport x86_stdcallcc void @glutPostRedisplay() 
 
 @GLUT._hasInit = private global i1 zeroinitializer
 

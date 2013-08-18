@@ -1,7 +1,37 @@
 MODULE GLTest;
     IMPORT GL, GLUT, Out;
 
+    VAR r, g, b : REAL;
+    VAR lastDraw : LONGINT;
+
+    PROCEDURE GetTickCount : LONGINT;
+    EXTERNAL "GetTickCount";
+
+    PROCEDURE IdleHandler;
+    VAR curTime : LONGINT;
+    BEGIN
+        curTime := GetTickCount();
+        IF curTime - lastDraw > 16 THEN
+            r := r + 1.0 / 16.0;
+            IF r >= 2 THEN
+                r := 0;
+                g := g + 1.0 / 16.0;
+                IF g >= 2 THEN
+                    g := 0;
+                    b := b + 1.0 / 16.0;
+                    IF b >= 2 THEN
+                        b := 0;
+                    END;
+                END;
+            END;
+
+            lastDraw := curTime;
+            GLUT.PostRedisplay;
+        END;
+    END;
+
     PROCEDURE DisplayHandler;
+        VAR rn, gn, bn : REAL;
     BEGIN
         GL.Clear(16640);
         GL.Enable(2929);
@@ -19,15 +49,19 @@ MODULE GLTest;
         GL.Rotatef(5, 1, 0, 0);
         GL.Translatef(-300, 0, 0);
 
-        GL.Color3f(1, 1, 1);
+        IF r < 1 THEN rn := r; ELSE rn := 2 - r; END;
+        IF g < 1 THEN gn := g; ELSE gn := 2 - g; END;
+        IF b < 1 THEN bn := b; ELSE bn := 2 - b; END;
+
+        GL.Color3f(rn, gn, bn);
         GLUT.StrokeCharacter(NIL, 'H');
         GLUT.StrokeCharacter(NIL, 'e');
         GLUT.StrokeCharacter(NIL, 'l');
         GLUT.StrokeCharacter(NIL, 'l');
-        GLUT.StrokeCharacter(NIL, 'o');
+        GLUT.StrokeCharacter(NIL, 'a');
 
-        GLUT.StrokeCharacter(NIL, 'W');
-        GLUT.StrokeCharacter(NIL, 'o');
+        GLUT.StrokeCharacter(NIL, 'V');
+        GLUT.StrokeCharacter(NIL, 'u');
         GLUT.StrokeCharacter(NIL, 'r');
         GLUT.StrokeCharacter(NIL, 'l');
         GLUT.StrokeCharacter(NIL, 'd');
@@ -37,18 +71,12 @@ MODULE GLTest;
     END DisplayHandler;
 
 BEGIN
-    Out.String("Init"); Out.Ln;
     GLUT.Init;
-    Out.String("InitDisplayMode"); Out.Ln;
     GLUT.InitDisplayMode(18);
-    Out.String("InitWindowSize"); Out.Ln;
     GLUT.InitWindowSize(500, 500);
-    Out.String("InitWindowPosition"); Out.Ln;
     GLUT.InitWindowPosition(300, 200);
-    Out.String("CreateWindow"); Out.Ln;
     GLUT.CreateWindow("Hello World!");
-    Out.String("DisplayFunc"); Out.Ln;
     GLUT.DisplayFunc(DisplayHandler);
-    Out.String("MainLoop"); Out.Ln;
+    GLUT.IdleFunc(IdleHandler);
     GLUT.MainLoop;
 END GLTest.
