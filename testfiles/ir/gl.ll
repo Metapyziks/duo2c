@@ -1,5 +1,5 @@
-; Generated 18/08/2013 22:27:16
-; GlobalUID 0ce4a381-3942-4739-a07c-b8c4086ea1d2
+; Generated 18/08/2013 22:41:23
+; GlobalUID 0f39ec5d-2987-47d8-9f81-ed2982b4ead8
 ; 
 ; LLVM IR file for module "GL"
 ; 
@@ -16,6 +16,8 @@ declare noalias i8* @GC_malloc(i32)
 
 declare x86_stdcallcc void @glClear(i32) 
 declare x86_stdcallcc void @glEnable(i32) 
+declare x86_stdcallcc void @glBegin(i32) 
+declare x86_stdcallcc void @glEnd() 
 declare x86_stdcallcc void @glMatrixMode(i32) 
 declare x86_stdcallcc void @glLoadIdentity() 
 declare x86_stdcallcc void @glOrtho(double, double, double, double, double, double) 
@@ -23,6 +25,8 @@ declare x86_stdcallcc void @glScalef(float, float, float)
 declare x86_stdcallcc void @glRotatef(float, float, float, float) 
 declare x86_stdcallcc void @glTranslatef(float, float, float) 
 declare x86_stdcallcc void @glColor3f(float, float, float) 
+declare x86_stdcallcc void @glVertex2f(float, float) 
+declare x86_stdcallcc void @glVertex3f(float, float, float) 
 
 @GL._hasInit = private global i1 zeroinitializer
 

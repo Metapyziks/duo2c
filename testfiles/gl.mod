@@ -1,6 +1,8 @@
 MODULE GL;
 
     CONST
+        Triangles      * = 00004H;
+        Quads          * = 00007H;
         ColorBufferBit * = 04000H;
         DepthBufferBit * = 00100H;
         DepthTest      * = 00B71H;
@@ -12,6 +14,12 @@ MODULE GL;
 
     PROCEDURE Enable* (cap : INTEGER);
     EXTERNAL "glEnable";
+
+    PROCEDURE Begin* (mode : INTEGER);
+    EXTERNAL "glBegin";
+
+    PROCEDURE End*;
+    EXTERNAL "glEnd";
 
     PROCEDURE MatrixMode* (mode : INTEGER);
     EXTERNAL "glMatrixMode";
@@ -33,5 +41,11 @@ MODULE GL;
 
     PROCEDURE Color3f* (r, g, b : REAL);
     EXTERNAL "glColor3f";
+
+    PROCEDURE Vertex2f* (x, y : REAL);
+    EXTERNAL "glVertex2f";
+
+    PROCEDURE Vertex3f* (x, y, z : REAL);
+    EXTERNAL "glVertex3f";
 
 END GL.

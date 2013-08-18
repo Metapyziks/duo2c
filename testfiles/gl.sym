@@ -1,6 +1,6 @@
 (**
- *  Generated 18/08/2013 22:27:16
- *  GlobalUID 0ce4a381-3942-4739-a07c-b8c4086ea1d2
+ *  Generated 18/08/2013 22:41:23
+ *  GlobalUID 0f39ec5d-2987-47d8-9f81-ed2982b4ead8
  *
  *  Exported symbol file for module "GL"
  *
@@ -10,6 +10,8 @@
 
 MODULE GL;
     CONST
+        Triangles * = 4;
+        Quads * = 7;
         ColorBufferBit * = 16384;
         DepthBufferBit * = 256;
         DepthTest * = 2929;
@@ -21,6 +23,12 @@ MODULE GL;
     
     PROCEDURE Enable * (cap : INTEGER);
     EXTERNAL "glEnable";
+    
+    PROCEDURE Begin * (mode : INTEGER);
+    EXTERNAL "glBegin";
+    
+    PROCEDURE End *;
+    EXTERNAL "glEnd";
     
     PROCEDURE MatrixMode * (mode : INTEGER);
     EXTERNAL "glMatrixMode";
@@ -42,6 +50,12 @@ MODULE GL;
     
     PROCEDURE Color3f * (r, g, b : REAL);
     EXTERNAL "glColor3f";
+    
+    PROCEDURE Vertex2f * (x, y : REAL);
+    EXTERNAL "glVertex2f";
+    
+    PROCEDURE Vertex3f * (x, y, z : REAL);
+    EXTERNAL "glVertex3f";
     
 END GL.
 
