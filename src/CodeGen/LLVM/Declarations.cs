@@ -26,6 +26,14 @@ namespace DUO2C.CodeGen.LLVM
                 var isExternal = proc is ExternalProcedureType;
                 
                 ctx.Keyword("declare");
+
+                if (isExternal) {
+                    var externType = (ExternalProcedureType) proc;
+                    if (externType.IsImported) {
+                        ctx.Keyword("dllimport");
+                    }
+                    ctx.Keyword("x86_stdcallcc");
+                }
                 
                 if (dest is GlobalIdent && ((GlobalIdent) dest).OptionTags.HasFlag(GlobalIdent.Options.NoAlias)) {
                     ctx.Keyword("noalias");

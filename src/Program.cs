@@ -100,6 +100,14 @@ namespace DUO2C
             }
         }
 
+        static IEnumerator<String> InsertArg(IEnumerator<String> iter, String str)
+        {
+            yield return str;
+            while (iter.MoveNext()) {
+                yield return iter.Current;
+            }
+        }
+
         static String[] ParseArgs(String[] args)
         {
             var iter = args.Where(x => true).GetEnumerator();
@@ -108,6 +116,11 @@ namespace DUO2C
             while (iter.MoveNext()) {
                 var arg = iter.Current;
                 if (arg.StartsWith("-")) {
+                    if (!arg.StartsWith("--") && arg.Length > 2) {
+                        var val = arg.Substring(2);
+                        arg = arg.Substring(0, 2);
+                        iter = InsertArg(iter, val);
+                    }
                     if (_options.ContainsKey(arg)) {
                         _options[arg](arg.TrimStart('-'), iter);
                     } else {
@@ -189,6 +202,7 @@ namespace DUO2C
                 String outPath = null;
                 String entryModule = null;
                 String keepDir = null;
+                var libs = new List<String>();
                 bool keepIRFiles = false;
                 bool link = true;
 
@@ -214,6 +228,11 @@ namespace DUO2C
                     link = false;
                     keepIRFiles = true;
                 }, "S");
+
+                AddOption((arg, iter) => {
+                    iter.MoveNext();
+                    libs.Add(iter.Current);
+                }, "l");
 
                 var ruleset = Ruleset.FromString(File.ReadAllText("oberon2.txt"));
                 ruleset.AddSubstitutionNS("DUO2C.Nodes.Oberon2", true);
@@ -356,7 +375,7 @@ namespace DUO2C
 
                     var assemblyPath = Path.GetTempFileName();
                     cleanupFiles.Add(assemblyPath);
-                    RunTool("llc", linkedPath, "-load gc", "-O3", "-o", assemblyPath);
+                    RunTool("llc", linkedPath, "-load gc", libs.Select(x => "-load " + x), "-O3", "-o", assemblyPath);
                     cleanupFiles.Remove(linkedPath);
                     assemblyPath = RenameTempFileExtension(assemblyPath, "s");
                     cleanupFiles.Add(assemblyPath);
@@ -365,7 +384,7 @@ namespace DUO2C
                         Directory.CreateDirectory(Path.GetDirectoryName(outPath));
                     }
 
-                    RunTool("gcc", assemblyPath, "-lgc", "-o", outPath);
+                    RunTool("gcc", assemblyPath, "-lgc", libs.Select(x => "-l" + x), "-o", outPath);
 
                     return 0;
                 } catch (InvalidArgumentException e) {

@@ -1,6 +1,6 @@
 (**
- *  Generated 17/08/2013 00:49:13
- *  GlobalUID afd1be1c-9a8c-4ce0-9685-a12d22270f7c
+ *  Generated 18/08/2013 02:23:10
+ *  GlobalUID 2bc30a6f-15b4-4a96-98c6-aefe28676c12
  *
  *  Exported symbol file for module "Out"
  *
@@ -9,11 +9,15 @@
 **)
 
 MODULE Out;
-    VAR
-        Ln * : PROCEDURE;
-        String * : PROCEDURE (val : ARRAY OF CHAR);
-        Integer * : PROCEDURE (val : LONGINT);
-        Real * : PROCEDURE (val : LONGREAL);
-        Boolean * : PROCEDURE (val : BOOLEAN);
+    PROCEDURE ^ Ln *;
+    
+    PROCEDURE ^ String * (val : ARRAY OF CHAR);
+    
+    PROCEDURE ^ Integer * (val : LONGINT);
+    
+    PROCEDURE ^ Real * (val : LONGREAL);
+    
+    PROCEDURE ^ Boolean * (val : BOOLEAN);
+    
 END Out.
 

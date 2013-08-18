@@ -1,5 +1,5 @@
 MODULE GLTest;
-    IMPORT GL, GLUT;
+    IMPORT GL, GLUT, Out;
 
     PROCEDURE DisplayHandler;
     BEGIN
@@ -37,11 +37,18 @@ MODULE GLTest;
     END DisplayHandler;
 
 BEGIN
+    Out.String("Init"); Out.Ln;
     GLUT.Init;
+    Out.String("InitDisplayMode"); Out.Ln;
     GLUT.InitDisplayMode(18);
+    Out.String("InitWindowSize"); Out.Ln;
     GLUT.InitWindowSize(500, 500);
+    Out.String("InitWindowPosition"); Out.Ln;
     GLUT.InitWindowPosition(300, 200);
+    Out.String("CreateWindow"); Out.Ln;
     GLUT.CreateWindow("Hello World!");
+    Out.String("DisplayFunc"); Out.Ln;
     GLUT.DisplayFunc(DisplayHandler);
+    Out.String("MainLoop"); Out.Ln;
     GLUT.MainLoop;
 END GLTest.

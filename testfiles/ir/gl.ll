@@ -1,5 +1,5 @@
-; Generated 18/08/2013 01:27:41
-; GlobalUID 14091c1c-9c12-446d-ae1a-9693474e0407
+; Generated 18/08/2013 02:23:10
+; GlobalUID e2905a4f-eab3-4827-9e12-4d52666f822c
 ; 
 ; LLVM IR file for module "GL"
 ; 
@@ -14,15 +14,15 @@ target datalayout = "e-p0:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f
 declare i32 @printf(%CHAR*, ...) nounwind 
 declare noalias i8* @GC_malloc(i32) 
 
-declare void @glClear(i32) 
-declare void @glEnable(i32) 
-declare void @glMatrixMode(i32) 
-declare void @glLoadIdentity() 
-declare void @glOrtho(double, double, double, double, double, double) 
-declare void @glScalef(float, float, float) 
-declare void @glRotatef(float, float, float, float) 
-declare void @glTranslatef(float, float, float) 
-declare void @glColor3f(float, float, float) 
+declare x86_stdcallcc void @glClear(i32) 
+declare x86_stdcallcc void @glEnable(i32) 
+declare x86_stdcallcc void @glMatrixMode(i32) 
+declare x86_stdcallcc void @glLoadIdentity() 
+declare x86_stdcallcc void @glOrtho(double, double, double, double, double, double) 
+declare x86_stdcallcc void @glScalef(float, float, float) 
+declare x86_stdcallcc void @glRotatef(float, float, float, float) 
+declare x86_stdcallcc void @glTranslatef(float, float, float) 
+declare x86_stdcallcc void @glColor3f(float, float, float) 
 
 @GL._hasInit = private global i1 zeroinitializer
 
