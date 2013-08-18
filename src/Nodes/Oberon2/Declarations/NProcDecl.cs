@@ -340,7 +340,7 @@ namespace DUO2C.Nodes.Oberon2
                         } else if (ret.Expression != null && retType == null) {
                             yield return new CompilerException(ParserError.Semantics,
                                 "Unexpected return expression", ret.Expression.StartIndex, ret.Expression.Length);
-                        } else if (ret.Expression.FindTypeErrors(scope).Count() == 0) {
+                        } else if (ret.Expression != null && ret.Expression.FindTypeErrors(scope).Count() == 0) {
                             var t = ret.Expression.GetFinalType(scope);
                             if (!retType.CanTestEquality(t)) {
                                 yield return new TypeMismatchException(retType, t, ret.Expression);

@@ -1,0 +1,13 @@
+(**
+ *  Generated 18/08/2013 22:27:14
+ *  GlobalUID c1b1c650-3338-47a3-b864-12978fc0cb96
+ *
+ *  Exported symbol file for module "Pong"
+ *
+ *  WARNING: This file is automatically
+ *  generated and should not be edited
+**)
+
+MODULE Pong;
+END Pong.
+

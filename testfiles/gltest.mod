@@ -33,14 +33,14 @@ MODULE GLTest;
     PROCEDURE DisplayHandler;
         VAR rn, gn, bn : REAL;
     BEGIN
-        GL.Clear(16640);
-        GL.Enable(2929);
+        GL.Clear(GL.ColorBufferBit OR GL.DepthBufferBit);
+        GL.Enable(GL.DepthTest);
 
-        GL.MatrixMode(5889);
+        GL.MatrixMode(GL.Projection);
         GL.LoadIdentity;
         GL.Ortho(-2.0, 2.0, -2.0, 2.0, -2.0, 500.0);
 
-        GL.MatrixMode(5888);
+        GL.MatrixMode(GL.Modelview);
         GL.LoadIdentity;
         GLUT.LookAt(2, 2, 2, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
         GL.Scalef(0.005, 0.005, 0.005);
@@ -72,7 +72,7 @@ MODULE GLTest;
 
 BEGIN
     GLUT.Init;
-    GLUT.InitDisplayMode(18);
+    GLUT.InitDisplayMode(GLUT.RGB OR GLUT.Double OR GLUT.Depth);
     GLUT.InitWindowSize(500, 500);
     GLUT.InitWindowPosition(300, 200);
     GLUT.CreateWindow("Hello World!");

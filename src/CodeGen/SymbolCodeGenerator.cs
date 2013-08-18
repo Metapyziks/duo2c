@@ -40,16 +40,25 @@ namespace DUO2C.CodeGen
                     kv.Value.Type.Resolve(module.Scope);
                     ctx.WriteTypeDecl(module, kv.Key, kv.Value.Type, kv.Value.Visibility);
                 }
-                ctx = ctx.Leave();
+                ctx = ctx.Leave().Ln().Ln();
             }
 
-            var vars = module.Scope.GetSymbols(false).Where(x => x.Value.Visibility != AccessModifier.Private && !x.Value.Type.IsProcedure);
+            var vars = module.Scope.GetSymbols(false).Where(x => x.Value.Visibility != AccessModifier.Private && !x.Value.Type.IsProcedure && !x.Value.IsConstant);
             if (vars.Any(x => true)) {
                 ctx = ctx.Write("VAR").Ln().Enter();
                 foreach (var kv in vars) {
                     ctx.WriteVarDecl(module, kv.Key, kv.Value.Type, kv.Value.Visibility);
                 }
-                ctx = ctx.Leave();
+                ctx = ctx.Leave().Ln().Ln();
+            }
+
+            var consts = module.Module.Declarations.Constants.Where(x => x.IdentDef.Visibility != AccessModifier.Private);
+            if (consts.Any(x => true)) {
+                ctx = ctx.Write("CONST").Ln().Enter();
+                foreach (var cval in consts) {
+                    ctx.WriteConstDecl(module, cval.Identifier, cval.ConstExpr.String, AccessModifier.Public);
+                }
+                ctx = ctx.Leave().Ln().Ln();
             }
 
             var procs = module.Scope.GetSymbols(false).Where(x => x.Value.Visibility != AccessModifier.Private && x.Value.Type.IsProcedure);
@@ -89,6 +98,11 @@ namespace DUO2C.CodeGen
         static GenerationContext WriteVarDecl(this GenerationContext ctx, ModuleType module, String identifier, OberonType type, AccessModifier visibility)
         {
             return ctx.Write(identifier).WriteAccessModifier(visibility).Anchor().Write(" : ").WriteType(module, type).Write(";").Ln();
+        }
+
+        static GenerationContext WriteConstDecl(this GenerationContext ctx, ModuleType module, String identifier, String value, AccessModifier visibility)
+        {
+            return ctx.Write(identifier).WriteAccessModifier(visibility).Anchor().Write(" = ").Write(value).Write(";").Ln();
         }
 
         static GenerationContext WriteProcDecl(this GenerationContext ctx, ModuleType module, String identifier, ProcedureType type, AccessModifier visibility)

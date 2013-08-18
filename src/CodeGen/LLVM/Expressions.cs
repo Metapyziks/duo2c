@@ -20,7 +20,8 @@ namespace DUO2C.CodeGen.LLVM
         static Value GetDesignation(this GenerationContext ctx, NDesignator node)
         {
             if (node.IsRoot) {
-                return new QualIdent((NQualIdent) node.Element);
+                var ident = (NQualIdent) node.Element;
+                return new QualIdent(ident);
             } else if (node.Operation is NPtrResolve) {
                 var desig = (NDesignator) node.Element;
                 var type = desig.GetFinalType(_scope);
@@ -304,7 +305,18 @@ namespace DUO2C.CodeGen.LLVM
         static GenerationContext Factor(this GenerationContext ctx, NFactor node, ref Value dest, OberonType type)
         {
             if (node.Inner is NDesignator) {
-                var val = ctx.GetDesignation((NDesignator) node.Inner);
+                var desig = (NDesignator) node.Inner;
+
+                if (desig.IsRoot) {
+                    var ident = (NQualIdent) desig.Element;
+                    var decl = _scope.GetSymbolDecl(ident.Identifier, ident.Module);
+                    if (decl.IsConstant) {
+                        var expr = _scope.GetConst(ident.Identifier, ident.Module);
+                        return ctx.Expr(expr, ref dest, type);
+                    }
+                }
+
+                var val = ctx.GetDesignation(desig);
                 var ntype = node.Inner.GetFinalType(_scope);
                 if (type.IsPointer && val is QualIdent && ntype.IsArray && !type.CanTestEquality(ntype)
                     && type.As<PointerType>().ResolvedType.Equals(ntype.As<ArrayType>().ElementType)) {
@@ -466,7 +478,7 @@ namespace DUO2C.CodeGen.LLVM
                 return ctx.Term(node.Term, ref dest, type);
             } else if (node.Operator == SimpleExprOperator.Or) {
                 var a = ctx.PrepareOperand(node.Prev, type, dest);
-                if (node.Term.IsConstant(_scope)) {
+                if (node.Term.IsConstant(_scope) || type.IsInteger) {
                     return ctx.BinaryOp(dest, "or", type, a, ctx.PrepareOperand(node.Term, type, dest));
                 } else {
                     var initBlock = _blockLabel;

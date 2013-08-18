@@ -1,5 +1,12 @@
 MODULE GL;
 
+    CONST
+        ColorBufferBit * = 04000H;
+        DepthBufferBit * = 00100H;
+        DepthTest      * = 00B71H;
+        Projection     * = 01701H;
+        Modelview      * = 01700H;
+
     PROCEDURE Clear* (buffer : INTEGER);
     EXTERNAL "glClear";
 

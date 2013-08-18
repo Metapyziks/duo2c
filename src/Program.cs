@@ -243,10 +243,14 @@ namespace DUO2C
                 var cleanupFiles = new List<String>();
 
                 try {
-                    String[] files = ParseArgs(args);
+                    Queue<String> files = new Queue<string>(ParseArgs(args));
 
                     if (keepDir != null && !Directory.Exists(keepDir)) {
                         Directory.CreateDirectory(keepDir);
+                    }
+
+                    if (files.Count == 0) {
+                        throw new Exception("No files to compile specified");
                     }
 
                     if (entryModule == null && outPath == null) {
@@ -257,17 +261,14 @@ namespace DUO2C
                         outPath = entryModule + ".exe";
                     }
 
-                    if (files.Length == 0) {
-                        throw new Exception("No files to compile specified");
-                    }
-
                     var modules = new Dictionary<String, NModule>();
                     var irFiles = new Dictionary<String, String>();
 #if DEBUG
                     var timer = new Stopwatch();
                     timer.Start();
 #endif
-                    foreach (var file in files) {
+                    while (files.Count > 0) {
+                        var file = files.Dequeue();
                         var module = (NModule) ruleset.ParseFile(file);
                         modules.Add(file, module);
                     }
@@ -275,9 +276,11 @@ namespace DUO2C
                     timer.Stop();
                     Console.WriteLine("File(s) parsed in {0}ms", timer.ElapsedMilliseconds);
 
-                    if (!modules.Any(x => x.Value.Identifier == entryModule)) {
+                    if (!modules.Any(x => x.Value.Identifier.ToLower() == entryModule.ToLower())) {
                         Console.WriteLine("Could not find entry module '{0}'", entryModule);
                         return 1;
+                    } else {
+                        entryModule = modules.First(x => x.Value.Identifier.ToLower() == entryModule.ToLower()).Value.Identifier;
                     }
 #endif
                     while (modules.Count > 0) {
@@ -400,11 +403,13 @@ namespace DUO2C
                     WriteCompilerError(e);
                     Console.WriteLine();
                     return 1;
+#if !DEBUG
                 } catch (Exception e) {
                     WriteErrorHeader("Encountered 1 error while compiling file(s):");
                     WriteError(e);
                     Console.WriteLine();
                     return 1;
+#endif
                 } finally {
                     foreach (var file in cleanupFiles) {
                         File.Delete(file);

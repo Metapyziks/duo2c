@@ -1,6 +1,6 @@
 (**
- *  Generated 18/08/2013 21:08:12
- *  GlobalUID 4c48f23a-58c6-4e6d-8c4e-c63f3b42d719
+ *  Generated 18/08/2013 22:27:16
+ *  GlobalUID 7efd31f9-108a-4587-b9c3-ff799582078b
  *
  *  Exported symbol file for module "GLUT"
  *
@@ -9,6 +9,11 @@
 **)
 
 MODULE GLUT;
+    CONST
+        RGB * = 0;
+        Double * = 2;
+        Depth * = 16;
+    
     PROCEDURE LookAt * (eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ : LONGREAL);
     EXTERNAL "gluLookAt";
     

@@ -184,7 +184,9 @@ define void @DisplayHandler() nounwind {
   %rn = alloca float
   %gn = alloca float
   %bn = alloca float
-  call x86_stdcallcc void @glClear(i32 16640)
+  %1 = or i16 16384, 256
+  %2 = sext i16 %1 to i32
+  call x86_stdcallcc void @glClear(i32 %2)
   call x86_stdcallcc void @glEnable(i32 2929)
   call x86_stdcallcc void @glMatrixMode(i32 5889)
   call x86_stdcallcc void @glLoadIdentity()
@@ -197,58 +199,58 @@ define void @DisplayHandler() nounwind {
   call x86_stdcallcc void @glRotatef(float 3.000000e+01, float 0.000000e+00, float 0.000000e+00, float 1.000000e+00)
   call x86_stdcallcc void @glRotatef(float 5.000000e+00, float 1.000000e+00, float 0.000000e+00, float 0.000000e+00)
   call x86_stdcallcc void @glTranslatef(float -3.000000e+02, float 0.000000e+00, float 0.000000e+00)
-  %1 = load float* @r
-  %2 = fcmp olt float %1, 1.000000e+00
-  br i1 %2, label %3, label %5
-
-; <label>:3                                       ; preds = %0
-  %4 = load float* @r
-  store float %4, float* %rn
-  br label %8
+  %3 = load float* @r
+  %4 = fcmp olt float %3, 1.000000e+00
+  br i1 %4, label %5, label %7
 
 ; <label>:5                                       ; preds = %0
   %6 = load float* @r
-  %7 = fsub float 2.000000e+00, %6
-  store float %7, float* %rn
-  br label %8
+  store float %6, float* %rn
+  br label %10
 
-; <label>:8                                       ; preds = %5, %3
-  %9 = load float* @g
-  %10 = fcmp olt float %9, 1.000000e+00
-  br i1 %10, label %11, label %13
+; <label>:7                                       ; preds = %0
+  %8 = load float* @r
+  %9 = fsub float 2.000000e+00, %8
+  store float %9, float* %rn
+  br label %10
 
-; <label>:11                                      ; preds = %8
-  %12 = load float* @g
-  store float %12, float* %gn
-  br label %16
+; <label>:10                                      ; preds = %7, %5
+  %11 = load float* @g
+  %12 = fcmp olt float %11, 1.000000e+00
+  br i1 %12, label %13, label %15
 
-; <label>:13                                      ; preds = %8
+; <label>:13                                      ; preds = %10
   %14 = load float* @g
-  %15 = fsub float 2.000000e+00, %14
-  store float %15, float* %gn
-  br label %16
+  store float %14, float* %gn
+  br label %18
 
-; <label>:16                                      ; preds = %13, %11
-  %17 = load float* @b
-  %18 = fcmp olt float %17, 1.000000e+00
-  br i1 %18, label %19, label %21
+; <label>:15                                      ; preds = %10
+  %16 = load float* @g
+  %17 = fsub float 2.000000e+00, %16
+  store float %17, float* %gn
+  br label %18
 
-; <label>:19                                      ; preds = %16
-  %20 = load float* @b
-  store float %20, float* %bn
-  br label %24
+; <label>:18                                      ; preds = %15, %13
+  %19 = load float* @b
+  %20 = fcmp olt float %19, 1.000000e+00
+  br i1 %20, label %21, label %23
 
-; <label>:21                                      ; preds = %16
+; <label>:21                                      ; preds = %18
   %22 = load float* @b
-  %23 = fsub float 2.000000e+00, %22
-  store float %23, float* %bn
-  br label %24
+  store float %22, float* %bn
+  br label %26
 
-; <label>:24                                      ; preds = %21, %19
-  %25 = load float* %rn
-  %26 = load float* %gn
-  %27 = load float* %bn
-  call x86_stdcallcc void @glColor3f(float %25, float %26, float %27)
+; <label>:23                                      ; preds = %18
+  %24 = load float* @b
+  %25 = fsub float 2.000000e+00, %24
+  store float %25, float* %bn
+  br label %26
+
+; <label>:26                                      ; preds = %23, %21
+  %27 = load float* %rn
+  %28 = load float* %gn
+  %29 = load float* %bn
+  call x86_stdcallcc void @glColor3f(float %27, float %28, float %29)
   call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 72)
   call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 101)
   call x86_stdcallcc void @glutStrokeCharacter(i8* null, i8 108)
@@ -266,39 +268,42 @@ define void @DisplayHandler() nounwind {
 
 define i32 @GLTest._init() nounwind {
   %1 = load i1* @GLTest._hasInit
-  br i1 %1, label %12, label %2
+  br i1 %1, label %15, label %2
 
 ; <label>:2                                       ; preds = %0
   store i1 true, i1* @GLTest._hasInit
   %3 = call i32 @GL._init()
   %4 = icmp eq i32 %3, 0
-  br i1 %4, label %5, label %13
+  br i1 %4, label %5, label %16
 
 ; <label>:5                                       ; preds = %2
   %6 = call i32 @GLUT._init()
   %7 = icmp eq i32 %6, 0
-  br i1 %7, label %8, label %13
+  br i1 %7, label %8, label %16
 
 ; <label>:8                                       ; preds = %5
   %9 = call i32 @Out._init()
   %10 = icmp eq i32 %9, 0
-  br i1 %10, label %11, label %13
+  br i1 %10, label %11, label %16
 
 ; <label>:11                                      ; preds = %8
   call void @GLUT.Init() nounwind
-  call x86_stdcallcc void @glutInitDisplayMode(i32 18)
+  %12 = or i8 0, 2
+  %13 = or i8 %12, 16
+  %14 = sext i8 %13 to i32
+  call x86_stdcallcc void @glutInitDisplayMode(i32 %14)
   call x86_stdcallcc void @glutInitWindowSize(i32 500, i32 500)
   call x86_stdcallcc void @glutInitWindowPosition(i32 300, i32 200)
   call void @GLUT.CreateWindow({ i32, i8* } { i32 13, i8* getelementptr inbounds ([13 x i8]* @.str01, i32 0, i32 0) }) nounwind
   call x86_stdcallcc void @glutDisplayFunc(void ()* @DisplayHandler)
   call x86_stdcallcc void @glutIdleFunc(void ()* @IdleHandler)
   call x86_stdcallcc void @glutMainLoop()
-  br label %12
+  br label %15
 
-; <label>:12                                      ; preds = %11, %0
+; <label>:15                                      ; preds = %11, %0
   ret i32 0
 
-; <label>:13                                      ; preds = %8, %5, %2
+; <label>:16                                      ; preds = %8, %5, %2
   ret i32 1
 }
 

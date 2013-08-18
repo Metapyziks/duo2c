@@ -140,7 +140,7 @@ namespace DUO2C.CodeGen.LLVM
                 ctx = ctx.Leave().Ln();
             }
             
-            var globals = _scope.GetSymbols(false).Where(y => !y.Value.Type.IsProcedure);
+            var globals = _scope.GetSymbols(false).Where(y => !y.Value.Type.IsProcedure && !y.Value.IsConstant);
             if (globals.Count() > 0) {
                 ctx = ctx.Ln().Enter(0);
                 foreach (var v in globals) {

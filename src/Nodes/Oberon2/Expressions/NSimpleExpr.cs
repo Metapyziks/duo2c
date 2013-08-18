@@ -50,7 +50,7 @@ namespace DUO2C.Nodes.Oberon2
             if (Prev == null) {
                 return Term.GetFinalType(scope);
             } else {
-                if (Operator == SimpleExprOperator.Or) {
+                if (Operator == SimpleExprOperator.Or && Term.GetFinalType(scope).IsBool) {
                     return BooleanType.Default;
                 } else if (Term.GetFinalType(scope).IsSet) {
                     return SetType.Default;
@@ -111,7 +111,7 @@ namespace DUO2C.Nodes.Oberon2
 
                 if (left != null && right != null) {
                     if (Operator == SimpleExprOperator.Or) {
-                        if (!left.IsBool || !right.IsBool) {
+                        if ((!left.IsBool || !right.IsBool) && (!left.IsInteger && !right.IsInteger)) {
                             yield return new OperandTypeException(left, right, _opString, this);
                         }
                     } else if ((!left.IsSet || !right.IsSet) && (!left.IsNumeric || !right.IsNumeric)) {

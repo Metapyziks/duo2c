@@ -1,5 +1,5 @@
-; Generated 18/08/2013 21:08:12
-; GlobalUID 0e26bad7-ab03-4ad4-97b9-23c057b812ba
+; Generated 18/08/2013 22:27:16
+; GlobalUID 68ac8701-a39e-4278-ab8f-81f015f80e60
 ; 
 ; LLVM IR file for module "GLTest"
 ; 
@@ -58,9 +58,11 @@ define void @IdleHandler() nounwind {
     
     %curTime = alloca i64
     
+    ; curTime := GetTickCount()
     %1 = call x86_stdcallcc i64 ()* @GetTickCount()
     store i64 %1, i64* %curTime
     
+    ; IF curTime - lastDraw > 16 THEN
     %2 = load i64* %curTime
     %3 = load i64* @lastDraw
     %4 = sub i64 %2, %3
@@ -69,43 +71,52 @@ define void @IdleHandler() nounwind {
     
 ; <label>:6                                       ; preds = %0
     
+    ; r := r + 0x3ff0000000000000 / 0x4030000000000000
     %7 = load float* @r
     %8 = fdiv float 0x3ff0000000000000, 0x4030000000000000
     %9 = fadd float %7, %8
     store float %9, float* @r
     
+    ; IF r >= 2 THEN
     %10 = load float* @r
     %11 = fcmp oge float %10, 2.000000e+000
     br i1 %11, label %12, label %27
     
 ; <label>:12                                      ; preds = %6
     
+    ; r := 0
     store float 0.000000e+000, float* @r
     
+    ; g := g + 0x3ff0000000000000 / 0x4030000000000000
     %13 = load float* @g
     %14 = fdiv float 0x3ff0000000000000, 0x4030000000000000
     %15 = fadd float %13, %14
     store float %15, float* @g
     
+    ; IF g >= 2 THEN
     %16 = load float* @g
     %17 = fcmp oge float %16, 2.000000e+000
     br i1 %17, label %18, label %26
     
 ; <label>:18                                      ; preds = %12
     
+    ; g := 0
     store float 0.000000e+000, float* @g
     
+    ; b := b + 0x3ff0000000000000 / 0x4030000000000000
     %19 = load float* @b
     %20 = fdiv float 0x3ff0000000000000, 0x4030000000000000
     %21 = fadd float %19, %20
     store float %21, float* @b
     
+    ; IF b >= 2 THEN
     %22 = load float* @b
     %23 = fcmp oge float %22, 2.000000e+000
     br i1 %23, label %24, label %25
     
 ; <label>:24                                      ; preds = %18
     
+    ; b := 0
     store float 0.000000e+000, float* @b
     
     br label %25
@@ -120,9 +131,11 @@ define void @IdleHandler() nounwind {
     
 ; <label>:27                                      ; preds = %6, %26
     
+    ; lastDraw := curTime
     %28 = load i64* %curTime
     store i64 %28, i64* @lastDraw
     
+    ; GLUT.PostRedisplay()
     call x86_stdcallcc void ()* @glutPostRedisplay()
     
     br label %29
@@ -138,122 +151,159 @@ define void @DisplayHandler() nounwind {
     %gn = alloca float
     %bn = alloca float
     
-    call x86_stdcallcc void (i32)* @glClear(i32 16640)
+    ; GL.Clear(GL.ColorBufferBit OR GL.DepthBufferBit)
+    %1 = or i16 16384, 256
+    %2 = sext i16 %1 to i32
+    call x86_stdcallcc void (i32)* @glClear(i32 %2)
     
+    ; GL.Enable(GL.DepthTest)
     call x86_stdcallcc void (i32)* @glEnable(i32 2929)
     
+    ; GL.MatrixMode(GL.Projection)
     call x86_stdcallcc void (i32)* @glMatrixMode(i32 5889)
     
+    ; GL.LoadIdentity()
     call x86_stdcallcc void ()* @glLoadIdentity()
     
+    ; GL.Ortho(0xc000000000000000, 0x4000000000000000, 0xc000000000000000, 0x4000000000000000, 0xc000000000000000, 0x407f400000000000)
     call x86_stdcallcc void (double, double, double, double, double, double)* @glOrtho(double 0xc000000000000000, double 0x4000000000000000, double 0xc000000000000000, double 0x4000000000000000, double 0xc000000000000000, double 0x407f400000000000)
     
+    ; GL.MatrixMode(GL.Modelview)
     call x86_stdcallcc void (i32)* @glMatrixMode(i32 5888)
     
+    ; GL.LoadIdentity()
     call x86_stdcallcc void ()* @glLoadIdentity()
     
+    ; GLUT.LookAt(2, 2, 2, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x3ff0000000000000, 0x0000000000000000)
     call x86_stdcallcc void (double, double, double, double, double, double, double, double, double)* @gluLookAt(double 2.000000e+000, double 2.000000e+000, double 2.000000e+000, double 0x0000000000000000, double 0x0000000000000000, double 0x0000000000000000, double 0x0000000000000000, double 0x3ff0000000000000, double 0x0000000000000000)
     
+    ; GL.Scalef(0x3f747ae140000000, 0x3f747ae140000000, 0x3f747ae140000000)
     call x86_stdcallcc void (float, float, float)* @glScalef(float 0x3f747ae140000000, float 0x3f747ae140000000, float 0x3f747ae140000000)
     
+    ; GL.Rotatef(20, 0, 1, 0)
     call x86_stdcallcc void (float, float, float, float)* @glRotatef(float 2.000000e+001, float 0.000000e+000, float 1.000000e+000, float 0.000000e+000)
     
+    ; GL.Rotatef(30, 0, 0, 1)
     call x86_stdcallcc void (float, float, float, float)* @glRotatef(float 3.000000e+001, float 0.000000e+000, float 0.000000e+000, float 1.000000e+000)
     
+    ; GL.Rotatef(5, 1, 0, 0)
     call x86_stdcallcc void (float, float, float, float)* @glRotatef(float 5.000000e+000, float 1.000000e+000, float 0.000000e+000, float 0.000000e+000)
     
+    ; GL.Translatef(-300, 0, 0)
     call x86_stdcallcc void (float, float, float)* @glTranslatef(float -3.000000e+002, float 0.000000e+000, float 0.000000e+000)
     
-    %1 = load float* @r
-    %2 = fcmp olt float %1, 1.000000e+000
-    br i1 %2, label %3, label %5
-    
-; <label>:3                                       ; preds = %0
-    
-    %4 = load float* @r
-    store float %4, float* %rn
-    
-    br label %8
+    ; IF r < 1 THEN
+    %3 = load float* @r
+    %4 = fcmp olt float %3, 1.000000e+000
+    br i1 %4, label %5, label %7
     
 ; <label>:5                                       ; preds = %0
     
+    ; rn := r
     %6 = load float* @r
-    %7 = fsub float 2.000000e+000, %6
-    store float %7, float* %rn
+    store float %6, float* %rn
     
-    br label %8
+    br label %10
     
-; <label>:8                                       ; preds = %3, %5
+; <label>:7                                       ; preds = %0
     
-    %9 = load float* @g
-    %10 = fcmp olt float %9, 1.000000e+000
-    br i1 %10, label %11, label %13
+    ; rn := 2 - r
+    %8 = load float* @r
+    %9 = fsub float 2.000000e+000, %8
+    store float %9, float* %rn
     
-; <label>:11                                      ; preds = %8
+    br label %10
     
-    %12 = load float* @g
-    store float %12, float* %gn
+; <label>:10                                      ; preds = %5, %7
     
-    br label %16
+    ; IF g < 1 THEN
+    %11 = load float* @g
+    %12 = fcmp olt float %11, 1.000000e+000
+    br i1 %12, label %13, label %15
     
-; <label>:13                                      ; preds = %8
+; <label>:13                                      ; preds = %10
     
+    ; gn := g
     %14 = load float* @g
-    %15 = fsub float 2.000000e+000, %14
-    store float %15, float* %gn
+    store float %14, float* %gn
     
-    br label %16
+    br label %18
     
-; <label>:16                                      ; preds = %11, %13
+; <label>:15                                      ; preds = %10
     
-    %17 = load float* @b
-    %18 = fcmp olt float %17, 1.000000e+000
-    br i1 %18, label %19, label %21
+    ; gn := 2 - g
+    %16 = load float* @g
+    %17 = fsub float 2.000000e+000, %16
+    store float %17, float* %gn
     
-; <label>:19                                      ; preds = %16
+    br label %18
     
-    %20 = load float* @b
-    store float %20, float* %bn
+; <label>:18                                      ; preds = %13, %15
     
-    br label %24
+    ; IF b < 1 THEN
+    %19 = load float* @b
+    %20 = fcmp olt float %19, 1.000000e+000
+    br i1 %20, label %21, label %23
     
-; <label>:21                                      ; preds = %16
+; <label>:21                                      ; preds = %18
     
+    ; bn := b
     %22 = load float* @b
-    %23 = fsub float 2.000000e+000, %22
-    store float %23, float* %bn
+    store float %22, float* %bn
     
-    br label %24
+    br label %26
     
-; <label>:24                                      ; preds = %19, %21
+; <label>:23                                      ; preds = %18
     
-    %25 = load float* %rn
-    %26 = load float* %gn
-    %27 = load float* %bn
-    call x86_stdcallcc void (float, float, float)* @glColor3f(float %25, float %26, float %27)
+    ; bn := 2 - b
+    %24 = load float* @b
+    %25 = fsub float 2.000000e+000, %24
+    store float %25, float* %bn
     
+    br label %26
+    
+; <label>:26                                      ; preds = %21, %23
+    
+    ; GL.Color3f(rn, gn, bn)
+    %27 = load float* %rn
+    %28 = load float* %gn
+    %29 = load float* %bn
+    call x86_stdcallcc void (float, float, float)* @glColor3f(float %27, float %28, float %29)
+    
+    ; GLUT.StrokeCharacter(NIL, "H")
     call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 72)
     
+    ; GLUT.StrokeCharacter(NIL, "e")
     call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 101)
     
+    ; GLUT.StrokeCharacter(NIL, "l")
     call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 108)
     
+    ; GLUT.StrokeCharacter(NIL, "l")
     call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 108)
     
+    ; GLUT.StrokeCharacter(NIL, "a")
     call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 97)
     
+    ; GLUT.StrokeCharacter(NIL, "V")
     call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 86)
     
+    ; GLUT.StrokeCharacter(NIL, "u")
     call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 117)
     
+    ; GLUT.StrokeCharacter(NIL, "r")
     call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 114)
     
+    ; GLUT.StrokeCharacter(NIL, "l")
     call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 108)
     
+    ; GLUT.StrokeCharacter(NIL, "d")
     call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 100)
     
+    ; GLUT.StrokeCharacter(NIL, "!")
     call x86_stdcallcc void (i8*, %CHAR)* @glutStrokeCharacter(i8* null, %CHAR 33)
     
+    ; GLUT.SwapBuffers()
     call x86_stdcallcc void ()* @glutSwapBuffers()
     
     ret void 
@@ -265,49 +315,60 @@ define void @DisplayHandler() nounwind {
 define i32 @GLTest._init() nounwind {
     
     %1 = load i1* @GLTest._hasInit
-    br i1 %1, label %12, label %2
+    br i1 %1, label %15, label %2
     
 ; <label>:2                                       ; preds = %0
     store i1 1, i1* @GLTest._hasInit
     
     %3 = call i32 ()* @GL._init()
     %4 = icmp eq i32 %3, 0
-    br i1 %4, label %5, label %13
+    br i1 %4, label %5, label %16
     
 ; <label>:5                                       ; preds = %2
     %6 = call i32 ()* @GLUT._init()
     %7 = icmp eq i32 %6, 0
-    br i1 %7, label %8, label %13
+    br i1 %7, label %8, label %16
     
 ; <label>:8                                       ; preds = %5
     %9 = call i32 ()* @Out._init()
     %10 = icmp eq i32 %9, 0
-    br i1 %10, label %11, label %13
+    br i1 %10, label %11, label %16
     
 ; <label>:11                                      ; preds = %8
     
+    ; GLUT.Init()
     call void ()* @GLUT.Init() nounwind
     
-    call x86_stdcallcc void (i32)* @glutInitDisplayMode(i32 18)
+    ; GLUT.InitDisplayMode(GLUT.RGB OR GLUT.Double OR GLUT.Depth)
+    %12 = or i8 0, 2
+    %13 = or i8 %12, 16
+    %14 = sext i8 %13 to i32
+    call x86_stdcallcc void (i32)* @glutInitDisplayMode(i32 %14)
     
+    ; GLUT.InitWindowSize(500, 500)
     call x86_stdcallcc void (i32, i32)* @glutInitWindowSize(i32 500, i32 500)
     
+    ; GLUT.InitWindowPosition(300, 200)
     call x86_stdcallcc void (i32, i32)* @glutInitWindowPosition(i32 300, i32 200)
     
+    ; GLUT.CreateWindow("Hello World!")
     call void ({i32, %CHAR*})* @GLUT.CreateWindow({i32, %CHAR*} {i32 13, %CHAR* getelementptr inbounds ([13 x %CHAR]* @.str0, i32 0, i32 0)}) nounwind
     
+    ; GLUT.DisplayFunc(DisplayHandler)
     call x86_stdcallcc void (void ()*)* @glutDisplayFunc(void ()* @DisplayHandler)
     
+    ; GLUT.IdleFunc(IdleHandler)
     call x86_stdcallcc void (void ()*)* @glutIdleFunc(void ()* @IdleHandler)
     
+    ; GLUT.MainLoop()
     call x86_stdcallcc void ()* @glutMainLoop()
     
-    br label %12
+    br label %15
     
-; <label>:12                                      ; preds = %0, %11
+; <label>:15                                      ; preds = %0, %11
     ret i32 0
     
-; <label>:13                                      ; preds = %2, %5, %8
+; <label>:16                                      ; preds = %2, %5, %8
     ret i32 1
 }
 

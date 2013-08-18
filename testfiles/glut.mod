@@ -1,6 +1,11 @@
 MODULE GLUT;
     IMPORT Out;
 
+    CONST
+        RGB    * = 00000H;
+        Double * = 00002H;
+        Depth  * = 00010H;
+
     TYPE
         ExitType = PROCEDURE (v : INTEGER);
 

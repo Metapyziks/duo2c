@@ -53,6 +53,7 @@ namespace DUO2C.Semantics
 
         private Dictionary<String, Declaration> _types;
         private Dictionary<String, Declaration> _symbols;
+        private Dictionary<String, NExpr> _consts;
 
         public virtual ModuleType CurrentModule
         {
@@ -71,6 +72,7 @@ namespace DUO2C.Semantics
 
             _types = new Dictionary<string, Declaration>();
             _symbols = new Dictionary<string, Declaration>();
+            _consts = new Dictionary<string, NExpr>();
         }
 
         public void DeclareType(String identifier, OberonType type, AccessModifier visibility)
@@ -81,6 +83,12 @@ namespace DUO2C.Semantics
         public void DeclareSymbol(String identifier, OberonType type, AccessModifier visibility, DeclarationType declType)
         {
             _symbols.Add(identifier, new Declaration(type, visibility, declType));
+        }
+
+        public void DeclareConst(String identifier, OberonType type, AccessModifier visibility, NExpr expr)
+        {
+            _symbols.Add(identifier, new Declaration(type, visibility, DeclarationType.Constant));
+            _consts.Add(identifier, expr);
         }
 
         public virtual Declaration GetTypeDecl(String identifier, String module = null)
@@ -102,6 +110,17 @@ namespace DUO2C.Semantics
                 return _symbols.ContainsKey(identifier)
                     ? _symbols[identifier] : HasParent
                     ? Parent.GetSymbolDecl(identifier, null) : null;
+            }
+        }
+
+        public virtual NExpr GetConst(String identifier, String module = null)
+        {
+            if (module != null) {
+                return Parent != null ? Parent.GetConst(identifier, module) : null;
+            } else {
+                return _consts.ContainsKey(identifier)
+                    ? _consts[identifier] : HasParent
+                    ? Parent.GetConst(identifier, null) : null;
             }
         }
 
@@ -244,6 +263,13 @@ namespace DUO2C.Semantics
             return module != null && _modules.ContainsKey(module)
                 ? _modules[module].GetSymbolDecl(identifier, null)
                 : base.GetSymbolDecl(identifier, null);
+        }
+
+        public override NExpr GetConst(string identifier, string module = null)
+        {
+            return module != null && _modules.ContainsKey(module)
+                ? _modules[module].GetConst(identifier, null)
+                : base.GetConst(identifier, null);
         }
 
         public override Scope GetDeclaringScope(OberonType type)
