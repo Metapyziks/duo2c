@@ -56,11 +56,17 @@ MODULE GLUT;
         CreateWindowInternal(title, Exit);
     END CreateWindow;
 
-    PROCEDURE DisplayFunc* (VAR func : PROCEDURE);
-    EXTERNAL IMPORT "glutDisplayFunc";
-
     PROCEDURE IdleFunc* (VAR func : PROCEDURE);
     EXTERNAL IMPORT "glutIdleFunc";
+
+    PROCEDURE MotionFunc* (VAR func : PROCEDURE(x, y : INTEGER));
+    EXTERNAL IMPORT "glutMotionFunc";
+
+    PROCEDURE PassiveMotionFunc* (VAR func : PROCEDURE(x, y : INTEGER));
+    EXTERNAL IMPORT "glutPassiveMotionFunc";
+
+    PROCEDURE DisplayFunc* (VAR func : PROCEDURE);
+    EXTERNAL IMPORT "glutDisplayFunc";
 
     PROCEDURE MainLoop*;
     EXTERNAL IMPORT "glutMainLoop";
