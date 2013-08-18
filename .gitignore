@@ -109,6 +109,9 @@ Backup*/
 UpgradeLog*.XML
 *.syntax
 testfiles/*.bc
-testfiles/*.asm
+testfiles/*.s
 testfiles/*.dll
 testfiles/*.exe
+testfiles/*.sym
+testfiles/bin/
+testfiles/ir/
