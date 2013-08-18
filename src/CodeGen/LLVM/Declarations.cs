@@ -37,7 +37,7 @@ namespace DUO2C.CodeGen.LLVM
                     ctx.Type(VoidType.Default);
                 }
 
-                ctx.Write(" \t{0}\t(", isExternal ? ((ExternalProcedureType) proc).ExternalSymbol : dest.ToString());
+                ctx.Write(" \t{0}\t(", isExternal ? "@" + ((ExternalProcedureType) proc).ExternalSymbol : dest.ToString());
                 foreach (var p in proc.ParamsWithReceiver) {
                     var ptype = isExternal ? p.Type.Marshalled(_scope) : p.Type;
                     if (p.ByReference) {

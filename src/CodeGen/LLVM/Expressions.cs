@@ -242,6 +242,8 @@ namespace DUO2C.CodeGen.LLVM
             if (src is Literal && to.IsNumeric && from.IsNumeric) {
                 if (to.IsReal && from.IsInteger) {
                     src = new Literal(int.Parse(src.ToString()).ToString("e"));
+                } else if (to.IsReal && from.IsReal && to.As<RealType>().Range == RealRange.LongReal && from.As<RealType>().Range == RealRange.Real) {
+                    
                 }
                 return ctx;
             } else if (from.IsPointer && to.IsPointer) {

@@ -208,7 +208,7 @@ namespace DUO2C.CodeGen.LLVM
 
             if (procType.ReturnType != null) ctx.Assign(dest);
             ctx.Keyword("call").Type(new PointerType(procType)).Write(" ");
-            ctx.Write(procType is ExternalProcedureType ? ((ExternalProcedureType) procType).ExternalSymbol : proc.ToString()).Write("(").EndArguments();
+            ctx.Write(procType is ExternalProcedureType ? "@" + ((ExternalProcedureType) procType).ExternalSymbol : proc.ToString()).Write("(").EndArguments();
             for (int i = 0; i < args.Length; ++i) {
                 ctx.Argument(argTypes[i], args[i], false);
             }

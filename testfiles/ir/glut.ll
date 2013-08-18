@@ -1,5 +1,5 @@
-; Generated 17/08/2013 21:14:11
-; GlobalUID 59d094f5-e2b4-47ea-9d3b-dc24fdeea17f
+; Generated 18/08/2013 01:27:41
+; GlobalUID 9be3cc41-47f5-4953-beb5-639e9969757c
 ; 
 ; LLVM IR file for module "GLUT"
 ; 
@@ -16,38 +16,38 @@ declare noalias i8* @GC_malloc(i32)
 
 %GLUT.ExitType = type void (i32)
 
-declare void exit(i32) 
-declare void gluLookAt(double, double, double, double, double, double, double, double, double) 
-declare void glutStrokeCharacter(i8*, %CHAR) 
-declare void glutSwapBuffers() 
-declare void __glutInitWithExit(i32, %CHAR**, %GLUT.ExitType*) 
+declare void @exit(i32) 
+declare void @gluLookAt(double, double, double, double, double, double, double, double, double) 
+declare void @glutStrokeCharacter(i8*, %CHAR) 
+declare void @glutSwapBuffers() 
+declare void @__glutInitWithExit(i32, %CHAR**, %GLUT.ExitType*) 
 define void @GLUT.Init() nounwind {
     
-    ; InitInternal(0, NIL, Exit)
-    call void (i32, %CHAR**, %GLUT.ExitType*)* __glutInitWithExit(i32 0, %CHAR** null, %GLUT.ExitType* @Exit)
+    ; InitInternal(0, NIL, exit)
+    call void (i32, %CHAR**, %GLUT.ExitType*)* @__glutInitWithExit(i32 0, %CHAR** null, %GLUT.ExitType* @exit)
     
     ret void 
 }
 
-declare void glutInitDisplayMode(i32) 
-declare void glutInitWindowSize(i32, i32) 
-declare void glutInitWindowPosition(i32, i32) 
-declare void __glutCreateWindowWithExit(%CHAR*, %GLUT.ExitType*) 
+declare void @glutInitDisplayMode(i32) 
+declare void @glutInitWindowSize(i32, i32) 
+declare void @glutInitWindowPosition(i32, i32) 
+declare void @__glutCreateWindowWithExit(%CHAR*, %GLUT.ExitType*) 
 define void @GLUT.CreateWindow({i32, %CHAR*} %$title) nounwind {
     
     %title = alloca {i32, %CHAR*}
     store {i32, %CHAR*} %$title, {i32, %CHAR*}* %title
     
-    ; CreateWindowInternal(title, Exit)
+    ; CreateWindowInternal(title, exit)
     %1 = getelementptr inbounds {i32, %CHAR*}* %title, i32 0, i32 1
     %2 = load %CHAR** %1
-    call void (%CHAR*, %GLUT.ExitType*)* __glutCreateWindowWithExit(%CHAR* %2, %GLUT.ExitType* @Exit)
+    call void (%CHAR*, %GLUT.ExitType*)* @__glutCreateWindowWithExit(%CHAR* %2, %GLUT.ExitType* @exit)
     
     ret void 
 }
 
-declare void glutDisplayFunc(void ()*) 
-declare void glutMainLoop() 
+declare void @glutDisplayFunc(void ()*) 
+declare void @glutMainLoop() 
 
 @GLUT._hasInit = private global i1 zeroinitializer
 

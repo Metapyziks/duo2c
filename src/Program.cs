@@ -382,8 +382,7 @@ namespace DUO2C
                     WriteErrorHeader("Encountered 1 error while compiling file(s):");
                     WriteError(e);
                     Console.WriteLine();
-                    throw;
-                    // return 1;
+                    return 1;
                 } finally {
                     foreach (var file in cleanupFiles) {
                         File.Delete(file);

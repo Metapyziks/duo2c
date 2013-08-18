@@ -2,7 +2,7 @@ MODULE GLUT;
     TYPE
         ExitType = PROCEDURE (v : INTEGER);
 
-    PROCEDURE Exit (errorCode : INTEGER);
+    PROCEDURE exit (errorCode : INTEGER);
     EXTERNAL "exit";
 
     PROCEDURE LookAt* (eyeX,    eyeY,    eyeZ,
@@ -22,7 +22,7 @@ MODULE GLUT;
 
     PROCEDURE Init*;
     BEGIN
-        InitInternal(0, NIL, Exit);
+        InitInternal(0, NIL, exit);
     END Init;
 
     PROCEDURE InitDisplayMode* (mode : INTEGER);
@@ -39,7 +39,7 @@ MODULE GLUT;
 
     PROCEDURE CreateWindow* (title : ARRAY OF CHAR);
     BEGIN
-        CreateWindowInternal(title, Exit);
+        CreateWindowInternal(title, exit);
     END CreateWindow;
 
     PROCEDURE DisplayFunc* (VAR func : PROCEDURE);

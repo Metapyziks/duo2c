@@ -19,11 +19,12 @@ namespace DUO2C.Nodes.Oberon2
         public override string String
         {
             get {
-                return Value.ToString("e");
+                var intVal = BitConverter.DoubleToInt64Bits(_finalType.Range == RealRange.LongReal ? Value : (float) Value);
+                return "0x" + intVal.ToString("x16");
             }
         }
 
-        private OberonType _finalType;
+        private RealType _finalType;
         public override OberonType GetFinalType(Scope scope)
         {
             return _finalType;
