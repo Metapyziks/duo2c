@@ -170,7 +170,7 @@ namespace DUO2C.CodeGen.LLVM
 
             ctx.LabelMarker(ifend);
 
-            if (node.ThenBody.EndsInBranch() && (node.ElseBody == null || node.ElseBody.EndsInBranch())) {
+            if (node.ThenBody.EndsInBranch() && (node.ElseBody != null && node.ElseBody.EndsInBranch())) {
                 ctx.Keyword("unreachable").EndOperation();
             }
 

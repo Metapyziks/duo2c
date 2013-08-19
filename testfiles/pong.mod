@@ -5,6 +5,7 @@ MODULE Pong;
         WindowWidth = 800;
         WindowHeight = 600;
         UpdateInterval = 16;
+        Margin = 24;
 
     TYPE
         Object = POINTER TO ObjectRec;
@@ -22,12 +23,21 @@ MODULE Pong;
             score : INTEGER;
         END;
 
+        Human = POINTER TO HumanRec;
+        HumanRec = RECORD (PlayerRec) END;
+
+        Computer = POINTER TO ComputerRec;
+        ComputerRec = RECORD (PlayerRec)
+            destY : REAL;
+            nextTry : LONGREAL;
+        END;
+
     VAR
         lastUpdate : LONGINT;
-
-        ball    : Ball;
-        player1 : Player;
-        player2 : Player;
+        mouseX, mouseY : INTEGER;
+        ball : Ball;
+        player1 : Human;
+        player2 : Computer;
 
     (* External Procedures *)
 
@@ -63,7 +73,7 @@ MODULE Pong;
 
     PROCEDURE (this : Ball) New(x, y, dx, dy : REAL);
     BEGIN
-        NEW(this);
+        IF this = NIL THEN NEW(this); END;
 
         this.x  := x;
         this.y  := y;
@@ -87,13 +97,12 @@ MODULE Pong;
         winner.score := winner.score + 1;
         
         IF winner = player1 THEN
-            this.x := player2.x - (player2.width + this.width) * 0.5 - 8;
+            this.x := player2.x - (player2.width + this.width) / 2 - 8;
             this.y := player2.y;
         ELSE
-            this.x := player1.x + (player1.width + this.width) * 0.5 + 8;
+            this.x := player1.x + (player1.width + this.width) / 2 + 8;
             this.y := player1.y;
         END;
-    
 
         this.dx := -this.dx;
         this.dy := 0;
@@ -111,12 +120,12 @@ MODULE Pong;
             this.Score(player1);
         END;
 
-        IF (this.dy < 0) & (this.y < this.height / 2) THEN
+        IF (this.dy < 0) & (this.y < Margin + this.height / 2) THEN
             this.dy := -this.dy;
-            this.y := this.height / 2;
-        ELSIF (this.dy > 0) & (this.y >= WindowHeight - this.height / 2) THEN
+            this.y := Margin + this.height / 2;
+        ELSIF (this.dy > 0) & (this.y >= WindowHeight - Margin - this.height / 2) THEN
             this.dy := -this.dy;
-            this.y := WindowHeight - this.height / 2;
+            this.y := WindowHeight - Margin - this.height / 2;
         END;
 
         IF (this.dx < 0) & this.IsTouching(player1) THEN
@@ -128,10 +137,8 @@ MODULE Pong;
 
     (* Player Procedures *)
 
-    PROCEDURE (this : Player) New(x, y : REAL);
+    PROCEDURE (this : Player) Init(x, y : REAL);
     BEGIN
-        NEW(this);
-
         this.x := x;
         this.y := y;
 
@@ -139,17 +146,75 @@ MODULE Pong;
         this.height := 128;
     END New;
 
+    PROCEDURE (this : Player) SetY(y : REAL);
+    BEGIN
+        IF y < Margin + this.height / 2 THEN
+            this.y := Margin + this.height / 2;
+        ELSIF y > WindowHeight - Margin - this.height / 2 THEN
+            this.y := WindowHeight - Margin - this.height / 2;
+        ELSE
+            this.y := y;
+        END;
+    END SetY;
+
     PROCEDURE (this : Player) Update;
     BEGIN
         RETURN;
+    END Update;
+
+    (* Human Procedures *)
+
+    PROCEDURE (this : Human) New(x, y : REAL);
+    BEGIN
+        NEW(this);
+        this.Init(x, y);
+    END New;
+
+    PROCEDURE (this : Human) Update;
+    BEGIN
+        this.SetY(mouseY);
+    END Update;
+
+    (* Computer Procedures *)
+
+    PROCEDURE (this : Computer) New(x, y : REAL);
+    BEGIN
+        NEW(this);
+        this.Init(x, y);
+    END New;
+
+    PROCEDURE (this : Computer) Update;
+    VAR curTime : LONGINT;
+    VAR dy, guess : REAL;
+    BEGIN
+        curTime := GetTickCount();
+        IF curTime >= this.nextTry THEN
+            this.nextTry := curTime + 250 + Abs(ball.x - this.x);
+            this.destY := ball.y + ball.dy * Abs(ball.x - this.x) * 1.5 / ball.dx;
+
+            WHILE (this.destY < 0) OR (this.destY > WindowHeight) DO
+                IF this.destY < 0 THEN
+                    this.destY := 2 * (Margin + ball.height / 2) - this.destY;
+                ELSE
+                    this.destY := 2 * (WindowHeight - Margin - ball.height / 2) - this.destY;
+                END;
+            END;
+        END;
+        
+        dy := (this.destY - this.y) * 0.1;
+
+        IF dy >  16 THEN dy :=  16; END;
+        IF dy < -16 THEN dy := -16; END;
+
+        this.SetY(this.y + dy);
     END Update;
 
     (* Global Procedures *)
 
     PROCEDURE VecToScreen(VAR x, y : REAL);
     BEGIN
-        x :=  x / (WindowWidth * 0.5);
-        y := -y / (WindowHeight * 0.5);
+        x := ( x * 2) / WindowWidth;
+        y := (-y * 2) / WindowHeight;
     END VecToScreen;
 
     PROCEDURE PosToScreen(VAR x, y : REAL);
@@ -171,9 +236,19 @@ MODULE Pong;
         GL.Vertex2f(x,     y + h);
     END DrawRect;
 
+    PROCEDURE DrawScore(score : INTEGER; x, y : REAL; dx, height : REAL);
+    VAR i : INTEGER;
+    BEGIN
+        IF dx < 0 THEN x := x; END;
+        FOR i := 0 TO score - 1 DO
+            DrawRect(x + dx * i, y, dx * 0.75, height);
+        END;
+    END;
+
     PROCEDURE MotionHandler(x, y : INTEGER);
     BEGIN
-        player1.y := y;
+        mouseX := x;
+        mouseY := y;
     END MotionHandler;
 
     PROCEDURE IdleHandler;
@@ -199,10 +274,21 @@ MODULE Pong;
             ball.Draw;
             player1.Draw;
             player2.Draw;
+
+            DrawScore(player1.score, 4, 4, 12, 16);
+            DrawScore(player2.score, WindowWidth - 4, 4, -12, 16);
         GL.End;
+
+        GL.Color3f(0.25, 0.25, 0.25);
         
         GLUT.SwapBuffers;
     END DisplayHandler;
+
+    PROCEDURE Abs(v : REAL) : REAL;
+    BEGIN
+        IF v < 0 THEN RETURN -v; END;
+        RETURN v;
+    END;
 
 BEGIN
     ball.New(WindowWidth / 2, WindowHeight / 2, 8, 0);
