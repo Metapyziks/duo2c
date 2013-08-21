@@ -44,7 +44,8 @@ ConstExpr     = Expr.
 Expr          = SimpleExpr [Relation SimpleExpr].
 SimpleExpr    = Term {AddOp Term}.
 Term          = Factor {MulOp Factor}.
-Factor        = Designator | number | character | string | Bool | Nil | Set | "(" Expr ")" | Unary.
+Factor        = Designator | number | character | string | Bool | Nil | Set
+              | "(" Expr ")" | Unary.
 Nil           = NIL.
 Unary         = ("+" | "-" | "~") Factor.
 Bool          = "TRUE" | "FALSE".

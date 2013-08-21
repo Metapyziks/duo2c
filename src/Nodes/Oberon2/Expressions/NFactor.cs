@@ -9,9 +9,9 @@ namespace DUO2C.Nodes.Oberon2
     [SubstituteToken("Factor")]
     public class NFactor : ExpressionElement
     {
-        public ExpressionElement Inner
+        public FactorElement Inner
         {
-            get { return (ExpressionElement) Children.First(); }
+            get { return (FactorElement) Children.First(); }
         }
 
         public override string String
