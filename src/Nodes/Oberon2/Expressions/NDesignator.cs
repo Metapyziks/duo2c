@@ -249,5 +249,12 @@ namespace DUO2C.Nodes.Oberon2
                 }
             }
         }
+
+        public override LiteralElement EvaluateConst(Scope scope)
+        {
+            var ident = (NQualIdent) Element;
+            var expr = scope.GetConst(ident.Identifier, ident.Module);
+            return expr.EvaluateConst(scope);
+        }
     }
 }

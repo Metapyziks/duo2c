@@ -112,7 +112,7 @@ namespace DUO2C.Semantics
                     ? Parent.GetSymbolDecl(identifier, null) : null;
             }
         }
-
+        
         public virtual NExpr GetConst(String identifier, String module = null)
         {
             if (module != null) {

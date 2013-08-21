@@ -9,7 +9,7 @@ namespace DUO2C.Nodes.Oberon2
     /// Substitution node for real numbers.
     /// </summary>
     [SubstituteToken("real")]
-    public class NReal : ExpressionElement
+    public class NReal : LiteralElement
     {
         /// <summary>
         /// The parsed value of the real number.
@@ -54,9 +54,124 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
+        public NReal(ParseNode orig, double value)
+            : base(orig, true)
+        {
+            Value = value;
+        }
+
         public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             return EmptyExceptionArray;
+        }
+
+        public override LiteralElement EvaluateConst(ParseNode orig, LiteralElement other, ExprOperator op, Scope scope)
+        {
+            if (other is NNumber) {
+                other = ((NNumber) other).Inner;
+            }
+
+            if (other is NInteger) {
+                var that = (NInteger) other;
+                switch (op) {
+                    case ExprOperator.Equals:
+                        return new NBool(orig, this.Value == that.Value);
+                    case ExprOperator.NotEquals:
+                        return new NBool(orig, this.Value != that.Value);
+                    case ExprOperator.GreaterThan:
+                        return new NBool(orig, this.Value > that.Value);
+                    case ExprOperator.GreaterThanOrEqual:
+                        return new NBool(orig, this.Value >= that.Value);
+                    case ExprOperator.LessThan:
+                        return new NBool(orig, this.Value < that.Value);
+                    case ExprOperator.LessThanOrEqual:
+                        return new NBool(orig, this.Value <= that.Value);
+                }
+            } else if (other is NReal) {
+                var that = (NReal) other;
+                switch (op) {
+                    case ExprOperator.Equals:
+                        return new NBool(orig, this.Value == that.Value);
+                    case ExprOperator.NotEquals:
+                        return new NBool(orig, this.Value != that.Value);
+                    case ExprOperator.GreaterThan:
+                        return new NBool(orig, this.Value > that.Value);
+                    case ExprOperator.GreaterThanOrEqual:
+                        return new NBool(orig, this.Value >= that.Value);
+                    case ExprOperator.LessThan:
+                        return new NBool(orig, this.Value < that.Value);
+                    case ExprOperator.LessThanOrEqual:
+                        return new NBool(orig, this.Value <= that.Value);
+                }
+            }
+
+            throw new NotImplementedException();
+        }
+
+        public override LiteralElement EvaluateConst(ParseNode orig, LiteralElement other, SimpleExprOperator op, Scope scope)
+        {
+            if (other is NNumber) {
+                other = ((NNumber) other).Inner;
+            }
+
+            if (other is NInteger) {
+                var that = (NInteger) other;
+                switch (op) {
+                    case SimpleExprOperator.Add:
+                        return new NReal(orig, this.Value + that.Value);
+                    case SimpleExprOperator.Subtract:
+                        return new NReal(orig, this.Value - that.Value);
+                }
+            } else if (other is NReal) {
+                var that = (NReal) other;
+                switch (op) {
+                    case SimpleExprOperator.Add:
+                        return new NReal(orig, this.Value + that.Value);
+                    case SimpleExprOperator.Subtract:
+                        return new NReal(orig, this.Value - that.Value);
+                }
+            }
+
+            throw new NotImplementedException();
+        }
+
+        public override LiteralElement EvaluateConst(ParseNode orig, LiteralElement other, TermOperator op, Scope scope)
+        {
+            if (other is NNumber) {
+                other = ((NNumber) other).Inner;
+            }
+
+            if (other is NInteger) {
+                var that = (NInteger) other;
+                switch (op) {
+                    case TermOperator.Multiply:
+                        return new NReal(orig, this.Value * that.Value);
+                    case TermOperator.Divide:
+                        return new NReal(orig, this.Value / that.Value);
+                }
+            } else if (other is NReal) {
+                var that = (NReal) other;
+                switch (op) {
+                    case TermOperator.Multiply:
+                        return new NReal(orig, this.Value * that.Value);
+                    case TermOperator.Divide:
+                        return new NReal(orig, this.Value / that.Value);
+                }
+            }
+
+            throw new NotImplementedException();
+        }
+
+        public override LiteralElement EvaluateConst(ParseNode orig, UnaryOperator op, Scope scope)
+        {
+            switch (op) {
+                case UnaryOperator.Identity:
+                    return this;
+                case UnaryOperator.Negation:
+                    return new NReal(orig, -this.Value);
+            }
+
+            throw new NotImplementedException();
         }
     }
 }
