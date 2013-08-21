@@ -36,9 +36,35 @@ namespace DUO2C.Nodes.Oberon2
             Inner = (LiteralElement) Children.First();
         }
 
+        public NNumber(ParseNode orig, LiteralElement inner)
+            : base(orig, false)
+        {
+            Inner = inner;
+        }
+
         public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             return EmptyExceptionArray;
+        }
+
+        public override LiteralElement EvaluateConst(NExpr orig, LiteralElement other, ExprOperator op, Scope scope)
+        {
+            return new NNumber(orig, Inner.EvaluateConst(orig, other, op, scope));
+        }
+
+        public override LiteralElement EvaluateConst(NSimpleExpr orig, LiteralElement other, SimpleExprOperator op, Scope scope)
+        {
+            return new NNumber(orig, Inner.EvaluateConst(orig, other, op, scope));
+        }
+
+        public override LiteralElement EvaluateConst(NTerm orig, LiteralElement other, TermOperator op, Scope scope)
+        {
+            return new NNumber(orig, Inner.EvaluateConst(orig, other, op, scope));
+        }
+
+        public override LiteralElement EvaluateConst(NUnary orig, UnaryOperator op, Scope scope)
+        {
+            return new NNumber(orig, Inner.EvaluateConst(orig, op, scope));
         }
     }
 }

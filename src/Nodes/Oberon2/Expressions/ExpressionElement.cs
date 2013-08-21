@@ -28,10 +28,10 @@ namespace DUO2C.Nodes.Oberon2
         public LiteralElement(ParseNode original, bool leaf, bool hasPayload = true)
             : base(original, leaf, hasPayload) { }
 
-        public abstract LiteralElement EvaluateConst(ParseNode orig, LiteralElement other, ExprOperator op, Scope scope);
-        public abstract LiteralElement EvaluateConst(ParseNode orig, LiteralElement other, SimpleExprOperator op, Scope scope);
-        public abstract LiteralElement EvaluateConst(ParseNode orig, LiteralElement other, TermOperator op, Scope scope);
-        public abstract LiteralElement EvaluateConst(ParseNode orig, UnaryOperator op, Scope scope);
+        public abstract LiteralElement EvaluateConst(NExpr orig, LiteralElement other, ExprOperator op, Scope scope);
+        public abstract LiteralElement EvaluateConst(NSimpleExpr orig, LiteralElement other, SimpleExprOperator op, Scope scope);
+        public abstract LiteralElement EvaluateConst(NTerm orig, LiteralElement other, TermOperator op, Scope scope);
+        public abstract LiteralElement EvaluateConst(NUnary orig, UnaryOperator op, Scope scope);
 
         public override LiteralElement EvaluateConst(Scope scope)
         {

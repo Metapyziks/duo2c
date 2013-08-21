@@ -9,7 +9,7 @@ using DUO2C.Semantics;
 namespace DUO2C.Nodes.Oberon2
 {
     [SubstituteToken("Nil")]
-    public class NNil : ExpressionElement
+    public class NNil : LiteralElement
     {
         public override string String
         {
@@ -35,6 +35,26 @@ namespace DUO2C.Nodes.Oberon2
         public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             return EmptyExceptionArray;
+        }
+
+        public override LiteralElement EvaluateConst(NExpr orig, LiteralElement other, ExprOperator op, Scope scope)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override LiteralElement EvaluateConst(NSimpleExpr orig, LiteralElement other, SimpleExprOperator op, Scope scope)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override LiteralElement EvaluateConst(NTerm orig, LiteralElement other, TermOperator op, Scope scope)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override LiteralElement EvaluateConst(NUnary orig, UnaryOperator op, Scope scope)
+        {
+            throw new NotImplementedException();
         }
     }
 }

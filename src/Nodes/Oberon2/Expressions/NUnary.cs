@@ -68,5 +68,10 @@ namespace DUO2C.Nodes.Oberon2
                 }
             }
         }
+
+        public override LiteralElement EvaluateConst(Scope scope)
+        {
+            return Factor.EvaluateConst(scope).EvaluateConst(this, Operator, scope);
+        }
     }
 }

@@ -54,10 +54,11 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
-        public NReal(ParseNode orig, double value)
+        public NReal(ParseNode orig, double value, RealType type)
             : base(orig, true)
         {
             Value = value;
+            _finalType = type;
         }
 
         public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
@@ -65,7 +66,7 @@ namespace DUO2C.Nodes.Oberon2
             return EmptyExceptionArray;
         }
 
-        public override LiteralElement EvaluateConst(ParseNode orig, LiteralElement other, ExprOperator op, Scope scope)
+        public override LiteralElement EvaluateConst(NExpr orig, LiteralElement other, ExprOperator op, Scope scope)
         {
             if (other is NNumber) {
                 other = ((NNumber) other).Inner;
@@ -108,7 +109,7 @@ namespace DUO2C.Nodes.Oberon2
             throw new NotImplementedException();
         }
 
-        public override LiteralElement EvaluateConst(ParseNode orig, LiteralElement other, SimpleExprOperator op, Scope scope)
+        public override LiteralElement EvaluateConst(NSimpleExpr orig, LiteralElement other, SimpleExprOperator op, Scope scope)
         {
             if (other is NNumber) {
                 other = ((NNumber) other).Inner;
@@ -118,24 +119,24 @@ namespace DUO2C.Nodes.Oberon2
                 var that = (NInteger) other;
                 switch (op) {
                     case SimpleExprOperator.Add:
-                        return new NReal(orig, this.Value + that.Value);
+                        return new NReal(orig, this.Value + that.Value, (RealType) orig.GetFinalType(scope));
                     case SimpleExprOperator.Subtract:
-                        return new NReal(orig, this.Value - that.Value);
+                        return new NReal(orig, this.Value - that.Value, (RealType) orig.GetFinalType(scope));
                 }
             } else if (other is NReal) {
                 var that = (NReal) other;
                 switch (op) {
                     case SimpleExprOperator.Add:
-                        return new NReal(orig, this.Value + that.Value);
+                        return new NReal(orig, this.Value + that.Value, (RealType) orig.GetFinalType(scope));
                     case SimpleExprOperator.Subtract:
-                        return new NReal(orig, this.Value - that.Value);
+                        return new NReal(orig, this.Value - that.Value, (RealType) orig.GetFinalType(scope));
                 }
             }
 
             throw new NotImplementedException();
         }
 
-        public override LiteralElement EvaluateConst(ParseNode orig, LiteralElement other, TermOperator op, Scope scope)
+        public override LiteralElement EvaluateConst(NTerm orig, LiteralElement other, TermOperator op, Scope scope)
         {
             if (other is NNumber) {
                 other = ((NNumber) other).Inner;
@@ -145,30 +146,30 @@ namespace DUO2C.Nodes.Oberon2
                 var that = (NInteger) other;
                 switch (op) {
                     case TermOperator.Multiply:
-                        return new NReal(orig, this.Value * that.Value);
+                        return new NReal(orig, this.Value * that.Value, (RealType) orig.GetFinalType(scope));
                     case TermOperator.Divide:
-                        return new NReal(orig, this.Value / that.Value);
+                        return new NReal(orig, this.Value / that.Value, (RealType) orig.GetFinalType(scope));
                 }
             } else if (other is NReal) {
                 var that = (NReal) other;
                 switch (op) {
                     case TermOperator.Multiply:
-                        return new NReal(orig, this.Value * that.Value);
+                        return new NReal(orig, this.Value * that.Value, (RealType) orig.GetFinalType(scope));
                     case TermOperator.Divide:
-                        return new NReal(orig, this.Value / that.Value);
+                        return new NReal(orig, this.Value / that.Value, (RealType) orig.GetFinalType(scope));
                 }
             }
 
             throw new NotImplementedException();
         }
 
-        public override LiteralElement EvaluateConst(ParseNode orig, UnaryOperator op, Scope scope)
+        public override LiteralElement EvaluateConst(NUnary orig, UnaryOperator op, Scope scope)
         {
             switch (op) {
                 case UnaryOperator.Identity:
                     return this;
                 case UnaryOperator.Negation:
-                    return new NReal(orig, -this.Value);
+                    return new NReal(orig, -this.Value, (RealType) orig.GetFinalType(scope));
             }
 
             throw new NotImplementedException();

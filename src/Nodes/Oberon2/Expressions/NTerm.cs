@@ -93,7 +93,7 @@ namespace DUO2C.Nodes.Oberon2
             bool innerFound = false;
 
             foreach (var e in Factor.FindTypeErrors(scope)) {
-            innerFound = true;
+                innerFound = true;
                 yield return e;
             }
 
@@ -109,27 +109,45 @@ namespace DUO2C.Nodes.Oberon2
                 var right = Factor.GetFinalType(scope);
 
                 if (left == null) {
+                    innerFound = true;
                     yield return new UndeclaredIdentifierException(Prev);
                 }
 
                 if (right == null) {
+                    innerFound = true;
                     yield return new UndeclaredIdentifierException(Factor);
                 }
 
                 if (left != null && right != null) {
                     if (Operator == TermOperator.IntDivide || Operator == TermOperator.Modulo) {
                         if (!left.IsInteger || !right.IsInteger) {
+                            innerFound = true;
                             yield return new OperandTypeException(left, right, _opString, this);
                         }
                     } else if (Operator == TermOperator.And) {
                         if (!left.IsBool || !right.IsBool) {
+                            innerFound = true;
                             yield return new OperandTypeException(left, right, _opString, this);
                         }
                     } else if ((!left.IsSet || !right.IsSet) && (!left.IsNumeric || !right.IsNumeric)) {
+                        innerFound = true;
                         yield return new OperandTypeException(left, right, _opString, this);
                     }
                 }
+
+                if (!innerFound && IsConstant(scope)) {
+                    Factor.OverwriteConst(EvaluateConst(scope));
+                    Children = new[] { Factor };
+                    Operator = TermOperator.None;
+                }
             }
+        }
+
+        public override LiteralElement EvaluateConst(Scope scope)
+        {
+            return Operator == TermOperator.None
+                ? Factor.EvaluateConst(scope)
+                : Prev.EvaluateConst(scope).EvaluateConst(this, Factor.EvaluateConst(scope), Operator, scope);
         }
     }
 }

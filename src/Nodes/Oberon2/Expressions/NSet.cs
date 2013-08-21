@@ -53,7 +53,7 @@ namespace DUO2C.Nodes.Oberon2
     }
 
     [SubstituteToken("Set")]
-    public class NSet : ExpressionElement
+    public class NSet : LiteralElement
     {
         public IEnumerable<NElement> Elements
         {
@@ -79,6 +79,26 @@ namespace DUO2C.Nodes.Oberon2
         public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             return Elements.SelectMany(x => x.FindTypeErrors(scope));
+        }
+
+        public override LiteralElement EvaluateConst(NExpr orig, LiteralElement other, ExprOperator op, Scope scope)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override LiteralElement EvaluateConst(NSimpleExpr orig, LiteralElement other, SimpleExprOperator op, Scope scope)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override LiteralElement EvaluateConst(NTerm orig, LiteralElement other, TermOperator op, Scope scope)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override LiteralElement EvaluateConst(NUnary orig, UnaryOperator op, Scope scope)
+        {
+            throw new NotImplementedException();
         }
     }
 }

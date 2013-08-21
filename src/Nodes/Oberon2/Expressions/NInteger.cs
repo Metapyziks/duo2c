@@ -73,7 +73,7 @@ namespace DUO2C.Nodes.Oberon2
             return EmptyExceptionArray;
         }
 
-        public override LiteralElement EvaluateConst(ParseNode orig, LiteralElement other, ExprOperator op, Scope scope)
+        public override LiteralElement EvaluateConst(NExpr orig, LiteralElement other, ExprOperator op, Scope scope)
         {
             if (other is NNumber) {
                 other = ((NNumber) other).Inner;
@@ -116,7 +116,7 @@ namespace DUO2C.Nodes.Oberon2
             throw new NotImplementedException();
         }
 
-        public override LiteralElement EvaluateConst(ParseNode orig, LiteralElement other, SimpleExprOperator op, Scope scope)
+        public override LiteralElement EvaluateConst(NSimpleExpr orig, LiteralElement other, SimpleExprOperator op, Scope scope)
         {
             if (other is NNumber) {
                 other = ((NNumber) other).Inner;
@@ -136,16 +136,16 @@ namespace DUO2C.Nodes.Oberon2
                 var that = (NReal) other;
                 switch (op) {
                     case SimpleExprOperator.Add:
-                        return new NReal(orig, this.Value + that.Value);
+                        return new NReal(orig, this.Value + that.Value, (RealType) orig.GetFinalType(scope));
                     case SimpleExprOperator.Subtract:
-                        return new NReal(orig, this.Value - that.Value);
+                        return new NReal(orig, this.Value - that.Value, (RealType) orig.GetFinalType(scope));
                 }
             }
 
             throw new NotImplementedException();
         }
 
-        public override LiteralElement EvaluateConst(ParseNode orig, LiteralElement other, TermOperator op, Scope scope)
+        public override LiteralElement EvaluateConst(NTerm orig, LiteralElement other, TermOperator op, Scope scope)
         {
             if (other is NNumber) {
                 other = ((NNumber) other).Inner;
@@ -157,7 +157,7 @@ namespace DUO2C.Nodes.Oberon2
                     case TermOperator.Multiply:
                         return new NInteger(orig, this.Value * that.Value);
                     case TermOperator.Divide:
-                        return new NReal(orig, (double) this.Value / that.Value);
+                        return new NReal(orig, (double) this.Value / that.Value, (RealType) orig.GetFinalType(scope));
                     case TermOperator.IntDivide:
                         return new NInteger(orig, this.Value / that.Value);
                     case TermOperator.Modulo:
@@ -167,16 +167,16 @@ namespace DUO2C.Nodes.Oberon2
                 var that = (NReal) other;
                 switch (op) {
                     case TermOperator.Multiply:
-                        return new NReal(orig, this.Value * that.Value);
+                        return new NReal(orig, this.Value * that.Value, (RealType) orig.GetFinalType(scope));
                     case TermOperator.Divide:
-                        return new NReal(orig, this.Value / that.Value);
+                        return new NReal(orig, this.Value / that.Value, (RealType) orig.GetFinalType(scope));
                 }
             }
 
             throw new NotImplementedException();
         }
 
-        public override LiteralElement EvaluateConst(ParseNode orig, UnaryOperator op, Scope scope)
+        public override LiteralElement EvaluateConst(NUnary orig, UnaryOperator op, Scope scope)
         {
             switch (op) {
                 case UnaryOperator.Identity:

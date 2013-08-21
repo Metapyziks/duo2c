@@ -98,34 +98,53 @@ namespace DUO2C.Nodes.Oberon2
             if (!innerFound && Prev != null) {
                 var left = Prev.GetFinalType(scope);
                 var right = SimpleExpr.GetFinalType(scope);
-                
+
                 if (left == null) {
+                    innerFound = true;
                     yield return new UndeclaredIdentifierException(Prev);
                 }
 
                 if (right == null) {
+                    innerFound = true;
                     yield return new UndeclaredIdentifierException(SimpleExpr);
                 }
 
                 if (left != null && right != null) {
                     if (Operator == ExprOperator.InSet) {
                         if (!left.IsInteger) {
+                            innerFound = true;
                             yield return new OperandTypeException(left, right, _opString, this);
                         }
                         if (!right.IsSet) {
+                            innerFound = true;
                             yield return new OperandTypeException(left, right, _opString, this);
                         }
                     } else if (Operator == ExprOperator.Equals || Operator == ExprOperator.NotEquals) {
                         if (!OberonType.CanTestEquality(left, right)) {
+                            innerFound = true;
                             yield return new OperandTypeException(left, right, _opString, this);
                         }
                     } else {
                         if (!OberonType.CanCompare(left, right)) {
+                            innerFound = true;
                             yield return new OperandTypeException(left, right, _opString, this);
                         }
                     }
                 }
+
+                if (!innerFound && IsConstant(scope)) {
+                    SimpleExpr.Term.Factor.OverwriteConst(EvaluateConst(scope));
+                    Children = new[] { SimpleExpr };
+                    Operator = ExprOperator.None;
+                }
             }
+        }
+
+        public override LiteralElement EvaluateConst(Scope scope)
+        {
+            return Operator == ExprOperator.None
+                ? SimpleExpr.EvaluateConst(scope)
+                : Prev.EvaluateConst(scope).EvaluateConst(this, SimpleExpr.EvaluateConst(scope), Operator, scope);
         }
     }
 }

@@ -39,5 +39,10 @@ namespace DUO2C.Nodes.Oberon2
                 yield return new ConstantExpectedException(Inner);
             }
         }
+
+        public override LiteralElement EvaluateConst(Scope scope)
+        {
+            return Inner.EvaluateConst(scope);
+        }
     }
 }

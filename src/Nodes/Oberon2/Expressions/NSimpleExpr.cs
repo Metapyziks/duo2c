@@ -102,23 +102,40 @@ namespace DUO2C.Nodes.Oberon2
                 var right = Term.GetFinalType(scope);
 
                 if (left == null) {
+                    innerFound = true;
                     yield return new UndeclaredIdentifierException(Prev);
                 }
 
                 if (right == null) {
+                    innerFound = true;
                     yield return new UndeclaredIdentifierException(Term);
                 }
 
                 if (left != null && right != null) {
                     if (Operator == SimpleExprOperator.Or) {
                         if ((!left.IsBool || !right.IsBool) && (!left.IsInteger && !right.IsInteger)) {
+                            innerFound = true;
                             yield return new OperandTypeException(left, right, _opString, this);
                         }
                     } else if ((!left.IsSet || !right.IsSet) && (!left.IsNumeric || !right.IsNumeric)) {
+                        innerFound = true;
                         yield return new OperandTypeException(left, right, _opString, this);
                     }
                 }
+
+                if (!innerFound && IsConstant(scope)) {
+                    Term.Factor.OverwriteConst(EvaluateConst(scope));
+                    Children = new[] { Term };
+                    Operator = SimpleExprOperator.None;
+                }
             }
+        }
+
+        public override LiteralElement EvaluateConst(Scope scope)
+        {
+            return Operator == SimpleExprOperator.None
+                ? Term.EvaluateConst(scope)
+                : Prev.EvaluateConst(scope).EvaluateConst(this, Term.EvaluateConst(scope), Operator, scope);
         }
     }
 }

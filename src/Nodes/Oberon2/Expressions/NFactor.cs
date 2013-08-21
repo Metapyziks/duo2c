@@ -45,9 +45,28 @@ namespace DUO2C.Nodes.Oberon2
             }
         }
 
+        public void OverwriteConst(LiteralElement value)
+        {
+            Children = new ParseNode[] { value };
+        }
+
         public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
-            return Inner.FindTypeErrors(scope);
+            bool innerFound = false;
+
+            foreach (var e in Inner.FindTypeErrors(scope)) {
+                innerFound = true;
+                yield return e;
+            }
+
+            if (!innerFound && IsConstant(scope)) {
+                OverwriteConst(EvaluateConst(scope));
+            }
+        }
+
+        public override LiteralElement EvaluateConst(Scope scope)
+        {
+            return Inner.EvaluateConst(scope);
         }
     }
 }
