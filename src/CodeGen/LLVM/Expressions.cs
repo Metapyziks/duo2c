@@ -384,6 +384,12 @@ namespace DUO2C.CodeGen.LLVM
                     var vals = vector.Expressions.Select(x => ctx.PrepareOperand(x, vtype.ElementType, new TempIdent()));
                     dest = new VectorLiteral(vtype.ElementType, vals);
                     return ctx;
+                } else if (type.IsVector) {
+                    var vtype = (VectorType) type;
+                    Value val = new TempIdent();
+                    ctx.Factor(node, ref val, vtype.ElementType);
+                    dest = new VectorLiteral(vtype.ElementType, Enumerable.Range(0, vtype.Length).Select(x => val));
+                    return ctx;
                 } else if (node.Inner is NNumber) {
                     dest = new Literal((NNumber) node.Inner);
                     return ctx;
