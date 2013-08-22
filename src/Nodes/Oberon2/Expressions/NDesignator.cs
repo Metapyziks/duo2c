@@ -72,7 +72,11 @@ namespace DUO2C.Nodes.Oberon2
                         return decl.Type.Resolve(scope);
                     }
                 } else if (Operation is NIndexer) {
-                    return type.As<ArrayType>().ElementType.Resolve(scope);
+                    if (type.IsArray) {
+                        return type.As<ArrayType>().ElementType.Resolve(scope);
+                    } else {
+                        return type.As<VectorType>().ElementType.Resolve(scope);
+                    }
                 } else if (Operation is NPtrResolve) {
                     return type.As<PointerType>().ResolvedType.Resolve(scope);
                 } else if (Operation is NTypeTest) {
@@ -193,7 +197,7 @@ namespace DUO2C.Nodes.Oberon2
                         }
                     } else if (Operation is NIndexer) {
                         var op = (NIndexer) Operation;
-                        if (!type.IsArray) {
+                        if (!type.IsArray && !type.IsVector) {
                             yield return new ArrayExpectedException(type, this);
                         }
                     } else if (Operation is NPtrResolve) {

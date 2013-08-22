@@ -443,16 +443,16 @@ namespace DUO2C.CodeGen.LLVM
             public bool InBounds { get; private set; }
             public OberonType StructureType { get; private set; }
             public Value Structure { get; private set; }
-            public int[] Indices { get; private set; }
+            public Value[] Indices { get; private set; }
 
-            public ElementPointer(bool inBraces, OberonType structType, Value structure, params int[] indices)
+            public ElementPointer(bool inBraces, OberonType structType, Value structure, params Object[] indices)
             {
                 InBraces = inBraces;
 
                 InBounds = true;
                 StructureType = structType;
                 Structure = structure;
-                Indices = indices;
+                Indices = indices.Select(x => x is Value ? (Value) x : new Literal(x.ToString())).ToArray();
             }
 
             public ElementPointer(bool inBraces, ElementPointer clone)
@@ -472,7 +472,7 @@ namespace DUO2C.CodeGen.LLVM
                 if (InBraces) ctx.Write("(");
                 ctx.Argument(StructureType, Structure);
                 foreach (var ind in Indices) {
-                    ctx.Argument(IntegerType.Integer, new Literal(ind.ToString()));
+                    ctx.Argument(IntegerType.Integer, ind);
                 }
                 if (InBraces) ctx.Write("\t)");
                 return ctx;

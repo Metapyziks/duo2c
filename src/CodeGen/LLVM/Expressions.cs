@@ -210,9 +210,20 @@ namespace DUO2C.CodeGen.LLVM
                 var recPtr = ctx.GetDesignation(record);
                 var type = record.GetFinalType(_scope);
                 var recType = type.As<RecordType>();
-                var temp = new TempIdent();
                 return new ElementPointer(false, new PointerType(type), recPtr,
                     0, 1 + recType.GetFieldIndex(ident));
+            } else if (node.Operation is NIndexer) {
+                var indices = ((NIndexer) node.Operation).Expressions;
+                var element = (NDesignator) node.Element;
+                var elemPtr = ctx.GetDesignation(element);
+                var elemType = (IndexableType) element.GetFinalType(_scope);
+
+                if (elemType.IsArray) throw new NotImplementedException();
+
+                var indexExpr = indices.First();
+                var index = ctx.PrepareOperand(indexExpr, IntegerType.Integer, new TempIdent());
+
+                return new ElementPointer(false, new PointerType(elemType), elemPtr, 0, index);
             } else {
                 throw new NotImplementedException();
             }

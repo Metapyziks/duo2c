@@ -593,21 +593,27 @@ namespace DUO2C.Semantics
         }
     }
 
-    public class ArrayType : OberonType
+    public abstract class IndexableType : OberonType
     {
         public OberonType ElementType { get; private set; }
         public int Length { get; private set; }
 
+        public IndexableType(OberonType elementType, int length = -1)
+        {
+            ElementType = elementType;
+            Length = length;
+        }
+    }
+
+    public class ArrayType : IndexableType
+    {
         public override bool IsArray
         {
             get { return true; }
         }
 
         public ArrayType(OberonType elementType, int length = -1)
-        {
-            ElementType = elementType;
-            Length = length;
-        }
+            : base(elementType, length) { }
 
         public override string ToString()
         {
@@ -630,18 +636,15 @@ namespace DUO2C.Semantics
         }
     }
 
-    public class VectorType : OberonType
+    public class VectorType : IndexableType
     {
-        public OberonType ElementType { get; private set; }
-        public int Length { get; private set; }
-
-        public override bool IsVector { get { return true; } }
+        public override bool IsVector
+        {
+            get { return true; }
+        }
 
         public VectorType(OberonType elementType, int length)
-        {
-            ElementType = elementType;
-            Length = length;
-        }
+            : base(elementType, length) { }
 
         public override string ToString()
         {
