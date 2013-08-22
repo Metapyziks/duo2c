@@ -184,6 +184,30 @@ namespace DUO2C.CodeGen.LLVM
             }
         }
 
+        public class VectorLiteral : Literal, IComplexWrite
+        {
+            public OberonType ElementType { get; private set; }
+            public IEnumerable<Value> Elements { get; private set; }
+
+            public VectorLiteral(OberonType elementType, IEnumerable<Value> vals)
+                : base("<...>")
+            {
+                ElementType = elementType;
+                Elements = vals;
+            }
+            
+            public GenerationContext Write(GenerationContext ctx)
+            {
+                ctx.Write("<").EndArguments();
+
+                foreach (var elem in Elements) {
+                    ctx.Argument(ElementType, elem);    
+                }
+
+                return ctx.Write(">").EndArguments();
+            }
+        }
+
         public class QualIdent : Value
         {
             NQualIdent _ident;

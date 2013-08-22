@@ -55,7 +55,19 @@ namespace DUO2C.Nodes.Oberon2
 
         public override OberonType GetFinalType(Scope scope)
         {
-            return Prev == null ? SimpleExpr.GetFinalType(scope) : BooleanType.Default;
+            if (Prev == null) return SimpleExpr.GetFinalType(scope);
+
+            var left = Prev.GetFinalType(scope);
+            var right = SimpleExpr.GetFinalType(scope);
+
+            bool isVector = left.IsVector || right.IsVector;
+            int vecLength = isVector ? left.IsVector ? ((VectorType) left).Length : ((VectorType) right).Length : 0;
+
+            if (isVector) {
+                return new VectorType(BooleanType.Default, vecLength);
+            } else {
+                return BooleanType.Default;
+            }
         }
 
         public override bool IsConstant(Scope scope)
@@ -102,11 +114,15 @@ namespace DUO2C.Nodes.Oberon2
                 if (left == null) {
                     innerFound = true;
                     yield return new UndeclaredIdentifierException(Prev);
+                } else if (left.IsVector) {
+                    left = ((VectorType) left).ElementType;
                 }
 
                 if (right == null) {
                     innerFound = true;
                     yield return new UndeclaredIdentifierException(SimpleExpr);
+                } else if (right.IsVector) {
+                    right = ((VectorType) right).ElementType;
                 }
 
                 if (left != null && right != null) {

@@ -378,6 +378,12 @@ namespace DUO2C.CodeGen.LLVM
                 if (node.Inner is NNil) {
                     dest = Literal.GetDefault(PointerType.Null);
                     return ctx;
+                } else if (node.Inner is NVector) {
+                    var vector = (NVector) node.Inner;
+                    var vtype = (VectorType) type;
+                    var vals = vector.Expressions.Select(x => ctx.PrepareOperand(x, vtype.ElementType, new TempIdent()));
+                    dest = new VectorLiteral(vtype.ElementType, vals);
+                    return ctx;
                 } else if (node.Inner is NNumber) {
                     dest = new Literal((NNumber) node.Inner);
                     return ctx;
@@ -406,7 +412,10 @@ namespace DUO2C.CodeGen.LLVM
             var temp = new TempIdent();
             var val = (Value) temp;
             var ntype = node.GetFinalType(_scope);
-            if (!type.CanTestEquality(ntype) && (type.Equals(new PointerType(ntype)) || (type.IsPointer
+
+            if (type.IsVector) {
+                ntype = type;
+            } else if (!type.CanTestEquality(ntype) && (type.Equals(new PointerType(ntype)) || (type.IsPointer
                 && ntype.IsArray && type.As<PointerType>().ResolvedType.Equals(ntype.As<ArrayType>().ElementType)))
                 || (type.IsChar && ntype.IsArray && node.IsConstant(_scope))) {
                 ntype = type;

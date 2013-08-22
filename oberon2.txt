@@ -46,7 +46,7 @@ ConstExpr     = Expr.
 Expr          = SimpleExpr [Relation SimpleExpr].
 SimpleExpr    = Term {AddOp Term}.
 Term          = Factor {MulOp Factor}.
-Factor        = Designator | number | character | string | Bool | Nil | Set
+Factor        = Designator | number | Vector | character | string | Bool | Nil | Set
               | "(" Expr ")" | Unary.
 Nil           = NIL.
 Unary         = ("+" | "-" | "~") Factor.
@@ -67,6 +67,7 @@ IdentList     = IdentDef {"," IdentDef}.
 QualIdent     = [ident "."] ident.
 IdentDef      = ident ["*" | "-"].
 character     = digit {hexDigit} "X".
+Vector        = "<" ExprList ">".
 number        = integer | real.
 integer       = ["-"] digit {digit} | digit {hexDigit} "H".
 real          = ["-"] digit {digit} "." {digit} [scaleFactor].

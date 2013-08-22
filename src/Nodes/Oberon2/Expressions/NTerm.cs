@@ -54,16 +54,29 @@ namespace DUO2C.Nodes.Oberon2
             if (Prev == null) {
                 return Factor.GetFinalType(scope);
             } else {
+                var left = Prev.GetFinalType(scope);
+                var right = Factor.GetFinalType(scope);
+
+                bool isVector = left.IsVector || right.IsVector;
+                int vecLength = isVector ? left.IsVector ? ((VectorType) left).Length : ((VectorType) right).Length : 0;
+
+                if (left.IsVector) left = ((VectorType) left).ElementType;
+                if (right.IsVector) right = ((VectorType) right).ElementType;
+
+                OberonType type;
+
                 if (Operator == TermOperator.And) {
-                    return BooleanType.Default;
-                } else if (Factor.GetFinalType(scope).IsSet) {
-                    return SetType.Default;
+                    type = BooleanType.Default;
+                } else if (right.IsSet) {
+                    type = SetType.Default;
                 } else if (Operator == TermOperator.Divide) {
-                    return NumericType.Largest(RealType.Real,
-                        NumericType.Largest(Factor.GetFinalType(scope).As<NumericType>(), Prev.GetFinalType(scope).As<NumericType>()));
+                    type = NumericType.Largest(RealType.Real,
+                        NumericType.Largest(left.As<NumericType>(), right.As<NumericType>()));
                 } else {
-                    return NumericType.Largest(Factor.GetFinalType(scope).As<NumericType>(), Prev.GetFinalType(scope).As<NumericType>());
+                    type = NumericType.Largest(left.As<NumericType>(), right.As<NumericType>());
                 }
+
+                return isVector ? (OberonType) new VectorType(type, vecLength) : type;
             }
         }
 
@@ -111,11 +124,15 @@ namespace DUO2C.Nodes.Oberon2
                 if (left == null) {
                     innerFound = true;
                     yield return new UndeclaredIdentifierException(Prev);
+                } else if (left.IsVector) {
+                    left = ((VectorType) left).ElementType;
                 }
 
                 if (right == null) {
                     innerFound = true;
                     yield return new UndeclaredIdentifierException(Factor);
+                } else if (right.IsVector) {
+                    right = ((VectorType) right).ElementType;
                 }
 
                 if (left != null && right != null) {

@@ -50,13 +50,26 @@ namespace DUO2C.Nodes.Oberon2
             if (Prev == null) {
                 return Term.GetFinalType(scope);
             } else {
+                var left = Prev.GetFinalType(scope);
+                var right = Term.GetFinalType(scope);
+
+                bool isVector = left.IsVector || right.IsVector;
+                int vecLength = isVector ? left.IsVector ? ((VectorType) left).Length : ((VectorType) right).Length : 0;
+
+                if (left.IsVector) left = ((VectorType) left).ElementType;
+                if (right.IsVector) right = ((VectorType) right).ElementType;
+
+                OberonType type;
+
                 if (Operator == SimpleExprOperator.Or && Term.GetFinalType(scope).IsBool) {
-                    return BooleanType.Default;
+                    type = BooleanType.Default;
                 } else if (Term.GetFinalType(scope).IsSet) {
-                    return SetType.Default;
+                    type = SetType.Default;
                 } else {
-                    return NumericType.Largest(Term.GetFinalType(scope).As<NumericType>(), Prev.GetFinalType(scope).As<NumericType>());
+                    type = NumericType.Largest(left.As<NumericType>(), right.As<NumericType>());
                 }
+                
+                return isVector ? (OberonType) new VectorType(type, vecLength) : type;
             }
         }
 
@@ -104,11 +117,15 @@ namespace DUO2C.Nodes.Oberon2
                 if (left == null) {
                     innerFound = true;
                     yield return new UndeclaredIdentifierException(Prev);
+                } else if (left.IsVector) {
+                    left = ((VectorType) left).ElementType;
                 }
 
                 if (right == null) {
                     innerFound = true;
                     yield return new UndeclaredIdentifierException(Term);
+                } else if (right.IsVector) {
+                    right = ((VectorType) right).ElementType;
                 }
 
                 if (left != null && right != null) {
