@@ -54,10 +54,10 @@ namespace DUO2C.Nodes.Oberon2
                 var right = Term.GetFinalType(scope);
 
                 bool isVector = left.IsVector || right.IsVector;
-                int vecLength = isVector ? left.IsVector ? ((VectorType) left).Length : ((VectorType) right).Length : 0;
+                int vecLength = isVector ? left.IsVector ? left.As<VectorType>().Length : right.As<VectorType>().Length : 0;
 
-                if (left.IsVector) left = ((VectorType) left).ElementType;
-                if (right.IsVector) right = ((VectorType) right).ElementType;
+                if (left.IsVector) left = left.As<VectorType>().ElementType;
+                if (right.IsVector) right = right.As<VectorType>().ElementType;
 
                 OberonType type;
 
@@ -118,14 +118,14 @@ namespace DUO2C.Nodes.Oberon2
                     innerFound = true;
                     yield return new UndeclaredIdentifierException(Prev);
                 } else if (left.IsVector) {
-                    left = ((VectorType) left).ElementType;
+                    left = left.As<VectorType>().ElementType;
                 }
 
                 if (right == null) {
                     innerFound = true;
                     yield return new UndeclaredIdentifierException(Term);
                 } else if (right.IsVector) {
-                    right = ((VectorType) right).ElementType;
+                    right = right.As<VectorType>().ElementType;
                 }
 
                 if (left != null && right != null) {

@@ -216,7 +216,7 @@ namespace DUO2C.CodeGen.LLVM
                 var indices = ((NIndexer) node.Operation).Expressions;
                 var element = (NDesignator) node.Element;
                 var elemPtr = ctx.GetDesignation(element);
-                var elemType = (IndexableType) element.GetFinalType(_scope);
+                var elemType = element.GetFinalType(_scope).As<IndexableType>();
 
                 if (elemType.IsArray) throw new NotImplementedException();
 
@@ -391,12 +391,12 @@ namespace DUO2C.CodeGen.LLVM
                     return ctx;
                 } else if (node.Inner is NVector) {
                     var vector = (NVector) node.Inner;
-                    var vtype = (VectorType) type;
+                    var vtype = type.As<VectorType>();
                     var vals = vector.Expressions.Select(x => ctx.PrepareOperand(x, vtype.ElementType, new TempIdent()));
                     dest = new VectorLiteral(vtype.ElementType, vals);
                     return ctx;
                 } else if (type.IsVector) {
-                    var vtype = (VectorType) type;
+                    var vtype = type.As<VectorType>();
                     Value val = new TempIdent();
                     ctx.Factor(node, ref val, vtype.ElementType);
                     dest = new VectorLiteral(vtype.ElementType, Enumerable.Range(0, vtype.Length).Select(x => val));

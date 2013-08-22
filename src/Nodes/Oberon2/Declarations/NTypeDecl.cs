@@ -25,7 +25,9 @@ namespace DUO2C.Nodes.Oberon2
 
         public override void FindDeclarations(Scope scope)
         {
-            scope.DeclareType(Identifier, Type.Type, Visibility);
+            if (Type.FindTypeErrors(scope).Count() == 0) {
+                scope.DeclareType(Identifier, Type.Type, Visibility);
+            }
         }
 
         public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
