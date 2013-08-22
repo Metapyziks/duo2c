@@ -79,6 +79,52 @@ namespace DUO2C.Nodes.Oberon2
         }
     }
 
+    [SubstituteToken("VectorType")]
+    public class NVectorType : TypeDefinition
+    {
+        [Serialize("length")]
+        public int VectorLength { get; private set; }
+
+        public NConstExpr LengthExpr
+        {
+            get { return Children.First() as NConstExpr; }
+        }
+
+        public NOberonType ElementDefinition
+        {
+            get { return (NOberonType) Children.Last(); }
+        }
+
+        public override OberonType Type
+        {
+            get { return new VectorType(ElementDefinition.Type, VectorLength); }
+        }
+
+        public NVectorType(ParseNode original)
+            : base(original, false)
+        {
+            Children = Children.Where(x => x is NConstExpr || x is NOberonType);
+        }
+
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
+        {
+            bool found = false;
+            foreach (var e in base.FindTypeErrors(scope)) {
+                found = true;
+                yield return e;
+            }
+
+            if (!found) {
+                var num = LengthExpr.EvaluateConst(scope) as NNumber;
+                if (num == null || !(num.Inner is NInteger) || ((IntegerType) num.GetFinalType(scope)).Range >= IntegerRange.Integer) {
+                    yield return new TypeMismatchException(IntegerType.Integer, LengthExpr.GetFinalType(scope), LengthExpr);
+                } else {
+                    VectorLength = (int) ((NInteger) num.Inner).Value;
+                }
+            }
+        }
+    }
+
     [SubstituteToken("OberonType")]
     public class NOberonType : TypeDefinition
     {

@@ -25,6 +25,7 @@ namespace DUO2C.Semantics
         public virtual bool IsPointer { get { return false; } }
         public virtual bool IsRecord { get { return false; } }
         public virtual bool IsArray { get { return false; } }
+        public virtual bool IsVector { get { return false; } }
         public virtual bool IsProcedure { get { return false; } }
 
         public virtual bool IsBool { get { return false; } }
@@ -140,6 +141,11 @@ namespace DUO2C.Semantics
         public override bool IsArray
         {
             get { return ReferencedType != null && ReferencedType.IsArray; }
+        }
+
+        public override bool IsVector
+        {
+            get { return ReferencedType != null && ReferencedType.IsVector; }
         }
 
         public override bool IsProcedure
@@ -621,6 +627,40 @@ namespace DUO2C.Semantics
             }
 
             return false;
+        }
+    }
+
+    public class VectorType : OberonType
+    {
+        public OberonType ElementType { get; private set; }
+        public int Length { get; private set; }
+
+        public override bool IsVector { get { return true; } }
+
+        public VectorType(OberonType elementType, int length)
+        {
+            ElementType = elementType;
+            Length = length;
+        }
+
+        public override string ToString()
+        {
+            return String.Format("VECTOR {0} OF {1}", Length, ElementType);
+        }
+
+        public override bool CanTestEquality(OberonType other)
+        {
+            return CanCompare(other);
+        }
+
+        public override bool CanCompare(OberonType other)
+        {
+            if (other.IsVector) {
+                var vec = other.As<VectorType>();
+                return ElementType.CanCompare(vec.ElementType) && Length == vec.Length;
+            }
+
+            return ElementType.CanCompare(other);
         }
     }
 

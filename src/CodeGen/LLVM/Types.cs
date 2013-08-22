@@ -138,6 +138,11 @@ namespace DUO2C.CodeGen.LLVM
             return ctx.Structure(IntegerType.Integer, new PointerType(type.ElementType));
         }
 
+        static GenerationContext Type(this GenerationContext ctx, VectorType type)
+        {
+            return ctx.Write("<{0} \tx \t", type.Length).Type(type.ElementType).Write("\t>");
+        }
+
         static GenerationContext Type(this GenerationContext ctx, IntegerType type)
         {
             return ctx.Write("i{0}", (int) type.Range * 8);

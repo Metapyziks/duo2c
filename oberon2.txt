@@ -13,11 +13,13 @@ ForwardDecl   = PROCEDURE "^" [Receiver] IdentDef [FormalPars].
 FormalPars    = ["(" [FPSection {";" FPSection}] ")"] [":" Type].
 FPSection     = [VAR] ident {"," ident} ":" Type.
 Receiver      = "(" [VAR] ident ":" ident ")".
-Type          = OberonType | NamedType | ArrayType | RecordType | PtrType | ProcType.
+Type          = OberonType | NamedType | ArrayType | VectorType | RecordType
+              | PtrType | ProcType.
 OberonType    = "LONGINT" | "INTEGER" | "SHORTINT" | "BYTE" | "LONGREAL" | "REAL" 
               | "BOOLEAN" | "SET" | "CHAR".
 NamedType     = QualIdent.
 ArrayType     = ARRAY [ConstExpr {"," ConstExpr}] OF Type.
+VectorType    = VECTOR ConstExpr OF OberonType.
 RecordType    = RECORD ["("NamedType")"] [FieldList] {";" [FieldList]} END.
 PtrType       = POINTER TO Type.
 ProcType      = PROCEDURE [FormalPars].
