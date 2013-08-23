@@ -653,14 +653,19 @@ namespace DUO2C.Semantics
 
         public override bool CanTestEquality(OberonType other)
         {
-            return CanCompare(other);
+            if (other.IsVector) {
+                var vec = other.As<VectorType>();
+                return Length == vec.Length && ElementType.CanTestEquality(vec.ElementType);
+            }
+
+            return ElementType.CanTestEquality(other);
         }
 
         public override bool CanCompare(OberonType other)
         {
             if (other.IsVector) {
                 var vec = other.As<VectorType>();
-                return ElementType.CanCompare(vec.ElementType) && Length == vec.Length;
+                return Length == vec.Length && ElementType.CanCompare(vec.ElementType);
             }
 
             return ElementType.CanCompare(other);

@@ -136,7 +136,7 @@ namespace DUO2C.CodeGen.LLVM
             if (_returnType is VoidType) {
                 return ctx.Keyword("ret").Argument(_returnType).EndOperation();
             } else {
-                var val = ctx.PrepareOperand(node.Expression, _returnType, new TempIdent());
+                var val = ctx.PrepareOperand(node.Expression, _returnType);
                 return ctx.Keyword("ret").Argument(_returnType, val);
             }
         }
@@ -145,7 +145,21 @@ namespace DUO2C.CodeGen.LLVM
         {
             var dest = ctx.GetDesignation(node.Assignee);
             var type = node.Assignee.GetFinalType(_scope);
-            return ctx.Assign(dest, type, node.Expression);
+
+            if (dest is VectorElement) {
+                var vecElem = (VectorElement) dest;
+                var vecDesig = (NDesignator) node.Assignee.Element;
+                var vec = ctx.GetDesignation(vecDesig);
+                var vecType = vecDesig.GetFinalType(_scope).As<VectorType>();
+                var orig = vecElem.Vector;
+                var value = ctx.PrepareOperand(node.Expression, vecType.ElementType);
+                var temp = new InsertElement(false, vecType, orig, value, vecElem.Index);
+                value = new TempIdent();
+                ctx.Assign(value).Argument(temp).EndOperation();
+                return ctx.Assign(vec, vecType, value);
+            } else {
+                return ctx.Assign(dest, type, node.Expression);
+            }
         }
 
         static GenerationContext Node(this GenerationContext ctx, NIfThenElse node)
@@ -270,7 +284,7 @@ namespace DUO2C.CodeGen.LLVM
             if (elem != null && elem.String == "NEW") {
                 var invoc = (NInvocation) node.Invocation.Operation;
                 var ptrType = invoc.Args.Expressions.First().GetFinalType(_scope).As<PointerType>();
-                var ptr = ctx.PrepareOperand(invoc.Args.Expressions.First(), new PointerType(ptrType), new TempIdent());
+                var ptr = ctx.PrepareOperand(invoc.Args.Expressions.First(), new PointerType(ptrType));
                 var type = ptrType.ResolvedType;
                 
                 Value temp = new TempIdent();
@@ -296,7 +310,7 @@ namespace DUO2C.CodeGen.LLVM
                 switch (elem.Identifier) {
                     case "Boolean":
                         var temp = new TempIdent();
-                        src = ctx.PrepareOperand(arg, type, null);
+                        src = ctx.PrepareOperand(arg, type);
                         ctx.Select(temp, src, new PointerType(CharType.Default),
                             new ElementPointer(true, GetStringType("TRUE"), GetStringIdent("TRUE"), 0, 0),
                             new ElementPointer(true, GetStringType("FALSE"), GetStringIdent("FALSE"), 0, 0));
@@ -306,14 +320,14 @@ namespace DUO2C.CodeGen.LLVM
                     case "ShortInt":
                     case "Integer":
                     case "LongInt":
-                        src = ctx.PrepareOperand(arg, type, null);
+                        src = ctx.PrepareOperand(arg, type);
                         return ctx.Call(new TempIdent(), _printfProcType, _printfProc,
                             new PointerType(CharType.Default),
                             new ElementPointer(true, GetStringType("%i"), GetStringIdent("%i"), 0, 0),
                             IntegerType.LongInt, src);
                     case "Real":
                     case "LongReal":
-                        src = ctx.PrepareOperand(arg, type, null);
+                        src = ctx.PrepareOperand(arg, type);
                         return ctx.Call(new TempIdent(), _printfProcType, _printfProc,
                             new PointerType(CharType.Default),
                             new ElementPointer(true, GetStringType("%g"), GetStringIdent("%g"), 0, 0),
@@ -322,7 +336,7 @@ namespace DUO2C.CodeGen.LLVM
                         type = type.As<ArrayType>();
                         var ptr = new TempIdent();
                         if (arg.IsConstant(_scope)) {
-                            src = ctx.PrepareOperand(arg, type, null);
+                            src = ctx.PrepareOperand(arg, type);
                             if (src is StringLiteral) {
                                 var lit = (StringLiteral) src;
                                 ctx.Assign(ptr);
@@ -333,7 +347,7 @@ namespace DUO2C.CodeGen.LLVM
                                 throw new InvalidOperationException();
                             }
                         } else {
-                            src = ctx.PrepareOperand(arg, new PointerType(type), null);
+                            src = ctx.PrepareOperand(arg, new PointerType(type));
                             ctx.Assign(ptr);
                             ctx.Argument(new ElementPointer(false, new PointerType(type), src, 0, 1));
                             ctx.EndOperation();

@@ -170,9 +170,9 @@ namespace DUO2C.CodeGen.LLVM
                 }
 
                 if (receiverValue == null) {
-                    argValus[i] = ctx.PrepareOperand(argExprs[i], argTypes[i], new TempIdent());
+                    argValus[i] = ctx.PrepareOperand(argExprs[i], argTypes[i]);
                 } else if (i > 0) {
-                    argValus[i] = ctx.PrepareOperand(argExprs[i - 1], argTypes[i], new TempIdent());
+                    argValus[i] = ctx.PrepareOperand(argExprs[i - 1], argTypes[i]);
                 }
             }
             
@@ -225,7 +225,7 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Assign(this GenerationContext ctx, Value dest, OberonType type, NExpr expression)
         {
-            return ctx.Assign(dest, type, ctx.PrepareOperand(expression, type, new TempIdent()));
+            return ctx.Assign(dest, type, ctx.PrepareOperand(expression, type));
         }
 
         static GenerationContext Assign(this GenerationContext ctx, Value dest, OberonType type, Value src)

@@ -465,7 +465,7 @@ namespace DUO2C.CodeGen.LLVM
                 Indices = clone.Indices;
             }
 
-            public GenerationContext Write(GenerationContext ctx)
+            public virtual GenerationContext Write(GenerationContext ctx)
             {
                 ctx.Keyword("getelementptr");
                 if (InBounds) ctx.Keyword("inbounds");
@@ -474,6 +474,56 @@ namespace DUO2C.CodeGen.LLVM
                 foreach (var ind in Indices) {
                     ctx.Argument(IntegerType.Integer, ind);
                 }
+                if (InBraces) ctx.Write("\t)");
+                return ctx;
+            }
+        }
+
+        public abstract class VectorElement : ElementPointer
+        {
+            public Value Index { get { return Indices.First(); } }
+
+            public Value Vector { get { return Structure; } }
+
+            public VectorType VectorType { get { return (VectorType) StructureType; } }
+
+            public VectorElement(bool inBraces, VectorType vectorType, Value structure, Object index)
+                : base(inBraces, vectorType, structure, index) { }
+        }
+
+        public class ExtractElement : VectorElement
+        {
+            public ExtractElement(bool inBraces, VectorType vectorType, Value structure, Object index)
+                : base(inBraces, vectorType, structure, index) { }
+
+            public override GenerationContext Write(GenerationContext ctx)
+            {
+                ctx.Keyword("extractelement");
+                if (InBraces) ctx.Write("(");
+                ctx.Argument(StructureType, Structure);
+                ctx.Argument(IntegerType.Integer, Index);
+                if (InBraces) ctx.Write("\t)");
+                return ctx;
+            }
+        }
+
+        public class InsertElement : VectorElement
+        {
+            public Value Value { get; private set; }
+
+            public InsertElement(bool inBraces, VectorType vectorType, Value structure, Value value, Object index)
+                : base(inBraces, vectorType, structure, index)
+            {
+                Value = value;
+            }
+
+            public override GenerationContext Write(GenerationContext ctx)
+            {
+                ctx.Keyword("insertelement");
+                if (InBraces) ctx.Write("(");
+                ctx.Argument(StructureType, Structure);
+                ctx.Argument(VectorType.ElementType, Value);
+                ctx.Argument(IntegerType.Integer, Index);
                 if (InBraces) ctx.Write("\t)");
                 return ctx;
             }

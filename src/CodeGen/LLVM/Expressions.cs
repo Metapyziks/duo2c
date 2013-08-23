@@ -218,12 +218,15 @@ namespace DUO2C.CodeGen.LLVM
                 var elemPtr = ctx.GetDesignation(element);
                 var elemType = element.GetFinalType(_scope).As<IndexableType>();
 
-                if (elemType.IsArray) throw new NotImplementedException();
+                if (!elemType.IsVector) throw new NotImplementedException();
 
                 var indexExpr = indices.First();
-                var index = ctx.PrepareOperand(indexExpr, IntegerType.Integer, new TempIdent());
+                var index = ctx.PrepareOperand(indexExpr, IntegerType.Integer);
 
-                return new ElementPointer(false, new PointerType(elemType), elemPtr, 0, index);
+                Value vector = new TempIdent();
+                ctx.ResolveValue(elemPtr, ref vector, elemType, element.IsConstant(_scope));
+
+                return new ExtractElement(false, (VectorType) elemType, vector, index);
             } else {
                 throw new NotImplementedException();
             }
@@ -306,56 +309,66 @@ namespace DUO2C.CodeGen.LLVM
                     val = new TempIdent();
                     ctx.Assign(val).Argument(ptr).EndOperation();
                 }
-                return ctx.Load(dest, type, val);
+
+                if (ptr is VectorElement) {
+                    dest = val;
+                } else {
+                    return ctx.Load(dest, type, val);
+                }
             }
 
             dest = val;
             return ctx;
         }
 
+        static GenerationContext Designator(this GenerationContext ctx, NDesignator node, ref Value dest, OberonType type)
+        {
+            var desig = (NDesignator) node;
+
+            if (desig.IsRoot) {
+                var ident = (NQualIdent) desig.Element;
+                var decl = _scope.GetSymbolDecl(ident.Identifier, ident.Module);
+                if (decl.IsConstant) {
+                    var expr = _scope.GetConst(ident.Identifier, ident.Module);
+                    return ctx.Expr(expr, ref dest, type);
+                }
+            }
+
+            var val = ctx.GetDesignation(desig);
+            var ntype = node.GetFinalType(_scope);
+            if (type.IsPointer && val is QualIdent && ntype.IsArray && !type.CanTestEquality(ntype)
+                && type.As<PointerType>().ResolvedType.Equals(ntype.As<ArrayType>().ElementType)) {
+
+                var temp = new TempIdent();
+                ctx.Assign(temp);
+                ctx.Argument(new ElementPointer(false, new PointerType(ntype), val, 0, 1));
+                ctx.EndOperation();
+                return ctx.Load(dest, new PointerType(CharType.Default), temp);
+            }
+            if (type.IsPointer && (val is QualIdent || val is ElementPointer) && !type.CanTestEquality(ntype)
+                && type.CanTestEquality(new PointerType(ntype))) {
+
+                if (val is ElementPointer && !node.IsConstant(_scope)) {
+                    dest = new TempIdent();
+                    ctx.Assign(dest).Argument(val).EndOperation();
+                } else {
+                    dest = val;
+                }
+
+                return ctx;
+            }
+            return ctx.ResolveValue(val, ref dest, type, node.IsConstant(_scope));
+        }
+
         static GenerationContext Factor(this GenerationContext ctx, NFactor node, ref Value dest, OberonType type)
         {
             if (node.Inner is NDesignator) {
-                var desig = (NDesignator) node.Inner;
-
-                if (desig.IsRoot) {
-                    var ident = (NQualIdent) desig.Element;
-                    var decl = _scope.GetSymbolDecl(ident.Identifier, ident.Module);
-                    if (decl.IsConstant) {
-                        var expr = _scope.GetConst(ident.Identifier, ident.Module);
-                        return ctx.Expr(expr, ref dest, type);
-                    }
-                }
-
-                var val = ctx.GetDesignation(desig);
-                var ntype = node.Inner.GetFinalType(_scope);
-                if (type.IsPointer && val is QualIdent && ntype.IsArray && !type.CanTestEquality(ntype)
-                    && type.As<PointerType>().ResolvedType.Equals(ntype.As<ArrayType>().ElementType)) {
-
-                    var temp = new TempIdent();
-                    ctx.Assign(temp);
-                    ctx.Argument(new ElementPointer(false, new PointerType(ntype), val, 0, 1));
-                    ctx.EndOperation();
-                    return ctx.Load(dest, new PointerType(CharType.Default), temp);
-                }
-                if (type.IsPointer && (val is QualIdent || val is ElementPointer) && !type.CanTestEquality(ntype)
-                    && type.CanTestEquality(new PointerType(ntype))) {
-
-                    if (val is ElementPointer && !node.IsConstant(_scope)) {
-                        dest = new TempIdent();
-                        ctx.Assign(dest).Argument(val).EndOperation();
-                    } else {
-                        dest = val;
-                    }
-
-                    return ctx;
-                }
-                return ctx.ResolveValue(val, ref dest, type, node.IsConstant(_scope));
+                return ctx.Designator((NDesignator) node.Inner, ref dest, type);
             }
 
             if (node.Inner is NUnary) {
                 var unary = (NUnary) node.Inner;
-                Value val = ctx.PrepareOperand(unary.Factor, type, new TempIdent());
+                Value val = ctx.PrepareOperand(unary.Factor, type);
                 Value zero = new Literal(0.ToString());
                 switch (unary.Operator) {
                     case UnaryOperator.Identity:
@@ -392,7 +405,7 @@ namespace DUO2C.CodeGen.LLVM
                 } else if (node.Inner is NVector) {
                     var vector = (NVector) node.Inner;
                     var vtype = type.As<VectorType>();
-                    var vals = vector.Expressions.Select(x => ctx.PrepareOperand(x, vtype.ElementType, new TempIdent()));
+                    var vals = vector.Expressions.Select(x => ctx.PrepareOperand(x, vtype.ElementType));
                     dest = new VectorLiteral(vtype.ElementType, vals);
                     return ctx;
                 } else if (type.IsVector) {
@@ -424,7 +437,7 @@ namespace DUO2C.CodeGen.LLVM
             throw new NotImplementedException("No rule to generate factor of type " + node.Inner.GetType());
         }
 
-        static Value PrepareOperand(this GenerationContext ctx, ExpressionElement node, OberonType type, Value dest)
+        static Value PrepareOperand(this GenerationContext ctx, ExpressionElement node, OberonType type)
         {
             var temp = new TempIdent();
             var val = (Value) temp;
@@ -437,7 +450,10 @@ namespace DUO2C.CodeGen.LLVM
                 || (type.IsChar && ntype.IsArray && node.IsConstant(_scope))) {
                 ntype = type;
             }
-            if (node is NFactor) {
+
+            if (node is NDesignator) {
+                ctx.Designator((NDesignator) node, ref val, ntype);
+            } else if (node is NFactor) {
                 ctx.Factor((NFactor) node, ref val, ntype);
             } else if (node is NTerm) {
                 ctx.Term((NTerm) node, ref val, ntype);
@@ -456,9 +472,9 @@ namespace DUO2C.CodeGen.LLVM
             if (node.Operator == TermOperator.None) {
                 return ctx.Factor(node.Factor, ref dest, type);
             } else if (node.Operator == TermOperator.And) {
-                var a = ctx.PrepareOperand(node.Prev, type, dest);
+                var a = ctx.PrepareOperand(node.Prev, type);
                 if (node.Factor.IsConstant(_scope)) {
-                    return ctx.BinaryOp(dest, "and", type, a, ctx.PrepareOperand(node.Factor, type, dest));
+                    return ctx.BinaryOp(dest, "and", type, a, ctx.PrepareOperand(node.Factor, type));
                 } else {
                     var initBlock = _blockLabel;
 
@@ -467,7 +483,7 @@ namespace DUO2C.CodeGen.LLVM
                     ctx.Branch(a, testB, end);
 
                     ctx.LabelMarker(testB);
-                    var b = ctx.PrepareOperand(node.Factor, type, dest);
+                    var b = ctx.PrepareOperand(node.Factor, type);
                     if (!(b is TempIdent)) {
                         var temp = new TempIdent();
                         ctx.Assign(temp).Argument(BooleanType.Default, b).EndOperation();
@@ -482,7 +498,7 @@ namespace DUO2C.CodeGen.LLVM
                         b, testB);
                 }
             } else {
-                Value a = ctx.PrepareOperand(node.Prev, type, dest), b = ctx.PrepareOperand(node.Factor, type, dest);
+                Value a = ctx.PrepareOperand(node.Prev, type), b = ctx.PrepareOperand(node.Factor, type);
                 switch (node.Operator) {
                     case TermOperator.Multiply:
                         return ctx.BinaryOp(dest, "mul", "fmul", type, a, b);
@@ -503,9 +519,9 @@ namespace DUO2C.CodeGen.LLVM
             if (node.Operator == SimpleExprOperator.None) {
                 return ctx.Term(node.Term, ref dest, type);
             } else if (node.Operator == SimpleExprOperator.Or) {
-                var a = ctx.PrepareOperand(node.Prev, type, dest);
+                var a = ctx.PrepareOperand(node.Prev, type);
                 if (node.Term.IsConstant(_scope) || type.IsInteger) {
-                    return ctx.BinaryOp(dest, "or", type, a, ctx.PrepareOperand(node.Term, type, dest));
+                    return ctx.BinaryOp(dest, "or", type, a, ctx.PrepareOperand(node.Term, type));
                 } else {
                     var initBlock = _blockLabel;
 
@@ -514,7 +530,7 @@ namespace DUO2C.CodeGen.LLVM
                     ctx.Branch(a, end, testB);
 
                     ctx.LabelMarker(testB);
-                    var b = ctx.PrepareOperand(node.Term, type, dest);
+                    var b = ctx.PrepareOperand(node.Term, type);
                     if (!(b is TempIdent)) {
                         var temp = new TempIdent();
                         ctx.Assign(temp).Argument(BooleanType.Default, b).EndOperation();
@@ -529,7 +545,7 @@ namespace DUO2C.CodeGen.LLVM
                         b, testB);
                 }
             } else {
-                Value a = ctx.PrepareOperand(node.Prev, type, dest), b = ctx.PrepareOperand(node.Term, type, dest);
+                Value a = ctx.PrepareOperand(node.Prev, type), b = ctx.PrepareOperand(node.Term, type);
                 switch (node.Operator) {
                     case SimpleExprOperator.Add:
                         return ctx.BinaryOp(dest, "add", "fadd", type, a, b);
@@ -554,7 +570,7 @@ namespace DUO2C.CodeGen.LLVM
                     ntype = NumericType.Largest(lt.As<NumericType>(), rt.As<NumericType>());
                 }
 
-                Value a = ctx.PrepareOperand(node.Prev, ntype, dest), b = ctx.PrepareOperand(node.SimpleExpr, ntype, dest);
+                Value a = ctx.PrepareOperand(node.Prev, ntype), b = ctx.PrepareOperand(node.SimpleExpr, ntype);
                 switch (node.Operator) {
                     case ExprOperator.Equals:
                         return ctx.BinaryComp(dest, "eq", "oeq", ntype, a, b);

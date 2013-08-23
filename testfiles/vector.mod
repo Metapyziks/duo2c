@@ -3,23 +3,25 @@ MODULE Vector;
 
     CONST N = 16;
 
-    TYPE Vector = VECTOR N OF INTEGER;
+    TYPE IntVector = VECTOR N OF INTEGER;
 
-    VAR a : Vector;
-    VAR b : Vector;
-    VAR c : Vector;
+    VAR a : IntVector;
+    VAR b : IntVector;
+    VAR c : IntVector;
     VAR i : INTEGER;
 
 BEGIN
     FOR i := 0 TO N - 1 DO a[i] := i; END;
 
-    b := 2;
-    c := a * b + 1;
+    b := a * 2 + 1;
+    c := 16 - a;
 
-    Out.String("< ");
+    Out.String("a\tb\tc"); Out.Ln; Out.Ln;
+
     FOR i := 0 TO N - 1 DO
-        Out.Integer(c[i]); Out.String(" ");
+        Out.Integer(a[i]); Out.String("\t");
+        Out.Integer(b[i]); Out.String("\t");
+        Out.Integer(c[i]); Out.Ln;
     END;
-    Out.String(">"); Out.Ln;
 
 END Vector.
