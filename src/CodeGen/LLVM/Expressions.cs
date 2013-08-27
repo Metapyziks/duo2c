@@ -293,7 +293,7 @@ namespace DUO2C.CodeGen.LLVM
                 }
             }
 
-            throw new InvalidOperationException(String.Format("No conversion between {0} to {1} defined", from.ToString(), to.ToString()));
+            throw new InvalidOperationException(String.Format("No conversion from {0} to {1} defined", from.ToString(), to.ToString()));
         }
 
         static GenerationContext ResolveValue(this GenerationContext ctx, Value val, ref Value dest, OberonType type, bool isConstant)
