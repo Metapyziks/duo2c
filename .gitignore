@@ -115,3 +115,5 @@ testfiles/*.exe
 testfiles/*.sym
 testfiles/bin/
 testfiles/ir/
+docs/*.out
+docs/*.aux

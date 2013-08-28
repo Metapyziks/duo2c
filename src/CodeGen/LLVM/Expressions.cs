@@ -405,8 +405,16 @@ namespace DUO2C.CodeGen.LLVM
                 } else if (node.Inner is NVector) {
                     var vector = (NVector) node.Inner;
                     var vtype = type.As<VectorType>();
-                    var vals = vector.Expressions.Select(x => ctx.PrepareOperand(x, vtype.ElementType));
+                    var vals = vector.Expressions.Select(x => x.IsConstant(_scope) ? ctx.PrepareOperand(x, vtype.ElementType) : Literal.GetDefault(vtype.ElementType));
                     dest = new VectorLiteral(vtype.ElementType, vals);
+                    for (int i = 0; i < vector.Expressions.Count(); ++i) {
+                        var expr = vector.Expressions.ElementAt(i);
+                        if (!expr.IsConstant(_scope)) {
+                            var temp = new InsertElement(false, vtype, dest, ctx.PrepareOperand(expr, vtype.ElementType), i);
+                            dest = new TempIdent();
+                            ctx.Assign(dest).Argument(temp).EndOperation();
+                        }
+                    }
                     return ctx;
                 } else if (type.IsVector) {
                     var vtype = type.As<VectorType>();
