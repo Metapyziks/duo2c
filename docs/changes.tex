@@ -13,12 +13,12 @@
     \maketitle
 
     \section{Introduction}
-    The two main goals for the Durham University Oberon-2 Compiler (DUO2C) are to add a clean method of interfacing with external procedures defined in system libraries, and to extend the language with support for explicit vectorization of primitive types, an intrinsic component of high performance computing.
+    The main goal for the Durham University Oberon-2 Compiler (DUO2C) is to provide an expandable compiler compatible with most modern systems through the use of the LLVM infrastructure. Additionally, we aim to add a clean method of interfacing with external procedures defined in system libraries, and to extend the language with support for explicit vectorization of primitive types, an intrinsic component of high performance computing.
 
-    This document will outline the proposed additions to the language, explain any design decisions, and provide examples of the new syntax's usage. For both of the extensions, care has been taken to follow the design principles employed by Oberon where possible.
+    This document will outline the proposed additions to the language and provide examples of the new syntax's usage. For both of the extensions, care has been taken to follow the design principles employed by Oberon where possible.
 
     \section{External Interface Extension}
-    To declare the existence of an external symbol to be linked, an \emph{EXTERNAL} keyword has been added. This keyword, followed by a string literal specifying the external symbol's identifier, may replace the body of a procedure. An optional \emph{IMPORT} keyword may also be used to import symbols from Dynamic Link Libraries on Windows.
+    To declare the existence of an external symbol to be linked, an \emph{EXTERNAL} keyword has been added. This keyword, followed by a string literal specifying the external symbol's identifier, may replace the body of a procedure. An optional \emph{IMPORT} keyword may also be used to import symbols from Dynamic Link Libraries on Windows, and translates to the \emph{dllimport} flag used by LLVM. When using the compiler, the libraries that contain definitions for external symbols can be specified in the same style as the GCC \emph{-l} option.
 
     \begin{figure}[h]
     \begin{lstlisting}
@@ -29,7 +29,7 @@
     \end{figure}
 
     \noindent
-    This declaration has the same header format as a normal procedure definition, but with the external reference in the place of a body. The following is an example of how this new syntax is used, to refer to a symbol from the OpenGL Utility Toolkit\cite{glut}.
+    This declaration has the same header format as a normal procedure definition, but with the external reference in the place of a body. The following is an example of how this new syntax is used, to refer to a symbol from the OpenGL Utility Toolkit\cite{glut}. The command line arguments used to link with this library will contain \emph{-lglut} (or alternatively \emph{-l glut}, for POSIX compliance), just like with GCC.
 
     \begin{figure}[h]
     \begin{lstlisting}
@@ -67,7 +67,7 @@
     \end{figure}
 
     \noindent
-    Any operators applied to vectors are implicitly applied to each element of the vector independently. For systems that support it, these operations are parallelised as SIMD instructions. These expressions are checked at compile time to ensure the vector sizes match, and the element types are compatible.
+    Any operators applied to vectors are implicitly applied to each element of the vector independently. For systems that support it, these operations are parallelised as SIMD instructions by LLVM. These expressions are checked at compile time to ensure the vector sizes match, and the element types are compatible. For operations applied to a vector and a literal, the literal is implicitly promoted to a vector with the same number of elements as the other operand, where each element is the literal's original value.
 
     \begin{figure}[h]
     \begin{lstlisting}
@@ -94,15 +94,15 @@
     \end{figure}
 
     \noindent
-    Finally, procedures to transfer elements of vectors to and from arrays will be provided, \emph{VECLOAD} and \emph{VECSTORE}.
+    Finally, two procedures to transfer elements of vectors to and from arrays are provided, \emph{VECLOAD} and \emph{VECSTORE}.
 
     \begin{figure}[!htbp]
     \begin{lstlisting}
-        VECLOAD(a, c, 2);  (* fill vector a with values from array c
-                            * starting at index 2                     *)
+        VECLOAD(a, c, 2);  (* fill vector a with values from
+                            * array c starting at index 2    *)
 
-        VECSTORE(b, c, 0); (* store elements from vector b in array c
-                            * starting at the first index             *)
+        VECSTORE(b, c, 0); (* store elements from vector b in
+                            * array c starting at the first index *)
     \end{lstlisting}
     \caption{Examples of \emph{VECLOAD} and \emph{VECSTORE}.}
     \end{figure}
