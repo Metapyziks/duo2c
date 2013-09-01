@@ -11,4 +11,8 @@ bin/pong.exe: out.mod gl.mod glut.mod pong.mod
 bin/vector.exe: out.mod vector.mod
 	../bin/Debug/duo2c.exe -o bin/vector.exe -e Vector -K ir \
 		out.mod vector.mod
+
+bin/arrays.exe: out.mod arrays.mod
+	../bin/Debug/duo2c.exe -o bin/arrays.exe -e Arrays -K ir \
+		out.mod arrays.mod
 		

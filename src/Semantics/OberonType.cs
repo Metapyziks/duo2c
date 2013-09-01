@@ -532,7 +532,7 @@ namespace DUO2C.Semantics
                 .Concat(Params).ToArray();
         }
 
-        public IEnumerable<CompilerException> MatchParameters(NInvocation invoc, Scope scope)
+        public virtual IEnumerable<CompilerException> MatchParameters(NInvocation invoc, Scope scope)
         {
             var args = invoc.Args != null ? invoc.Args.Expressions.ToArray() : new NExpr[0];
             if (args.Length != Params.Length) {
@@ -575,6 +575,27 @@ namespace DUO2C.Semantics
         }
     }
 
+    public delegate IEnumerable<CompilerException> ArgumentCheckDelegate(
+        NInvocation invoc, KeyValuePair<OberonType, NExpr>[] args, Scope scope);
+
+    public class OverloadedProcedureType : ProcedureType
+    {
+        private ArgumentCheckDelegate _argCheck;
+
+        public OverloadedProcedureType(OberonType returnType, ArgumentCheckDelegate argCheck)
+            : base(returnType, new Parameter(false, "args", VarArgsType.Default))
+        {
+            _argCheck = argCheck;
+        }
+
+        public override IEnumerable<CompilerException> MatchParameters(NInvocation invoc, Scope scope)
+        {
+            return _argCheck(invoc, invoc.Args != null ? invoc.Args.Expressions.Select(x =>
+                    new KeyValuePair<OberonType, NExpr>(x.GetFinalType(scope), x)).ToArray()
+                : new KeyValuePair<OberonType, NExpr>[0], scope);
+        }
+    }
+
     public class ExternalProcedureType : ProcedureType
     {
         public String ExternalSymbol { get; private set; }
@@ -610,6 +631,11 @@ namespace DUO2C.Semantics
         public override bool IsArray
         {
             get { return true; }
+        }
+
+        public bool IsOpen
+        {
+            get { return Length == -1; }
         }
 
         public ArrayType(OberonType elementType, int length = -1)

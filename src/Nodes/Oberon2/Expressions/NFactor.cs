@@ -20,7 +20,7 @@ namespace DUO2C.Nodes.Oberon2
                 if (Inner is NExpr) {
                     return String.Format("({0})", Inner.String);
                 } else if (Inner is NString) {
-                    return String.Format("\"{0}\"", Inner.String);
+                    return String.Format("\"{0}\"", Inner.String.Replace("\r", "\\r").Replace("\n", "\\n"));
                 } else {
                     return Inner.String;
                 }

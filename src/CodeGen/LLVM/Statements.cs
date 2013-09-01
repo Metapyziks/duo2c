@@ -283,20 +283,45 @@ namespace DUO2C.CodeGen.LLVM
             // Probably temporary hack
             if (elem != null && elem.String == "NEW") {
                 var invoc = (NInvocation) node.Invocation.Operation;
-                var ptrType = invoc.Args.Expressions.First().GetFinalType(_scope).As<PointerType>();
-                var ptr = ctx.PrepareOperand(invoc.Args.Expressions.First(), new PointerType(ptrType));
-                var type = ptrType.ResolvedType;
-                
-                Value temp = new TempIdent();
-                ctx.Assign(temp).Argument(new ElementPointer(false, ptrType, Literal.GetDefault(ptrType), 1)).EndOperation();
-                var size = new TempIdent();
-                ctx.Assign(size).Keyword("ptrtoint").Argument(ptrType, temp).Keyword(" to").Argument(IntegerType.Integer).EndOperation();
-                
-                temp = new TempIdent();
-                ctx.Call(temp, _gcMallocProcType, _gcMallocProc, IntegerType.Integer, size);
-                ctx.Conversion(PointerType.Byte, ptrType, ref temp);
-                ctx.Keyword("store").Argument(type, Literal.GetDefault(type)).Argument(ptrType, temp).EndOperation();
-                ctx.Keyword("store").Argument(ptrType, temp).Argument(new PointerType(ptrType), ptr).EndOperation();
+                var target = invoc.Args.Expressions.First();
+                var targetType = target.GetFinalType(_scope);
+
+                if (targetType is PointerType) {
+                    var ptrType = targetType.As<PointerType>();
+                    var ptr = ctx.PrepareOperand(target, new PointerType(ptrType));
+                    var type = ptrType.ResolvedType;
+
+                    Value temp = new TempIdent();
+                    ctx.Assign(temp).Argument(new ElementPointer(false, ptrType, Literal.GetDefault(ptrType), 1)).EndOperation();
+                    var size = new TempIdent();
+                    ctx.Assign(size).Keyword("ptrtoint").Argument(ptrType, temp).Keyword(" to").Argument(IntegerType.Integer).EndOperation();
+
+                    temp = new TempIdent();
+                    ctx.Call(temp, _gcMallocProcType, _gcMallocProc, IntegerType.Integer, size);
+                    ctx.Conversion(PointerType.Byte, ptrType, ref temp);
+                    ctx.Keyword("store").Argument(type, Literal.GetDefault(type)).Argument(ptrType, temp).EndOperation();
+                    ctx.Keyword("store").Argument(ptrType, temp).Argument(new PointerType(ptrType), ptr).EndOperation();
+                } else {
+                    var arrayType = targetType.As<ArrayType>();
+                    var ptr = ctx.PrepareOperand(target, new PointerType(arrayType));
+                    var type = arrayType.ElementType;
+                    var ptrType = new PointerType(type);
+
+                    if (invoc.Args.Expressions.Count() > 1) {
+                        throw new NotImplementedException();
+                    }
+
+                    Value temp = new TempIdent();
+                    ctx.Assign(temp).Argument(new ElementPointer(false, ptrType, Literal.GetDefault(ptrType), 1)).EndOperation();
+                    var size = new TempIdent();
+                    ctx.Assign(size).Keyword("ptrtoint").Argument(ptrType, temp).Keyword(" to").Argument(IntegerType.Integer).EndOperation();
+
+                    temp = new TempIdent();
+                    ctx.Call(temp, _gcMallocProcType, _gcMallocProc, IntegerType.Integer, size);
+                    ctx.Conversion(PointerType.Byte, ptrType, ref temp);
+                    ctx.Keyword("store").Argument(type, Literal.GetDefault(type)).Argument(ptrType, temp).EndOperation();
+                    ctx.Keyword("store").Argument(ptrType, temp).Argument(new PointerType(ptrType), ptr).EndOperation();
+                }
 
                 return ctx;
             }

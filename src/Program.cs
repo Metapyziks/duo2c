@@ -296,10 +296,6 @@ namespace DUO2C
 
                         var root = new RootScope();
 
-                        root.DeclareSymbol("NEW", new ProcedureType(null,
-                            new Parameter(true, "ptr", PointerType.Null)
-                        ), AccessModifier.Private, DeclarationType.Global);
-
                         foreach (var import in module.Imports) {
                             var path = FindSymbolFile(import, Path.GetDirectoryName(Path.GetFullPath(modules.FirstOrDefault(x => x.Value.Identifier == import).Key ?? mdlpath)));
                             if (path == null) {

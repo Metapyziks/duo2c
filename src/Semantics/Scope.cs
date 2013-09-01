@@ -229,7 +229,7 @@ namespace DUO2C.Semantics
         }
     }
 
-    public class RootScope : Scope
+    public partial class RootScope : Scope
     {
         private Dictionary<String, Scope> _modules;
 
@@ -241,6 +241,8 @@ namespace DUO2C.Semantics
         public RootScope()
         {
             _modules = new Dictionary<string,Scope>();
+
+            DeclareGlobals();
         }
 
         public Scope CreateModuleScope(ModuleType type)

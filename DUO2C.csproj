@@ -122,6 +122,7 @@
     <Compile Include="src\Semantics\AccessibilityException.cs" />
     <Compile Include="src\Semantics\ArrayExpectedException.cs" />
     <Compile Include="src\Semantics\ConstantExpectedException.cs" />
+    <Compile Include="src\Semantics\GlobalProcedures.cs" />
     <Compile Include="src\Semantics\MemberNotFoundException.cs" />
     <Compile Include="src\Semantics\OberonType.cs" />
     <Compile Include="src\Semantics\OperandTypeException.cs" />
