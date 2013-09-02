@@ -648,7 +648,7 @@ namespace DUO2C.Semantics
 
         public override bool CanTestEquality(OberonType other)
         {
-            return CanCompare(other);
+            return CanCompare(other) || (other.IsArray && other.As<ArrayType>().ElementType.Equals(ElementType));
         }
 
         public override bool CanCompare(OberonType other)

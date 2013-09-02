@@ -303,10 +303,11 @@ namespace DUO2C.CodeGen.LLVM
                     ctx.Keyword("store").Argument(ptrType, temp).Argument(new PointerType(ptrType), ptr).EndOperation();
                 } else {
                     var arrayType = targetType.As<ArrayType>();
+                    var arrayPtrType = new PointerType(arrayType);
                     var type = arrayType.ElementType;
                     var ptrType = new PointerType(type);
 
-                    Value ptr = ctx.PrepareOperand(target, new PointerType(arrayType));
+                    Value ptr = ctx.PrepareOperand(target, arrayPtrType);
                     Value lengthElem = new TempIdent();
 
                     if (invoc.Args.Expressions.Count() > 1) {
@@ -339,8 +340,10 @@ namespace DUO2C.CodeGen.LLVM
                         ctx.Assign(size).Keyword("ptrtoint").Argument(ptrType, dest).Keyword(" to").Argument(IntegerType.Integer).EndOperation();
 
                         dest = new TempIdent();
+
                         ctx.Call(dest, _gcMallocProcType, _gcMallocProc, IntegerType.Integer, size);
                         ctx.Conversion(PointerType.Byte, ptrType, ref dest);
+                        ctx.Branch(loopStart);
 
                         comp = new TempIdent();
 
@@ -352,14 +355,16 @@ namespace DUO2C.CodeGen.LLVM
                         ctx.BinaryComp(comp, "sge", IntegerType.Integer, iter, length);
                         ctx.Branch(comp, loopEnd, loopStart);
 
+                        elemPtr = new TempIdent();
+
                         ctx.LabelMarker(loopEnd);
-                        ctx.Assign(elemPtr).Argument(new ElementPointer(false, arrayType, ptr, 0, 1)).EndOperation();
+                        ctx.Assign(elemPtr).Argument(new ElementPointer(false, arrayPtrType, ptr, 0, 1)).EndOperation();
                         ctx.Keyword("store").Argument(ptrType, dest).Argument(new PointerType(ptrType), elemPtr).EndOperation();
                         ctx.Branch(postAlloc);
                     }
 
                     ctx.LabelMarker(postAlloc);
-                    ctx.Assign(lengthElem).Argument(new ElementPointer(false, arrayType, ptr, 0, 0)).EndOperation();
+                    ctx.Assign(lengthElem).Argument(new ElementPointer(false, arrayPtrType, ptr, 0, 0)).EndOperation();
                     ctx.Keyword("store").Argument(IntegerType.Integer, length).Argument(new PointerType(IntegerType.Integer), lengthElem).EndOperation();
                 }
 
