@@ -176,7 +176,7 @@ namespace DUO2C.CodeGen.LLVM
                             context.Branch(temp, end, body);
                             
                             context.LabelMarker(body);
-                            context.Assign(initFlag, BooleanType.Default, new Literal(1.ToString())).Ln();
+                            context.Assign(initFlag, BooleanType.Default, new Literal(1)).Ln();
 
                             if (module.Imports.Count() > 0) {
                                 TempIdent next = null;
@@ -186,7 +186,7 @@ namespace DUO2C.CodeGen.LLVM
                                     context.Call(temp, initType, new GlobalIdent(String.Format("{0}._init", import), true));
 
                                     var comp = new TempIdent();
-                                    context.BinaryComp(comp, "eq", IntegerType.Integer, temp, new Literal(0.ToString()));
+                                    context.BinaryComp(comp, "eq", IntegerType.Integer, temp, new Literal(0));
 
                                     next = new TempIdent();
                                     context.Branch(comp, next, error);
@@ -200,11 +200,11 @@ namespace DUO2C.CodeGen.LLVM
 
                             context.LabelMarker(end);
                         }
-                        context.Keyword("ret").Argument(IntegerType.Integer, new Literal(0.ToString())).EndOperation();
+                        context.Keyword("ret").Argument(IntegerType.Integer, new Literal(0)).EndOperation();
 
                         if (error.Predecessors.Count() > 0) {
                             context.LabelMarker(error);
-                            context.Keyword("ret").Argument(IntegerType.Integer, new Literal(1.ToString())).EndOperation();
+                            context.Keyword("ret").Argument(IntegerType.Integer, new Literal(1)).EndOperation();
                         }
                     });
 

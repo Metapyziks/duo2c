@@ -109,6 +109,16 @@ namespace DUO2C.CodeGen.LLVM
                 _str = str;
             }
 
+            public Literal(long integer)
+            {
+                _str = integer.ToString();
+            }
+
+            public Literal(double real)
+            {
+                _str = real.ToString();
+            }
+
             public Literal(NNumber num)
             {
                 _str = num.Inner.String;
@@ -452,7 +462,7 @@ namespace DUO2C.CodeGen.LLVM
                 InBounds = true;
                 StructureType = structType;
                 Structure = structure;
-                Indices = indices.Select(x => x is Value ? (Value) x : new Literal(x.ToString())).ToArray();
+                Indices = indices.Select(x => x is Value ? (Value) x : new Literal((int) x)).ToArray();
             }
 
             public ElementPointer(bool inBraces, ElementPointer clone)

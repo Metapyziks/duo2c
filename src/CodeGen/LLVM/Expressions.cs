@@ -105,9 +105,9 @@ namespace DUO2C.CodeGen.LLVM
                 ctx.LabelMarker(end);
                 var result = new TempIdent();
                 ctx.Phi(result, BooleanType.Default,
-                    new Literal(0.ToString()), startLabel ?? TempIdent.Zero,
-                    new Literal(0.ToString()), checkNull,
-                    new Literal(1.ToString()), testPtr);
+                    new Literal(0), startLabel ?? TempIdent.Zero,
+                    new Literal(0), checkNull,
+                    new Literal(1), testPtr);
 
                 return result;
             } else if (node.Operation is NInvocation) {
@@ -369,7 +369,7 @@ namespace DUO2C.CodeGen.LLVM
             if (node.Inner is NUnary) {
                 var unary = (NUnary) node.Inner;
                 Value val = ctx.PrepareOperand(unary.Factor, type);
-                Value zero = new Literal(0.ToString());
+                Value zero = new Literal(0);
                 switch (unary.Operator) {
                     case UnaryOperator.Identity:
                         dest = val;
@@ -430,7 +430,7 @@ namespace DUO2C.CodeGen.LLVM
                     return ctx;
                 } else if (node.Inner is NString) {
                     if (type.IsChar) {
-                        dest = new Literal(((int) node.Inner.String[0]).ToString());
+                        dest = new Literal((int) node.Inner.String[0]);
                     } else {
                         GetStringIdent(node.Inner.String);
                         dest = new StringLiteral(node.Inner.String);
@@ -502,7 +502,7 @@ namespace DUO2C.CodeGen.LLVM
 
                     ctx.LabelMarker(end);
                     return ctx.Phi(dest, BooleanType.Default,
-                        new Literal(0.ToString()), initBlock,
+                        new Literal(0), initBlock,
                         b, testB);
                 }
             } else {
@@ -549,7 +549,7 @@ namespace DUO2C.CodeGen.LLVM
 
                     ctx.LabelMarker(end);
                     return ctx.Phi(dest, BooleanType.Default,
-                        new Literal(1.ToString()), initBlock,
+                        new Literal(1), initBlock,
                         b, testB);
                 }
             } else {

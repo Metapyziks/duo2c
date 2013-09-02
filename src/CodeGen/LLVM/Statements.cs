@@ -266,7 +266,7 @@ namespace DUO2C.CodeGen.LLVM
             ctx.PushExitLabel(bodyend).Statements(node.Body).PopExitLabel();
             temp = new TempIdent();
             ctx.ResolveValue(iter, ref temp, iter.Declaration.Type, false);
-            ctx.BinaryOp(incr, "add", "fadd", iter.Declaration.Type, temp, new Literal(1.ToString()));
+            ctx.BinaryOp(incr, "add", "fadd", iter.Declaration.Type, temp, new Literal(1));
             ctx.Assign(iter, iter.Declaration.Type, incr);
             ctx.Branch(condstart);
 
@@ -303,24 +303,64 @@ namespace DUO2C.CodeGen.LLVM
                     ctx.Keyword("store").Argument(ptrType, temp).Argument(new PointerType(ptrType), ptr).EndOperation();
                 } else {
                     var arrayType = targetType.As<ArrayType>();
-                    var ptr = ctx.PrepareOperand(target, new PointerType(arrayType));
                     var type = arrayType.ElementType;
                     var ptrType = new PointerType(type);
+
+                    Value ptr = ctx.PrepareOperand(target, new PointerType(arrayType));
+                    Value lengthElem = new TempIdent();
 
                     if (invoc.Args.Expressions.Count() > 1) {
                         throw new NotImplementedException();
                     }
 
-                    Value temp = new TempIdent();
-                    ctx.Assign(temp).Argument(new ElementPointer(false, ptrType, Literal.GetDefault(ptrType), 1)).EndOperation();
-                    var size = new TempIdent();
-                    ctx.Assign(size).Keyword("ptrtoint").Argument(ptrType, temp).Keyword(" to").Argument(IntegerType.Integer).EndOperation();
+                    var notEmpty = new TempIdent();
+                    var postAlloc = new TempIdent();
 
-                    temp = new TempIdent();
-                    ctx.Call(temp, _gcMallocProcType, _gcMallocProc, IntegerType.Integer, size);
-                    ctx.Conversion(PointerType.Byte, ptrType, ref temp);
-                    ctx.Keyword("store").Argument(type, Literal.GetDefault(type)).Argument(ptrType, temp).EndOperation();
-                    ctx.Keyword("store").Argument(ptrType, temp).Argument(new PointerType(ptrType), ptr).EndOperation();
+                    Value length = new Literal(arrayType.Length.ToString());
+                    Value comp = new TempIdent();
+
+                    ctx.BinaryComp(comp, "sgt", IntegerType.Integer, length, new Literal(0));
+                    ctx.Branch(comp, notEmpty, postAlloc);
+
+                    {
+                        ctx.LabelMarker(notEmpty);
+
+                        var loopStart = new TempIdent();
+                        var loopEnd = new TempIdent();
+
+                        Value dest = new TempIdent();
+                        Value size = new TempIdent();
+                        Value iter = new TempIdent();
+                        Value next = new TempIdent();
+                        Value elemPtr = new TempIdent();
+                        Value ptrElem = new TempIdent();
+
+                        ctx.Assign(dest).Argument(new ElementPointer(false, ptrType, Literal.GetDefault(ptrType), length)).EndOperation();
+                        ctx.Assign(size).Keyword("ptrtoint").Argument(ptrType, dest).Keyword(" to").Argument(IntegerType.Integer).EndOperation();
+
+                        dest = new TempIdent();
+                        ctx.Call(dest, _gcMallocProcType, _gcMallocProc, IntegerType.Integer, size);
+                        ctx.Conversion(PointerType.Byte, ptrType, ref dest);
+
+                        comp = new TempIdent();
+
+                        ctx.LabelMarker(loopStart);
+                        ctx.Phi(iter, IntegerType.Integer, new Literal(0), notEmpty, next, loopStart);
+                        ctx.Assign(elemPtr).Argument(new ElementPointer(false, ptrType, dest, iter)).EndOperation();
+                        ctx.Keyword("store").Argument(type, Literal.GetDefault(type)).Argument(ptrType, elemPtr).EndOperation();
+                        ctx.BinaryOp(next, "add", IntegerType.Integer, iter, new Literal(1));
+                        ctx.BinaryComp(comp, "sge", IntegerType.Integer, iter, length);
+                        ctx.Branch(comp, loopEnd, loopStart);
+
+                        ctx.LabelMarker(loopEnd);
+                        ctx.Assign(elemPtr).Argument(new ElementPointer(false, arrayType, ptr, 0, 1)).EndOperation();
+                        ctx.Keyword("store").Argument(ptrType, dest).Argument(new PointerType(ptrType), elemPtr).EndOperation();
+                        ctx.Branch(postAlloc);
+                    }
+
+                    ctx.LabelMarker(postAlloc);
+                    ctx.Assign(lengthElem).Argument(new ElementPointer(false, arrayType, ptr, 0, 0)).EndOperation();
+                    ctx.Keyword("store").Argument(IntegerType.Integer, length).Argument(new PointerType(IntegerType.Integer), lengthElem).EndOperation();
                 }
 
                 return ctx;
