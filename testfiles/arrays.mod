@@ -5,11 +5,16 @@ MODULE Arrays;
         TestRec = RECORD x : INTEGER; END;
         Test = POINTER TO TestRec;
 
-    VAR a : ARRAY 5 OF INTEGER;
+    VAR
+        a : ARRAY 5 OF INTEGER;
+        i : INTEGER;
 
 BEGIN
     NEW(a);
 
-    Out.String("Hello world!\n"); Out.Ln;
+    FOR i := 0 TO 4 DO
+        a[i] := i + 1;
+        Out.Integer(a[i]); Out.Ln;
+    END;
 
 END Arrays.

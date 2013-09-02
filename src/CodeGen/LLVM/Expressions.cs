@@ -217,16 +217,28 @@ namespace DUO2C.CodeGen.LLVM
                 var element = (NDesignator) node.Element;
                 var elemPtr = ctx.GetDesignation(element);
                 var elemType = element.GetFinalType(_scope).As<IndexableType>();
-
-                if (!elemType.IsVector) throw new NotImplementedException();
-
+                
                 var indexExpr = indices.First();
                 var index = ctx.PrepareOperand(indexExpr, IntegerType.Integer);
 
-                Value vector = new TempIdent();
-                ctx.ResolveValue(elemPtr, ref vector, elemType, element.IsConstant(_scope));
+                if (elemType.IsVector) {
+                    Value vector = new TempIdent();
+                    ctx.ResolveValue(elemPtr, ref vector, elemType, element.IsConstant(_scope));
 
-                return new ExtractElement(false, (VectorType) elemType, vector, index);
+                    return new ExtractElement(false, (VectorType) elemType, vector, index);
+                } else {
+                    var arrayPtrType = new PointerType(elemType);
+                    var elemPtrType = new PointerType(elemType.ElementType);
+
+                    Value array = new TempIdent();
+                    Value arrayPtr = new TempIdent();
+                    Value arrayStartPtr = new TempIdent();
+
+                    ctx.Assign(arrayStartPtr).Argument(new ElementPointer(false, arrayPtrType, elemPtr, 0, 1)).EndOperation();
+                    ctx.Load(arrayPtr, elemPtrType, arrayStartPtr);
+
+                    return new ElementPointer(false, elemPtrType, arrayPtr, index);
+                }
             } else {
                 throw new NotImplementedException();
             }
