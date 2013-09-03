@@ -135,7 +135,11 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Type(this GenerationContext ctx, ArrayType type)
         {
-            return ctx.Structure(IntegerType.Integer, new PointerType(type.ElementType));
+            if (type.IsOpen) {
+                return ctx.Structure(IntegerType.Integer, new PointerType(type.ElementType));
+            } else {
+                return ctx.Type(new ConstArrayType(type.ElementType, type.Length));
+            }
         }
 
         static GenerationContext Type(this GenerationContext ctx, VectorType type)

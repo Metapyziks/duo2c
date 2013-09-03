@@ -310,14 +310,17 @@ namespace DUO2C.CodeGen.LLVM
                     Value ptr = ctx.PrepareOperand(target, arrayPtrType);
                     Value lengthElem = new TempIdent();
 
-                    if (invoc.Args.Expressions.Count() > 1) {
-                        throw new NotImplementedException();
-                    }
-
                     var notEmpty = new TempIdent();
                     var postAlloc = new TempIdent();
 
-                    Value length = new Literal(arrayType.Length.ToString());
+                    Value length;
+                    
+                    if (arrayType.IsOpen) {
+                        length = ctx.PrepareOperand(invoc.Args.Expressions.ElementAt(1), IntegerType.Integer);
+                    } else {
+                        length = new Literal(arrayType.Length.ToString());
+                    }
+                    
                     Value comp = new TempIdent();
 
                     ctx.BinaryComp(comp, "sgt", IntegerType.Integer, length, new Literal(0));

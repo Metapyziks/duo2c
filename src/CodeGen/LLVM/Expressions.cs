@@ -230,14 +230,18 @@ namespace DUO2C.CodeGen.LLVM
                     var arrayPtrType = new PointerType(elemType);
                     var elemPtrType = new PointerType(elemType.ElementType);
 
-                    Value array = new TempIdent();
-                    Value arrayPtr = new TempIdent();
-                    Value arrayStartPtr = new TempIdent();
+                    if (elemType.As<ArrayType>().IsOpen) {
+                        Value array = new TempIdent();
+                        Value arrayPtr = new TempIdent();
+                        Value arrayStartPtr = new TempIdent();
 
-                    ctx.Assign(arrayStartPtr).Argument(new ElementPointer(false, arrayPtrType, elemPtr, 0, 1)).EndOperation();
-                    ctx.Load(arrayPtr, elemPtrType, arrayStartPtr);
+                        ctx.Assign(arrayStartPtr).Argument(new ElementPointer(false, arrayPtrType, elemPtr, 0, 1)).EndOperation();
+                        ctx.Load(arrayPtr, elemPtrType, arrayStartPtr);
 
-                    return new ElementPointer(false, elemPtrType, arrayPtr, index);
+                        return new ElementPointer(false, elemPtrType, arrayPtr, index);
+                    } else {
+                        return new ElementPointer(false, arrayPtrType, elemPtr, 0, index);
+                    }
                 }
             } else {
                 throw new NotImplementedException();

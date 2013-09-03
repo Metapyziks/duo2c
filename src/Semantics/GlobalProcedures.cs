@@ -31,7 +31,8 @@ namespace DUO2C.Semantics
                             }
                         } else {
                             int depth = 0;
-                            var inner = argPairs.First().Key.As<ArrayType>();
+                            var outer = argPairs.First().Key.As<ArrayType>();
+                            var inner = outer;
                             while (inner != null && inner.IsOpen) {
                                 ++depth;
                                 inner = inner.ElementType.IsArray
@@ -43,6 +44,12 @@ namespace DUO2C.Semantics
                                 exceptions.Add(new CompilerException(ParserError.Semantics,
                                     String.Format("Argument count mismatch, expected up to "
                                         + "{0}, received {1}", depth + 1, argPairs.Length),
+                                        invoc.StartIndex, invoc.Length));
+                            }
+
+                            if (depth > 0 && argPairs.Length < 2) {
+                                exceptions.Add(new CompilerException(ParserError.Semantics,
+                                    "Argument count mismatch, expected 1, received none",
                                         invoc.StartIndex, invoc.Length));
                             }
 

@@ -42,10 +42,7 @@ namespace DUO2C.Nodes.Oberon2
         [Serialize("length")]
         public int ArrayLength { get; private set; }
 
-        public NConstExpr LengthExpr
-        {
-            get { return Children.First() as NConstExpr; }
-        }
+        public NConstExpr LengthExpr { get; private set; }
 
         public NType ElementDefinition
         {
@@ -61,14 +58,11 @@ namespace DUO2C.Nodes.Oberon2
             : base(original, false)
         {
             Children = Children.Where(x => x is NConstExpr || x is NType);
+            LengthExpr = Children.First() as NConstExpr;
 
-            if (LengthExpr != null) {
-                ArrayLength = int.Parse(LengthExpr.String);
-            } else {
+            if (LengthExpr == null) {
                 ArrayLength = -1;
-            }
-
-            if (Children.Count() > 2) {
+            } else if (Children.Count() > 2) {
                 Children = new ParseNode[] {
                     LengthExpr,
                     new NType(new BranchNode(new ParseNode[] { new NArrayType(new BranchNode(Children.Skip(1), Token)) }, "Type"))
@@ -76,6 +70,23 @@ namespace DUO2C.Nodes.Oberon2
             }
 
             Children = Children.Where(x => x is NType);
+        }
+
+        public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
+        {
+            var errors = base.FindTypeErrors(scope);
+            if (errors.Count() == 0 && LengthExpr != null) {
+                var num = LengthExpr.EvaluateConst(scope) as NNumber;
+                if (num == null || !(num.Inner is NInteger) || ((IntegerType) num.GetFinalType(scope)).Range >= IntegerRange.Integer) {
+                    yield return new TypeMismatchException(IntegerType.Integer, LengthExpr.GetFinalType(scope), LengthExpr);
+                } else {
+                    ArrayLength = (int) ((NInteger) num.Inner).Value;
+                }
+            }
+
+            foreach (var error in errors) {
+                yield return error;
+            }
         }
     }
 
