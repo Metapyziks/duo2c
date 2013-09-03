@@ -85,6 +85,8 @@ namespace DUO2C.CodeGen.LLVM
 
         public class Literal : Value
         {
+            public static readonly Literal Undef = new Literal("undef");
+
             public static Literal GetDefault(OberonType type)
             {
                 if (type.IsRecord) {
@@ -127,6 +129,27 @@ namespace DUO2C.CodeGen.LLVM
             public override string ToString()
             {
                 return _str;
+            }
+        }
+
+        public class OpenArrayLiteral : Literal, IComplexWrite
+        {
+            public ArrayType Type { get; private set; }
+
+            public OpenArrayLiteral(ArrayType type)
+                : base(String.Empty)
+            {
+                Type = type;
+            }
+
+            public GenerationContext Write(GenerationContext ctx)
+            {
+                var elementPtrType = new PointerType(Type.ElementType);
+
+                ctx.Write("{").EndArguments();
+                ctx.Argument(IntegerType.Integer, new Literal(Type.Length));
+                ctx.Argument(elementPtrType, Literal.GetDefault(elementPtrType));
+                return ctx.Write("}");
             }
         }
 
@@ -200,7 +223,7 @@ namespace DUO2C.CodeGen.LLVM
             public IEnumerable<Value> Elements { get; private set; }
 
             public VectorLiteral(OberonType elementType, IEnumerable<Value> vals)
-                : base("<...>")
+                : base(String.Empty)
             {
                 ElementType = elementType;
                 Elements = vals;
@@ -483,6 +506,34 @@ namespace DUO2C.CodeGen.LLVM
                 ctx.Argument(StructureType, Structure);
                 foreach (var ind in Indices) {
                     ctx.Argument(IntegerType.Integer, ind);
+                }
+                if (InBraces) ctx.Write("\t)");
+                return ctx;
+            }
+        }
+
+        public class InsertValue : ElementPointer
+        {
+            public OberonType ValueType { get; private set; }
+
+            public Value Value { get; private set; }
+
+            public InsertValue(bool inBraces, OberonType structType, Value structure,
+                OberonType valueType, Value value, params Object[] indices)
+                : base(inBraces, structType, structure, indices)
+            {
+                ValueType = valueType;
+                Value = value;
+            }
+
+            public override GenerationContext Write(GenerationContext ctx)
+            {
+                ctx.Keyword("insertvalue");
+                if (InBraces) ctx.Write("(");
+                ctx.Argument(StructureType, Structure);
+                ctx.Argument(ValueType, Value);
+                foreach (var index in Indices) {
+                    ctx.Argument(index);
                 }
                 if (InBraces) ctx.Write("\t)");
                 return ctx;

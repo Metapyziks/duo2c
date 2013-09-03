@@ -653,7 +653,7 @@ namespace DUO2C.Semantics
 
             var array = other.As<ArrayType>();
 
-            return (IsOpen || !array.IsOpen) && ElementType.CanTestEquality(array.ElementType);
+            return (IsOpen || !array.IsOpen && Length == array.Length) && ElementType.CanTestEquality(array.ElementType);
         }
 
         public override bool CanCompare(OberonType other)

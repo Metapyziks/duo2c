@@ -14,10 +14,10 @@ BEGIN
         a[i] := i + 1;
     END;
 
-    (* b := N; *)
+    b := a;
 
     FOR i := 0 TO N - 1 DO
-        Out.Integer(a[i]); Out.Ln;
+        Out.Integer(b[i]); Out.Ln;
     END;
 
 END Arrays.

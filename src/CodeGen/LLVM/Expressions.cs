@@ -289,12 +289,21 @@ namespace DUO2C.CodeGen.LLVM
                 ctx.Assign(temp).Keyword("ptrtoint").Argument(from, src).Keyword(" to").Argument(to).EndOperation();
                 src = temp;
                 return ctx;
+            } else if (from.IsPointer && to.IsArray) {
+                var temp = new TempIdent();
+                var fromArray = from.As<PointerType>().ResolvedType.As<ArrayType>();
+                ctx.Conversion(new PointerType(new ConstArrayType(fromArray.ElementType, fromArray.Length)),
+                    new PointerType(fromArray.ElementType), ref src);
+                ctx.Assign(temp).Argument(new InsertValue(false, to,
+                    new OpenArrayLiteral(fromArray),
+                    new PointerType(fromArray.ElementType), src, 1)).EndOperation();
+                src = temp;
+                return ctx;
             }
 
             var tsrc = src;
             src = new TempIdent();
-
-
+            
             if (from.IsInteger && to.IsInteger) {
                 IntegerType fi = from.As<IntegerType>(), ti = to.As<IntegerType>();
                 if (fi.Range < ti.Range) {
@@ -469,6 +478,12 @@ namespace DUO2C.CodeGen.LLVM
 
             if (type.IsVector) {
                 ntype = type;
+            } else if (type.IsArray && ntype.IsArray) {
+                var array = type.As<ArrayType>();
+                var narray = ntype.As<ArrayType>();
+                if (array.IsOpen && !narray.IsOpen) {
+                    ntype = new PointerType(ntype);
+                }
             } else if (!type.CanTestEquality(ntype) && (type.Equals(new PointerType(ntype)) || (type.IsPointer
                 && ntype.IsArray && type.As<PointerType>().ResolvedType.Equals(ntype.As<ArrayType>().ElementType)))
                 || (type.IsChar && ntype.IsArray && node.IsConstant(_scope))) {

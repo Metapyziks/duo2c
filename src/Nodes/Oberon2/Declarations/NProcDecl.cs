@@ -127,8 +127,13 @@ namespace DUO2C.Nodes.Oberon2
         public IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             if (ReturnType != null) {
+                bool found = false;
                 foreach (var e in ReturnType.FindTypeErrors(scope)) {
+                    found = true;
                     yield return e;
+                }
+                if (!found && ReturnType.Type.IsArray || ReturnType.Type.IsRecord) {
+                    yield return new CompilerException(ParserError.Semantics, "Illegal return type", StartIndex, Length);
                 }
             }
 

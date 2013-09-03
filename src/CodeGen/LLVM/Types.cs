@@ -24,12 +24,12 @@ namespace DUO2C.CodeGen.LLVM
 
             public override bool CanCompare(OberonType other)
             {
-                throw new NotImplementedException();
+                return false;
             }
 
             public override bool CanTestEquality(OberonType other)
             {
-                throw new NotImplementedException();
+                return false;
             }
         }
 
@@ -39,12 +39,12 @@ namespace DUO2C.CodeGen.LLVM
 
             public override bool CanCompare(OberonType other)
             {
-                throw new NotImplementedException();
+                return false;
             }
 
             public override bool CanTestEquality(OberonType other)
             {
-                throw new NotImplementedException();
+                return false;
             }
         }
 
