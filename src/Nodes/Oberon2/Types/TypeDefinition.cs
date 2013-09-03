@@ -250,8 +250,8 @@ namespace DUO2C.Nodes.Oberon2
         public IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             return Children.SelectMany(x => (x is ITypeErrorSource)
-                   ? ((ITypeErrorSource) x).FindTypeErrors(scope)
-                   : new CompilerException[0]);
+                ? ((ITypeErrorSource) x).FindTypeErrors(scope)
+                : new CompilerException[0]);
         }
 
         public IEnumerable<CompilerException> FindAccessibilityErrors(Scope scope)

@@ -19,7 +19,7 @@ namespace DUO2C.Semantics
                     } else {
                         if (!argPairs.First().Key.IsPointer && !argPairs.First().Key.IsArray) {
                             var argNode = invoc.Args.Expressions.First();
-                            exceptions.Add(new CompilerException(ParserError.Semantics, "Pointer or array expected",
+                            exceptions.Add(new CompilerException(ParserError.Semantics, "Pointer or open array expected",
                                 argNode.StartIndex, argNode.Length));
                         }
                         if (argPairs.First().Key.IsPointer) {
@@ -32,31 +32,31 @@ namespace DUO2C.Semantics
                         } else {
                             int depth = 0;
                             var outer = argPairs.First().Key.As<ArrayType>();
-                            var inner = outer;
-                            while (inner != null && inner.IsOpen) {
-                                ++depth;
-                                inner = inner.ElementType.IsArray
-                                    ? inner.ElementType.As<ArrayType>()
-                                    : null;
-                            }
 
-                            if (argPairs.Length != depth + 1) {
-                                exceptions.Add(new CompilerException(ParserError.Semantics,
-                                    String.Format("Argument count mismatch, expected up to "
-                                        + "{0}, received {1}", depth + 1, argPairs.Length),
+                            if (!outer.IsOpen) {
+                                exceptions.Add(new CompilerException(ParserError.Semantics, "Pointer or open array expected",
+                                    argPairs.First().Value.StartIndex, argPairs.First().Value.Length));
+                            } else {
+                                var inner = outer;
+                                while (inner != null) {
+                                    ++depth;
+                                    inner = inner.ElementType.IsArray
+                                        ? inner.ElementType.As<ArrayType>()
+                                        : null;
+                                }
+
+                                if (argPairs.Length != depth + 1) {
+                                    exceptions.Add(new CompilerException(ParserError.Semantics,
+                                        String.Format("Argument count mismatch, expected {0}, received {1}",
+                                            depth + 1, argPairs.Length),
                                         invoc.StartIndex, invoc.Length));
-                            }
+                                }
 
-                            if (depth > 0 && argPairs.Length < 2) {
-                                exceptions.Add(new CompilerException(ParserError.Semantics,
-                                    "Argument count mismatch, expected 1, received none",
-                                        invoc.StartIndex, invoc.Length));
-                            }
-
-                            for (int i = 1; i < argPairs.Length; ++i) {
-                                if (!argPairs[i].Key.IsInteger) {
-                                    exceptions.Add(new TypeMismatchException(IntegerType.Integer,
-                                        argPairs[i].Key, invoc.Args.Expressions.ElementAt(i)));
+                                for (int i = 1; i < argPairs.Length; ++i) {
+                                    if (!argPairs[i].Key.IsInteger) {
+                                        exceptions.Add(new TypeMismatchException(IntegerType.Integer,
+                                            argPairs[i].Key, invoc.Args.Expressions.ElementAt(i)));
+                                    }
                                 }
                             }
                         }
