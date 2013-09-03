@@ -40,7 +40,7 @@ namespace DUO2C.Semantics
                                     : null;
                             }
 
-                            if (argPairs.Length > depth + 1) {
+                            if (argPairs.Length != depth + 1) {
                                 exceptions.Add(new CompilerException(ParserError.Semantics,
                                     String.Format("Argument count mismatch, expected up to "
                                         + "{0}, received {1}", depth + 1, argPairs.Length),

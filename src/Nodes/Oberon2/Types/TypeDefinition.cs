@@ -75,12 +75,19 @@ namespace DUO2C.Nodes.Oberon2
         public override IEnumerable<CompilerException> FindTypeErrors(Scope scope)
         {
             var errors = base.FindTypeErrors(scope);
-            if (errors.Count() == 0 && LengthExpr != null) {
-                var num = LengthExpr.EvaluateConst(scope) as NNumber;
-                if (num == null || !(num.Inner is NInteger) || ((IntegerType) num.GetFinalType(scope)).Range >= IntegerRange.Integer) {
-                    yield return new TypeMismatchException(IntegerType.Integer, LengthExpr.GetFinalType(scope), LengthExpr);
-                } else {
-                    ArrayLength = (int) ((NInteger) num.Inner).Value;
+            if (errors.Count() == 0) {
+                if (LengthExpr != null) {
+                    var num = LengthExpr.EvaluateConst(scope) as NNumber;
+                    if (num == null || !(num.Inner is NInteger) || ((IntegerType) num.GetFinalType(scope)).Range >= IntegerRange.Integer) {
+                        yield return new TypeMismatchException(IntegerType.Integer, LengthExpr.GetFinalType(scope), LengthExpr);
+                    } else {
+                        ArrayLength = (int) ((NInteger) num.Inner).Value;
+                    }
+                }
+
+                if (ElementDefinition.Type.IsArray && ElementDefinition.Type.As<ArrayType>().IsOpen != (ArrayLength != -1)) {
+                    yield return new CompilerException(ParserError.Semantics, "Multidimensional arrays must be completely fixed-size or completely open",
+                        ElementDefinition.StartIndex, ElementDefinition.Length);
                 }
             }
 
