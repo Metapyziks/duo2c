@@ -134,20 +134,29 @@ namespace DUO2C.CodeGen.LLVM
 
         public class OpenArrayLiteral : Literal, IComplexWrite
         {
-            public ArrayType Type { get; private set; }
+            public OberonType ElementType { get; private set; }
+            public Value Length { get; private set; }
 
             public OpenArrayLiteral(ArrayType type)
                 : base(String.Empty)
             {
-                Type = type;
+                ElementType = type.ElementType;
+                Length = new Literal(type.Length);
+            }
+
+            public OpenArrayLiteral(OberonType elementType, Value length)
+                : base(String.Empty)
+            {
+                ElementType = elementType;
+                Length = length;
             }
 
             public GenerationContext Write(GenerationContext ctx)
             {
-                var elementPtrType = new PointerType(Type.ElementType);
+                var elementPtrType = new PointerType(ElementType);
 
                 ctx.Write("{").EndArguments();
-                ctx.Argument(IntegerType.Integer, new Literal(Type.Length));
+                ctx.Argument(IntegerType.Integer, Length);
                 ctx.Argument(elementPtrType, Literal.GetDefault(elementPtrType));
                 return ctx.Write("}");
             }

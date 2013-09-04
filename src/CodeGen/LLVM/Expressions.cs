@@ -254,6 +254,14 @@ namespace DUO2C.CodeGen.LLVM
             }
         }
 
+        static GenerationContext OpenArray(this GenerationContext ctx, Value dest, OberonType elementType, Value length, Value ptr)
+        {
+            ctx.Assign(dest).Argument(new InsertValue(false, new ArrayType(elementType),
+                new OpenArrayLiteral(elementType, length),
+                new PointerType(elementType), ptr, 1)).EndOperation();
+            return ctx;
+        }
+
         static GenerationContext Conversion(this GenerationContext ctx, OberonType from, OberonType to, ref Value src)
         {
             if (from.IsArray && to.IsChar) {
@@ -300,11 +308,8 @@ namespace DUO2C.CodeGen.LLVM
                 var fromArray = from.As<PointerType>().ResolvedType.As<ArrayType>();
                 ctx.Conversion(new PointerType(new StaticArrayType(fromArray.ElementType, fromArray.Length)),
                     new PointerType(fromArray.ElementType), ref src);
-                ctx.Assign(temp).Argument(new InsertValue(false, to,
-                    new OpenArrayLiteral(fromArray),
-                    new PointerType(fromArray.ElementType), src, 1)).EndOperation();
+                ctx.OpenArray(temp, fromArray.ElementType, new Literal(fromArray.Length), src);
                 src = temp;
-                return ctx;
             }
 
             var tsrc = src;

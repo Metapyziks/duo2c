@@ -306,6 +306,7 @@ namespace DUO2C.CodeGen.LLVM
                     var arrayPtrType = new PointerType(arrayType);
 
                     Value ptr = ctx.PrepareOperand(target, arrayPtrType);
+                    Value temp = null;
 
                     IEnumerable<OberonType> types = new List<OberonType>();
                     OberonType inner = arrayType;
@@ -323,14 +324,14 @@ namespace DUO2C.CodeGen.LLVM
 
                     Value prev = new Literal(1);
                     var totLengths = lengths.Select(x => {
-                        var temp = new TempIdent();
+                        temp = new TempIdent();
                         ctx.BinaryOp(temp, "mul", IntegerType.Integer, prev, x);
                         prev = temp;
                         return temp;
                     }).ToArray();
 
                     Value prevPtr = null;
-                    Value rootPtr = null;
+                    PointerType prevRootPtrType = null;
 
                     for (int i = types.Count() - 1; i > 0; --i) {
                         var rootType = types.ElementAt(i);
@@ -342,7 +343,7 @@ namespace DUO2C.CodeGen.LLVM
                         }
                         var allocatedPtrType = new PointerType(allocatedType);
 
-                        Value temp = new TempIdent();
+                        temp = new TempIdent();
                         Value elemSize = new TempIdent();
                         Value size = new TempIdent();
 
@@ -352,12 +353,13 @@ namespace DUO2C.CodeGen.LLVM
 
                         temp = new TempIdent();
                         ctx.Call(temp, _gcMallocProcType, _gcMallocProc, IntegerType.Integer, size);
-                        ctx.Conversion(PointerType.Byte, allocatedPtrType, ref temp);
 
-                        rootPtr = temp;
+                        ctx.Conversion(PointerType.Byte, rootPtrType, ref temp);
+                        Value rootPtr = temp;
 
                         if (!rootType.IsArray) {
-                            ctx.Store(rootPtr, allocatedType, Literal.GetDefault(allocatedType));
+                            ctx.Conversion(rootPtrType, allocatedPtrType, ref temp);
+                            ctx.Store(temp, allocatedType, Literal.GetDefault(allocatedType));
                         } else {
                             var preLoop = _blockLabel;
                             var loopStart = new TempIdent();
@@ -372,8 +374,18 @@ namespace DUO2C.CodeGen.LLVM
                             ctx.Phi(iter, IntegerType.Integer, new Literal(0), preLoop, next, loopStart);
                             ctx.BinaryOp(next, "add", IntegerType.Integer, iter, new Literal(1));
 
-                            // Value elemPtr = new TempIdent();
-                            // ctx.Assign(elemPtr).Argument(new ElementPointer(false, ))
+                            Value srcPtr = new TempIdent();
+                            Value destPtr = new TempIdent();
+
+                            temp = new TempIdent();
+                            ctx.BinaryOp(temp, "mul", IntegerType.Integer, iter, lengths[i]);
+
+                            ctx.Assign(srcPtr).Argument(new ElementPointer(false, prevRootPtrType, prevPtr, temp)).EndOperation();
+                            ctx.Assign(destPtr).Argument(new ElementPointer(false, rootPtrType, rootPtr, iter)).EndOperation();
+
+                            temp = new TempIdent();
+                            ctx.OpenArray(temp, rootType.As<ArrayType>().ElementType, lengths[i], srcPtr);
+                            ctx.Store(destPtr, rootType, temp);
 
                             Value cond = new TempIdent();
 
@@ -384,7 +396,12 @@ namespace DUO2C.CodeGen.LLVM
                         }
 
                         prevPtr = rootPtr;
+                        prevRootPtrType = rootPtrType;
                     }
+
+                    temp = new TempIdent();
+                    ctx.OpenArray(temp, types.ElementAt(0).As<ArrayType>().ElementType, lengths[0], prevPtr);
+                    ctx.Store(ptr, types.ElementAt(0), temp);
                 }
 
                 return ctx;
