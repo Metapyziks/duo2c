@@ -321,6 +321,14 @@ namespace DUO2C.CodeGen.LLVM
                     var lengths = invoc.Args.Expressions.Skip(1).Select(x =>
                         ctx.PrepareOperand(x, IntegerType.Integer)).ToArray();
 
+                    Value prev = new Literal(1);
+                    var totLengths = lengths.Select(x => {
+                        var temp = new TempIdent();
+                        ctx.BinaryOp(temp, "mul", IntegerType.Integer, prev, x);
+                        prev = temp;
+                        return temp;
+                    }).ToArray();
+
                     Value prevPtr = null;
                     Value rootPtr = null;
 
@@ -329,31 +337,27 @@ namespace DUO2C.CodeGen.LLVM
                         var rootPtrType = new PointerType(rootType);
                         StaticArrayType allocatedType = null;
                         for (int j = 0; j < i; ++j) {
-                            var lengthValue = lengths[lengths.Length - j - 1];
+                            var lengthValue = lengths[i - j - 1];
                             allocatedType = new StaticArrayType(allocatedType ?? rootType, lengthValue);
                         }
-
-                        var elemType = allocatedType.ElementType;
-                        var elemPtrType = new PointerType(elemType);
+                        var allocatedPtrType = new PointerType(allocatedType);
 
                         Value temp = new TempIdent();
                         Value elemSize = new TempIdent();
                         Value size = new TempIdent();
 
-                        ctx.Assign(temp).Argument(new ElementPointer(false, elemPtrType, Literal.GetDefault(elemPtrType), 1)).EndOperation();
-                        ctx.Assign(elemSize).Keyword("ptrtoint").Argument(elemPtrType, temp).Keyword(" to").Argument(IntegerType.Integer).EndOperation();
-                        ctx.BinaryOp(size, "mul", IntegerType.Integer, elemSize, allocatedType.Length);
+                        ctx.Assign(temp).Argument(new ElementPointer(false, rootPtrType, Literal.GetDefault(rootPtrType), 1)).EndOperation();
+                        ctx.Assign(elemSize).Keyword("ptrtoint").Argument(rootPtrType, temp).Keyword(" to").Argument(IntegerType.Integer).EndOperation();
+                        ctx.BinaryOp(size, "mul", IntegerType.Integer, elemSize, totLengths[i - 1]);
 
                         temp = new TempIdent();
                         ctx.Call(temp, _gcMallocProcType, _gcMallocProc, IntegerType.Integer, size);
-                        ctx.Conversion(PointerType.Byte, rootPtrType, ref temp);
+                        ctx.Conversion(PointerType.Byte, allocatedPtrType, ref temp);
 
                         rootPtr = temp;
 
                         if (!rootType.IsArray) {
-                            temp = rootPtr;
-                            ctx.Conversion(rootPtrType, elemPtrType, ref temp);
-                            ctx.Store(temp, allocatedType, Literal.GetDefault(allocatedType));
+                            ctx.Store(rootPtr, allocatedType, Literal.GetDefault(allocatedType));
                         } else {
                             var preLoop = _blockLabel;
                             var loopStart = new TempIdent();
@@ -363,13 +367,17 @@ namespace DUO2C.CodeGen.LLVM
 
                             Value iter = new TempIdent();
                             Value next = new TempIdent();
-                            Value cond = new TempIdent();    
 
                             ctx.LabelMarker(loopStart);
                             ctx.Phi(iter, IntegerType.Integer, new Literal(0), preLoop, next, loopStart);
                             ctx.BinaryOp(next, "add", IntegerType.Integer, iter, new Literal(1));
-                            
-                            ctx.BinaryComp(cond, "slt", IntegerType.Integer, next, allocatedType.Length);
+
+                            // Value elemPtr = new TempIdent();
+                            // ctx.Assign(elemPtr).Argument(new ElementPointer(false, ))
+
+                            Value cond = new TempIdent();
+
+                            ctx.BinaryComp(cond, "slt", IntegerType.Integer, next, totLengths[i - 1]);
                             ctx.Branch(cond, loopStart, loopEnd);
 
                             ctx.LabelMarker(loopEnd);
