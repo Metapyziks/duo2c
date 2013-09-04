@@ -95,7 +95,7 @@ namespace DUO2C.CodeGen.LLVM
 
         static OberonType GetStringType(String str)
         {
-            return new PointerType(new ConstArrayType(CharType.Default, GetStringLength(str)));
+            return new PointerType(new StaticArrayType(CharType.Default, GetStringLength(str)));
         }
 
         static GenerationContext PushScope(this GenerationContext ctx, Scope scope)

@@ -11,15 +11,21 @@ namespace DUO2C.CodeGen.LLVM
 {
     public static partial class IntermediaryCodeGenerator
     {
-        class ConstArrayType : OberonType
+        class StaticArrayType : OberonType
         {
             public OberonType ElementType { get; private set; }
-            public int Length { get; private set; }
+            public Value Length { get; private set; }
 
-            public ConstArrayType(OberonType elementType, int length)
+            public StaticArrayType(OberonType elementType, Value length)
             {
                 ElementType = elementType;
                 Length = length;
+            }
+
+            public StaticArrayType(OberonType elementType, int length)
+            {
+                ElementType = elementType;
+                Length = new Literal(length);
             }
 
             public override bool CanCompare(OberonType other)
@@ -138,7 +144,7 @@ namespace DUO2C.CodeGen.LLVM
             if (type.IsOpen) {
                 return ctx.Structure(IntegerType.Integer, new PointerType(type.ElementType));
             } else {
-                return ctx.Type(new ConstArrayType(type.ElementType, type.Length));
+                return ctx.Type(new StaticArrayType(type.ElementType, type.Length));
             }
         }
 
@@ -188,7 +194,7 @@ namespace DUO2C.CodeGen.LLVM
             return ctx.Write("...");
         }
 
-        static GenerationContext Type(this GenerationContext ctx, ConstArrayType type)
+        static GenerationContext Type(this GenerationContext ctx, StaticArrayType type)
         {
             return ctx.Write("[{0} \tx \t", type.Length).Type(type.ElementType).Write("\t]");
         }

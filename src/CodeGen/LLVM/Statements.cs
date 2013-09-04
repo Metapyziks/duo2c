@@ -304,71 +304,41 @@ namespace DUO2C.CodeGen.LLVM
                 } else {
                     var arrayType = targetType.As<ArrayType>();
                     var arrayPtrType = new PointerType(arrayType);
-                    var type = arrayType.ElementType;
-                    var ptrType = new PointerType(type);
 
                     Value ptr = ctx.PrepareOperand(target, arrayPtrType);
-                    Value lengthElem = new TempIdent();
+                    Value size;
+                    Value temp;
 
-                    var notEmpty = new TempIdent();
-                    var postAlloc = new TempIdent();
-
-                    Value length;
-                    
-                    if (arrayType.IsOpen) {
-                        length = ctx.PrepareOperand(invoc.Args.Expressions.ElementAt(1), IntegerType.Integer);
-                    } else {
-                        length = new Literal(arrayType.Length.ToString());
-                    }
-                    
-                    Value comp = new TempIdent();
-
-                    ctx.BinaryComp(comp, "sgt", IntegerType.Integer, length, new Literal(0));
-                    ctx.Branch(comp, notEmpty, postAlloc);
-
-                    {
-                        ctx.LabelMarker(notEmpty);
-
-                        var loopStart = new TempIdent();
-                        var loopEnd = new TempIdent();
-
-                        Value dest = new TempIdent();
-                        Value size = new TempIdent();
-                        Value iter = new TempIdent();
-                        Value next = new TempIdent();
-                        Value elemPtr = new TempIdent();
-                        Value ptrElem = new TempIdent();
-
-                        ctx.Assign(dest).Argument(new ElementPointer(false, ptrType, Literal.GetDefault(ptrType), length)).EndOperation();
-                        ctx.Assign(size).Keyword("ptrtoint").Argument(ptrType, dest).Keyword(" to").Argument(IntegerType.Integer).EndOperation();
-
-                        dest = new TempIdent();
-
-                        ctx.Call(dest, _gcMallocProcType, _gcMallocProc, IntegerType.Integer, size);
-                        ctx.Conversion(PointerType.Byte, ptrType, ref dest);
-                        ctx.Branch(loopStart);
-
-                        comp = new TempIdent();
-
-                        ctx.LabelMarker(loopStart);
-                        ctx.Phi(iter, IntegerType.Integer, new Literal(0), notEmpty, next, loopStart);
-                        ctx.Assign(elemPtr).Argument(new ElementPointer(false, ptrType, dest, iter)).EndOperation();
-                        ctx.Keyword("store").Argument(type, Literal.GetDefault(type)).Argument(ptrType, elemPtr).EndOperation();
-                        ctx.BinaryOp(next, "add", IntegerType.Integer, iter, new Literal(1));
-                        ctx.BinaryComp(comp, "sge", IntegerType.Integer, iter, length);
-                        ctx.Branch(comp, loopEnd, loopStart);
-
-                        elemPtr = new TempIdent();
-
-                        ctx.LabelMarker(loopEnd);
-                        ctx.Assign(elemPtr).Argument(new ElementPointer(false, arrayPtrType, ptr, 0, 1)).EndOperation();
-                        ctx.Keyword("store").Argument(ptrType, dest).Argument(new PointerType(ptrType), elemPtr).EndOperation();
-                        ctx.Branch(postAlloc);
+                    IEnumerable<OberonType> types = new List<OberonType>();
+                    OberonType inner = arrayType;
+                    for (;;) {
+                        ((List<OberonType>) types).Add(inner);
+                        if (inner.IsArray) {
+                            inner = inner.As<ArrayType>().ElementType;
+                        } else {
+                            break;
+                        }
                     }
 
-                    ctx.LabelMarker(postAlloc);
-                    ctx.Assign(lengthElem).Argument(new ElementPointer(false, arrayPtrType, ptr, 0, 0)).EndOperation();
-                    ctx.Keyword("store").Argument(IntegerType.Integer, length).Argument(new PointerType(IntegerType.Integer), lengthElem).EndOperation();
+                    for (int i = types.Count() - 1; i > 0; --i) {
+                        var rootType = types.ElementAt(i);
+                        var allocatedType = rootType;
+                        for (int j = 0; j < i; ++j) {
+                            var lengthExpr = invoc.Args.Expressions.ElementAt(types.Count() - j - 1);
+                            var lengthValue = ctx.PrepareOperand(lengthExpr, IntegerType.Integer);
+                            allocatedType = new StaticArrayType(allocatedType, lengthValue);
+                        }
+                        var allocatedPtrType = new PointerType(allocatedType);
+
+                        temp = new TempIdent();
+                        size = new TempIdent();
+                        ctx.Assign(temp).Argument(new ElementPointer(false, allocatedPtrType, Literal.GetDefault(allocatedPtrType), 1)).EndOperation();
+                        ctx.Assign(size).Keyword("ptrtoint").Argument(allocatedPtrType, temp).Keyword(" to").Argument(IntegerType.Integer).EndOperation();
+
+                        temp = new TempIdent();
+                        ctx.Call(temp, _gcMallocProcType, _gcMallocProc, IntegerType.Integer, size);
+                        ctx.Conversion(PointerType.Byte, new PointerType(rootType), ref temp);
+                    }
                 }
 
                 return ctx;

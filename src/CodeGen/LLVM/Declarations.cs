@@ -81,7 +81,7 @@ namespace DUO2C.CodeGen.LLVM
         static GenerationContext StringConstant(this GenerationContext ctx, GlobalStringIdent ident, String str)
         {
             var bytes = UTF8Encoding.UTF8.GetBytes(str + "\0");
-            return ctx.Constant(ident, new ConstArrayType(IntegerType.Byte, bytes.Length), new Literal(bytes));
+            return ctx.Constant(ident, new StaticArrayType(IntegerType.Byte, bytes.Length), new Literal(bytes));
         }
 
         static GenerationContext Constant(this GenerationContext ctx, GlobalStringIdent ident, OberonType type, Value value)
@@ -101,9 +101,9 @@ namespace DUO2C.CodeGen.LLVM
             }
         }
 
-        static ConstArrayType GetRecordTableType(RecordType type)
+        static StaticArrayType GetRecordTableType(RecordType type)
         {
-            return new ConstArrayType(new PointerType(IntegerType.Byte), 2 + type.Procedures.Count());
+            return new StaticArrayType(new PointerType(IntegerType.Byte), 2 + type.Procedures.Count());
         }
 
         static GenerationContext RecordTable(this GenerationContext ctx, String ident, RecordType type, bool define)
@@ -112,7 +112,7 @@ namespace DUO2C.CodeGen.LLVM
             if (define) {
                 ctx.Keyword("global").Argument(GetRecordTableType(type), new RecordTableConst(ident, type));
             } else {
-                ctx.Keyword("linkonce", "global").Argument(new ConstArrayType(PointerType.Byte, 0)).Keyword("[]");
+                ctx.Keyword("linkonce", "global").Argument(new StaticArrayType(PointerType.Byte, 0)).Keyword("[]");
             }
             return ctx.EndOperation();
         }

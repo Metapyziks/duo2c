@@ -210,7 +210,7 @@ namespace DUO2C.CodeGen.LLVM
                 ctx.Write("{").EndArguments();
                 ctx.Argument(IntegerType.Integer, new Literal(Length.ToString()));
                 ctx.Argument(new PointerType(CharType.Default),
-                    new ElementPointer(true, new PointerType(new ConstArrayType(CharType.Default,
+                    new ElementPointer(true, new PointerType(new StaticArrayType(CharType.Default,
                         Length)), Identifier, 0, 0));
                 ctx.EndArguments();
                 return ctx.Write("}");

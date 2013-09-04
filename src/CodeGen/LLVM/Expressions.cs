@@ -298,7 +298,7 @@ namespace DUO2C.CodeGen.LLVM
             } else if (from.IsPointer && to.IsArray) {
                 var temp = new TempIdent();
                 var fromArray = from.As<PointerType>().ResolvedType.As<ArrayType>();
-                ctx.Conversion(new PointerType(new ConstArrayType(fromArray.ElementType, fromArray.Length)),
+                ctx.Conversion(new PointerType(new StaticArrayType(fromArray.ElementType, fromArray.Length)),
                     new PointerType(fromArray.ElementType), ref src);
                 ctx.Assign(temp).Argument(new InsertValue(false, to,
                     new OpenArrayLiteral(fromArray),
