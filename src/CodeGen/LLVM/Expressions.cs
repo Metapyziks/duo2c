@@ -230,6 +230,12 @@ namespace DUO2C.CodeGen.LLVM
                     var arrayPtrType = new PointerType(elemType);
                     var elemPtrType = new PointerType(elemType.ElementType);
 
+                    if (elemPtr is ElementPointer) {
+                        Value temp = new TempIdent();
+                        ctx.Assign(temp).Argument(elemPtr).EndOperation();
+                        elemPtr = temp;
+                    }
+
                     if (elemType.As<ArrayType>().IsOpen) {
                         Value array = new TempIdent();
                         Value arrayPtr = new TempIdent();

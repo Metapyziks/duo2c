@@ -2,27 +2,18 @@ MODULE Arrays;
     IMPORT Out;
 
     CONST
-        N = 16;
+        N = 10;
 
     VAR 
-        i : INTEGER;
-        a : ARRAY N OF INTEGER;
-
-    PROCEDURE PrintArray(array : ARRAY OF INTEGER; start : INTEGER; count : INTEGER);
-    VAR 
-        j : INTEGER;
-    BEGIN
-        FOR j := start TO start + count - 1 DO
-            Out.Integer(array[j]); Out.Ln;
-        END;
-    END PrintArray;
+        i, j : INTEGER;
+        a : ARRAY N, N OF INTEGER;
 
 BEGIN
     FOR i := 0 TO N - 1 DO
-        a[i] := i + 1;
+        FOR j := 0 TO N - 1 DO
+            a[i][j] := (i + 1) * (j + 1);
+        END;
     END;
 
-    PrintArray(a, 0, 4);
-    PrintArray(a, 8, 8);
-
+    Out.Integer(a[3 - 1][8 - 1]); Out.Ln;
 END Arrays.

@@ -85,7 +85,7 @@ namespace DUO2C.Nodes.Oberon2
                     }
                 }
 
-                if (ElementDefinition.Type.IsArray && ElementDefinition.Type.As<ArrayType>().IsOpen != (ArrayLength != -1)) {
+                if (ElementDefinition.Type.IsArray && ElementDefinition.Type.As<ArrayType>().IsOpen != (ArrayLength == -1)) {
                     yield return new CompilerException(ParserError.Semantics, "Multidimensional arrays must be completely fixed-size or completely open",
                         ElementDefinition.StartIndex, ElementDefinition.Length);
                 }
