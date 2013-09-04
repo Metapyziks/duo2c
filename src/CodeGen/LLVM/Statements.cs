@@ -299,15 +299,13 @@ namespace DUO2C.CodeGen.LLVM
                     temp = new TempIdent();
                     ctx.Call(temp, _gcMallocProcType, _gcMallocProc, IntegerType.Integer, size);
                     ctx.Conversion(PointerType.Byte, ptrType, ref temp);
-                    ctx.Keyword("store").Argument(type, Literal.GetDefault(type)).Argument(ptrType, temp).EndOperation();
-                    ctx.Keyword("store").Argument(ptrType, temp).Argument(new PointerType(ptrType), ptr).EndOperation();
+                    ctx.Store(temp, type, Literal.GetDefault(type));
+                    ctx.Store(ptr, ptrType, temp);
                 } else {
                     var arrayType = targetType.As<ArrayType>();
                     var arrayPtrType = new PointerType(arrayType);
 
                     Value ptr = ctx.PrepareOperand(target, arrayPtrType);
-                    Value size;
-                    Value temp;
 
                     IEnumerable<OberonType> types = new List<OberonType>();
                     OberonType inner = arrayType;
@@ -320,24 +318,64 @@ namespace DUO2C.CodeGen.LLVM
                         }
                     }
 
+                    var lengths = invoc.Args.Expressions.Skip(1).Select(x =>
+                        ctx.PrepareOperand(x, IntegerType.Integer)).ToArray();
+
+                    Value prevPtr = null;
+                    Value rootPtr = null;
+
                     for (int i = types.Count() - 1; i > 0; --i) {
                         var rootType = types.ElementAt(i);
-                        var allocatedType = rootType;
+                        var rootPtrType = new PointerType(rootType);
+                        StaticArrayType allocatedType = null;
                         for (int j = 0; j < i; ++j) {
-                            var lengthExpr = invoc.Args.Expressions.ElementAt(types.Count() - j - 1);
-                            var lengthValue = ctx.PrepareOperand(lengthExpr, IntegerType.Integer);
-                            allocatedType = new StaticArrayType(allocatedType, lengthValue);
+                            var lengthValue = lengths[lengths.Length - j - 1];
+                            allocatedType = new StaticArrayType(allocatedType ?? rootType, lengthValue);
                         }
-                        var allocatedPtrType = new PointerType(allocatedType);
 
-                        temp = new TempIdent();
-                        size = new TempIdent();
-                        ctx.Assign(temp).Argument(new ElementPointer(false, allocatedPtrType, Literal.GetDefault(allocatedPtrType), 1)).EndOperation();
-                        ctx.Assign(size).Keyword("ptrtoint").Argument(allocatedPtrType, temp).Keyword(" to").Argument(IntegerType.Integer).EndOperation();
+                        var elemType = allocatedType.ElementType;
+                        var elemPtrType = new PointerType(elemType);
+
+                        Value temp = new TempIdent();
+                        Value elemSize = new TempIdent();
+                        Value size = new TempIdent();
+
+                        ctx.Assign(temp).Argument(new ElementPointer(false, elemPtrType, Literal.GetDefault(elemPtrType), 1)).EndOperation();
+                        ctx.Assign(elemSize).Keyword("ptrtoint").Argument(elemPtrType, temp).Keyword(" to").Argument(IntegerType.Integer).EndOperation();
+                        ctx.BinaryOp(size, "mul", IntegerType.Integer, elemSize, allocatedType.Length);
 
                         temp = new TempIdent();
                         ctx.Call(temp, _gcMallocProcType, _gcMallocProc, IntegerType.Integer, size);
-                        ctx.Conversion(PointerType.Byte, new PointerType(rootType), ref temp);
+                        ctx.Conversion(PointerType.Byte, rootPtrType, ref temp);
+
+                        rootPtr = temp;
+
+                        if (!rootType.IsArray) {
+                            temp = rootPtr;
+                            ctx.Conversion(rootPtrType, elemPtrType, ref temp);
+                            ctx.Store(temp, allocatedType, Literal.GetDefault(allocatedType));
+                        } else {
+                            var preLoop = _blockLabel;
+                            var loopStart = new TempIdent();
+                            var loopEnd = new TempIdent();
+
+                            ctx.Branch(loopStart);
+
+                            Value iter = new TempIdent();
+                            Value next = new TempIdent();
+                            Value cond = new TempIdent();    
+
+                            ctx.LabelMarker(loopStart);
+                            ctx.Phi(iter, IntegerType.Integer, new Literal(0), preLoop, next, loopStart);
+                            ctx.BinaryOp(next, "add", IntegerType.Integer, iter, new Literal(1));
+                            
+                            ctx.BinaryComp(cond, "slt", IntegerType.Integer, next, allocatedType.Length);
+                            ctx.Branch(cond, loopStart, loopEnd);
+
+                            ctx.LabelMarker(loopEnd);
+                        }
+
+                        prevPtr = rootPtr;
                     }
                 }
 

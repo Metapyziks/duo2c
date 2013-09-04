@@ -69,6 +69,11 @@ namespace DUO2C.CodeGen.LLVM
             return ctx.Assign(dest).Keyword("load").Argument(new PointerType(type), src).EndOperation();
         }
 
+        static GenerationContext Store(this GenerationContext ctx, Value dest, OberonType type, Value src)
+        {
+            return ctx.Keyword("store").Argument(type, src).Argument(new PointerType(type), dest).EndOperation();
+        }
+
         static GenerationContext Conversion(this GenerationContext ctx, Value dest, String conv, OberonType from, Value src, OberonType to)
         {
             return ctx.Assign(dest).Keyword(conv).Argument(from, src).Keyword(" \tto").Argument(to).EndOperation();
@@ -231,11 +236,11 @@ namespace DUO2C.CodeGen.LLVM
         static GenerationContext Assign(this GenerationContext ctx, Value dest, OberonType type, Value src)
         {
             if (dest is GlobalIdent || (dest is QualIdent && ((QualIdent) dest).Declaration.IsVariable)) {
-                return ctx.Keyword("store").Argument(type, src).Argument(new PointerType(type), dest).EndOperation();
+                return ctx.Store(dest, type, src);
             } else if (dest is ElementPointer) {
                 var temp = new TempIdent();
                 ctx.Assign(temp).Argument(dest).EndOperation();
-                return ctx.Keyword("store").Argument(type, src).Argument(new PointerType(type), temp).EndOperation();
+                return ctx.Store(temp, type, src);
             } else {
                 throw new NotImplementedException("Cannot assign to a non-variable");
             }
