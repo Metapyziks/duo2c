@@ -108,6 +108,16 @@ namespace DUO2C.Nodes.Oberon2
         {
             _fudgedPtrs = false;
 
+            Children = Children.SelectMany(x => {
+                if (x is NIndexer) {
+                    return (IEnumerable<ParseNode>) ((NIndexer) x).Expressions.Select(y => 
+                        new NIndexer(x, new NExpr[] { y })
+                    );
+                } else {
+                    return new ParseNode[] { x };
+                }
+            });
+
             if (Children.Count() >= 2 && Element is NQualIdent) {
                 var prev = Children.Take(Children.Count() - 1);
                 Children = new ParseNode[] {

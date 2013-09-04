@@ -13,7 +13,7 @@ namespace DUO2C.Nodes.Oberon2
     {
         public IEnumerable<NExpr> Expressions
         {
-            get { return ((NExprList) Children.First()).Expressions; }
+            get; private set;
         }
 
         public override string String
@@ -26,7 +26,13 @@ namespace DUO2C.Nodes.Oberon2
         public NIndexer(ParseNode original)
             : base(original, false)
         {
-            Children = Children.Where(x => x.Token == "ExprList");
+            Expressions = Children.OfType<NExprList>().First().Expressions;
+        }
+
+        public NIndexer(ParseNode original, IEnumerable<NExpr> expressions)
+            : base(original, false)
+        {
+            Expressions = expressions;
         }
     }
 }
