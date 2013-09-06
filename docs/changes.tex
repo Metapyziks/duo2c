@@ -15,12 +15,14 @@
     \section{Introduction}
     The main goal for the Durham University Oberon-2 Compiler (DUO2C) is to provide an expandable compiler compatible with most modern systems through the use of the LLVM infrastructure. Additionally, we aim to add a clean method of interfacing with external procedures defined in system libraries, and to extend the language with support for explicit vectorization of primitive types, an intrinsic component of high performance computing.
 
-    This document will outline the proposed additions to the language and provide examples of the new syntax's usage. For both of the extensions, care has been taken to follow the design principles employed by Oberon where possible.
+    Our compiler implementation uses LLVM for assembly generation, linking, and optimisation. This decision was made because of the multiple benefits of using an established and continually developed system; LLVM is used and therefore relied on by many high profile organisations\cite{llvmusers}, which will have invested resources into supporting and maintaining the project. The optimiser in particular is constantly being improved upon, so the effective quality of this project will increase even when active development has ceased. Furthermore, the LLVM compiler supports a large range of target architectures, relieving us from needing to specifically implement support for multiple platforms ourselves.
+
+    This document will outline the proposed additions to the language and provide examples of the new syntax's usage. For both of the extensions, care has been taken to follow the design principles employed by Oberon where possible. The rest of the language as implemented in the compiler adheres to the 1993 report on Oberon-2\cite{oberspec}.
 
     \section{External Interface Extension}
     To declare the existence of an external symbol to be linked, an \emph{EXTERNAL} keyword has been added. This keyword, followed by a string literal specifying the external symbol's identifier, may replace the body of a procedure. An optional \emph{IMPORT} keyword may also be used to import symbols from Dynamic Link Libraries on Windows, and translates to the \emph{dllimport} flag used by LLVM. When using the compiler, the libraries that contain definitions for external symbols can be specified in the same style as the GCC \emph{-l} option.
 
-    \begin{figure}[h]
+    \begin{figure}[!htbp]
     \begin{lstlisting}
         ExternalDecl = PROCEDURE IdentDef [FormalPars] ";"
                        EXTERNAL [IMPORT] string.
@@ -31,7 +33,7 @@
     \noindent
     This declaration has the same header format as a normal procedure definition, but with the external reference in the place of a body. The following is an example of how this new syntax is used, to refer to a symbol from the OpenGL Utility Toolkit\cite{glut}. The command line arguments used to link with this library will contain \emph{-lglut} (or alternatively \emph{-l glut}, for POSIX compliance), just like with GCC.
 
-    \begin{figure}[h]
+    \begin{figure}[!htbp]
     \begin{lstlisting}
         PROCEDURE InitWindowSize* (width, height : INTEGER);
         EXTERNAL IMPORT "glutInitWindowSize";
@@ -45,7 +47,7 @@
     \section{SIMD Vector Extension}
     This second language extension adds some support for declaring and using vectors of primitive types, for systems that support Single Instruction Multiple Data (SIMD) operations. High level languages rarely support this technique, let alone feature it as a part of their syntax. Central to this extension is the addition of a new \emph{VECTOR} data type, which may substitute any primitive type.
 
-    \begin{figure}[h]
+    \begin{figure}[!htbp]
     \begin{lstlisting}
         VectorType    = VECTOR ConstExpr OF PrimitiveType.
         PrimitiveType = LONGINT  | INTEGER | SHORTINT
@@ -57,8 +59,8 @@
 
     \noindent
     Additionally, a vector literal may be used which is a list of expressions surrounded by angle braces.
-
-    \begin{figure}[h]
+    
+    \begin{figure}[!htbp]
     \begin{lstlisting}
         Vector   = "<" ExprList ">".
         ExprList = Expr {"," Expr}.
@@ -69,7 +71,7 @@
     \noindent
     Any operators applied to vectors are implicitly applied to each element of the vector independently. For systems that support it, these operations are parallelised as SIMD instructions by LLVM. These expressions are checked at compile time to ensure the vector sizes match, and the element types are compatible. For operations applied to a vector and a literal, the literal is implicitly promoted to a vector with the same number of elements as the other operand, where each element is the literal's original value.
 
-    \begin{figure}[h]
+    \begin{figure}[!htbp]
     \begin{lstlisting}
         VAR a, b : VECTOR 4 OF INTEGER;
         BEGIN
@@ -109,6 +111,11 @@
 
     \newpage
     \begin{thebibliography}{9}
+        \bibitem{llvmusers}
+            \emph{LLVM Users}. \newline
+            \url{http://llvm.org/Users.html}
+            [Retrieved \today].
+
         \bibitem{oberspec}
             Hanspeter M\"{o}ssenb\"{o}ck, Niklaus Wirth,
             \emph{The Programming Language Oberon-2}. \newline

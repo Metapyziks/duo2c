@@ -17,9 +17,9 @@ BEGIN
         FOR j := 0 TO J - 1 DO
             FOR k := 0 TO K - 1 DO
                 a[i, j, k] := (i + 1) * (j + 1) * (k + 1);
+                Out.Integer(a[i, j, k]); Out.Ln;
             END;
         END;
     END;
 
-    Out.Integer(a[0, 1, 2]); Out.Ln;
 END Arrays.
