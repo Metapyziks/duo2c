@@ -2,6 +2,7 @@
 
 \usepackage{lipsum}
 \usepackage{listings}
+\usepackage{graphicx}
 \usepackage[margin=20mm]{geometry}
 \usepackage{hyperref}
 
@@ -16,6 +17,12 @@
     The main goal for the Durham University Oberon-2 Compiler (DUO2C) is to provide an expandable compiler compatible with most modern systems through the use of the LLVM infrastructure. Additionally, we aim to add a clean method of interfacing with external procedures defined in system libraries, and to extend the language with support for explicit vectorization of primitive types, an intrinsic component of high performance computing.
 
     Our compiler implementation uses LLVM for assembly generation, linking, and optimisation. This decision was made because of the multiple benefits of using an established and continually developed system; LLVM is used and therefore relied on by many high profile organisations\cite{llvmusers}, which will have invested resources into supporting and maintaining the project. The optimiser in particular is constantly being improved upon, so the effective quality of this project will increase even when active development has ceased. Furthermore, the LLVM compiler supports a large range of target architectures, relieving us from needing to specifically implement support for multiple platforms ourselves.
+
+    \begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=\textwidth]{compiler}
+    \caption{The compilation pipeline used by our compiler, where \emph{llvm-link} is the LLVM linker, and \emph{llc} is the LLVM compiler.}
+    \end{figure}
 
     This document will outline the proposed additions to the language and provide examples of the new syntax's usage. For both of the extensions, care has been taken to follow the design principles employed by Oberon where possible. The rest of the language as implemented in the compiler adheres to the 1993 report on Oberon-2\cite{oberspec}.
 
@@ -109,7 +116,6 @@
     \caption{Examples of \emph{VECLOAD} and \emph{VECSTORE}.}
     \end{figure}
 
-    \newpage
     \begin{thebibliography}{9}
         \bibitem{llvmusers}
             \emph{LLVM Users}. \newline
