@@ -48,6 +48,14 @@
     \caption{An example of an externally defined procedure declaration.}
     \end{figure}
 
+    \begin{figure}[!htbp]
+    \begin{lstlisting}
+        extern void __declspec(dllimport)
+            glutInitWindowSize(int width, int height);
+    \end{lstlisting}
+    \caption{The original C declaration of the imported symbol\cite{gluth} when compiled on Windows.}
+    \end{figure}
+
     \noindent
     Arguments of primitive types such as numerics and booleans are passed directly to the called procedure, but more complex types such as arrays and records are implicitly marshalled. The compiler stores an array as a pair of the array size and a pointer to the first element, which is marshalled by only sending the element pointer. Records contain a pointer to their corresponding virtual table used when dynamically dispatching bound procedure calls, and this will be stripped when marshalling records for use as arguments in external procedures.
 
@@ -132,6 +140,12 @@
             Khronos Group,
             \emph{GLUT - The OpenGL Utility Toolkit}. \newline
             \url{http://www.opengl.org/resources/libraries/glut/}
+            [Retrieved \today].
+
+        \bibitem{gluth}
+            Khronos Group,
+            \emph{glut.h} \newline
+            \url{http://www.cs.uaf.edu/~cs381/GLUT/glut.h}
             [Retrieved \today].
 
     \end{thebibliography}
