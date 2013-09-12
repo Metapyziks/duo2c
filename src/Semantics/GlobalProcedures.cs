@@ -80,6 +80,9 @@ namespace DUO2C.Semantics
 
                     if (!arg1.Key.IsArray) {
                         exceptions.Add(new TypeMismatchException(new ArrayType(null), arg1.Key, arg1.Value));
+                    } else if (arg1.Key.As<ArrayType>().IsOpen) {
+                        exceptions.Add(new CompilerException(ParserError.Semantics,
+                            "Expected a fixed-length array", arg1.Value.StartIndex, arg1.Value.Length));
                     }
                     if (!arg2.Key.IsVector) {
                         exceptions.Add(new TypeMismatchException(new VectorType(null, 0), arg2.Key, arg2.Value));
