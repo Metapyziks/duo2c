@@ -407,6 +407,60 @@ namespace DUO2C.CodeGen.LLVM
                 return ctx;
             }
 
+            if (elem != null && elem.String == "VECLOAD") {
+                var invoc = (NInvocation) node.Invocation.Operation;
+                var arrayExpr = invoc.Args.Expressions.First();
+                var arrayType = arrayExpr.GetFinalType(_scope).As<ArrayType>();
+                var elemPtrType = new PointerType(arrayType.ElementType);
+
+                var vectorExpr = invoc.Args.Expressions.ElementAt(1);
+                var vectorType = vectorExpr.GetFinalType(_scope).As<VectorType>();
+                var vectorPtrType = new PointerType(vectorType);
+                var vectorPtr = ctx.PrepareOperand(vectorExpr, vectorPtrType);
+    
+                Value index;            
+                if (invoc.Args.Expressions.Count() == 3) {
+                    var indexExpr = invoc.Args.Expressions.ElementAt(2);
+                    index = ctx.PrepareOperand(indexExpr, IntegerType.Integer);
+                } else {
+                    index = new Literal(0);
+                }
+                
+                bool nonZeroIndex = !(index is Literal) || ((Literal) index).IntegerValue > 0;
+
+                Value arrayPtr;
+                if (arrayType.IsOpen) {
+                    var temp = ctx.PrepareOperand(arrayExpr, arrayType);
+                    arrayPtr = new TempIdent();
+                    ctx.Assign(arrayPtr).Argument(new ExtractValue(false, arrayType, temp, 1)).EndOperation();
+                } else {
+                    var arrayPtrType = new PointerType(arrayType);
+                    arrayPtr = ctx.PrepareOperand(arrayExpr, arrayPtrType);
+
+                    if (nonZeroIndex) {
+                        ctx.Conversion(arrayPtrType, elemPtrType, ref arrayPtr);
+                    } else {
+                        ctx.Conversion(arrayPtrType, vectorPtrType, ref arrayPtr);
+                    }
+                }
+
+                if (nonZeroIndex) {
+                    var temp = arrayPtr;
+                    arrayPtr = new TempIdent();
+                    ctx.Assign(arrayPtr).Argument(new ElementPointer(false, elemPtrType, temp, index));
+                }
+
+                if (nonZeroIndex || arrayType.IsOpen) {
+                    ctx.Conversion(elemPtrType, vectorPtrType, ref arrayPtr);
+                }
+                
+                var vector = new TempIdent();
+                ctx.Load(vector, vectorType, arrayPtr);
+                ctx.Store(vectorPtr, vectorType, vector);
+
+                return ctx;
+            }
+
             // Temporary print hack
             if (elem != null && elem.Module == "Out") {
                 var invoc = (NInvocation) node.Invocation.Operation;

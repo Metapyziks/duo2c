@@ -100,6 +100,14 @@ namespace DUO2C.CodeGen.LLVM
 
             String _str;
 
+            public long IntegerValue
+            {
+                get
+                {
+                    return long.Parse(_str);
+                }
+            }
+
             public Literal(byte[] bytes)
             {
                 _str = String.Format("c\"{0}\"", bytes.Aggregate(String.Empty,
@@ -541,6 +549,24 @@ namespace DUO2C.CodeGen.LLVM
                 if (InBraces) ctx.Write("(");
                 ctx.Argument(StructureType, Structure);
                 ctx.Argument(ValueType, Value);
+                foreach (var index in Indices) {
+                    ctx.Argument(index);
+                }
+                if (InBraces) ctx.Write("\t)");
+                return ctx;
+            }
+        }
+
+        public class ExtractValue : ElementPointer
+        {
+            public ExtractValue(bool inBraces, OberonType structType, Value structure, params Object[] indices)
+                : base(inBraces, structType, structure, indices) { }
+
+            public override GenerationContext Write(GenerationContext ctx)
+            {
+                ctx.Keyword("extractvalue");
+                if (InBraces) ctx.Write("(");
+                ctx.Argument(StructureType, Structure);
                 foreach (var index in Indices) {
                     ctx.Argument(index);
                 }
