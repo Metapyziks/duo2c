@@ -643,7 +643,11 @@ namespace DUO2C.Semantics
 
         public override string ToString()
         {
-            return String.Format("ARRAY {0}OF {1}", (Length > -1 ? Length + " " : ""), ElementType);
+            if (ElementType != null) {
+                return String.Format("ARRAY {0}OF {1}", (Length > -1 ? Length + " " : ""), ElementType);
+            } else {
+                return "ARRAY";
+            }
         }
 
         public override bool CanTestEquality(OberonType other)
@@ -679,7 +683,11 @@ namespace DUO2C.Semantics
 
         public override string ToString()
         {
-            return String.Format("VECTOR {0} OF {1}", Length, ElementType);
+            if (ElementType != null) {
+                return String.Format("VECTOR {0} OF {1}", Length, ElementType);
+            } else {
+                return "VECTOR";
+            }
         }
 
         public override bool CanTestEquality(OberonType other)

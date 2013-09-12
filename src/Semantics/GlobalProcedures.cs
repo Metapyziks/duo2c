@@ -65,6 +65,37 @@ namespace DUO2C.Semantics
                     return exceptions;
                 }
             ), AccessModifier.Private, DeclarationType.Global);
+
+            ArgumentCheckDelegate vecOpArgCheck = (invoc, argPairs, scope) => {
+                var exceptions = new List<CompilerException>();
+                if (argPairs.Length < 2 || argPairs.Length > 3) {
+                    exceptions.Add(new CompilerException(ParserError.Semantics,
+                        String.Format("Argument count mismatch, expected {0}, received {1}",
+                            2, argPairs.Length),
+                        invoc.StartIndex, invoc.Length));
+                } else {
+                    var arg1 = argPairs.First();
+                    var arg2 = argPairs.ElementAt(1);
+                    var arg3 = argPairs.ElementAtOrDefault(2);
+
+                    if (!arg1.Key.IsArray) {
+                        exceptions.Add(new TypeMismatchException(new ArrayType(null), arg1.Key, arg1.Value));
+                    }
+                    if (!arg2.Key.IsVector) {
+                        exceptions.Add(new TypeMismatchException(new VectorType(null, 0), arg2.Key, arg2.Value));
+                    }
+                    if (arg3.Key != null && !arg3.Key.IsInteger) {
+                        exceptions.Add(new TypeMismatchException(IntegerType.Integer, arg3.Key, arg3.Value));
+                    }
+                }
+                return exceptions;
+            };
+
+            DeclareSymbol("VECLOAD", new OverloadedProcedureType(null, vecOpArgCheck),
+                AccessModifier.Private, DeclarationType.Global);
+
+            DeclareSymbol("VECSTORE", new OverloadedProcedureType(null, vecOpArgCheck),
+                AccessModifier.Private, DeclarationType.Global);
         }
     }
 }

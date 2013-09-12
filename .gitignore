@@ -117,3 +117,4 @@ testfiles/bin/
 testfiles/ir/
 docs/*.out
 docs/*.aux
+*Thumbs.db
