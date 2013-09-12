@@ -84,6 +84,14 @@ namespace DUO2C.Semantics
                     if (!arg2.Key.IsVector) {
                         exceptions.Add(new TypeMismatchException(new VectorType(null, 0), arg2.Key, arg2.Value));
                     }
+                    if (exceptions.Count == 0) {
+                        var arr = arg1.Key.As<ArrayType>();
+                        var vec = arg2.Key.As<VectorType>();
+
+                        if (!arr.ElementType.Equals(vec.ElementType)) {
+                            exceptions.Add(new TypeMismatchException(new ArrayType(vec.ElementType), arr, arg1.Value));
+                        }
+                    }
                     if (arg3.Key != null && !arg3.Key.IsInteger) {
                         exceptions.Add(new TypeMismatchException(IntegerType.Integer, arg3.Key, arg3.Value));
                     }
