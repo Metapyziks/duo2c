@@ -102,10 +102,7 @@ namespace DUO2C.CodeGen.LLVM
 
             public long IntegerValue
             {
-                get
-                {
-                    return long.Parse(_str);
-                }
+                get { return long.Parse(_str); }
             }
 
             public Literal(byte[] bytes)

@@ -407,7 +407,7 @@ namespace DUO2C.CodeGen.LLVM
                 return ctx;
             }
 
-            if (elem != null && elem.String == "VECLOAD") {
+            if (elem != null && (elem.String == "VECLOAD" || elem.String == "VECSTORE")) {
                 var invoc = (NInvocation) node.Invocation.Operation;
                 var arrayExpr = invoc.Args.Expressions.First();
                 var arrayType = arrayExpr.GetFinalType(_scope).As<ArrayType>();
@@ -447,7 +447,7 @@ namespace DUO2C.CodeGen.LLVM
                 if (nonZeroIndex) {
                     var temp = arrayPtr;
                     arrayPtr = new TempIdent();
-                    ctx.Assign(arrayPtr).Argument(new ElementPointer(false, elemPtrType, temp, index));
+                    ctx.Assign(arrayPtr).Argument(new ElementPointer(false, elemPtrType, temp, index)).EndOperation();
                 }
 
                 if (nonZeroIndex || arrayType.IsOpen) {
@@ -455,8 +455,14 @@ namespace DUO2C.CodeGen.LLVM
                 }
                 
                 var vector = new TempIdent();
-                ctx.Load(vector, vectorType, arrayPtr);
-                ctx.Store(vectorPtr, vectorType, vector);
+
+                if (elem.String == "VECLOAD") {
+                    ctx.Load(vector, vectorType, arrayPtr);
+                    ctx.Store(vectorPtr, vectorType, vector);
+                } else {
+                    ctx.Load(vector, vectorType, vectorPtr);
+                    ctx.Store(arrayPtr, vectorType, vector);
+                }
 
                 return ctx;
             }
