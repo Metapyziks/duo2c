@@ -428,30 +428,30 @@ namespace DUO2C.CodeGen.LLVM
                 
                 bool nonZeroIndex = !(index is Literal) || ((Literal) index).IntegerValue > 0;
 
+                OberonType arrayPtrType;
                 Value arrayPtr;
                 if (arrayType.IsOpen) {
+                    arrayPtrType = new PointerType(new ArrayType(arrayType.ElementType, vectorType.Length));
+
                     var temp = ctx.PrepareOperand(arrayExpr, arrayType);
                     arrayPtr = new TempIdent();
                     ctx.Assign(arrayPtr).Argument(new ExtractValue(false, arrayType, temp, 1)).EndOperation();
+                    ctx.Conversion(elemPtrType, arrayPtrType, ref arrayPtr);
                 } else {
-                    var arrayPtrType = new PointerType(arrayType);
-                    arrayPtr = ctx.PrepareOperand(arrayExpr, arrayPtrType);
+                    arrayPtrType = new PointerType(arrayType);
 
-                    if (nonZeroIndex) {
-                        ctx.Conversion(arrayPtrType, elemPtrType, ref arrayPtr);
-                    } else {
-                        ctx.Conversion(arrayPtrType, vectorPtrType, ref arrayPtr);
-                    }
+                    arrayPtr = ctx.PrepareOperand(arrayExpr, arrayPtrType);
                 }
+
 
                 if (nonZeroIndex) {
                     var temp = arrayPtr;
                     arrayPtr = new TempIdent();
+                    ctx.Conversion(arrayPtrType, elemPtrType, ref temp);
                     ctx.Assign(arrayPtr).Argument(new ElementPointer(false, elemPtrType, temp, index)).EndOperation();
-                }
-
-                if (nonZeroIndex || arrayType.IsOpen) {
                     ctx.Conversion(elemPtrType, vectorPtrType, ref arrayPtr);
+                } else {
+                    ctx.Conversion(arrayPtrType, vectorPtrType, ref arrayPtr);
                 }
                 
                 var vector = new TempIdent();

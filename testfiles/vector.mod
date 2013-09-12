@@ -7,17 +7,14 @@ MODULE Vector;
 
     VAR
         vec : IntVector;
-        arr : ARRAY N OF INTEGER;
+        arr : ARRAY N * 2 OF INTEGER;
 
         i : INTEGER;
 
 BEGIN
-    FOR i := 0 TO N - 1 DO vec[i] := i; END;
+    FOR i := 0 TO (N * 2) - 1 DO arr[i] := i; END;
 
-    vec := vec * 2 + 1;
-
-    VECSTORE(arr, vec);
-
-    FOR i := 0 TO N - 1 DO Out.Integer(arr[i]); Out.Ln; END;
-
+    VECLOAD(arr, vec, 8);
+    
+    FOR i := 0 TO N - 1 DO Out.Integer(vec[i]); Out.Ln; END;
 END Vector.
