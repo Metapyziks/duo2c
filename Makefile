@@ -16,7 +16,8 @@ SRC = \
 	$(SRCDIR)/Nodes/Oberon2/Statements/*.cs \
 	$(SRCDIR)/Properties/*.cs \
 	$(SRCDIR)/Semantics/*.cs \
-	$(SRCDIR)/Parsers/*.cs
+	$(SRCDIR)/Parsers/*.cs \
+	$(SRCDIR)/CodeGen/*.cs
 
 TARGET = bin/release/DUO2C.exe
 
