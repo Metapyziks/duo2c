@@ -1,4 +1,4 @@
-CSC = /usr/local/bin/mcs
+CSC = mcs
 
 CSVERSION = future
 
@@ -17,7 +17,9 @@ SRC = \
 	$(SRCDIR)/Properties/*.cs \
 	$(SRCDIR)/Semantics/*.cs \
 	$(SRCDIR)/Parsers/*.cs \
-	$(SRCDIR)/CodeGen/*.cs
+	$(SRCDIR)/CodeGen/*.cs \
+    $(SRCDIR)/CodeGen/LLVM/*.cs \
+    Properties/*.cs
 
 TARGET = bin/release/DUO2C.exe
 
