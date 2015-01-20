@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Collections.Generic;
 
 using DUO2C.Semantics;
@@ -22,7 +23,7 @@ namespace DUO2C.Nodes.Oberon2
 
         public override OberonType GetFinalType(Scope scope)
         {
-            return new ArrayType(CharType.Default, String.Length);
+            return new ArrayType(CharType.Default, Encoding.UTF8.GetByteCount(_string) + 1);
         }
 
         public override bool IsConstant(Scope scope)

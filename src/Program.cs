@@ -313,7 +313,7 @@ namespace DUO2C
                         module.FindDeclarations(root);
 
                         var errors = module.FindTypeErrors(root);
-                        if (errors.Count() > 0) {
+                        if (errors.Any()) {
                             var src = File.ReadAllText(mdlpath);
                             WriteErrorHeader("Encountered {0} error{1} while performing type checks:",
                                 errors.Count(), errors.Count() != 1 ? "s" : "");

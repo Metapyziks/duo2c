@@ -37,6 +37,11 @@ namespace DUO2C.CodeGen.LLVM
             {
                 return false;
             }
+
+            public override string ToString()
+            {
+                return String.Format("ARRAY {0} OF {1}", Length, ElementType);
+            }
         }
 
         class OpaqueType : OberonType

@@ -221,13 +221,16 @@ namespace DUO2C.CodeGen.LLVM
 
             public GenerationContext Write(GenerationContext ctx)
             {
-                ctx.Write("{").EndArguments();
-                ctx.Argument(IntegerType.Integer, new Literal(Length.ToString()));
-                ctx.Argument(new PointerType(CharType.Default),
-                    new ElementPointer(true, new PointerType(new StaticArrayType(CharType.Default,
-                        Length)), Identifier, 0, 0));
-                ctx.EndArguments();
-                return ctx.Write("}");
+                //var ptr = new ElementPointer(true, new PointerType(new StaticArrayType(CharType.Default,
+                //    Length)), Identifier, 0, 0);
+
+                //ctx.Write("{").EndArguments();
+                //ctx.Argument(IntegerType.Integer, new Literal(Length.ToString()));
+                //ctx.Argument(new PointerType(CharType.Default), ptr);
+                //ctx.EndArguments();
+                //return ctx.Write("}");
+
+                return ctx.Write(Identifier);
             }
         }
 
