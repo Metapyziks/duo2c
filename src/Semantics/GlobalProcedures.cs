@@ -21,8 +21,7 @@ namespace DUO2C.Semantics
                             var argNode = invoc.Args.Expressions.First();
                             exceptions.Add(new CompilerException(ParserError.Semantics, "Pointer or open array expected",
                                 argNode.StartIndex, argNode.Length));
-                        }
-                        if (argPairs.First().Key.IsPointer) {
+                        } else if (argPairs.First().Key.IsPointer) {
                             if (argPairs.Length > 1) {
                                 exceptions.Add(new CompilerException(ParserError.Semantics,
                                     String.Format("Argument count mismatch, expected "
