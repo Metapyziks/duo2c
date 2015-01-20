@@ -26,6 +26,11 @@ namespace DUO2C
 
     class Program
     {
+        static bool IsWindows
+        {
+            get { return Path.DirectorySeparatorChar == '\\'; }
+        }
+
         static void WriteTextWrapped(String text)
         {
             int margin = Console.CursorLeft;
@@ -262,7 +267,7 @@ namespace DUO2C
                     } else if (entryModule == null) {
                         entryModule = Path.GetFileNameWithoutExtension(outPath);
                     } else if (outPath == null) {
-                        outPath = entryModule + ".exe";
+                        outPath = entryModule + (IsWindows ? ".exe" : String.Empty);
                     }
 
                     var modules = new Dictionary<String, NModule>();
