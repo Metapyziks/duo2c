@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.IO;
 using System.Linq;
 using System.Threading;
+
 using DUO2C.CodeGen;
 using DUO2C.CodeGen.LLVM;
 using DUO2C.Nodes.Oberon2;
@@ -237,7 +239,9 @@ namespace DUO2C
                     libs.Add(iter.Current);
                 }, "l");
 
-                var ruleset = Ruleset.FromString(Properties.Resources.oberon2);
+                var rulesetPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "oberon2.txt");
+
+                var ruleset = Ruleset.FromString(File.ReadAllText(rulesetPath));
                 ruleset.AddSubstitutionNS("DUO2C.Nodes.Oberon2", true);
 
                 var cleanupFiles = new List<String>();
