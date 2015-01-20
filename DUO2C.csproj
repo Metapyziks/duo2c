@@ -41,11 +41,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="src\CodeGen\LLVM\AutoHeader.cs" />
     <Compile Include="src\CodeGen\GenerationContext.cs" />
     <Compile Include="src\CodeGen\LLVM\Declarations.cs" />
@@ -137,16 +132,24 @@
     <Content Include="oberon2.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="testfiles\arrays.mod" />
+    <Content Include="testfiles\bool.mod" />
+    <Content Include="testfiles\gl.mod" />
+    <Content Include="testfiles\gltest.mod" />
+    <Content Include="testfiles\glut.mod" />
+    <Content Include="testfiles\link.mod" />
     <Content Include="testfiles\list.mod" />
+    <Content Include="testfiles\out.mod" />
+    <Content Include="testfiles\pointerbirds.mod" />
+    <Content Include="testfiles\pong.mod" />
+    <Content Include="testfiles\simple.mod" />
+    <Content Include="testfiles\test.mod" />
+    <Content Include="testfiles\vector.mod" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\Nodes\EBNF\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
