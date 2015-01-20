@@ -20,14 +20,16 @@ SRC = \
 	$(SRCDIR)/CodeGen/*.cs \
 	$(SRCDIR)/CodeGen/LLVM/*.cs
 
-TARGET = bin/release/DUO2C.exe
+TARGETDIR = bin/Debug
 
-release:
-	mkdir -p bin/release
+TARGET = $(TARGETDIR)/DUO2C.exe
+
+debug:
+	mkdir -p $(TARGETDIR)
 	rm -f $(TARGET)
 	$(CSC) -langversion:$(CSVERSION) $(SRC) -d:$(DEF) \
-		-t:exe -out:$(TARGET) -optimize+
-	cp oberon2.txt bin/release/
+		-t:exe -debug -out:$(TARGET)
+	cp oberon2.txt $(TARGETDIR)/
 
 clean:
 	rm -r bin/
