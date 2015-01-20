@@ -46,7 +46,6 @@ namespace DUO2C.CodeGen.LLVM
                 var desig = (NDesignator) node.Element;
                 var val = ctx.GetDesignation(desig);
                 var type = desig.GetFinalType(_scope);
-                var recType = type.As<PointerType>().ResolvedType.As<RecordType>();
                 var testType = _scope.GetType(op.TypeIdent.Identifier,
                     op.TypeIdent.Module).As<PointerType>().ResolvedType.As<RecordType>();
 
@@ -67,9 +66,6 @@ namespace DUO2C.CodeGen.LLVM
                 ctx.Branch(isNull, end, initLoop);
 
                 ctx.LabelMarker(initLoop);
-
-                // Get the type of the record's vtable
-                var recTablePtrType = new PointerType(GetRecordTableType(recType));
 
                 // Find pointer to the vtable
                 Value recTablePtr = new TempIdent();
@@ -237,7 +233,6 @@ namespace DUO2C.CodeGen.LLVM
                     }
 
                     if (elemType.As<ArrayType>().IsOpen) {
-                        Value array = new TempIdent();
                         Value arrayPtr = new TempIdent();
                         Value arrayStartPtr = new TempIdent();
 
