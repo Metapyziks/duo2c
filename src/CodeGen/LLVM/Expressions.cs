@@ -310,6 +310,7 @@ namespace DUO2C.CodeGen.LLVM
                     new PointerType(fromArray.ElementType), ref src);
                 ctx.OpenArray(temp, fromArray.ElementType, new Literal(fromArray.Length), src);
                 src = temp;
+                return ctx;
             }
 
             var tsrc = src;
