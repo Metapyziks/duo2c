@@ -482,7 +482,7 @@ namespace DUO2C.CodeGen.LLVM
             throw new NotImplementedException("No rule to generate factor of type " + node.Inner.GetType());
         }
 
-        static Value PrepareOperand(this GenerationContext ctx, ExpressionElement node, OberonType type)
+        static Value PrepareOperand(this GenerationContext ctx, ExpressionElement node, OberonType type, bool allowStaticToOpenArray = false)
         {
             var temp = new TempIdent();
             var val = (Value) temp;
@@ -493,7 +493,7 @@ namespace DUO2C.CodeGen.LLVM
             } else if (type.IsArray && ntype.IsArray) {
                 var array = type.As<ArrayType>();
                 var narray = ntype.As<ArrayType>();
-                if (array.IsOpen && !narray.IsOpen) {
+                if (array.IsOpen && !narray.IsOpen && !allowStaticToOpenArray) {
                     ntype = new PointerType(ntype);
                 }
             } else if (!type.CanTestEquality(ntype) && (type.Equals(new PointerType(ntype)) || (type.IsPointer

@@ -286,7 +286,7 @@ namespace DUO2C.CodeGen.LLVM
                 var target = invoc.Args.Expressions.First();
                 var targetType = target.GetFinalType(_scope);
 
-                if (targetType is PointerType) {
+                if (targetType.IsPointer) {
                     var ptrType = targetType.As<PointerType>();
                     var ptr = ctx.PrepareOperand(target, new PointerType(ptrType));
                     var type = ptrType.ResolvedType;
@@ -502,7 +502,7 @@ namespace DUO2C.CodeGen.LLVM
                         type = type.As<ArrayType>();
                         var ptr = new TempIdent();
                         if (arg.IsConstant(_scope)) {
-                            src = ctx.PrepareOperand(arg, type);
+                            src = ctx.PrepareOperand(arg, type, true);
                             if (src is StringLiteral) {
                                 var lit = (StringLiteral) src;
                                 ctx.Assign(ptr);

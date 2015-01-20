@@ -142,7 +142,7 @@
     <Content Include="testfiles\out.mod" />
     <Content Include="testfiles\pointerbirds.mod" />
     <Content Include="testfiles\pong.mod" />
-    <Content Include="testfiles\simple.mod" />
+    <Content Include="testfiles\simpler.mod" />
     <Content Include="testfiles\test.mod" />
     <Content Include="testfiles\vector.mod" />
   </ItemGroup>
