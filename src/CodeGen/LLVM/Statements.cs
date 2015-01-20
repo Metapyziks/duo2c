@@ -275,8 +275,6 @@ namespace DUO2C.CodeGen.LLVM
 
         static GenerationContext Node(this GenerationContext ctx, NInvocStmnt node)
         {
-            var tmp = new TempIdent();
-
             var desig = node.Invocation.Element as NDesignator;
             var elem = desig != null ? desig.Element as NQualIdent : null;
 
